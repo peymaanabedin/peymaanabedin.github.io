@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>محاسبه گر اقساط گوشی</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS styling for the app */
+      body {
+        font-family: "Vazirmatn", sans-serif;
+        text-align: center;
+        padding: 20px;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+      }
+
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+      }
+
+      .calculator {
+        background-color: #f8f8f8;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .input-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .input-group input {
+        padding: 10px;
+        width: 100%;
+        max-width: 350px;
+        text-align: center;
+      }
+
+      #result {
+        margin-top: 30px;
+        font-size: 24px;
+        background-color: #f8f8f8;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        display: none;
+      }
+
+      #result span {
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      .btn-calculate {
+        padding: 10px 20px;
+        background-color: #007aff;
+        color: #fff;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      #created {
+        color: #3534345b;
+        font-size: 14px;
+      }
+
+      @media only screen and (max-width: 480px) {
+        .container {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .calculator,
+        #result {
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>محاسبه گر اقساط گوشی</h1>
+    <div class="container">
+      <div class="calculator">
+        <div class="input-group">
+          <label for="interestRate">نرخ بهره سالیانه</label>
+          <input
+            type="text"
+            id="interestRate"
+            value="0.6"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="numPayments">تعداد ماه پرداخت اقساط</label>
+          <input
+            type="text"
+            id="numPayments"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="paymentDuration">پرداخت هر چند ماه یکبار</label>
+          <input
+            type="text"
+            id="paymentDuration"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="price">مبلغ نقدی گوشی به تومان</label>
+          <input
+            type="text"
+            id="price"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="prepayment">میزان پیش پرداخت به تومان</label>
+          <input
+            type="text"
+            id="prepayment"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="result"></div>
+    </div>
+    <div class="created">
+      <br />
+      <p id="created">کد نویسی شده توسط پیمان عابدین پور 💻</p>
+    </div>
+    <script>
+      function calculate() {
+        // Get user inputs
+        var interestRateInput = document.getElementById("interestRate");
+        var numPaymentsInput = document.getElementById("numPayments");
+        var paymentDurationInput = document.getElementById("paymentDuration");
+        var priceInput = document.getElementById("price");
+        var prepaymentInput = document.getElementById("prepayment");
+
+        // Parse user inputs
+        var interestRate = parseFloat(removeCommas(interestRateInput.value));
+        var numPayments = parseFloat(removeCommas(numPaymentsInput.value));
+        var paymentDuration = parseFloat(
+          removeCommas(paymentDurationInput.value)
+        );
+        var price = parseFloat(removeCommas(priceInput.value));
+        var prepayment = parseFloat(removeCommas(prepaymentInput.value));
+
+        // Check if all inputs are filled
+        if (
+          interestRate &&
+          numPayments &&
+          paymentDuration &&
+          price &&
+          prepayment
+        ) {
+          // Calculate the results
+          var nper = numPayments / paymentDuration;
+          var pv = price - prepayment;
+          var rate = (interestRate / 12) * paymentDuration;
+          var pmt = PMT(rate, nper, -pv, 0, 0);
+          var pvNoVAT = price / 1.09 - prepayment;
+          var rateForVAT = Math.pow(1 + rate, paymentDuration) - 1;
+          var pmtNoVAT = PMT(rateForVAT, nper, -pvNoVAT, 0, 0);
+          var wage =
+            pvNoVAT * 0.09 +
+            (pmtNoVAT * numPayments + prepayment - pvNoVAT) * 0.09;
+          var iov = PMT(rateForVAT, nper, -wage, 0, 0);
+          var valueAddedInterest = iov * numPayments - wage;
+          var valueAddedInterestVAT = valueAddedInterest * 0.09;
+          var finalPayment =
+            iov + pmtNoVAT + valueAddedInterestVAT / numPayments;
+
+          // Format the values with comma-separated thousands and round the results
+          pv = formatNumber(Math.round(pv).toFixed(0));
+          finalPayment = formatNumber(Math.round(finalPayment).toFixed(0));
+
+          // Display the results
+          document.getElementById("result").innerHTML = `
+            <span>مبلغ اعتباری: ${pv} تومان</span>
+            <span>مبلغ هر چک اقساط: ${finalPayment} تومان</span>
+          `;
+
+          // Show the result container
+          document.getElementById("result").style.display = "block";
+        }
+      }
+
+      // PMT function calculates the payment for a loan based on constant payments and a constant interest rate
+      function PMT(rate, nper, pv, fv, type) {
+        if (!fv) fv = 0;
+        if (!type) type = 0;
+
+        if (rate === 0) return -(pv + fv) / nper;
+
+        var pvif = Math.pow(1 + rate, nper);
+        var pmt = (rate / (pvif - 1)) * -(pv * pvif + fv);
+
+        if (type === 1) {
+          pmt /= 1 + rate;
+        }
+
+        return pmt;
+      }
+
+      // Helper function to remove commas from input values
+      function removeCommas(value) {
+        return value.toString().replace(/,/g, "");
+      }
+
+      // Helper function to format numbers with comma-separated thousands
+      function formatNumber(value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      // Helper function to format the user input values with comma-separated thousands
+      function formatInput(input) {
+        var value = removeCommas(input.value);
+        input.value = formatNumber(value);
+      }
+    </script>
+  </body>
+</html>
