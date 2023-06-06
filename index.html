@@ -22,6 +22,18 @@
     />
 
     <style>
+      input,
+      select,
+      textarea {
+        font-size: 16px;
+        max-height: 2em;
+        max-width: 100%;
+        -webkit-user-select: none; /* Safari/Chrome */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+ */
+        user-select: none; /* Standard syntax */
+      }
+
       .error-message {
         color: #ff0000;
         margin-top: 20px;
@@ -209,38 +221,57 @@
 
         // Validate inputs
         var errorMessages = [];
-
-        if (isNaN(numPayments) || numPayments <= 0) {
-          errorMessages.push("تعداد ماه پرداخت اقساط باید عددی مثبت باشد   ");
+        if (
+          isNaN(numPayments) ||
+          !Number.isInteger(numPayments) ||
+          numPayments <= 0
+        ) {
+          errorMessages.push(
+            "تعداد ماه پرداخت اقساط باید یک عدد صحیح و مثبت باشد"
+          );
         }
 
-        if (isNaN(paymentDuration) || paymentDuration <= 0) {
-          errorMessages.push("پرداخت هر چند ماه یکبار باید عددی مثبت باشد   ");
+        if (
+          isNaN(paymentDuration) ||
+          !Number.isInteger(paymentDuration) ||
+          paymentDuration < 1
+        ) {
+          errorMessages.push(
+            "پرداخت هر چند ماه یکبار باید یک عدد صحیح و بزرگتر از یک باشد"
+          );
         }
+
         if (numPayments % paymentDuration !== 0) {
           errorMessages.push(
-            "تعداد ماه پرداخت اقساط باید بر پرداخت هر چند ماه یکبار بخش پذیر باشد   "
+            "تعداد ماه پرداخت اقساط باید بر پرداخت هر چند ماه یکبار بخش‌پذیر باشد"
           );
         }
 
         if (paymentDuration > numPayments) {
           errorMessages.push(
-            "پرداخت هر چند ماه یکبار نمی‌تواند بیشتر از تعداد ماه پرداخت اقساط باشد   "
+            "پرداخت هر چند ماه یکبار نمی‌تواند بیشتر از تعداد ماه پرداخت اقساط باشد"
           );
         }
-        if (isNaN(price) || price <= 0) {
-          errorMessages.push("مبلغ نقدی گوشی باید عددی مثبت باشد   ");
+
+        if (isNaN(price) || !Number.isInteger(price) || price <= 0) {
+          errorMessages.push("مبلغ نقدی گوشی باید یک عدد صحیح و مثبت باشد");
         }
 
-        if (isNaN(prepayment) || prepayment < 0) {
-          errorMessages.push("میزان پیش پرداخت باید عددی مثبت یا صفر باشد   ");
+        if (
+          isNaN(prepayment) ||
+          !Number.isInteger(prepayment) ||
+          prepayment < 0
+        ) {
+          errorMessages.push(
+            "میزان پیش پرداخت باید یک عدد صحیح و مثبت یا صفر باشد"
+          );
         }
+
         if (prepayment > price) {
           errorMessages.push(
-            "میزان پیش پرداخت نمی‌تواند بیشتر از مبلغ نقدی گوشی باشد   "
+            "میزان پیش پرداخت نمی‌تواند بیشتر از مبلغ نقدی گوشی باشد"
           );
         }
-
         if (errorMessages.length > 0) {
           // Display error messages
           var errorMessageHTML = "<ul class='error-message'>";
