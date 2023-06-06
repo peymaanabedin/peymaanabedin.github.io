@@ -9,12 +9,29 @@
       href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
     <style>
+      .error-message {
+        color: #ff0000;
+        margin-top: 20px;
+        text-align: right;
+      }
+
       /* CSS styling for the app */
       body {
         font-family: "Vazirmatn", sans-serif;
         text-align: center;
         padding: 20px;
+      }
+      ul {
+        direction: rtl;
       }
 
       h1 {
@@ -31,9 +48,10 @@
         background-color: #f8f8f8;
         border-radius: 10px;
         padding: 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
         width: 100%;
         max-width: 400px;
+        box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 3px 0px;
       }
 
       .input-group {
@@ -53,18 +71,20 @@
         width: 100%;
         max-width: 350px;
         text-align: center;
+        border-radius: 10px;
       }
 
       #result {
         margin-top: 30px;
-        font-size: 24px;
-        background-color: #f8f8f8;
-        border-radius: 10px;
+        font-size: 16px;
+        background-color: #ecf0f1;
+        border-radius: 12px;
         padding: 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 3px 0px;
         width: 100%;
         max-width: 400px;
         display: none;
+        text-align: right;
       }
 
       #result span {
@@ -105,11 +125,19 @@
     <div class="container">
       <div class="calculator">
         <div class="input-group">
-          <label for="interestRate">نرخ بهره سالیانه</label>
+          <label for="price">مبلغ نقدی گوشی به تومان</label>
           <input
             type="text"
-            id="interestRate"
-            value="0.6"
+            id="price"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="prepayment">میزان پیش پرداخت به تومان</label>
+          <input
+            type="text"
+            id="prepayment"
             oninput="formatInput(this); calculate()"
           />
         </div>
@@ -133,25 +161,16 @@
         </div>
 
         <div class="input-group">
-          <label for="price">مبلغ نقدی گوشی به تومان</label>
+          <label for="interestRate">نرخ بهره سالیانه</label>
           <input
             type="text"
-            id="price"
-            oninput="formatInput(this); calculate()"
-          />
-        </div>
-
-        <div class="input-group">
-          <label for="prepayment">میزان پیش پرداخت به تومان</label>
-          <input
-            type="text"
-            id="prepayment"
+            id="interestRate"
+            value="0.6"
             oninput="formatInput(this); calculate()"
           />
         </div>
       </div>
     </div>
-
     <div class="container">
       <div id="result"></div>
     </div>
@@ -177,6 +196,55 @@
         var price = parseFloat(removeCommas(priceInput.value));
         var prepayment = parseFloat(removeCommas(prepaymentInput.value));
 
+        // Validate inputs
+        var errorMessages = [];
+
+        if (isNaN(numPayments) || numPayments <= 0) {
+          errorMessages.push("تعداد ماه پرداخت اقساط باید عددی مثبت باشد   ");
+        }
+
+        if (isNaN(paymentDuration) || paymentDuration <= 0) {
+          errorMessages.push("پرداخت هر چند ماه یکبار باید عددی مثبت باشد   ");
+        }
+        if (numPayments % paymentDuration !== 0) {
+          errorMessages.push(
+            "تعداد ماه پرداخت اقساط باید بر پرداخت هر چند ماه یکبار بخش پذیر باشد   "
+          );
+        }
+
+        if (paymentDuration > numPayments) {
+          errorMessages.push(
+            "پرداخت هر چند ماه یکبار نمی‌تواند بیشتر از تعداد ماه پرداخت اقساط باشد   "
+          );
+        }
+        if (isNaN(price) || price <= 0) {
+          errorMessages.push("مبلغ نقدی گوشی باید عددی مثبت باشد   ");
+        }
+
+        if (isNaN(prepayment) || prepayment < 0) {
+          errorMessages.push("میزان پیش پرداخت باید عددی مثبت یا صفر باشد   ");
+        }
+        if (prepayment > price) {
+          errorMessages.push(
+            "میزان پیش پرداخت نمی‌تواند بیشتر از مبلغ نقدی گوشی باشد   "
+          );
+        }
+
+        if (errorMessages.length > 0) {
+          // Display error messages
+          var errorMessageHTML = "<ul class='error-message'>";
+          errorMessages.forEach(function (errorMessage) {
+            errorMessageHTML += "<li>" + errorMessage + "</li>";
+          });
+          errorMessageHTML += " </ul> ";
+          document.getElementById("result").innerHTML = errorMessageHTML;
+          document.getElementById("result").style.display = "block";
+          document.getElementById("result").style.backgroundColor = "#ffdddd"; // Set error background color
+          return;
+        }
+
+        // Clear error background color
+        document.getElementById("result").style.backgroundColor = "";
         // Check if all inputs are filled
         if (
           interestRate &&
@@ -199,15 +267,18 @@
           var valueAddedInterest = iov * nper - wage;
           var valueAddedInterestVAT = valueAddedInterest * 0.09;
           var finalPayment = iov + pmtNoVAT + valueAddedInterestVAT / nper;
-
+          var finalprice = nper * finalPayment + prepayment;
           // Format the values with comma-separated thousands and round the results
           pv = formatNumber(Math.round(pv).toFixed(0));
           finalPayment = formatNumber(Math.round(finalPayment).toFixed(0));
+          finalprice = formatNumber(Math.round(finalprice).toFixed(0));
 
           // Display the results
           document.getElementById("result").innerHTML = `
             <span>مبلغ اعتباری: ${pv} تومان</span>
+            <span>تعداد چک: ${nper} عدد</span>
             <span>مبلغ هر چک اقساط: ${finalPayment} تومان</span>
+            <span>مبلغ تمام شده: ${finalprice} تومان</span>
             
          
           `;
