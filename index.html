@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>محاسبه گر اقساط گوشی</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -129,6 +133,7 @@
           <input
             type="text"
             id="price"
+            inputmode="numeric"
             oninput="formatInput(this); calculate()"
           />
         </div>
@@ -137,6 +142,7 @@
           <label for="prepayment">میزان پیش پرداخت به تومان</label>
           <input
             type="text"
+            inputmode="numeric"
             id="prepayment"
             oninput="formatInput(this); calculate()"
           />
@@ -146,6 +152,7 @@
           <label for="numPayments">تعداد ماه پرداخت اقساط</label>
           <input
             type="text"
+            inputmode="numeric"
             id="numPayments"
             oninput="formatInput(this); calculate()"
           />
@@ -155,6 +162,7 @@
           <label for="paymentDuration">پرداخت هر چند ماه یکبار</label>
           <input
             type="text"
+            inputmode="numeric"
             id="paymentDuration"
             oninput="formatInput(this); calculate()"
           />
@@ -164,6 +172,7 @@
           <label for="interestRate">نرخ بهره سالیانه</label>
           <input
             type="text"
+            inputmode="numeric"
             id="interestRate"
             value="0.6"
             oninput="formatInput(this); calculate()"
