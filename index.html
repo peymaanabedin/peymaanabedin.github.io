@@ -46,9 +46,19 @@
         text-align: center;
         padding: 20px;
         font-size: 16px;
-        background: linear-gradient(15deg, #e6e5e5, #c1d1d8, #c1d1d8);
-        background-size: 1000% 1000%;
-        animation: GradientBackground 5s ease infinite;
+        background: linear-gradient(
+          308deg,
+          #eea2a2,
+          #bbc1bf,
+          #57c6e1,
+          #b49fda,
+          #7ac5d8
+        );
+        background-size: 600% 600%;
+
+        -webkit-animation: AnimationName 150s ease infinite;
+        -moz-animation: AnimationName 150s ease infinite;
+        animation: AnimationName 150s ease infinite;
       }
       ul {
         direction: rtl;
@@ -159,18 +169,37 @@
       }
 
       //gradiant bg
-
-      @keyframes GradientBackground {
+      @-webkit-keyframes AnimationName {
         0% {
-          background-position: 0% 50%;
+          background-position: 7% 0%;
         }
-
         50% {
-          background-position: 100% 50%;
+          background-position: 94% 100%;
         }
-
         100% {
-          background-position: 0% 50%;
+          background-position: 7% 0%;
+        }
+      }
+      @-moz-keyframes AnimationName {
+        0% {
+          background-position: 7% 0%;
+        }
+        50% {
+          background-position: 94% 100%;
+        }
+        100% {
+          background-position: 7% 0%;
+        }
+      }
+      @keyframes AnimationName {
+        0% {
+          background-position: 7% 0%;
+        }
+        50% {
+          background-position: 94% 100%;
+        }
+        100% {
+          background-position: 7% 0%;
         }
       }
     </style>
