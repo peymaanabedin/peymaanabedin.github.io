@@ -127,7 +127,7 @@
 
       #head {
         margin-top: 30px;
-        font-size: 16px;
+        font-size: 22px;
         background-color: #f8f8f8;
         border-radius: 12px;
         padding: 20px;
@@ -217,8 +217,9 @@
     <div class="container">
       <div class="calculator">
         <div class="input-group">
-          <label for="price">مبلغ نقدی گوشی به تومان</label>
+          <label class="input-label" for="price">مبلغ نقدی گوشی به تومان</label>
           <input
+            class="input-box"
             type="text"
             id="price"
             inputmode="numeric"
@@ -227,8 +228,11 @@
         </div>
 
         <div class="input-group">
-          <label for="prepayment">میزان پیش پرداخت به تومان</label>
+          <label class="input-label" for="prepayment"
+            >میزان پیش پرداخت به تومان</label
+          >
           <input
+            class="input-box"
             type="text"
             inputmode="numeric"
             id="prepayment"
@@ -237,8 +241,11 @@
         </div>
 
         <div class="input-group">
-          <label for="numPayments">تعداد ماه پرداخت اقساط</label>
+          <label class="input-label" for="numPayments"
+            >تعداد ماه پرداخت اقساط</label
+          >
           <input
+            class="input-box"
             type="text"
             inputmode="numeric"
             id="numPayments"
@@ -247,8 +254,11 @@
         </div>
 
         <div class="input-group">
-          <label for="paymentDuration">پرداخت هر چند ماه یکبار</label>
+          <label class="input-label" for="paymentDuration"
+            >پرداخت هر چند ماه یکبار</label
+          >
           <input
+            class="input-box"
             type="text"
             inputmode="numeric"
             id="paymentDuration"
@@ -257,8 +267,9 @@
         </div>
 
         <div class="input-group">
-          <label for="interestRate">نرخ بهره سالیانه</label>
+          <label class="input-label" for="interestRate">نرخ بهره سالیانه</label>
           <input
+            class="input-box"
             type="text"
             id="interestRate"
             value="0.6"
@@ -275,6 +286,22 @@
       <p id="created">کد نویسی شده توسط پیمان عابدین پور 💻</p>
     </div>
     <script>
+      //label hover effect
+      // Change label color when input box is focused
+      var inputBoxes = document.querySelectorAll(".input-box");
+      var inputLabels = document.querySelectorAll(".input-label");
+
+      inputBoxes.forEach(function (inputBox, index) {
+        inputBox.addEventListener("focus", function () {
+          inputLabels[index].style.color = " #21618c ";
+        });
+
+        inputBox.addEventListener("blur", function () {
+          inputLabels[index].style.color = "";
+        });
+      });
+      //main functions
+
       function calculate() {
         // Get user inputs
         var interestRateInput = document.getElementById("interestRate");
