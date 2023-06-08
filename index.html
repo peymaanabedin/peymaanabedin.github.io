@@ -22,6 +22,9 @@
     />
 
     <style>
+      #resultnumber {
+        color: #21618c;
+      }
       input,
       select,
       textarea {
@@ -172,8 +175,36 @@
           max-width: 100%;
         }
       }
+      /* table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        direction: rtl;
+      }
 
-      //gradiant bg
+      th,
+      td {
+        padding: 4.5px;
+        text-align: right;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      tr:hover {
+        background-color: #e8e8e8;
+      }
+      td:first-child {
+        width: 160px; /* Adjust the width as desired */
+      }
+
+      /*gradiant bg*/
       @-webkit-keyframes AnimationName {
         0% {
           background-position: 7% 0%;
@@ -337,7 +368,7 @@
           paymentDuration < 1
         ) {
           errorMessages.push(
-            "پرداخت هر چند ماه یکبار باید یک عدد صحیح و بزرگتر از یک باشد"
+            "پرداخت هر چند ماه یکبار باید یک عدد صحیح و بزرگتر و مساوی  یک باشد"
           );
         }
 
@@ -417,12 +448,37 @@
 
           // Display the results
           document.getElementById("result").innerHTML = `
-            <span>مبلغ اعتباری: ${pv} تومان</span>
-            <span>تعداد چک: ${nper} عدد</span>
-            <span>مبلغ هر چک اقساط: ${finalPayment} تومان</span>
-            <span>مبلغ تمام شده: ${finalprice} تومان</span>
-            
          
+          <br>
+            <table>
+    <tr>
+      
+    </tr>
+    <tr>
+      <td>مبلغ اعتباری:</td>
+      <td id="resultnumber" >${pv} </td>
+      <td>تومان</td>
+    </tr>
+    <tr>
+      <td>تعداد چک:</td>
+      <td id="resultnumber">${nper}</td>
+      <td>فقره</td>
+    </tr>
+    <tr>
+      <td>مبلغ هر چک اقساط:</td>
+      <td id="resultnumber">${finalPayment}</td>
+      <td>تومان</td>
+    </tr>
+    <tr>
+      <td>مبلغ تمام شده:</td>
+      <td id="resultnumber">${finalprice}</td>
+      <td>تومان</td>
+    </tr>
+  </table>
+  <br>
+
+
+            
           `;
 
           // Show the result container
