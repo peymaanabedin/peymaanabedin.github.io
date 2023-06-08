@@ -23,6 +23,17 @@
     />
 
     <style>
+      .icon-container {
+        display: inline-block;
+      }
+
+      .icon-container i {
+        transition: color 0.3s ease-in-out;
+      }
+
+      .icon-container i:hover {
+        color: red;
+      }
       #headicon {
         margin-left: 40px;
         color: #21618c;
@@ -269,7 +280,7 @@
   <body>
     <div class="container">
       <h1 id="head">
-        محاسبه گر اقساط گوشی<span id="headicon"
+        محاسبه گر اقساط گوشی<span class="icon-container" id="headicon"
           ><i class="fa-solid fa-calculator fa-xl"></i
         ></span>
       </h1>
