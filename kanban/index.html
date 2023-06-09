@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@700&display=swap"
+      rel="stylesheet"
+    />
+  <title>Kanban Board</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Vazirmatn", sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .board {
+      display: flex;
+      gap: 20px;
+    }
+    .column {
+      flex: 1;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      padding: 10px;
+    }
+    .column-header {
+      font-weight: bold;
+      padding-bottom: 10px;
+      cursor: pointer;
+    }
+    .task-list {
+      min-height: 100px;
+      background-color: #fff;
+      border-radius: 4px;
+      padding: 10px;
+    }
+    .task {
+      background-color: #fff;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 10px;
+      cursor: move;
+    }
+    .task-title {
+      font-weight: bold;
+    }
+    .task-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 5px;
+    }
+    .task-action {
+      cursor: pointer;
+    }
+    .task-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .task-modal-content {
+      background-color: #fff;
+      border-radius: 4px;
+      padding: 20px;
+    }
+    .task-modal-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .task-modal-input {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    .task-modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .task-modal-button {
+      padding: 5px 10px;
+      background-color: #e2e2e2;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .task-modal-button:hover {
+      background-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+    <div class="column">
+      <div class="column-header" id="todoColumnName">To Do</div>
+      <div class="task-list" id="todoColumn" ondrop="handleDrop(event, 'todoColumn');" ondragover="handleDragOver(event);"></div>
+    </div>
+    <div class="column">
+      <div class="column-header" id="inProgressColumnName">In Progress</div>
+      <div class="task-list" id="inProgressColumn" ondrop="handleDrop(event, 'inProgressColumn');" ondragover="handleDragOver(event);"></div>
+    </div>
+    <div class="column">
+      <div class="column-header" id="doneColumnName">Done</div>
+      <div class="task-list" id="doneColumn" ondrop="handleDrop(event, 'doneColumn');" ondragover="handleDragOver(event);"></div>
+    </div>
+  </div>
+
+  <div class="task-modal" id="taskModal">
+    <div class="task-modal-content">
+      <div class="task-modal-title" id="taskModalTitle"></div>
+      <input type="text" class="task-modal-input" id="taskTitle" placeholder="Task title">
+      <div class="task-modal-buttons">
+        <button class="task-modal-button" onclick="saveTask()">Save</button>
+        <button class="task-modal-button" onclick="closeTaskModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let tasks = [];
+    let todoColumnName = 'To Do';
+    let inProgressColumnName = 'In Progress';
+    let doneColumnName = 'Done';
+    let currentTaskId = null;
+
+    function createTaskElement(taskId, taskTitle) {
+      const taskElement = document.createElement('div');
+      taskElement.className = 'task';
+      taskElement.id = taskId;
+      taskElement.setAttribute('draggable', 'true');
+      taskElement.setAttribute('data-task-id', taskId);
+      taskElement.setAttribute('ondragstart', 'handleDragStart(event)');
+      taskElement.innerHTML = `
+        <div class="task-title">${taskTitle}</div>
+        <div class="task-actions">
+          <span class="task-action" onclick="editTask('${taskId}')">Edit</span>
+          <span class="task-action" onclick="deleteTask('${taskId}')">Delete</span>
+        </div>
+      `;
+      return taskElement;
+    }
+
+    function updateTaskElement(taskId, taskTitle) {
+      const taskElement = document.getElementById(taskId);
+      if (taskElement) {
+        const taskTitleElement = taskElement.querySelector('.task-title');
+        if (taskTitleElement) {
+          taskTitleElement.textContent = taskTitle;
+        }
+      }
+    }
+
+    function openTaskModal(taskId) {
+      const taskModalTitle = document.getElementById('taskModalTitle');
+      const taskTitleInput = document.getElementById('taskTitle');
+
+      if (taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+          taskModalTitle.textContent = 'Edit Task';
+          taskTitleInput.value = task.title;
+        }
+      } else {
+        taskModalTitle.textContent = 'Add New Task';
+        taskTitleInput.value = '';
+      }
+
+      const taskModal = document.getElementById('taskModal');
+      taskModal.style.display = 'flex';
+    }
+
+    function closeTaskModal() {
+      const taskModal = document.getElementById('taskModal');
+      taskModal.style.display = 'none';
+      currentTaskId = null;
+    }
+
+    function saveTask() {
+      const taskTitleInput = document.getElementById('taskTitle');
+      const taskTitle = taskTitleInput.value.trim();
+
+      if (taskTitle === '') {
+        return;
+      }
+
+      if (currentTaskId) {
+        // Edit existing task
+        const task = tasks.find(t => t.id === currentTaskId);
+        if (task) {
+          task.title = taskTitle;
+          updateTaskElement(task.id, task.title);
+        }
+      } else {
+        // Add new task
+        const taskId = `task-${Date.now()}`;
+        const taskElement = createTaskElement(taskId, taskTitle);
+        const todoColumn = document.getElementById('todoColumn');
+        todoColumn.appendChild(taskElement);
+
+        tasks.push({ id: taskId, title: taskTitle, column: 'todoColumn' });
+      }
+
+      saveTasks();
+      closeTaskModal();
+    }
+
+    function deleteTask(taskId) {
+      const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+      if (taskElement) {
+        taskElement.remove();
+        tasks = tasks.filter(task => task.id !== taskId);
+        saveTasks();
+      }
+    }
+
+    function editTask(taskId) {
+      openTaskModal(taskId);
+      currentTaskId = taskId;
+    }
+
+    function editColumnName(columnNameId) {
+      const columnHeader = document.getElementById(columnNameId);
+      if (columnHeader) {
+        const columnName = columnHeader.textContent;
+        const newColumnName = prompt('Edit Column Name', columnName);
+        if (newColumnName) {
+          columnHeader.textContent = newColumnName;
+          if (columnNameId === 'todoColumnName') {
+            todoColumnName = newColumnName;
+          } else if (columnNameId === 'inProgressColumnName') {
+            inProgressColumnName = newColumnName;
+          } else if (columnNameId === 'doneColumnName') {
+            doneColumnName = newColumnName;
+          }
+          saveColumnNames();
+        }
+      }
+    }
+
+    function handleDragStart(event) {
+      const taskId = event.target.getAttribute('data-task-id');
+      if (taskId) {
+        event.dataTransfer.setData('text/plain', taskId);
+      }
+    }
+
+    function handleDrop(event, columnId) {
+      event.preventDefault();
+      const taskId = event.dataTransfer.getData('text/plain');
+      const taskElement = document.getElementById(taskId);
+      if (taskElement) {
+        const columnElement = document.getElementById(columnId);
+        if (columnElement) {
+          columnElement.appendChild(taskElement);
+          const task = tasks.find(t => t.id === taskId);
+          if (task) {
+            task.column = columnId;
+            saveTasks();
+          }
+        }
+      }
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+    }
+
+    function saveTasks() {
+      localStorage.setItem('kanbanTasks', JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+      const storedTasks = localStorage.getItem('kanbanTasks');
+      if (storedTasks) {
+        tasks = JSON.parse(storedTasks);
+        tasks.forEach(task => {
+          const taskElement = createTaskElement(task.id, task.title);
+          const columnElement = document.getElementById(task.column);
+          if (columnElement) {
+            columnElement.appendChild(taskElement);
+          }
+        });
+      }
+    }
+
+    function saveColumnNames() {
+      localStorage.setItem('kanbanColumnNames', JSON.stringify({ todoColumnName, inProgressColumnName, doneColumnName }));
+    }
+
+    function loadColumnNames() {
+      const storedColumnNames = localStorage.getItem('kanbanColumnNames');
+      if (storedColumnNames) {
+        const columnNames = JSON.parse(storedColumnNames);
+        todoColumnName = columnNames.todoColumnName;
+        inProgressColumnName = columnNames.inProgressColumnName;
+        doneColumnName = columnNames.doneColumnName;
+        document.getElementById('todoColumnName').textContent = todoColumnName;
+        document.getElementById('inProgressColumnName').textContent = inProgressColumnName;
+        document.getElementById('doneColumnName').textContent = doneColumnName;
+      }
+    }
+
+    function init() {
+      loadTasks();
+      loadColumnNames();
+
+      const todoColumnHeader = document.getElementById('todoColumnName');
+      const inProgressColumnHeader = document.getElementById('inProgressColumnName');
+      const doneColumnHeader = document.getElementById('doneColumnName');
+
+      todoColumnHeader.addEventListener('dblclick', () => editColumnName('todoColumnName'));
+      inProgressColumnHeader.addEventListener('dblclick', () => editColumnName('inProgressColumnName'));
+      doneColumnHeader.addEventListener('dblclick', () => editColumnName('doneColumnName'));
+
+      const addTaskButton = document.createElement('button');
+      addTaskButton.className = 'task-action';
+      addTaskButton.textContent = '+ Add Task';
+      addTaskButton.addEventListener('click', () => openTaskModal());
+
+      const todoColumn = document.getElementById('todoColumn');
+      todoColumn.parentElement.insertBefore(addTaskButton, todoColumn);
+    }
+
+    init();
+  </script>
+</body>
+</html>
