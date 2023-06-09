@@ -74,9 +74,19 @@
         margin-left: 5px;
         cursor: pointer;
       }
+      #add {
+        padding: 10px;
+        margin-left: 30px;
+        width: 100px;
+        margin-top: 15px;
+        background-color: cadetblue;
+        color: aliceblue;
+        display: flex;
+      }
     </style>
   </head>
   <body>
+    <div><button id="add" onclick="handleAddTask()">Add Task</button></div>
     <div class="task-board">
       <div class="column">
         <div class="column-header" id="todoColumnName">To Do</div>
@@ -106,8 +116,6 @@
         ></div>
       </div>
     </div>
-
-    <button onclick="handleAddTask()">Add Task</button>
 
     <script>
       let tasks = [];
