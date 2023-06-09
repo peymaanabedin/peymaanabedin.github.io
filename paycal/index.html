@@ -431,7 +431,7 @@
         if (
           isNaN(prepayment) ||
           !Number.isInteger(prepayment) ||
-          prepayment < 0
+          prepayment <= 0
         ) {
           errorMessages.push(
             "میزان پیش پرداخت باید یک عدد صحیح و مثبت یا صفر باشد"
