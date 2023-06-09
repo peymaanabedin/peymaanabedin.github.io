@@ -63,6 +63,9 @@
 
       .task-title {
         margin-right: 10px;
+        border: none; /* Remove border */
+        outline: none; /* Remove outline */
+        width: 100%; /* Use full width of the input field */
       }
 
       .task-actions {
@@ -74,22 +77,48 @@
         margin-left: 5px;
         cursor: pointer;
       }
+
+      #add-task-container {
+        display: flex;
+        align-items: inherit;
+        margin-bottom: 10px;
+        margin-left: 30px;
+        margin-top: 15px;
+      }
+
       #add {
         padding: 10px;
-        margin-left: 30px;
-        width: 100px;
-        margin-top: 15px;
+        margin-left: 10px;
         background-color: cadetblue;
         color: aliceblue;
-        display: flex;
+      }
+
+      .task-divider {
+        height: 1px;
+        background-color: #cccccc;
+        margin: 5px 0;
       }
     </style>
   </head>
   <body>
-    <div><button id="add" onclick="handleAddTask()">Add Task</button></div>
+    <div id="add-task-container">
+      <input
+        type="text"
+        id="taskTitleInput"
+        placeholder="Enter task title..."
+        onkeypress="handleKeyPress(event)"
+      />
+      <button id="add" onclick="handleAddTask()">Add Task</button>
+    </div>
     <div class="task-board">
       <div class="column">
-        <div class="column-header" id="todoColumnName">To Do</div>
+        <div
+          class="column-header"
+          id="todoColumnName"
+          onkeypress="handleColumnEdit(event, 'todoColumnName')"
+        >
+          To Do
+        </div>
         <div
           class="task-list"
           id="todoColumn"
@@ -98,7 +127,13 @@
         ></div>
       </div>
       <div class="column">
-        <div class="column-header" id="inProgressColumnName">In Progress</div>
+        <div
+          class="column-header"
+          id="inProgressColumnName"
+          onkeypress="handleColumnEdit(event, 'inProgressColumnName')"
+        >
+          In Progress
+        </div>
         <div
           class="task-list"
           id="inProgressColumn"
@@ -107,7 +142,13 @@
         ></div>
       </div>
       <div class="column">
-        <div class="column-header" id="doneColumnName">Done</div>
+        <div
+          class="column-header"
+          id="doneColumnName"
+          onkeypress="handleColumnEdit(event, 'doneColumnName')"
+        >
+          Done
+        </div>
         <div
           class="task-list"
           id="doneColumn"
@@ -118,6 +159,58 @@
     </div>
 
     <script>
+      //title edit
+
+      function handleColumnEdit(event, columnName) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const columnHeader = document.getElementById(columnName);
+          columnHeader.contentEditable = false; // Disable editing after pressing Enter
+          saveColumn(columnName, columnHeader.textContent.trim());
+        }
+      }
+
+      function saveColumn(columnName, newColumnTitle) {
+        const columnHeader = document.getElementById(columnName);
+        columnHeader.textContent = newColumnTitle;
+
+        // Update the column name in the tasks array
+        switch (columnName) {
+          case "todoColumnName":
+            tasks.forEach((task) => {
+              if (task.column === "todoColumn") {
+                task.column = newColumnTitle;
+              }
+            });
+            break;
+          case "inProgressColumnName":
+            tasks.forEach((task) => {
+              if (task.column === "inProgressColumn") {
+                task.column = newColumnTitle;
+              }
+            });
+            break;
+          case "doneColumnName":
+            tasks.forEach((task) => {
+              if (task.column === "doneColumn") {
+                task.column = newColumnTitle;
+              }
+            });
+            break;
+          default:
+            break;
+        }
+
+        saveTasks();
+      }
+      //enter key
+      function handleKeyPress(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          handleAddTask();
+        }
+      }
+
       let tasks = [];
 
       // Check if tasks are already stored in localStorage
@@ -184,13 +277,17 @@
       }
 
       function handleAddTask() {
-        const taskTitle = prompt("Enter task title:");
+        const taskTitleInput = document.getElementById("taskTitleInput");
+        const taskTitle = taskTitleInput.value.trim();
         if (taskTitle) {
           const taskId = `task${Date.now()}`;
           const taskElement = createTaskElement(taskId, taskTitle);
+
+          const todoColumn = document.getElementById("todoColumn");
+          todoColumn.appendChild(taskElement);
           tasks.push({ id: taskId, title: taskTitle, column: "todoColumn" });
           saveTasks();
-          renderTasks();
+          taskTitleInput.value = ""; // Clear the input field
         }
       }
 
@@ -221,13 +318,23 @@
         const taskElement = event.target.closest(".task");
         const taskId = taskElement.getAttribute("data-task-id");
         const task = tasks.find((t) => t.id === taskId);
-        const newTaskTitle = prompt("Enter new task title:", task.title);
-        if (newTaskTitle) {
-          task.title = newTaskTitle;
-          const taskTitleElement = taskElement.querySelector(".task-title");
-          taskTitleElement.textContent = newTaskTitle;
-          saveTasks();
-        }
+        const taskTitleElement = taskElement.querySelector(".task-title");
+
+        // Enable editing of task title
+        taskTitleElement.contentEditable = true;
+        taskTitleElement.focus();
+
+        taskTitleElement.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            // Save task title on pressing Enter key
+            const newTaskTitle = taskTitleElement.textContent.trim();
+            if (newTaskTitle) {
+              task.title = newTaskTitle;
+              saveTasks();
+            }
+            taskTitleElement.contentEditable = false;
+          }
+        });
       }
 
       function handleDeleteTask(event) {
