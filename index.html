@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>my apps</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="paycal">
+        <a href="https://peymaanabedin.github.io/paycal" class="button"
+          >Paycal</a
+        >
+      </div>
+      <div class="kanban">
+        <a href="https://peymaanabedin.github.io/kanban/" class="button"
+          >Kanban Board</a
+        >
+      </div>
+    </div>
+  </body>
+</html>
+<style>
+  .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      ". . . ."
+      ". kanban paycal ."
+      ". . . ."
+      ". . . .";
+  }
+
+  .paycal {
+    grid-area: paycal;
+  }
+
+  .kanban {
+    grid-area: kanban;
+  }
+
+  html,
+  body,
+  .container {
+    height: 100%;
+    margin: 0;
+  }
+  .button {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    background-color: #4caf50;
+    color: white;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .button:hover {
+    background-color: #45a049;
+  }
+</style>
