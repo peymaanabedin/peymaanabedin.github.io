@@ -16,6 +16,53 @@
         font-family: "Vazirmatn", sans-serif;
         margin: 0;
         padding: 0;
+        background: linear-gradient(
+          308deg,
+          #eea2a2,
+          #bbc1bf,
+          #57c6e1,
+          #b49fda,
+          #7ac5d8
+        );
+        background-size: 600% 600%;
+
+        -webkit-animation: AnimationName 150s ease infinite;
+        -moz-animation: AnimationName 150s ease infinite;
+        animation: AnimationName 150s ease infinite;
+      }
+      /*gradiant bg*/
+      @-webkit-keyframes AnimationName {
+        0% {
+          background-position: 7% 0%;
+        }
+        50% {
+          background-position: 94% 100%;
+        }
+        100% {
+          background-position: 7% 0%;
+        }
+      }
+      @-moz-keyframes AnimationName {
+        0% {
+          background-position: 7% 0%;
+        }
+        50% {
+          background-position: 94% 100%;
+        }
+        100% {
+          background-position: 7% 0%;
+        }
+      }
+      @keyframes AnimationName {
+        0% {
+          background-position: 7% 0%;
+        }
+        50% {
+          background-position: 94% 100%;
+        }
+        100% {
+          background-position: 7% 0%;
+        }
       }
 
       .task-board {
@@ -30,6 +77,13 @@
         border-radius: 5px;
         padding: 10px;
         margin: 0 10px;
+        box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.1) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.1) 0px -3px 0px inset, rgba(0, 0, 0, 0.1) 0px 2px 4px,
+          rgba(0, 0, 0, 0.1) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.1) 0px -3px 0px inset, rgba(0, 0, 0, 0.1) 0px 2px 4px,
+          rgba(0, 0, 0, 0.1) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.1) 0px -11px 0px inset;
       }
 
       .column-header {
