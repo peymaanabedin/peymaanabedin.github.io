@@ -1,66 +1,588 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <!-- iOS icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="images/icon-180.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="images/icon-152.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="images/icon-120.png" />
+    <!-- Android icons -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="images/android-192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="144x144"
+      href="images/android-144.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="96x96"
+      href="images/android-96.png"
+    />
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" href="images/favicon.ico" />
+    <title>Paycal</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Apps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@700&display=swap"
+      rel="stylesheet"
+    />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
     />
+
     <style>
+      .icon-container {
+        display: inline-block;
+      }
+
+      .icon-container i {
+        transition: color 0.3s ease-in-out;
+      }
+
+      .icon-container i:hover {
+        color: red;
+      }
+      #headicon {
+        margin-left: 40px;
+        color: #21618c;
+      }
+      #resultnumber {
+        color: #21618c;
+      }
+      input,
+      select,
+      textarea {
+        font-size: 16px;
+        max-height: 2em;
+        max-width: 100%;
+        -webkit-user-select: none; /* Safari/Chrome */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+ */
+        user-select: none; /* Standard syntax */
+      }
+
+      .error-message {
+        color: #ff0000;
+        margin-top: 20px;
+        text-align: right;
+      }
+
+      /* CSS styling for the app */
       body {
-        background-color: #f2f2f2;
-        font-family: "Roboto", sans-serif;
-        margin: 0;
-        padding: 0;
+        font-family: "Vazirmatn", sans-serif;
+        text-align: center;
+        padding: 20px;
+        font-size: 16px;
+        background: linear-gradient(
+          308deg,
+          #eea2a2,
+          #bbc1bf,
+          #57c6e1,
+          #b49fda,
+          #7ac5d8
+        );
+        background-size: 600% 600%;
+
+        -webkit-animation: AnimationName 150s ease infinite;
+        -moz-animation: AnimationName 150s ease infinite;
+        animation: AnimationName 150s ease infinite;
+      }
+      ul {
+        direction: rtl;
+      }
+
+      h1 {
+        margin-bottom: 20px;
       }
 
       .container {
         display: flex;
         justify-content: center;
-        align-items: center;
-        height: 100vh;
+        align-items: flex-end;
       }
 
-      .card {
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
+      .calculator {
+        background-color: #f8f8f8;
+        border-radius: 12px;
         padding: 20px;
-        text-align: center;
+        /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+        width: 100%;
+        max-width: 400px;
+        box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.2) 0px -3px 0px inset, rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.2) 0px -3px 0px inset, rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.3) 0px -11px 0px inset;
+        opacity: 0.7;
       }
-      .card h1 {
-        font-size: 24px;
-        font-weight: 500;
-        margin-top: 0;
+
+      .input-group {
         margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        font-size: 16px;
       }
-      .card a {
-        display: inline-block;
+
+      .input-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .input-group input {
+        padding: 10px;
+        width: 95%;
+        max-width: 350px;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: inset 11px 11px 30px #e6e6e6, inset -1px 1px 30px #fff;
+        outline: none;
+        /*border: none;*/
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        background-color: #efefef;
+      }
+
+      #result {
+        margin-top: 30px;
+        font-size: 16px;
+        background-color: #ecf0f1;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.2) 0px -3px 0px inset, rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.2) 0px -3px 0px inset, rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.3) 0px -11px 0px inset;
+        width: 100%;
+        max-width: 400px;
+        display: none;
+        text-align: right;
+        opacity: 0.8;
+      }
+
+      #head {
+        margin-top: 30px;
+        font-size: 22px;
+        background-color: #f8f8f8;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.2) 0px -3px 0px inset, rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.2) 0px -3px 0px inset, rgba(0, 0, 0, 0.4) 0px 2px 4px,
+          rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+          rgba(0, 0, 0, 0.3) 0px -6px 0px inset;
+        width: 100%;
+        max-width: 400px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        text-align: center;
+        opacity: 0.7;
+      }
+
+      #result span {
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      .btn-calculate {
         padding: 10px 20px;
-        text-decoration: none;
-        background-color: #4caf50;
-        color: white;
-        border-radius: 4px;
+        background-color: #007aff;
+        color: #fff;
+        border-radius: 5px;
         border: none;
         cursor: pointer;
         font-size: 16px;
-        transition: background-color 0.3s;
       }
 
-      .card a:hover {
-        background-color: #45a049;
+      #created {
+        color: #3534345b;
+        font-size: 16px;
+      }
+
+      @media only screen and (max-width: 480px) {
+        .container {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .calculator,
+        #result {
+          max-width: 100%;
+        }
+      }
+      /* table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        direction: rtl;
+      }
+
+      th,
+      td {
+        padding: 4.5px;
+        text-align: right;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      tr:hover {
+        background-color: #e8e8e8;
+      }
+      td:first-child {
+        width: 160px; /* Adjust the width as desired */
+      }
+
+      /*gradiant bg*/
+      @-webkit-keyframes AnimationName {
+        0% {
+          background-position: 7% 0%;
+        }
+        50% {
+          background-position: 94% 100%;
+        }
+        100% {
+          background-position: 7% 0%;
+        }
+      }
+      @-moz-keyframes AnimationName {
+        0% {
+          background-position: 7% 0%;
+        }
+        50% {
+          background-position: 94% 100%;
+        }
+        100% {
+          background-position: 7% 0%;
+        }
+      }
+      @keyframes AnimationName {
+        0% {
+          background-position: 7% 0%;
+        }
+        50% {
+          background-position: 94% 100%;
+        }
+        100% {
+          background-position: 7% 0%;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <div class="card">
-        <h1>My Apps</h1>
-        <a href="https://peymaanabedin.github.io/paycal">Paycal</a>
-        <a href="https://peymaanabedin.github.io/kanban/">Kanban Board</a>
+      <h1 id="head">
+        محاسبه گر اقساط گوشی<span class="icon-container" id="headicon"
+          ><i class="fa-solid fa-calculator fa-xl"></i
+        ></span>
+      </h1>
+    </div>
+
+    <div class="container">
+      <div class="calculator">
+        <div class="input-group">
+          <label class="input-label" for="price">مبلغ نقدی گوشی به تومان</label>
+          <input
+            class="input-box"
+            type="text"
+            id="price"
+            inputmode="numeric"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="prepayment"
+            >میزان پیش پرداخت به تومان</label
+          >
+          <input
+            class="input-box"
+            type="text"
+            inputmode="numeric"
+            id="prepayment"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="numPayments"
+            >تعداد ماه پرداخت اقساط</label
+          >
+          <input
+            class="input-box"
+            type="text"
+            inputmode="numeric"
+            id="numPayments"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="paymentDuration"
+            >پرداخت هر چند ماه یکبار</label
+          >
+          <input
+            class="input-box"
+            type="text"
+            inputmode="numeric"
+            id="paymentDuration"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="interestRate">نرخ بهره سالیانه</label>
+          <input
+            class="input-box"
+            type="text"
+            id="interestRate"
+            value="0.6"
+            oninput="formatInput(this); calculate()"
+          />
+        </div>
       </div>
     </div>
+    <div class="container">
+      <div id="result"></div>
+    </div>
+    <div class="created">
+      <br />
+      <p id="created">Paycal App | پیمان عابدین پور 💻</p>
+    </div>
+    <script>
+      //label hover effect
+      // Change label color when input box is focused
+      var inputBoxes = document.querySelectorAll(".input-box");
+      var inputLabels = document.querySelectorAll(".input-label");
+
+      inputBoxes.forEach(function (inputBox, index) {
+        inputBox.addEventListener("focus", function () {
+          inputLabels[index].style.color = " #21618c ";
+        });
+
+        inputBox.addEventListener("blur", function () {
+          inputLabels[index].style.color = "";
+        });
+      });
+      //main functions
+
+      function calculate() {
+        // Get user inputs
+        var interestRateInput = document.getElementById("interestRate");
+        var numPaymentsInput = document.getElementById("numPayments");
+        var paymentDurationInput = document.getElementById("paymentDuration");
+        var priceInput = document.getElementById("price");
+        var prepaymentInput = document.getElementById("prepayment");
+
+        // Parse user inputs
+        var interestRate = parseFloat(removeCommas(interestRateInput.value));
+        var numPayments = parseFloat(removeCommas(numPaymentsInput.value));
+        var paymentDuration = parseFloat(
+          removeCommas(paymentDurationInput.value)
+        );
+        var price = parseFloat(removeCommas(priceInput.value));
+        var prepayment = parseFloat(removeCommas(prepaymentInput.value));
+
+        // Validate inputs
+        var errorMessages = [];
+        if (
+          isNaN(numPayments) ||
+          !Number.isInteger(numPayments) ||
+          numPayments <= 0
+        ) {
+          errorMessages.push(
+            "تعداد ماه پرداخت اقساط باید یک عدد صحیح و مثبت باشد"
+          );
+        }
+
+        if (
+          isNaN(paymentDuration) ||
+          !Number.isInteger(paymentDuration) ||
+          paymentDuration < 1
+        ) {
+          errorMessages.push(
+            "پرداخت هر چند ماه یکبار باید یک عدد صحیح و بزرگتر و مساوی  یک باشد"
+          );
+        }
+
+        if (numPayments % paymentDuration !== 0) {
+          errorMessages.push(
+            "تعداد ماه پرداخت اقساط باید بر پرداخت هر چند ماه یکبار بخش‌پذیر باشد"
+          );
+        }
+
+        if (paymentDuration > numPayments) {
+          errorMessages.push(
+            "پرداخت هر چند ماه یکبار نمی‌تواند بیشتر از تعداد ماه پرداخت اقساط باشد"
+          );
+        }
+
+        if (isNaN(price) || !Number.isInteger(price) || price <= 0) {
+          errorMessages.push("مبلغ نقدی گوشی باید یک عدد صحیح و مثبت باشد");
+        }
+
+        if (
+          isNaN(prepayment) ||
+          !Number.isInteger(prepayment) ||
+          prepayment <= 0
+        ) {
+          errorMessages.push(
+            "میزان پیش پرداخت باید یک عدد صحیح و مثبت یا صفر باشد"
+          );
+        }
+
+        if (prepayment > price) {
+          errorMessages.push(
+            "میزان پیش پرداخت نمی‌تواند بیشتر از مبلغ نقدی گوشی باشد"
+          );
+        }
+        if (errorMessages.length > 0) {
+          // Display error messages
+          var errorMessageHTML = "<ul class='error-message'>";
+          errorMessages.forEach(function (errorMessage) {
+            errorMessageHTML += "<li>" + errorMessage + "</li>";
+          });
+          errorMessageHTML += " </ul> ";
+          document.getElementById("result").innerHTML = errorMessageHTML;
+          document.getElementById("result").style.display = "block";
+          document.getElementById("result").style.backgroundColor = "#ffdddd"; // Set error background color
+          return;
+        }
+
+        // Clear error background color
+        document.getElementById("result").style.backgroundColor = "";
+        // Check if all inputs are filled
+        if (
+          interestRate &&
+          numPayments &&
+          paymentDuration &&
+          price &&
+          prepayment
+        ) {
+          // Calculate the results
+          var nper = numPayments / paymentDuration;
+          var pv = price - prepayment;
+          var rate = (interestRate / 12) * paymentDuration;
+          var pmt = PMT(rate, nper, -pv, 0, 0);
+          var pvNoVAT = price / 1.09 - prepayment;
+          var rateForVAT = Math.pow(1 + interestRate / 12, paymentDuration) - 1;
+          var pmtNoVAT = PMT(rateForVAT, nper, -pvNoVAT, 0, 0);
+          var wage =
+            pvNoVAT * 0.09 + (pmtNoVAT * nper + prepayment - pvNoVAT) * 0.09;
+          var iov = PMT(rateForVAT, nper, -wage, 0, 0);
+          var valueAddedInterest = iov * nper - wage;
+          var valueAddedInterestVAT = valueAddedInterest * 0.09;
+          var finalPayment = iov + pmtNoVAT + valueAddedInterestVAT / nper;
+          var finalprice = nper * finalPayment + prepayment;
+          // Format the values with comma-separated thousands and round the results
+          pv = formatNumber(Math.round(pv).toFixed(0));
+          finalPayment = formatNumber(Math.round(finalPayment).toFixed(0));
+          finalprice = formatNumber(Math.round(finalprice).toFixed(0));
+
+          // Display the results
+          document.getElementById("result").innerHTML = `
+         
+          <br>
+            <table>
+    <tr>
+      
+    </tr>
+    <tr>
+      <td>مبلغ اعتباری:</td>
+      <td id="resultnumber" >${pv} </td>
+      <td>تومان</td>
+    </tr>
+    <tr>
+      <td>تعداد چک:</td>
+      <td id="resultnumber">${nper}</td>
+      <td>فقره</td>
+    </tr>
+    <tr>
+      <td>مبلغ هر چک اقساط:</td>
+      <td id="resultnumber">${finalPayment}</td>
+      <td>تومان</td>
+    </tr>
+    <tr>
+      <td>مبلغ تمام شده:</td>
+      <td id="resultnumber">${finalprice}</td>
+      <td>تومان</td>
+    </tr>
+  </table>
+  <br>
+
+
+            
+          `;
+
+          // Show the result container
+          document.getElementById("result").style.display = "block";
+        }
+      }
+
+      // PMT function calculates the payment for a loan based on constant payments and a constant interest rate
+      function PMT(rate, nper, pv, fv, type) {
+        if (!fv) fv = 0;
+        if (!type) type = 0;
+
+        if (rate === 0) return -(pv + fv) / nper;
+
+        var pvif = Math.pow(1 + rate, nper);
+        var pmt = (rate / (pvif - 1)) * -(pv * pvif + fv);
+
+        if (type === 1) {
+          pmt /= 1 + rate;
+        }
+
+        return pmt;
+      }
+
+      // Helper function to remove commas from input values
+      function removeCommas(value) {
+        return value.toString().replace(/,/g, "");
+      }
+
+      // Helper function to format numbers with comma-separated thousands
+      function formatNumber(value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      // Helper function to format the user input values with comma-separated thousands
+      function formatInput(input) {
+        var value = removeCommas(input.value);
+        input.value = formatNumber(value);
+      }
+    </script>
   </body>
 </html>
