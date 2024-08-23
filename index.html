@@ -15,7 +15,12 @@
     <link rel="stylesheet" href="css/styles.css" />
   </head>
 
-  <body data-bs-spy="scroll" data-bs-target="#navbar-example">
+  <body
+    data-bs-spy="scroll"
+    data-bs-target="#navbar-example"
+    data-bs-offset="0"
+    tabindex="0"
+  >
     <nav
       id="navbar-example"
       class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top"
@@ -33,8 +38,11 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav">
             <li class="nav-item">
               <a class="nav-link" href="#about">About Me</a>
             </li>
@@ -54,21 +62,21 @@
 
     <header
       id="home"
-      class="vh-100 d-flex align-items-center justify-content-center text-center"
+      class="d-flex align-items-center justify-content-center vh-100"
     >
-      <div class="container">
+      <div class="container text-center">
         <h1 class="display-4" data-aos="fade-up">
           Welcome to My Digital Playground
         </h1>
         <p class="lead" data-aos="fade-up" data-aos-delay="200">
-          Crafting Seamless Digital Experiences
+          Crafting Seamless Digital Experiences with Minimalism and Precision
         </p>
         <a
           href="#about"
-          class="btn btn-primary btn-lg mt-4"
+          class="btn btn-outline-light mt-4"
           data-aos="fade-up"
           data-aos-delay="400"
-          >Explore More</a
+          >Learn More</a
         >
       </div>
     </header>
@@ -77,11 +85,11 @@
       <div class="container">
         <h2 class="text-center mb-4" data-aos="fade-right">About Me</h2>
         <p class="text-center" data-aos="fade-left">
-          I’m <strong>[Your Name]</strong>, a Software Engineer, Creative
-          Technologist, and Data Analyst with over a decade of experience. I’m
-          passionate about creating digital products that meet the highest
-          standards of performance while offering a seamless, delightful user
-          experience.
+          I’m <strong>[Your Name]</strong>, a seasoned Software Engineer,
+          Creative Technologist, and Data Analyst with over a decade of
+          experience. My work is driven by a passion for technology, a
+          commitment to minimalism, and a relentless focus on creating digital
+          solutions that are both effective and elegantly simple.
         </p>
       </div>
     </section>
@@ -90,43 +98,36 @@
       <div class="container">
         <h2 class="text-center mb-4" data-aos="fade-right">My Expertise</h2>
         <div class="row">
-          <div class="col-lg-6" data-aos="zoom-in">
+          <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
             <h3>Full-Stack Development</h3>
             <p>
-              Expertise in both frontend and backend technologies using Python
-              (Django, Flask) and JavaScript (Vue.js, Node.js).
+              I excel in both frontend and backend technologies, using Python
+              (Django, Flask) and JavaScript (Vue.js, Node.js) to build robust,
+              scalable, and high-performing applications.
             </p>
           </div>
-          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="200">
+          <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
             <h3>API & Headless Architecture</h3>
             <p>
-              Designing and implementing RESTful APIs and headless architectures
-              for flexibility and scalability.
+              Specializing in designing and implementing RESTful APIs and
+              headless architectures to provide flexibility and scalability
+              across platforms.
             </p>
           </div>
-          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="400">
+          <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
             <h3>Database Mastery</h3>
             <p>
-              Managing NoSQL (MongoDB) and SQL databases, ensuring data-driven
-              systems are fast, secure, and scalable.
+              With deep expertise in managing both NoSQL (MongoDB) and SQL
+              databases, I ensure that data-driven systems are optimized for
+              performance, security, and scalability.
             </p>
           </div>
-          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="600">
+          <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
             <h3>Data Analysis and Insights</h3>
             <p>
-              Analyzing complex data sets to uncover actionable insights that
-              drive business strategy.
-            </p>
-          </div>
-          <div
-            class="col-lg-12 text-center mt-4"
-            data-aos="zoom-in"
-            data-aos-delay="800"
-          >
-            <h3>Designing and Coding for Efficiency and Delight</h3>
-            <p>
-              Crafting websites with a minimalist design philosophy that ensures
-              clarity, usability, and a seamless user experience.
+              As a Data Analyst, I transform complex data into actionable
+              insights, helping businesses make informed decisions and optimize
+              their operations.
             </p>
           </div>
         </div>
@@ -139,10 +140,10 @@
           My Commitment to Excellence
         </h2>
         <p class="text-center" data-aos="fade-left">
-          In every project I undertake, I bring a relentless focus on quality,
-          innovation, and user satisfaction. I believe that the best digital
-          solutions come from a deep understanding of both the technology and
-          the people who use it.
+          In every project, I bring a deep commitment to quality, innovation,
+          and user satisfaction. My approach is grounded in the belief that the
+          best digital solutions are born from simplicity, clarity, and a
+          thorough understanding of both technology and user needs.
         </p>
       </div>
     </section>
@@ -153,16 +154,15 @@
           Let’s Create Something Extraordinary
         </h2>
         <p class="mb-4" data-aos="fade-left">
-          My career has been driven by a simple yet powerful principle: to craft
-          digital experiences that are as efficient as they are engaging. Let’s
-          work together to transform your vision into reality—creating solutions
-          that are not only powerful and scalable but also elegantly designed
-          and a joy to use.
+          I am driven by the principle that digital experiences should be as
+          efficient as they are engaging. Let's work together to build something
+          remarkable—solutions that are powerful, scalable, and elegantly
+          simple.
         </p>
         <a
           href="mailto:your.email@example.com"
-          class="btn btn-outline-light btn-lg"
-          data-aos="zoom-in"
+          class="btn btn-outline-light"
+          data-aos="fade-up"
           >Get in Touch</a
         >
       </div>
