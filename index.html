@@ -3,179 +3,261 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Welcome to My Digital Playground</title>
+    <title>My Digital Playground</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
     />
-    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Playfair+Display:wght@900&display=swap");
+
+      body {
+        background: linear-gradient(
+          to bottom,
+          #f7f7f7,
+          #e0e0e0
+        ); /* Light gray gradient background */
+        color: #333333; /* Dark Slate text */
+        font-family: "Lora", serif; /* Elegant serif font for body */
+        overflow-x: hidden;
+      }
+
+      header {
+        background: linear-gradient(
+          135deg,
+          #84a9ac,
+          #3b6978
+        ); /* Soft blue gradient */
+        color: #f7f7f7; /* Light Gray text */
+        text-align: center;
+        padding: 30px 0;
+        font-family: "Playfair Display", serif; /* Elegant, modern serif font for title */
+        font-size: 3rem;
+        text-shadow: 1px 1px 2px #555555; /* Subtle shadow for depth */
+        border-bottom: 4px solid #3b6978; /* Darker blue accent */
+        letter-spacing: 1px;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      section {
+        background: linear-gradient(
+          to right,
+          #f7f7f7,
+          #e0e0e0
+        ); /* Subtle gray gradient */
+        color: #333333; /* Dark Slate text */
+        padding: 30px;
+        margin-bottom: 30px;
+        border: 1px solid #cfcfcf; /* Soft gray border */
+        border-radius: 8px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+        font-family: "Lora", serif;
+      }
+
+      h2 {
+        color: #3b6978; /* Darker blue */
+        font-size: 2.2rem;
+        margin-bottom: 20px;
+        font-family: "Playfair Display", serif;
+        text-align: center;
+        border-bottom: 2px solid #84a9ac; /* Lighter blue underline */
+        display: inline-block;
+        padding-bottom: 5px;
+      }
+
+      p {
+        margin: 15px 0;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        text-align: justify;
+      }
+
+      .highlight {
+        color: #ffffff; /* White text */
+        background: #3b6978; /* Darker blue background */
+        padding: 4px 8px;
+        font-family: "Playfair Display", serif;
+        border-radius: 4px;
+      }
+
+      footer {
+        background: #3b6978; /* Darker blue */
+        color: #f7f7f7; /* Light gray text */
+        text-align: center;
+        padding: 15px 0;
+        font-family: "Playfair Display", serif;
+        letter-spacing: 1px;
+        border-top: 4px solid #84a9ac; /* Lighter blue accent */
+      }
+
+      @media screen and (max-width: 600px) {
+        header {
+          font-size: 2.5rem;
+        }
+
+        h2 {
+          font-size: 1.8rem;
+        }
+
+        p {
+          font-size: 1rem;
+        }
+      }
+    </style>
   </head>
-
-  <body
-    data-bs-spy="scroll"
-    data-bs-target="#navbar-example"
-    data-bs-offset="0"
-    tabindex="0"
-  >
-    <nav
-      id="navbar-example"
-      class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top"
-    >
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#home">My Digital Playground</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div
-          class="collapse navbar-collapse justify-content-end"
-          id="navbarNav"
-        >
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="#about">About Me</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#expertise">Expertise</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#commitment">Commitment</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#contact">Contact</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-    <header
-      id="home"
-      class="d-flex align-items-center justify-content-center vh-100"
-    >
-      <div class="container text-center">
-        <h1 class="display-4" data-aos="fade-up">
-          Welcome to My Digital Playground
-        </h1>
-        <p class="lead" data-aos="fade-up" data-aos-delay="200">
-          Crafting Seamless Digital Experiences with Minimalism and Precision
-        </p>
-        <a
-          href="#about"
-          class="btn btn-outline-light mt-4"
-          data-aos="fade-up"
-          data-aos-delay="400"
-          >Learn More</a
-        >
-      </div>
+  <body>
+    <header class="animate__animated animate__fadeIn">
+      <div id="header-text">My Digital Playground</div>
     </header>
 
-    <section id="about" class="py-5">
-      <div class="container">
-        <h2 class="text-center mb-4" data-aos="fade-right">About Me</h2>
-        <p class="text-center" data-aos="fade-left">
-          I’m <strong>[Your Name]</strong>, a seasoned Software Engineer,
+    <div class="container">
+      <section class="animate__animated animate__fadeInLeft">
+        <h2>Welcome to My Digital Playground</h2>
+        <p>
+          Welcome to my digital playground—a space where innovation, technology,
+          and design come together to create extraordinary digital experiences.
+          I’m <span class="highlight">[Your Name]</span>, a Software Engineer,
           Creative Technologist, and Data Analyst with over a decade of
-          experience. My work is driven by a passion for technology, a
-          commitment to minimalism, and a relentless focus on creating digital
-          solutions that are both effective and elegantly simple.
+          experience dedicated to turning complex ideas into simple, elegant
+          solutions. My career is a testament to my belief in the power of
+          minimalism, efficiency, and user-centered design. I’m passionate about
+          creating digital products that not only meet the highest standards of
+          performance but also offer a seamless, delightful user experience.
         </p>
-      </div>
-    </section>
+      </section>
 
-    <section id="expertise" class="py-5 bg-light">
-      <div class="container">
-        <h2 class="text-center mb-4" data-aos="fade-right">My Expertise</h2>
-        <div class="row">
-          <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
-            <h3>Full-Stack Development</h3>
-            <p>
-              I excel in both frontend and backend technologies, using Python
-              (Django, Flask) and JavaScript (Vue.js, Node.js) to build robust,
-              scalable, and high-performing applications.
-            </p>
-          </div>
-          <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
-            <h3>API & Headless Architecture</h3>
-            <p>
-              Specializing in designing and implementing RESTful APIs and
-              headless architectures to provide flexibility and scalability
-              across platforms.
-            </p>
-          </div>
-          <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
-            <h3>Database Mastery</h3>
-            <p>
-              With deep expertise in managing both NoSQL (MongoDB) and SQL
-              databases, I ensure that data-driven systems are optimized for
-              performance, security, and scalability.
-            </p>
-          </div>
-          <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
-            <h3>Data Analysis and Insights</h3>
-            <p>
-              As a Data Analyst, I transform complex data into actionable
-              insights, helping businesses make informed decisions and optimize
-              their operations.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="commitment" class="py-5">
-      <div class="container">
-        <h2 class="text-center mb-4" data-aos="fade-right">
-          My Commitment to Excellence
-        </h2>
-        <p class="text-center" data-aos="fade-left">
-          In every project, I bring a deep commitment to quality, innovation,
-          and user satisfaction. My approach is grounded in the belief that the
-          best digital solutions are born from simplicity, clarity, and a
-          thorough understanding of both technology and user needs.
+      <section class="animate__animated animate__fadeInRight">
+        <h2>A Journey of Passion, Innovation, and Technical Mastery</h2>
+        <p>
+          My journey began with a deep-rooted passion for technology, nurtured
+          by a Bachelor’s Degree in Information Technology that laid a strong
+          foundation for my technical expertise. Over the years, I’ve honed my
+          skills across various domains, from software development and database
+          management to creative design and data analysis. This journey has
+          equipped me with a diverse and versatile skill set that allows me to
+          approach every project with a holistic perspective—blending the
+          technical with the creative, the functional with the aesthetic, and
+          the data-driven with the intuitive.
         </p>
-      </div>
-    </section>
+      </section>
 
-    <section id="contact" class="py-5 bg-dark text-light">
-      <div class="container text-center">
-        <h2 class="mb-4" data-aos="fade-right">
-          Let’s Create Something Extraordinary
-        </h2>
-        <p class="mb-4" data-aos="fade-left">
-          I am driven by the principle that digital experiences should be as
-          efficient as they are engaging. Let's work together to build something
-          remarkable—solutions that are powerful, scalable, and elegantly
-          simple.
+      <section class="animate__animated animate__fadeInLeft">
+        <h2>What I Bring to Your Digital Projects</h2>
+        <p>
+          At the core of my work is a commitment to delivering high-quality,
+          efficient, and user-friendly digital solutions. I specialize in
+          designing and developing data-driven websites that not only perform at
+          the highest levels of efficiency but also provide a delightful and
+          intuitive user experience. Here’s a closer look at what I bring to
+          your projects:
         </p>
-        <a
-          href="mailto:your.email@example.com"
-          class="btn btn-outline-light"
-          data-aos="fade-up"
-          >Get in Touch</a
-        >
-      </div>
-    </section>
+        <p>
+          <span class="highlight">Full-Stack Development:</span> My expertise in
+          full-stack development spans both frontend and backend technologies. I
+          excel in using Python frameworks like Django and Flask to build robust
+          and scalable backend systems, while leveraging JavaScript frameworks
+          such as Vue.js and Node.js to create dynamic, responsive frontends.
+          Every project I work on is approached with a focus on performance,
+          scalability, and user experience, ensuring that the end product is
+          both technically sound and engaging.
+        </p>
+        <p>
+          <span class="highlight">API & Headless Architecture:</span> In an
+          increasingly interconnected digital world, flexibility and scalability
+          are paramount. I specialize in designing and implementing RESTful APIs
+          and headless architectures that provide the backbone for modern,
+          modular applications. Whether you need to integrate complex systems or
+          build a flexible, future-proof platform, my solutions are crafted to
+          adapt and evolve with your business needs.
+        </p>
+        <p>
+          <span class="highlight">Database Mastery:</span> Data is the lifeblood
+          of any digital application, and I ensure it is managed with precision
+          and care. Whether working with NoSQL databases like MongoDB or
+          relational databases using SQL, I design data-driven systems that are
+          optimized for speed, security, and scalability. My goal is to make
+          sure your data is not just stored, but strategically utilized to drive
+          your business forward.
+        </p>
+        <p>
+          <span class="highlight">Data Analysis and Insights:</span> As a Data
+          Analyst, I understand the critical role that data plays in
+          decision-making. I specialize in analyzing complex data sets to
+          uncover actionable insights that can drive your business strategy. By
+          leveraging advanced analytical tools and techniques, I transform raw
+          data into meaningful information that helps you make informed
+          decisions, optimize processes, and achieve your business goals.
+        </p>
+      </section>
 
-    <footer class="py-4 bg-dark text-center text-light">
-      <div class="container">
-        <p>&copy; 2024 [Your Name]. All rights reserved.</p>
-      </div>
+      <section class="animate__animated animate__fadeInRight">
+        <h2>Designing and Coding for Efficiency and Delight</h2>
+        <p>
+          I believe that great digital experiences are rooted in simplicity and
+          efficiency. I specialize in creating websites that are driven by data
+          and designed for performance. My approach to design is minimalist,
+          focusing on clarity and usability. I strive to create interfaces that
+          are not only aesthetically pleasing but also intuitive and easy to
+          navigate, ensuring that users can accomplish their goals without
+          unnecessary friction. My mantra is simple: make things effective,
+          fast, and effortless—don’t make users think.
+        </p>
+        <p>
+          <span class="highlight">Minimalist Design Philosophy:</span> My design
+          philosophy is guided by the principles of minimalism. I believe that
+          less is more and that every element in a design should have a purpose.
+          By stripping away the unnecessary and focusing on what truly matters,
+          I create user interfaces that are clean, efficient, and delightful to
+          use. My goal is to craft experiences that feel natural and intuitive,
+          where every interaction is seamless, and every decision is effortless.
+          In a world where attention is fleeting, I aim to create products that
+          are not just functional, but truly engaging.
+        </p>
+      </section>
+
+      <section class="animate__animated animate__fadeInLeft">
+        <h2>My Commitment to Excellence</h2>
+        <p>
+          In every project I undertake, I bring a relentless focus on quality,
+          innovation, and user satisfaction. I believe that the best digital
+          solutions come from a deep understanding of both the technology and
+          the people who use it. Whether you’re a startup with a bold new idea
+          or an established enterprise looking to innovate, I’m here to help you
+          create digital experiences that are efficient, effective, and
+          beautifully designed.
+        </p>
+        <p id="extra-text">
+          <span class="highlight">Let’s Create Something Extraordinary</span>
+        </p>
+      </section>
+    </div>
+
+    <footer class="animate__animated animate__fadeInUp">
+      &copy; 2024 My Digital Playground. All rights reserved.
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script src="js/script.js"></script>
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script>
+      // Typed.js for header typewriting effect
+
+      // GSAP animations for content sections
+      gsap.from("#about-text", { duration: 1, x: -100, opacity: 0 });
+      gsap.from("#journey-text", { duration: 1.5, x: 100, opacity: 0 });
+      gsap.from("#skills-text", { duration: 2, y: 50, opacity: 0 });
+      gsap.from("#design-text", { duration: 2.5, y: -50, opacity: 0 });
+      gsap.from("#commitment-text", { duration: 3, x: -100, opacity: 0 });
+      gsap.from("#extra-text", { duration: 3.5, x: 100, opacity: 0 });
+    </script>
   </body>
 </html>
