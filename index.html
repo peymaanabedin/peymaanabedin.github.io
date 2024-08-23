@@ -8,100 +8,80 @@
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
-
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Playfair+Display:wght@900&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;700&family=Spectral:wght@400;700&display=swap");
 
       body {
-        background: linear-gradient(
-          to bottom,
-          #f7f7f7,
-          #e0e0e0
-        ); /* Light gray gradient background */
-        color: #333333; /* Dark Slate text */
-        font-family: "Lora", serif; /* Elegant serif font for body */
-        overflow-x: hidden;
+        background-color: #f4f4f4; /* Light gray background for a newspaper look */
+        font-family: "Spectral", serif; /* Elegant serif font for body */
+        color: #333; /* Dark gray text color */
+        line-height: 1.6;
       }
 
       header {
-        background: linear-gradient(
-          135deg,
-          #84a9ac,
-          #3b6978
-        ); /* Soft blue gradient */
-        color: #f7f7f7; /* Light Gray text */
+        background-color: #fff; /* White background for header */
+        color: #000; /* Black text color */
         text-align: center;
-        padding: 30px 0;
-        font-family: "Playfair Display", serif; /* Elegant, modern serif font for title */
+        padding: 20px 0;
+        font-family: "Crimson Text", serif; /* Bold, classic serif font for header */
         font-size: 3rem;
-        text-shadow: 1px 1px 2px #555555; /* Subtle shadow for depth */
-        border-bottom: 4px solid #3b6978; /* Darker blue accent */
+        border-bottom: 2px solid #333; /* Dark gray border */
         letter-spacing: 1px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
       }
 
       .container {
-        max-width: 1000px;
-        margin: 0 auto;
+        max-width: 900px;
+        margin: 40px auto;
         padding: 20px;
+        background-color: #fff; /* White background for main content */
+        border: 1px solid #ddd; /* Light gray border */
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Light shadow for paper effect */
       }
 
       section {
-        background: linear-gradient(
-          to right,
-          #f7f7f7,
-          #e0e0e0
-        ); /* Subtle gray gradient */
-        color: #333333; /* Dark Slate text */
-        padding: 30px;
         margin-bottom: 30px;
-        border: 1px solid #cfcfcf; /* Soft gray border */
-        border-radius: 8px;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
-        font-family: "Lora", serif;
       }
 
       h2 {
-        color: #3b6978; /* Darker blue */
-        font-size: 2.2rem;
-        margin-bottom: 20px;
-        font-family: "Playfair Display", serif;
-        text-align: center;
-        border-bottom: 2px solid #84a9ac; /* Lighter blue underline */
-        display: inline-block;
+        font-family: "Crimson Text", serif;
+        font-size: 2rem;
+        margin-bottom: 15px;
+        color: #222; /* Darker text for headings */
+        border-bottom: 1px solid #ccc; /* Light gray underline */
         padding-bottom: 5px;
       }
 
       p {
-        margin: 15px 0;
-        font-size: 1.1rem;
-        line-height: 1.8;
-        text-align: justify;
+        margin-bottom: 15px;
+        text-align: justify; /* Justified text for a classic look */
+        font-size: 1rem;
       }
 
       .highlight {
-        color: #ffffff; /* White text */
-        background: #3b6978; /* Darker blue background */
-        padding: 4px 8px;
-        font-family: "Playfair Display", serif;
-        border-radius: 4px;
+        background-color: #000; /* Black background */
+        color: #fff; /* White text */
+        padding: 2px 4px;
+        font-family: "Crimson Text", serif;
+        font-weight: bold;
       }
 
       footer {
-        background: #3b6978; /* Darker blue */
-        color: #f7f7f7; /* Light gray text */
+        background-color: #fff;
+        color: #000;
         text-align: center;
-        padding: 15px 0;
-        font-family: "Playfair Display", serif;
-        letter-spacing: 1px;
-        border-top: 4px solid #84a9ac; /* Lighter blue accent */
+        padding: 10px 0;
+        border-top: 2px solid #333;
+        font-family: "Crimson Text", serif;
+        font-size: 1rem;
+        margin-top: 30px;
       }
 
       @media screen and (max-width: 600px) {
+        body {
+          font-size: 1rem;
+        }
+
         header {
           font-size: 2.5rem;
         }
@@ -109,26 +89,20 @@
         h2 {
           font-size: 1.8rem;
         }
-
-        p {
-          font-size: 1rem;
-        }
       }
     </style>
   </head>
   <body>
-    <header class="animate__animated animate__fadeIn">
-      <div id="header-text">Peymaan Abedinpour's Digital Playground</div>
-    </header>
+    <header>Peymaan Abedinpour's Digital Playground</header>
 
     <div class="container">
-      <section class="animate__animated animate__fadeInLeft">
+      <section>
         <h2>Welcome to My Digital Playground</h2>
         <p>
           Welcome to my digital playground—a space where innovation, technology,
           and design come together to create extraordinary digital experiences.
           I’m <span class="highlight">Peymaan Abedinpour</span>, a Software
-          Engineer, Creative Technologist,Coding Artist and Data Analyst with
+          Engineer, Creative Technologist, Coding Artist and Data Analyst with
           over a decade of experience dedicated to turning complex ideas into
           simple, elegant solutions. My career is a testament to my belief in
           the power of minimalism, efficiency, and user-centered design. I’m
@@ -138,7 +112,7 @@
         </p>
       </section>
 
-      <section class="animate__animated animate__fadeInRight">
+      <section>
         <h2>A Journey of Passion, Innovation, and Technical Mastery</h2>
         <p>
           My journey began with a deep-rooted passion for technology, nurtured
@@ -153,7 +127,7 @@
         </p>
       </section>
 
-      <section class="animate__animated animate__fadeInLeft">
+      <section>
         <h2>What I Bring to Your Digital Projects</h2>
         <p>
           At the core of my work is a commitment to delivering high-quality,
@@ -202,7 +176,7 @@
         </p>
       </section>
 
-      <section class="animate__animated animate__fadeInRight">
+      <section>
         <h2>Designing and Coding for Efficiency and Delight</h2>
         <p>
           I believe that great digital experiences are rooted in simplicity and
@@ -227,7 +201,7 @@
         </p>
       </section>
 
-      <section class="animate__animated animate__fadeInLeft">
+      <section>
         <h2>My Commitment to Excellence</h2>
         <p>
           In every project I undertake, I bring a relentless focus on quality,
@@ -238,29 +212,12 @@
           create digital experiences that are efficient, effective, and
           beautifully designed.
         </p>
-        <p id="extra-text">
+        <p>
           <span class="highlight">Let’s Create Something Extraordinary</span>
         </p>
       </section>
     </div>
 
-    <footer class="animate__animated animate__fadeInUp">
-      &copy; 2024 Peymaan Abedinpour. All rights reserved.
-    </footer>
-
-    <!-- JavaScript Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-    <script>
-      // Typed.js for header typewriting effect
-
-      // GSAP animations for content sections
-      gsap.from("#about-text", { duration: 1, x: -100, opacity: 0 });
-      gsap.from("#journey-text", { duration: 1.5, x: 100, opacity: 0 });
-      gsap.from("#skills-text", { duration: 2, y: 50, opacity: 0 });
-      gsap.from("#design-text", { duration: 2.5, y: -50, opacity: 0 });
-      gsap.from("#commitment-text", { duration: 3, x: -100, opacity: 0 });
-      gsap.from("#extra-text", { duration: 3.5, x: 100, opacity: 0 });
-    </script>
+    <footer>&copy; 2024 Peymaan Abedinpour . All rights reserved.</footer>
   </body>
 </html>
