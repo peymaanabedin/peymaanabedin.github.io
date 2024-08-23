@@ -2,421 +2,180 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Welcome to My Digital Playground</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@700&display=swap"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <title>Task Board</title>
-    <style>
-      body {
-        font-family: "Vazirmatn", sans-serif;
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(
-          308deg,
-          #eea2a2,
-          #bbc1bf,
-          #57c6e1,
-          #b49fda,
-          #7ac5d8
-        );
-        background-size: 1000% 1000%;
-
-        -webkit-animation: AnimationName 550s ease infinite;
-        -moz-animation: AnimationName 550s ease infinite;
-        animation: AnimationName 550s ease infinite;
-      }
-      /*gradiant bg*/
-      @-webkit-keyframes AnimationName {
-        0% {
-          background-position: 7% 0%;
-        }
-        50% {
-          background-position: 94% 100%;
-        }
-        100% {
-          background-position: 7% 0%;
-        }
-      }
-      @-moz-keyframes AnimationName {
-        0% {
-          background-position: 7% 0%;
-        }
-        50% {
-          background-position: 94% 100%;
-        }
-        100% {
-          background-position: 7% 0%;
-        }
-      }
-      @keyframes AnimationName {
-        0% {
-          background-position: 7% 0%;
-        }
-        50% {
-          background-position: 94% 100%;
-        }
-        100% {
-          background-position: 7% 0%;
-        }
-      }
-
-      .task-board {
-        display: flex;
-        justify-content: space-between;
-        padding: 20px;
-      }
-
-      .column {
-        flex-grow: 1;
-        background-color: #f2f2f2;
-        border-radius: 5px;
-        padding: 10px;
-        margin: 0 10px;
-        box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
-          rgba(0, 0, 0, 0.1) 0px 7px 13px -3px,
-          rgba(0, 0, 0, 0.1) 0px -3px 0px inset, rgba(0, 0, 0, 0.1) 0px 2px 4px,
-          rgba(0, 0, 0, 0.1) 0px 7px 13px -3px,
-          rgba(0, 0, 0, 0.1) 0px -3px 0px inset, rgba(0, 0, 0, 0.1) 0px 2px 4px,
-          rgba(0, 0, 0, 0.1) 0px 7px 13px -3px,
-          rgba(0, 0, 0, 0.1) 0px -11px 0px inset;
-      }
-
-      .column-header {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-
-      .task-list {
-        min-height: 100px;
-        background-color: #ffffff;
-        border: 1px solid #cccccc;
-        border-radius: 5px;
-        padding: 10px;
-      }
-
-      .task {
-        background-color: #ffffff;
-        border: 1px solid #cccccc;
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 10px;
-        cursor: move;
-      }
-
-      .task-box {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .task-title {
-        margin-right: 10px;
-        border: none; /* Remove border */
-        outline: none; /* Remove outline */
-        width: 100%; /* Use full width of the input field */
-      }
-
-      .task-actions {
-        display: flex;
-        align-items: center;
-      }
-
-      .task-action {
-        margin-left: 5px;
-        cursor: pointer;
-      }
-
-      #add-task-container {
-        display: flex;
-        align-items: inherit;
-        margin-bottom: 10px;
-        margin-left: 30px;
-        margin-top: 15px;
-      }
-
-      #add {
-        padding: 10px;
-        margin-left: 10px;
-        background-color: cadetblue;
-        color: aliceblue;
-        transition: all 0.3s ease;
-      }
-      #add:hover {
-        color: #000;
-      }
-      #add:hover:after {
-        left: auto;
-        right: 0;
-        width: 100%;
-      }
-
-      .task-divider {
-        height: 1px;
-        background-color: #cccccc;
-        margin: 5px 0;
-      }
-      #created {
-        color: #3534345b;
-        font-size: 16px;
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
   </head>
-  <body>
-    <div id="add-task-container">
-      <input
-        type="text"
-        id="taskTitleInput"
-        placeholder="Enter task title..."
-        onkeypress="handleKeyPress(event)"
-      />
-      <button id="add" onclick="handleAddTask()">Add Task</button>
-    </div>
-    <div class="task-board">
-      <div class="column">
-        <div
-          class="column-header"
-          id="todoColumnName"
-          onkeypress="handleColumnEdit(event, 'todoColumnName')"
+
+  <body data-bs-spy="scroll" data-bs-target="#navbar-example">
+    <nav
+      id="navbar-example"
+      class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top"
+    >
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#home">My Digital Playground</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
         >
-          To Do
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#about">About Me</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#expertise">Expertise</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#commitment">Commitment</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#contact">Contact</a>
+            </li>
+          </ul>
         </div>
-        <div
-          class="task-list"
-          id="todoColumn"
-          ondrop="handleDrop(event, 'todoColumn');"
-          ondragover="handleDragOver(event);"
-        ></div>
       </div>
-      <div class="column">
-        <div
-          class="column-header"
-          id="inProgressColumnName"
-          onkeypress="handleColumnEdit(event, 'inProgressColumnName')"
+    </nav>
+
+    <header
+      id="home"
+      class="vh-100 d-flex align-items-center justify-content-center text-center"
+    >
+      <div class="container">
+        <h1 class="display-4" data-aos="fade-up">
+          Welcome to My Digital Playground
+        </h1>
+        <p class="lead" data-aos="fade-up" data-aos-delay="200">
+          Crafting Seamless Digital Experiences
+        </p>
+        <a
+          href="#about"
+          class="btn btn-primary btn-lg mt-4"
+          data-aos="fade-up"
+          data-aos-delay="400"
+          >Explore More</a
         >
-          In Progress
-        </div>
-        <div
-          class="task-list"
-          id="inProgressColumn"
-          ondrop="handleDrop(event, 'inProgressColumn');"
-          ondragover="handleDragOver(event);"
-        ></div>
       </div>
-      <div class="column">
-        <div
-          class="column-header"
-          id="doneColumnName"
-          onkeypress="handleColumnEdit(event, 'doneColumnName')"
-        >
-          Done
-        </div>
-        <div
-          class="task-list"
-          id="doneColumn"
-          ondrop="handleDrop(event, 'doneColumn');"
-          ondragover="handleDragOver(event);"
-        ></div>
+    </header>
+
+    <section id="about" class="py-5">
+      <div class="container">
+        <h2 class="text-center mb-4" data-aos="fade-right">About Me</h2>
+        <p class="text-center" data-aos="fade-left">
+          I’m <strong>[Your Name]</strong>, a Software Engineer, Creative
+          Technologist, and Data Analyst with over a decade of experience. I’m
+          passionate about creating digital products that meet the highest
+          standards of performance while offering a seamless, delightful user
+          experience.
+        </p>
       </div>
-    </div>
-    <div class="created">
-      <br />
-      <p id="created">کد نویسی شده توسط پیمان عابدین پور 💻</p>
-    </div>
-    <script>
-      //title edit
+    </section>
 
-      function handleColumnEdit(event, columnName) {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          const columnHeader = document.getElementById(columnName);
-          columnHeader.contentEditable = false; // Disable editing after pressing Enter
-          saveColumn(columnName, columnHeader.textContent.trim());
-        }
-      }
-
-      function saveColumn(columnName, newColumnTitle) {
-        const columnHeader = document.getElementById(columnName);
-        columnHeader.textContent = newColumnTitle;
-
-        // Update the column name in the tasks array
-        switch (columnName) {
-          case "todoColumnName":
-            tasks.forEach((task) => {
-              if (task.column === "todoColumn") {
-                task.column = newColumnTitle;
-              }
-            });
-            break;
-          case "inProgressColumnName":
-            tasks.forEach((task) => {
-              if (task.column === "inProgressColumn") {
-                task.column = newColumnTitle;
-              }
-            });
-            break;
-          case "doneColumnName":
-            tasks.forEach((task) => {
-              if (task.column === "doneColumn") {
-                task.column = newColumnTitle;
-              }
-            });
-            break;
-          default:
-            break;
-        }
-
-        saveTasks();
-      }
-      //enter key
-      function handleKeyPress(event) {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          handleAddTask();
-        }
-      }
-
-      let tasks = [];
-
-      // Check if tasks are already stored in localStorage
-      if (localStorage.getItem("tasks")) {
-        tasks = JSON.parse(localStorage.getItem("tasks"));
-        renderTasks();
-      }
-
-      function saveTasks() {
-        localStorage.setItem("tasks", JSON.stringify(tasks));
-      }
-
-      function createTaskElement(taskId, taskTitle) {
-        const taskElement = document.createElement("div");
-        taskElement.className = "task";
-        taskElement.id = taskId;
-        taskElement.setAttribute("draggable", "true");
-        taskElement.setAttribute("data-task-id", taskId);
-        taskElement.addEventListener("dragstart", handleDragStart);
-
-        taskElement.innerHTML = `
-        <div class="task-box">
-          <div class="task-title">${taskTitle}</div>
-          <div class="task-actions">
-            <span class="task-action" onclick="handleEditTask(event)">&#9998;</span>
-            <span class="task-action" onclick="handleDeleteTask(event)">&#128465;</span>
+    <section id="expertise" class="py-5 bg-light">
+      <div class="container">
+        <h2 class="text-center mb-4" data-aos="fade-right">My Expertise</h2>
+        <div class="row">
+          <div class="col-lg-6" data-aos="zoom-in">
+            <h3>Full-Stack Development</h3>
+            <p>
+              Expertise in both frontend and backend technologies using Python
+              (Django, Flask) and JavaScript (Vue.js, Node.js).
+            </p>
+          </div>
+          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="200">
+            <h3>API & Headless Architecture</h3>
+            <p>
+              Designing and implementing RESTful APIs and headless architectures
+              for flexibility and scalability.
+            </p>
+          </div>
+          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="400">
+            <h3>Database Mastery</h3>
+            <p>
+              Managing NoSQL (MongoDB) and SQL databases, ensuring data-driven
+              systems are fast, secure, and scalable.
+            </p>
+          </div>
+          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="600">
+            <h3>Data Analysis and Insights</h3>
+            <p>
+              Analyzing complex data sets to uncover actionable insights that
+              drive business strategy.
+            </p>
+          </div>
+          <div
+            class="col-lg-12 text-center mt-4"
+            data-aos="zoom-in"
+            data-aos-delay="800"
+          >
+            <h3>Designing and Coding for Efficiency and Delight</h3>
+            <p>
+              Crafting websites with a minimalist design philosophy that ensures
+              clarity, usability, and a seamless user experience.
+            </p>
           </div>
         </div>
-      `;
+      </div>
+    </section>
 
-        return taskElement;
-      }
+    <section id="commitment" class="py-5">
+      <div class="container">
+        <h2 class="text-center mb-4" data-aos="fade-right">
+          My Commitment to Excellence
+        </h2>
+        <p class="text-center" data-aos="fade-left">
+          In every project I undertake, I bring a relentless focus on quality,
+          innovation, and user satisfaction. I believe that the best digital
+          solutions come from a deep understanding of both the technology and
+          the people who use it.
+        </p>
+      </div>
+    </section>
 
-      function renderTasks() {
-        const todoColumn = document.getElementById("todoColumn");
-        const inProgressColumn = document.getElementById("inProgressColumn");
-        const doneColumn = document.getElementById("doneColumn");
+    <section id="contact" class="py-5 bg-dark text-light">
+      <div class="container text-center">
+        <h2 class="mb-4" data-aos="fade-right">
+          Let’s Create Something Extraordinary
+        </h2>
+        <p class="mb-4" data-aos="fade-left">
+          My career has been driven by a simple yet powerful principle: to craft
+          digital experiences that are as efficient as they are engaging. Let’s
+          work together to transform your vision into reality—creating solutions
+          that are not only powerful and scalable but also elegantly designed
+          and a joy to use.
+        </p>
+        <a
+          href="mailto:your.email@example.com"
+          class="btn btn-outline-light btn-lg"
+          data-aos="zoom-in"
+          >Get in Touch</a
+        >
+      </div>
+    </section>
 
-        // Clear existing tasks
-        todoColumn.innerHTML = "";
-        inProgressColumn.innerHTML = "";
-        doneColumn.innerHTML = "";
+    <footer class="py-4 bg-dark text-center text-light">
+      <div class="container">
+        <p>&copy; 2024 [Your Name]. All rights reserved.</p>
+      </div>
+    </footer>
 
-        // Render tasks in respective columns
-        tasks.forEach((task) => {
-          const { id, title, column } = task;
-          const taskElement = createTaskElement(id, title);
-
-          switch (column) {
-            case "todoColumn":
-              todoColumn.appendChild(taskElement);
-              break;
-            case "inProgressColumn":
-              inProgressColumn.appendChild(taskElement);
-              break;
-            case "doneColumn":
-              doneColumn.appendChild(taskElement);
-              break;
-            default:
-              todoColumn.appendChild(taskElement);
-              break;
-          }
-        });
-      }
-
-      function handleAddTask() {
-        const taskTitleInput = document.getElementById("taskTitleInput");
-        const taskTitle = taskTitleInput.value.trim();
-        if (taskTitle) {
-          const taskId = `task${Date.now()}`;
-          const taskElement = createTaskElement(taskId, taskTitle);
-
-          const todoColumn = document.getElementById("todoColumn");
-          todoColumn.appendChild(taskElement);
-          tasks.push({ id: taskId, title: taskTitle, column: "todoColumn" });
-          saveTasks();
-          taskTitleInput.value = ""; // Clear the input field
-        }
-      }
-
-      let currentTaskId;
-
-      function handleDragStart(event) {
-        const taskId = event.target.getAttribute("data-task-id");
-        currentTaskId = taskId;
-      }
-
-      function handleDrop(event, columnName) {
-        event.preventDefault();
-        const column = document.getElementById(columnName);
-        const taskElement = document.getElementById(currentTaskId);
-        column.appendChild(taskElement);
-
-        // Update task's column in the tasks array
-        const task = tasks.find((t) => t.id === currentTaskId);
-        task.column = columnName;
-        saveTasks();
-      }
-
-      function handleDragOver(event) {
-        event.preventDefault();
-      }
-
-      function handleEditTask(event) {
-        const taskElement = event.target.closest(".task");
-        const taskId = taskElement.getAttribute("data-task-id");
-        const task = tasks.find((t) => t.id === taskId);
-        const taskTitleElement = taskElement.querySelector(".task-title");
-
-        // Enable editing of task title
-        taskTitleElement.contentEditable = true;
-        taskTitleElement.focus();
-
-        taskTitleElement.addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            // Save task title on pressing Enter key
-            const newTaskTitle = taskTitleElement.textContent.trim();
-            if (newTaskTitle) {
-              task.title = newTaskTitle;
-              saveTasks();
-            }
-            taskTitleElement.contentEditable = false;
-          }
-        });
-      }
-
-      function handleDeleteTask(event) {
-        const taskElement = event.target.closest(".task");
-        const taskId = taskElement.getAttribute("data-task-id");
-        tasks = tasks.filter((t) => t.id !== taskId);
-        taskElement.remove();
-        saveTasks();
-      }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="js/script.js"></script>
   </body>
 </html>
