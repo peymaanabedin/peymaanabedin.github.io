@@ -2,227 +2,478 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Digital Playground</title>
+    <title>Welcome to My Digital Playground</title>
+    <!-- External CSS Libraries -->
+    <!-- Using Press Start 2P font for retro vibe -->
     <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
       rel="stylesheet"
     />
+    <!-- Font Awesome for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <!-- CSS Styles -->
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;700&family=Spectral:wght@400;700&display=swap");
+      /* Reset */
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        background: #000;
+        color: #00ff00;
+        font-family: "Press Start 2P", cursive;
+        font-size: 14px;
+        overflow-x: hidden;
+      }
+
+      /* CRT Monitor Effect */
+      .crt {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      .crt:before,
+      .crt:after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      /* Scan lines */
+      .crt:before {
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0),
+          rgba(0, 0, 0, 0) 1px,
+          rgba(0, 0, 0, 0.05) 2px
+        );
+      }
+
+      /* Glow effect */
+      .crt:after {
+        background: radial-gradient(
+          ellipse at center,
+          rgba(0, 255, 0, 0.1),
+          transparent 80%
+        );
+        mix-blend-mode: screen;
+      }
+
+      /* Content */
+      .content {
+        padding: 50px;
+        max-width: 800px;
+        margin: auto;
+        line-height: 1.6;
+        margin-bottom: 100px;
+      }
+
+      /* Blinking cursor */
+      .typed-cursor {
+        opacity: 1;
+        animation: blink 0.7s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        50.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      /* Custom blinking cursor at end of sentences */
+      .blink {
+        display: inline-block;
+        width: 10px;
+        background-color: #00ff00;
+        animation: blink 1s steps(2, start) infinite;
+        vertical-align: bottom;
+        margin-left: 2px;
+      }
+
+      /* Big blinking cursor */
+      .big-blink {
+        width: 20px;
+        height: 20px;
+        background-color: #00ff00;
+        animation: blink 1s steps(2, start) infinite;
+        display: inline-block;
+        vertical-align: bottom;
+        margin-left: 2px;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 12px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #000;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #00ff00;
+      }
+
+      /* Retro Buttons */
+      .retro-button {
+        background: none;
+        border: 2px solid #00ff00;
+        color: #00ff00;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-family: "Press Start 2P", cursive;
+        margin-top: 20px;
+        transition: background 0.3s, color 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .retro-button:hover {
+        background: #00ff00;
+        color: #000;
+      }
+
+      .retro-button:active {
+        transform: translateY(2px);
+      }
+
+      /* Button Sound Effect */
+      .retro-button::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(0, 255, 0, 0.2);
+        transition: width 0.3s;
+        z-index: -1;
+      }
+
+      .retro-button:hover::after {
+        width: 100%;
+      }
+
+      /* Terminal Effect */
+      .terminal {
+        background: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border: 2px solid #00ff00;
+        box-shadow: 0 0 10px #00ff00;
+      }
+
+      /* Enhanced Background Flicker Effect */
+      @keyframes flicker {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.95;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
 
       body {
-        background-color: #f4f4f4; /* Light gray background for a newspaper look */
-        font-family: "Spectral", serif; /* Elegant serif font for body */
-        color: #333; /* Dark gray text color */
-        line-height: 1.6;
+        animation: flicker 0.15s infinite;
       }
 
-      header {
-        background-color: #fff; /* White background for header */
-        color: #000; /* Black text color */
-        text-align: center;
-        padding: 20px 0;
-        font-family: "Crimson Text", serif; /* Bold, classic serif font for header */
-        font-size: 3rem;
-        border-bottom: 2px solid #333; /* Dark gray border */
-        letter-spacing: 1px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+      /* Glitch Effect */
+      .glitch {
+        position: relative;
+        color: #00ff00;
       }
 
-      .container {
-        max-width: 900px;
-        margin: 40px auto;
-        padding: 20px;
-        background-color: #fff; /* White background for main content */
-        border: 1px solid #ddd; /* Light gray border */
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Light shadow for paper effect */
+      .glitch::before,
+      .glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0.8;
       }
 
-      section {
-        margin-bottom: 30px;
+      .glitch::before {
+        color: #ff00c1;
+        z-index: -1;
+        animation: glitchTop 0.5s infinite;
       }
 
-      h2 {
-        font-family: "Crimson Text", serif;
-        font-size: 2rem;
-        margin-bottom: 15px;
-        color: #222; /* Darker text for headings */
-        border-bottom: 1px solid #ccc; /* Light gray underline */
-        padding-bottom: 5px;
+      .glitch::after {
+        color: #00fff9;
+        z-index: -2;
+        animation: glitchBottom 0.5s infinite;
       }
 
-      p {
-        margin-bottom: 15px;
-        text-align: justify; /* Justified text for a classic look */
-        font-size: 1rem;
-      }
-
-      .highlight {
-        background-color: #000; /* Black background */
-        color: #fff; /* White text */
-        padding: 2px 4px;
-        font-family: "Crimson Text", serif;
-        font-weight: bold;
-      }
-
-      footer {
-        background-color: #fff;
-        color: #000;
-        text-align: center;
-        padding: 10px 0;
-        border-top: 2px solid #333;
-        font-family: "Crimson Text", serif;
-        font-size: 1rem;
-        margin-top: 30px;
-      }
-
-      @media screen and (max-width: 600px) {
-        body {
-          font-size: 1rem;
+      @keyframes glitchTop {
+        0% {
+          clip: rect(2px, 9999px, 5px, 0);
+          transform: translate(0);
         }
-
-        header {
-          font-size: 2.5rem;
+        20% {
+          clip: rect(10px, 9999px, 15px, 0);
+          transform: translate(-5px, -5px);
         }
+        40% {
+          clip: rect(5px, 9999px, 10px, 0);
+          transform: translate(-5px, 0);
+        }
+        60% {
+          clip: rect(15px, 9999px, 20px, 0);
+          transform: translate(0, -5px);
+        }
+        80% {
+          clip: rect(10px, 9999px, 15px, 0);
+          transform: translate(5px, 0);
+        }
+        100% {
+          clip: rect(2px, 9999px, 5px, 0);
+          transform: translate(0);
+        }
+      }
 
-        h2 {
-          font-size: 1.8rem;
+      @keyframes glitchBottom {
+        0% {
+          clip: rect(2px, 9999px, 5px, 0);
+          transform: translate(0);
+        }
+        20% {
+          clip: rect(10px, 9999px, 15px, 0);
+          transform: translate(5px, 5px);
+        }
+        40% {
+          clip: rect(5px, 9999px, 10px, 0);
+          transform: translate(5px, 0);
+        }
+        60% {
+          clip: rect(15px, 9999px, 20px, 0);
+          transform: translate(0, 5px);
+        }
+        80% {
+          clip: rect(10px, 9999px, 15px, 0);
+          transform: translate(-5px, 0);
+        }
+        100% {
+          clip: rect(2px, 9999px, 5px, 0);
+          transform: translate(0);
+        }
+      }
+
+      /* Responsive Design */
+      @media screen and (max-width: 768px) {
+        .content {
+          padding: 20px;
+        }
+        .retro-button {
+          padding: 8px 16px;
+          font-size: 12px;
         }
       }
     </style>
   </head>
   <body>
-    <header>Peymaan Abedinpour's Digital Playground</header>
-
-    <div class="container">
-      <section>
-        <h2>Welcome to My Digital Playground</h2>
-        <p>
-          My digital playground—a space where innovation, technology, and design
-          come together to create extraordinary digital experiences. I’m
-          <span class="highlight">Peymaan Abedinpour</span> a Software Engineer,
-          Creative Technologist, Coding Artist and Data Analyst with over a
-          decade of experience dedicated to turning complex ideas into simple,
-          elegant solutions. My career is a testament to my belief in the power
-          of minimalism, efficiency, and user-centered design. I’m passionate
-          about creating digital products that not only meet the highest
-          standards of performance but also offer a seamless, delightful user
-          experience.
-        </p>
-      </section>
-
-      <section>
-        <h2>A Journey of Passion, Innovation, and Technical Mastery</h2>
-        <p>
-          My journey began with a deep-rooted passion for technology, nurtured
-          by a Bachelor’s Degree in Information Technology that laid a strong
-          foundation for my technical expertise. Over the years, I’ve honed my
-          skills across various domains, from software development and database
-          management to creative design and data analysis. This journey has
-          equipped me with a diverse and versatile skill set that allows me to
-          approach every project with a holistic perspective—blending the
-          technical with the creative, the functional with the aesthetic, and
-          the data-driven with the intuitive.
-        </p>
-      </section>
-
-      <section>
-        <h2>What I Bring to Your Digital Projects</h2>
-        <p>
-          At the core of my work is a commitment to delivering high-quality,
-          efficient, and user-friendly digital solutions. I specialize in
-          designing and developing data-driven websites that not only perform at
-          the highest levels of efficiency but also provide a delightful and
-          intuitive user experience. Here’s a closer look at what I bring to
-          your projects:
-        </p>
-        <p>
-          <span class="highlight">Full-Stack Development:</span> My expertise in
-          full-stack development spans both frontend and backend technologies. I
-          excel in using Python frameworks like Django and Flask to build robust
-          and scalable backend systems, while leveraging JavaScript frameworks
-          such as Vue.js and Node.js to create dynamic, responsive frontends.
-          Every project I work on is approached with a focus on performance,
-          scalability, and user experience, ensuring that the end product is
-          both technically sound and engaging.
-        </p>
-        <p>
-          <span class="highlight">API & Headless Architecture:</span> In an
-          increasingly interconnected digital world, flexibility and scalability
-          are paramount. I specialize in designing and implementing RESTful APIs
-          and headless architectures that provide the backbone for modern,
-          modular applications. Whether you need to integrate complex systems or
-          build a flexible, future-proof platform, my solutions are crafted to
-          adapt and evolve with your business needs.
-        </p>
-        <p>
-          <span class="highlight">Database Mastery:</span> Data is the lifeblood
-          of any digital application, and I ensure it is managed with precision
-          and care. Whether working with NoSQL databases like MongoDB or
-          relational databases using SQL, I design data-driven systems that are
-          optimized for speed, security, and scalability. My goal is to make
-          sure your data is not just stored, but strategically utilized to drive
-          your business forward.
-        </p>
-        <p>
-          <span class="highlight">Data Analysis and Insights:</span> As a Data
-          Analyst, I understand the critical role that data plays in
-          decision-making. I specialize in analyzing complex data sets to
-          uncover actionable insights that can drive your business strategy. By
-          leveraging advanced analytical tools and techniques, I transform raw
-          data into meaningful information that helps you make informed
-          decisions, optimize processes, and achieve your business goals.
-        </p>
-      </section>
-
-      <section>
-        <h2>Designing and Coding for Efficiency and Delight</h2>
-        <p>
-          I believe that great digital experiences are rooted in simplicity and
-          efficiency. I specialize in creating websites that are driven by data
-          and designed for performance. My approach to design is minimalist,
-          focusing on clarity and usability. I strive to create interfaces that
-          are not only aesthetically pleasing but also intuitive and easy to
-          navigate, ensuring that users can accomplish their goals without
-          unnecessary friction. My mantra is simple: make things effective,
-          fast, and effortless—don’t make users think.
-        </p>
-        <p>
-          <span class="highlight">Minimalist Design Philosophy:</span> My design
-          philosophy is guided by the principles of minimalism. I believe that
-          less is more and that every element in a design should have a purpose.
-          By stripping away the unnecessary and focusing on what truly matters,
-          I create user interfaces that are clean, efficient, and delightful to
-          use. My goal is to craft experiences that feel natural and intuitive,
-          where every interaction is seamless, and every decision is effortless.
-          In a world where attention is fleeting, I aim to create products that
-          are not just functional, but truly engaging.
-        </p>
-      </section>
-
-      <section>
-        <h2>My Commitment to Excellence</h2>
-        <p>
-          In every project I undertake, I bring a relentless focus on quality,
-          innovation, and user satisfaction. I believe that the best digital
-          solutions come from a deep understanding of both the technology and
-          the people who use it. Whether you’re a startup with a bold new idea
-          or an established enterprise looking to innovate, I’m here to help you
-          create digital experiences that are efficient, effective, and
-          beautifully designed.
-        </p>
-        <p>
-          <span class="highlight"
-            >Let’s Let’s Create Something Extraordinary
-          </span>
-          - Email Address: Peymaancrafts@gmail.com
-        </p>
-      </section>
+    <div class="crt">
+      <div class="content">
+        <div class="terminal">
+          <h1
+            id="title"
+            class="glitch"
+            data-text="Welcome to My Digital Playground"
+          ></h1>
+          <div id="paragraph"></div>
+          <div id="big-blink-container"></div>
+          <div class="button-container">
+            <!-- Added "Show Full Text" Button -->
+            <button class="retro-button" onclick="showFullText()">
+              Show Full Text
+            </button>
+            <button class="retro-button" onclick="scrollToTop()">
+              Back to Top
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <footer>
-      &copy; 2024 Peymaan Abedinpour Digital Playground. All rights reserved.
-    </footer>
+    <!-- External JS Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js"></script>
+    <script>
+      // Content Arrays
+      const titleText = "Welcome to My Digital Playground";
+      const contentText = [
+        'My digital playground—a space where innovation, technology and design come together to create extraordinary digital experiences. My name is  <span style="color:#b22222">Peymaan Abedinpour</span>, a Software Engineer, Creative Technologist, Coding Artist and Data Analyst with over a decade of experience dedicated to turning complex ideas into simple, elegant solutions. My career is a testament to my belief in the power of minimalism, efficiency and user-centered design. I\'m passionate about creating digital products that not only meet the highest standards of performance but also offer a seamless, delightful user experience.',
+        "A Journey of Passion, Innovation and Technical Mastery",
+        "My journey began with a deep-rooted passion for technology, nurtured by a Bachelor's Degree in Information Technology that laid a strong foundation for my technical expertise. Over the years, I've honed my skills across various domains, from software development and database management to creative design and data analysis. This journey has equipped me with a diverse and versatile skill set that allows me to approach every project with a holistic perspective—blending the technical with the creative, the functional with the aesthetic and the data-driven with the intuitive.",
+        "What I Bring to Your Digital Projects",
+        "At the core of my work is a commitment to delivering high-quality, efficient and user-friendly digital solutions. I specialize in designing and developing data-driven websites that not only perform at the highest levels of efficiency but also provide a delightful and intuitive user experience. Here's a closer look at what I bring to your projects:",
+        "Full-Stack Development: My expertise in full-stack development spans both frontend and backend technologies. I excel in using Python frameworks like Django and Flask to build robust and scalable backend systems, while leveraging JavaScript frameworks such as Vue.js and Node.js to create dynamic, responsive frontends. Every project I work on is approached with a focus on performance, scalability and user experience, ensuring that the end product is both technically sound and engaging.",
+        "API & Headless Architecture: In an increasingly interconnected digital world, flexibility and scalability are paramount. I specialize in designing and implementing RESTful APIs and headless architectures that provide the backbone for modern, modular applications. Whether you need to integrate complex systems or build a flexible, future-proof platform, my solutions are crafted to adapt and evolve with your business needs.",
+        "Database Mastery: Data is the lifeblood of any digital application and I ensure it is managed with precision and care. Whether working with NoSQL databases like MongoDB or relational databases using SQL, I design data-driven systems that are optimized for speed, security and scalability. My goal is to make sure your data is not just stored, but strategically utilized to drive your business forward.",
+        "Data Analysis and Insights: As a Data Analyst, I understand the critical role that data plays in decision-making. I specialize in analyzing complex data sets to uncover actionable insights that can drive your business strategy. By leveraging advanced analytical tools and techniques, I transform raw data into meaningful information that helps you make informed decisions, optimize processes and achieve your business goals.",
+        "Designing and Coding for Efficiency and Delight",
+        "I believe that great digital experiences are rooted in simplicity and efficiency. I specialize in creating websites that are driven by data and designed for performance. My approach to design is minimalist, focusing on clarity and usability. I strive to create interfaces that are not only aesthetically pleasing but also intuitive and easy to navigate, ensuring that users can accomplish their goals without unnecessary friction. My mantra is simple: make things effective, fast and effortless—don't make users think.",
+        "Minimalist Design Philosophy: My design philosophy is guided by the principles of minimalism. I believe that less is more and that every element in a design should have a purpose. By stripping away the unnecessary and focusing on what truly matters, I create user interfaces that are clean, efficient and delightful to use. My goal is to craft experiences that feel natural and intuitive, where every interaction is seamless and every decision is effortless. In a world where attention is fleeting, I aim to create products that are not just functional, but truly engaging.",
+        "My Commitment to Excellence",
+        "In every project I undertake, I bring a relentless focus on quality, innovation and user satisfaction. I believe that the best digital solutions come from a deep understanding of both the technology and the people who use it. Whether you're a startup with a bold new idea or an established enterprise looking to innovate, I'm here to help you create digital experiences that are efficient, effective and beautifully designed.",
+      ];
+
+      // Variable to store Typed.js instances
+      let typedInstances = [];
+
+      // Sound Effect
+      var typeSound = new Howl({
+        src: [
+          "https://www.myinstants.com/media/sounds/keyboard-typing-fast.mp3",
+        ],
+        volume: 0.1,
+        loop: true,
+      });
+
+      // Play typing sound
+      typeSound.play();
+
+      // Typewriter Effect for Title
+      let titleTyped = new Typed("#title", {
+        strings: [titleText],
+        typeSpeed: 50,
+        backSpeed: 0,
+        showCursor: true,
+        cursorChar: "_",
+        autoInsertCss: true,
+        onComplete: function () {
+          // Start typing the content after the title
+          typeContent(0);
+        },
+      });
+
+      // Function to type content paragraphs
+      function typeContent(index) {
+        if (index >= contentText.length) {
+          // Stop typing sound when done
+          typeSound.stop();
+
+          // Add big blinking cursor at the end
+          addBigBlinkCursor();
+          return;
+        }
+
+        let paragraph = document.createElement("p");
+        document.getElementById("paragraph").appendChild(paragraph);
+
+        let typed = new Typed(paragraph, {
+          strings: [contentText[index]],
+          typeSpeed: 30,
+          backSpeed: 0,
+          showCursor: false,
+          onComplete: function () {
+            // Add blinking cursor at the end of each paragraph
+            let blinkCursor = document.createElement("span");
+            blinkCursor.className = "blink";
+            paragraph.appendChild(blinkCursor);
+
+            typeContent(index + 1);
+          },
+        });
+
+        // Store the instance
+        typedInstances.push(typed);
+      }
+
+      // Scroll to Top Function
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // Function to show full text instantly
+      function showFullText() {
+        // Destroy all Typed.js instances
+        typedInstances.forEach(function (typed) {
+          typed.destroy();
+        });
+        if (titleTyped) titleTyped.destroy();
+
+        // Clear the content
+        document.getElementById("title").innerHTML = titleText;
+        document.getElementById("paragraph").innerHTML = "";
+
+        // Display all content
+        contentText.forEach(function (text) {
+          let paragraph = document.createElement("p");
+          paragraph.innerHTML = text;
+
+          // Add blinking cursor at the end
+          let blinkCursor = document.createElement("span");
+          blinkCursor.className = "blink";
+          paragraph.appendChild(blinkCursor);
+
+          document.getElementById("paragraph").appendChild(paragraph);
+        });
+
+        // Add big blinking cursor at the end
+        addBigBlinkCursor();
+
+        // Stop typing sound
+        typeSound.stop();
+      }
+
+      // Enhanced Background Flicker Effect
+      setInterval(function () {
+        const colors = ["#00ff00", "#00cc00", "#009900"];
+        document.body.style.color =
+          colors[Math.floor(Math.random() * colors.length)];
+      }, 1000);
+
+      // Button Click Sound Effect
+      var buttonSound = new Howl({
+        src: ["https://www.myinstants.com/media/sounds/button-click.mp3"],
+        volume: 0.1,
+      });
+
+      // Attach sound to buttons
+      document.querySelectorAll(".retro-button").forEach(function (button) {
+        button.addEventListener("click", function () {
+          buttonSound.play();
+        });
+      });
+
+      // Random Glitch Effect
+      setInterval(function () {
+        const glitch = document.createElement("div");
+        glitch.className = "glitch";
+        glitch.style.position = "absolute";
+        glitch.style.top = Math.random() * window.innerHeight + "px";
+        glitch.style.left = Math.random() * window.innerWidth + "px";
+        glitch.style.width = Math.random() * 20 + "px";
+        glitch.style.height = Math.random() * 20 + "px";
+        glitch.style.background = "#00ff00";
+        glitch.style.opacity = Math.random();
+        document.body.appendChild(glitch);
+        setTimeout(function () {
+          document.body.removeChild(glitch);
+        }, 100);
+      }, 500);
+
+      // Function to add a big blinking cursor at the end
+      function addBigBlinkCursor() {
+        let bigBlinkCursor = document.createElement("div");
+        bigBlinkCursor.classList.add("big-blink");
+        document
+          .getElementById("big-blink-container")
+          .appendChild(bigBlinkCursor);
+      }
+    </script>
   </body>
 </html>
