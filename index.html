@@ -137,6 +137,9 @@
         transition: background 0.3s, color 0.3s;
         position: relative;
         overflow: hidden;
+        text-decoration: none; /* Ensures no underline */
+        font-size: 16px; /* Ensure font size consistency */
+        font-weight: normal; /* Ensure normal font weight */
       }
 
       .retro-button:hover {
@@ -296,6 +299,11 @@
           <div id="big-blink-container"></div>
           <div class="button-container">
             <!-- Added "Show Full Text" Button -->
+            <a
+              href="https://medium.com/@peymaan.abedinpour"
+              class="retro-button"
+              >Blog</a
+            >
             <button class="retro-button" onclick="showFullText()">
               Show Full Text
             </button>
