@@ -52,6 +52,7 @@
       }
       .dark body {
         background: #141925;
+        color: #bdbdbd;
       }
       .tweet-card {
         animation: fadeInUp 0.45s cubic-bezier(0.23, 1.04, 0.36, 1) both;
@@ -63,6 +64,17 @@
         backdrop-filter: blur(10px) saturate(110%) contrast(1.03);
         -webkit-backdrop-filter: blur(10px) saturate(110%) contrast(1.03);
         border: 1.5px solid #f2f2f6;
+      }
+
+      .dark .tweet-card .tweet-author {
+        color: #fff !important;
+      }
+      .dark .tweet-card .tweet-text {
+        color: #e7edfa !important;
+      }
+
+      .dark .app-title {
+        color: #fff !important;
       }
       @keyframes fadeInUp {
         from {
@@ -471,7 +483,7 @@
         "
       >
         <div class="flex justify-center items-center gap-2 mb-2">
-          <img
+         <!-- <img
             src="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png"
             style="
               width: 2em;
@@ -479,17 +491,19 @@
               border-radius: 16%;
               box-shadow: 0 0 9px #6a95d7;
             "
-          />
-        </div>
-        این اپلیکیشن هیچ مسئولیتی در قبال صحت یا محتوای اخبار و مطالب
-        نمایش‌داده‌شده ندارد و صرفاً <b>بازنشر اتوماتیک</b> محتوا است.<br />
-        استفاده از داده‌های این برنامه بر عهده کاربر است. و هیچ گونه مسئولیتی
-        متوجه این اپلیکیشن نمی باشد و تمامی نوشته ها و تصاویر و اخبار نمایش داده
-        شده برای مرجع مربوطه می باشد.<br />
-        <span style="font-size: 13px; color: #426bba"
-          >peyman abe طراحی شده توسط | Copyright © 2025</span
-        >
-      </div>
+          />-->
+<div>
+  <div class="flex justify-center items-center gap-2 mb-2">
+    <img src="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png" style="width:2em;height:2em;border-radius:16%;box-shadow:0 0 9px #6a95d7;"> 
+  </div>
+  <b>سلب مسئولیت:</b><br>
+  این اپلیکیشن هیچ یک از اخبار، مطالب، تصاویر یا نظرات نمایش داده شده را تأیید یا تصدیق نمی‌کند و صرفاً بازنشر اتوماتیک محتوا به منظور اطلاع‌رسانی است.<br>
+  این اپلیکیشن هیچ مسئولیتی در قبال صحت، اعتبار، یا محتوای اخبار، مطالب، تصاویر و اظهارنظرهای ارائه‌شده ندارد و تمامی مسئولیت‌ها بر عهده مراجع اصلی یا منتشرکنندگان اولیه آن مطالب می‌باشد.<br>
+  استفاده از داده‌ها و اطلاعات ارائه‌شده صرفاً با مسئولیت شخصی کاربران بوده و هیچ گونه مسئولیتی متوجه این اپلیکیشن نمی‌باشد. هرگونه استناد یا استفاده از اطلاعات این برنامه، به طور کامل بر عهده کاربر است و هیچ حقی علیه اپلیکیشن قابل پیگیری نمی‌باشد.<br>
+  <span style="font-size: 13px; color: #426bba">
+    peyman abe طراحی شده توسط | Copyright © 2025
+  </span>
+</div>
     </footer>
     <!-- Lightbox Overlay -->
     <div id="lightbox-overlay">
@@ -768,9 +782,11 @@
                     }" title="بوکمارک" data-tweetid="${tweet.id}">
                         <i class="fa-solid fa-bookmark"></i>
                     </button>
-                    <a href="https://x.com${tweet.user.url}/status/${
+                    <a href="https://x.com/${tweet.user.username}/status/${
           tweet.id
-        }" target="_blank" class="text-blue-400 hover:underline whitespace-nowrap"> مشاهده منبع <i class="fa-brands fa-x-twitter"></i></a>
+        }" target="_blank" class="text-blue-400 hover:underline whitespace-nowrap">
+  مشاهده منبع<i class="fa-brands fa-x-twitter"></i>
+</a>
                 </div>
             </div>
         </div>
