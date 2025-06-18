@@ -603,18 +603,11 @@
     <!-- ***** اسکریپت ورود ***** -->
     <script>
       (function () {
-        /* الگوریتم ساده اما غیر قابل بازیابی سریع برای رمزگذاری */
         const decodeStr = (s) => atob(s).split("").reverse().join("");
 
-        /*
-          نام کاربری و رمز عبور در زیر معکوس و سپس base64 شده‌اند:
-          admin  => "bmltZGE="
-          password123 => "MzIxZHJvd3NzYXA="
-        */
         const ENC_USER = "bmltZGE=";
         const ENC_PASS = "MzIxZHJvd3NzYXA=";
 
-        /* لیست توییتر دوبار base64 و معکوس شده است */
         const ENC_LIST = "T0RJeE5qQTFNalUwT1RFME5EUTVORE01TVE9PQ==";
         const decodeList = (s) => {
           const step1 = atob(s);
@@ -668,7 +661,6 @@
           });
         }
 
-        /* جایگزینی تابع getListId برای استفاده از لیست رمزنگاری شده */
         window.getListId = function () {
           return decodeList(ENC_LIST);
         };
