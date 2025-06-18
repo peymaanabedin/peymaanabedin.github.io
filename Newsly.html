@@ -393,44 +393,57 @@
     <div id="login-container" class="bg-gray-100 dark:bg-gray-900 px-4">
       <form
         id="login-form"
-        class="bg-white dark:bg-[#1b2236] p-8 rounded-2xl shadow max-w-xs w-full"
+        class="bg-white dark:bg-[#1b2236] p-8 rounded-2xl shadow-xl max-w-xs w-full relative"
       >
+        <!-- لوگو و نام برنامه -->
+        <div class="flex flex-col items-center mb-6">
+          <img
+            src="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png"
+            alt="app icon"
+            class="w-16 h-16 rounded-2xl shadow-lg mb-3"
+          />
+          <h1
+            class="text-2xl font-extrabold text-gray-800 dark:text-gray-100 tracking-tight"
+          >
+            آخرین خبر
+          </h1>
+        </div>
         <h2
-          class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center"
+          class="text-lg font-bold mb-6 text-gray-700 dark:text-gray-200 text-center"
         >
-          ورود به برنامه
+          ورود به حساب کاربری
         </h2>
         <div class="mb-4">
           <label
-            class="block text-gray-700 dark:text-gray-300 mb-1"
+            class="block text-gray-700 dark:text-gray-300 mb-1 text-sm"
             for="username"
             >نام کاربری</label
           >
           <input
             id="username"
             type="text"
-            class="w-full p-2.5 rounded-md border dark:bg-[#232b46] dark:border-[#29304d] focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-[#232b46] dark:border-[#29304d]"
             autocomplete="username"
             required
           />
         </div>
         <div class="mb-6">
           <label
-            class="block text-gray-700 dark:text-gray-300 mb-1"
+            class="block text-gray-700 dark:text-gray-300 mb-1 text-sm"
             for="password"
             >رمز عبور</label
           >
           <input
             id="password"
             type="password"
-            class="w-full p-2.5 rounded-md border dark:bg-[#232b46] dark:border-[#29304d] focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-[#232b46] dark:border-[#29304d]"
             autocomplete="current-password"
             required
           />
         </div>
         <button
           type="submit"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-md transition"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition shadow-md"
         >
           ورود
         </button>
@@ -485,6 +498,10 @@
             </button>
             <button id="refresh-btn" class="action-btn" title="رفرش اخبار">
               <i class="fa-solid fa-rotate-right"></i>
+            </button>
+            <!-- دکمه خروج -->
+            <button id="logout-btn" class="action-btn" title="خروج">
+              <i class="fa-solid fa-right-from-bracket"></i>
             </button>
           </div>
           <div id="fontSizeMenu">
@@ -606,7 +623,7 @@
         };
 
         /* بررسی وضعیت لاگین */
-        const isLoggedIn = () => sessionStorage.getItem("logged_in") === "true";
+        const isLoggedIn = () => localStorage.getItem("logged_in") === "true";
         const showApp = () => {
           document.getElementById("login-container").style.display = "none";
           document.getElementById("main-app").style.display = "block";
@@ -631,7 +648,7 @@
             const u = document.getElementById("username").value.trim();
             const p = document.getElementById("password").value.trim();
             if (u === decodeStr(ENC_USER) && p === decodeStr(ENC_PASS)) {
-              sessionStorage.setItem("logged_in", "true");
+              localStorage.setItem("logged_in", "true");
               showApp();
               /* پس از لاگین موفق، توییت‌ها بارگذاری می‌شوند */
               if (typeof fetchAndParseTweets === "function") {
@@ -642,6 +659,15 @@
             }
           });
 
+        /* دکمه خروج */
+        const logoutBtn = document.getElementById("logout-btn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", () => {
+            localStorage.removeItem("logged_in");
+            location.reload();
+          });
+        }
+
         /* جایگزینی تابع getListId برای استفاده از لیست رمزنگاری شده */
         window.getListId = function () {
           return decodeList(ENC_LIST);
@@ -649,10 +675,10 @@
       })();
     </script>
 
-    <!-- ***** اسکریپت اصلی برنامه (همان کد اولیه شما) ***** -->
+    <!-- ***** اسکریپت اصلی برنامه (بدون تغییرات اصلی) ***** -->
     <script>
       // توجه: این اسکریپت بدون تغییرات اصلی آورده شده و در صورت نیاز می‌توانید آن را ویرایش کنید.
-      // بخش‌های اصلی همانند قبل است و تنها خط lbase حذف شده و getListId اکنون در اسکریپت ورود بازنویسی می‌شود.
+      // بخش‌های اصلی همانند قبل است و تنها sessionStorage به localStorage تغییر یافته است.
 
       const NITTER_INSTANCES = [
         "https://nitter.pussthecat.org",
@@ -756,7 +782,7 @@
             : "light");
         applyTheme(savedTheme);
         // فقط زمانی که کاربر لاگین کرده باشد توییت‌ها لود می‌شود
-        if (sessionStorage.getItem("logged_in") === "true") {
+        if (localStorage.getItem("logged_in") === "true") {
           fetchAndParseTweets();
         }
       });
