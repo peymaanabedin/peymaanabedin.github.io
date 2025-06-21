@@ -5,38 +5,19 @@
     <!-- جلوگیری از ایندکس شدن در موتورهای جستجو -->
     <meta name="robots" content="noindex, nofollow" />
     <title>آخرین خبر</title>
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <!-- App Icon & PWA -->
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      href="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png"
-    />
+    <link rel="icon" type="image/png" sizes="192x192" href="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png" />
+    <link rel="apple-touch-icon" href="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png" />
     <meta name="theme-color" content="#2563eb" />
     <link rel="manifest" href="manifest.json" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <style>
+      /* ---------- CSS VARIABLES ---------- */
       :root {
         --tweet-font-size-small: 13px;
         --tweet-font-size-medium: 15px;
@@ -56,6 +37,7 @@
         background: #141925;
         color: #bdbdbd;
       }
+
       /* فرم لاگین */
       #login-container {
         display: flex;
@@ -63,6 +45,7 @@
         justify-content: center;
         min-height: 100vh;
       }
+
       /* کارت توییت */
       .tweet-card {
         animation: fadeInUp 0.45s cubic-bezier(0.23, 1.04, 0.36, 1) both;
@@ -92,6 +75,18 @@
         to {
           opacity: 1;
           transform: translateY(0);
+        }
+      }
+      /* minimal pulse animation for bell */
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+        100% {
+          transform: scale(1);
         }
       }
       .dark .tweet-card {
@@ -276,34 +271,87 @@
         color: #b8bed4;
         border-top: 1.5px solid #232a3a;
       }
+
+      /* === برو بالا === */
       #goTopBtn {
         position: fixed;
         bottom: 24px;
-        left: 24px;
-        z-index: 70;
-        display: none;
-        width: 39px;
-        height: 39px;
+      left: 24px;
+right: auto;
+     z-index:9999;       /* از هر چیزی بالاتر بایستد */
+
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+
         border-radius: 50%;
-        background: rgba(243, 244, 250, 0.94);
-        color: #338cfb;
+        background: #e5edff;
+        color: #2563eb;
         border: none;
-        box-shadow: 0 4px 14px 0 #0001;
+        box-shadow: 0 4px 18px #0002;
+        display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.18rem;
-        transition: 0.18s;
-      }
-      #goTopBtn:active {
-        transform: scale(0.92);
-      }
-      .dark #goTopBtn {
-        background: rgba(36, 41, 57, 0.92);
-        color: #82aaff;
+        font-size: 1.25rem;
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.8);
+        transition: opacity 0.25s ease, transform 0.25s ease;
       }
       #goTopBtn.visible {
-        display: flex;
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1);
       }
+      #goTopBtn:active {
+        transform: scale(0.9);
+      }
+      .dark #goTopBtn {
+        background: #27334d;
+        color: #7aa5ff;
+      }
+
+      /* === دکمه اخبار تازه (با زنگوله شیشه‌ای) === */
+      #newUpdatesBtn {
+        position: fixed;
+        bottom: 72px;
+        right: 20px;
+        z-index: 90;
+        background: rgba(37, 99, 235, 0.7);
+        color: #fff;
+        border-radius: 9999px;
+        padding: 0.48rem 1rem 0.48rem 1.1rem;
+        font-size: 13px;
+        line-height: 1;
+        box-shadow: 0 3px 16px rgba(0, 0, 0, 0.16);
+        backdrop-filter: blur(12px) saturate(140%) contrast(1.1);
+        -webkit-backdrop-filter: blur(12px) saturate(140%) contrast(1.1);
+        border: 1px solid rgba(255, 255, 255, 0.38);
+        display: none;
+        white-space: nowrap;
+        transition: transform 0.25s ease, opacity 0.25s ease;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      #newUpdatesBtn:hover {
+        transform: translateY(-2px);
+        opacity: 0.95;
+      }
+    #newUpdatesBtn i {
+  font-size: 1.15em;
+  margin-left: 0.35em;
+  color: #fffde4;
+  filter: drop-shadow(0 0 4px #fff4);
+  animation: pulse 1.3s infinite;
+}
+      #newUpdatesBtn.pulse {
+        animation: pulse 1.6s infinite ease-in-out;
+      }
+      .dark #newUpdatesBtn {
+        background: rgba(51, 75, 255, 0.75);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
       #lightbox-overlay {
         display: none;
         position: fixed;
@@ -447,10 +495,7 @@
         >
           ورود
         </button>
-        <p
-          id="login-error"
-          class="text-red-500 text-sm mt-4 hidden text-center"
-        >
+        <p id="login-error" class="text-red-500 text-sm mt-4 hidden text-center">
           نام کاربری یا رمز عبور نادرست است.
         </p>
       </form>
@@ -459,163 +504,55 @@
     <!-- اپلیکیشن اصلی -->
     <div id="main-app" style="display: none">
       <div class="container mx-auto max-w-xl sm:px-0 px-1">
-        <header
-          class="flex justify-between items-center px-3 pt-5 pb-3 sticky top-0 header-glass backdrop-blur-2xl z-30 relative"
-        >
-          <span
-            class="app-title text-gray-800 dark:text-gray-50 tracking-tight flex items-center gap-2"
-          >
-            <img
-              src="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png"
-              style="
-                width: 1.7em;
-                height: 1.7em;
-                border-radius: 15%;
-                box-shadow: 0 0 7px #6a95d7;
-              "
-              alt="app icon"
-            />
+        <header class="flex justify-between items-center px-3 pt-5 pb-3 sticky top-0 header-glass backdrop-blur-2xl z-30 relative">
+          <span class="app-title text-gray-800 dark:text-gray-50 tracking-tight flex items-center gap-2">
+            <img src="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png" style="width: 1.7em;height: 1.7em;border-radius: 15%;box-shadow: 0 0 7px #6a95d7;" alt="app icon" />
             آخرین خبر
           </span>
           <div class="flex items-center gap-1">
-            <button
-              id="bookmark-btn"
-              class="action-btn"
-              title="مشاهده بوکمارک‌ها"
-            >
-              <i class="fa-solid fa-bookmark"></i>
-            </button>
-            <button id="font-btn" class="action-btn" title="سایز فونت">
-              <i class="fa-solid fa-font"></i>
-            </button>
-            <button id="mode-btn" class="action-btn" title="تم تیره/روشن">
-              <i class="fa-solid fa-moon" id="mode-dark"></i>
-              <i class="fa-solid fa-sun hidden" id="mode-light"></i>
-            </button>
-            <button id="view-btn" class="action-btn" title="حالت فشرده/کامل">
-              <i class="fa-solid fa-align-left" id="view-full"></i>
-              <i class="fa-solid fa-align-justify hidden" id="view-compact"></i>
-            </button>
-            <button id="refresh-btn" class="action-btn" title="رفرش اخبار">
-              <i class="fa-solid fa-rotate-right"></i>
-            </button>
-            <!-- دکمه خروج -->
-            <button id="logout-btn" class="action-btn" title="خروج">
-              <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
+            <button id="bookmark-btn" class="action-btn" title="مشاهده بوکمارک‌ها"><i class="fa-solid fa-bookmark"></i></button>
+            <button id="font-btn" class="action-btn" title="سایز فونت"><i class="fa-solid fa-font"></i></button>
+            <button id="mode-btn" class="action-btn" title="تم تیره/روشن"><i class="fa-solid fa-moon" id="mode-dark"></i><i class="fa-solid fa-sun hidden" id="mode-light"></i></button>
+            <button id="view-btn" class="action-btn" title="حالت فشرده/کامل"><i class="fa-solid fa-align-left" id="view-full"></i><i class="fa-solid fa-align-justify hidden" id="view-compact"></i></button>
+            <button id="refresh-btn" class="action-btn" title="رفرش اخبار"><i class="fa-solid fa-rotate-right"></i></button>
+            <button id="logout-btn" class="action-btn" title="خروج"><i class="fa-solid fa-right-from-bracket"></i></button>
           </div>
           <div id="fontSizeMenu">
-            <span class="font-opt" data-size="small" style="font-size: 13px"
-              >کوچک</span
-            >
-            <span class="font-opt" data-size="medium" style="font-size: 15px"
-              >متوسط</span
-            >
-            <span class="font-opt" data-size="large" style="font-size: 18px"
-              >بزرگ</span
-            >
-            <span class="font-opt" data-size="xlarge" style="font-size: 21px"
-              >خیلی بزرگ</span
-            >
+            <span class="font-opt" data-size="small" style="font-size: 13px">کوچک</span>
+            <span class="font-opt" data-size="medium" style="font-size: 15px">متوسط</span>
+            <span class="font-opt" data-size="large" style="font-size: 18px">بزرگ</span>
+            <span class="font-opt" data-size="xlarge" style="font-size: 21px">خیلی بزرگ</span>
           </div>
         </header>
-        <input
-          id="searchBar"
-          placeholder="جستجوی زنده در متن اخبار..."
-          autocomplete="off"
-        />
+        <input id="searchBar" placeholder="جستجوی زنده در متن اخبار..." autocomplete="off" />
         <div id="bookmark-section" class="hidden"></div>
-        <div id="ptr-container" class="w-full" style="height: 0">
-          <div
-            id="ptr-icon"
-            class="w-8 h-8 border-4 border-dashed rounded-full animate-spin mx-auto mt-2"
-            style="border-top-color: #3b82f6"
-          ></div>
-        </div>
+        <div id="ptr-container" class="w-full" style="height: 0"><div id="ptr-icon" class="w-8 h-8 border-4 border-dashed rounded-full animate-spin mx-auto mt-2" style="border-top-color: #3b82f6"></div></div>
         <main id="feedContainer" class="mt-3 flex flex-col gap-2"></main>
-        <div
-          id="loading-spinner"
-          class="flex flex-col items-center justify-center py-8"
-        >
-          <div
-            class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"
-          ></div>
-          <span
-            class="mt-3 text-gray-500 dark:text-gray-300"
-            style="font-size: 14px"
-            >در حال بارگذاری...</span
-          >
-        </div>
-        <div
-          id="error-message"
-          class="hidden bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg my-4"
-          role="alert"
-        >
-          <span id="error-text"></span>
-        </div>
+        <div id="loading-spinner" class="flex flex-col items-center justify-center py-8"><div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div><span class="mt-3 text-gray-500 dark:text-gray-300" style="font-size: 14px">در حال بارگذاری...</span></div>
+        <div id="error-message" class="hidden bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg my-4" role="alert"><span id="error-text"></span></div>
       </div>
       <footer>
-        <div
-          style="
-            max-width: 560px;
-            margin: 0 auto;
-            line-height: 2;
-            font-size: 14px;
-          "
-        >
-          <div class="flex justify-center items-center gap-2 mb-2">
-            <img
-              src="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png"
-              style="
-                width: 2em;
-                height: 2em;
-                border-radius: 16%;
-                box-shadow: 0 0 9px #6a95d7;
-              "
-            />
-          </div>
-          <b>سلب مسئولیت:</b><br />
-          این اپلیکیشن هیچ یک از اخبار، مطالب، تصاویر یا نظرات نمایش داده شده را
-          تأیید یا تصدیق نمی‌کند و صرفاً بازنشر اتوماتیک محتوا به منظور
-          اطلاع‌رسانی است.<br />
-          این اپلیکیشن هیچ مسئولیتی در قبال صحت، اعتبار، یا محتوای اخبار، مطالب،
-          تصاویر و اظهارنظرهای ارائه‌شده ندارد و تمامی مسئولیت‌ها بر عهده مراجع
-          اصلی یا منتشرکنندگان اولیه آن مطالب می‌باشد.<br />
-          استفاده از داده‌ها و اطلاعات ارائه‌شده صرفاً با مسئولیت شخصی کاربران
-          بوده و هیچ گونه مسئولیتی متوجه این اپلیکیشن نمی‌باشد. هرگونه استناد یا
-          استفاده از اطلاعات این برنامه، به طور کامل بر عهده کاربر است و هیچ حقی
-          علیه اپلیکیشن قابل پیگیری نمی‌باشد.<br />
-          <span style="font-size: 13px; color: #426bba">
-            Copyright © 2025
-          </span>
+        <div style="max-width: 560px;margin: 0 auto;line-height: 2;font-size: 14px;">
+          <div class="flex justify-center items-center gap-2 mb-2"><img src="https://i.ibb.co/CpfLvZLq/App-Icon-2x.png" style="width: 2em;height: 2em;border-radius: 16%;box-shadow: 0 0 9px #6a95d7;" /></div>
+          <b>سلب مسئولیت:</b><br />این اپلیکیشن هیچ یک از اخبار، مطالب، تصاویر یا نظرات نمایش داده شده را تأیید یا تصدیق نمی‌کند و صرفاً بازنشر اتوماتیک محتوا به منظور اطلاع‌رسانی است.<br />این اپلیکیشن هیچ مسئولیتی در قبال صحت، اعتبار، یا محتوای اخبار، مطالب، تصاویر و اظهارنظرهای ارائه‌شده ندارد و تمامی مسئولیت‌ها بر عهده مراجع اصلی یا منتشرکنندگان اولیه آن مطالب می‌باشد.<br />استفاده از داده‌ها و اطلاعات ارائه‌شده صرفاً با مسئولیت شخصی کاربران بوده و هیچ گونه مسئولیتی متوجه این اپلیکیشن نمی‌باشد. هرگونه استناد یا استفاده از اطلاعات این برنامه، به طور کامل بر عهده کاربر است و هیچ حقی علیه اپلیکیشن قابل پیگیری نمی‌باشد.<br /><span style="font-size: 13px; color: #426bba">Copyright © 2025</span>
         </div>
       </footer>
       <!-- Lightbox Overlay -->
-      <div id="lightbox-overlay">
-        <img id="lightbox-img" src="" alt="پیش‌نمایش" />
-        <button id="lightbox-close"><i class="fa fa-times"></i></button>
-      </div>
-      <button id="goTopBtn" aria-label="برو بالا">
-        <i class="fa fa-arrow-up"></i>
-      </button>
+      <div id="lightbox-overlay"><img id="lightbox-img" src="" alt="پیش‌نمایش" /><button id="lightbox-close"><i class="fa fa-times"></i></button></div>
+      <button id="goTopBtn" aria-label="برو بالا"><i class="fa fa-arrow-up"></i></button>
+      <button id="newUpdatesBtn"></button>
     </div>
 
     <!-- ***** اسکریپت ورود ***** -->
     <script>
       (function () {
         const decodeStr = (s) => atob(s).split("").reverse().join("");
-
-        const ENC_USER = "bmltZGE=";
-        const ENC_PASS = "MzIxZHJvd3NzYXA=";
-
+        const ENC_USER = "bmltZGE="; // admin
+        const ENC_PASS = "MzIxZHJvd3NzYXA="; // password123
         const ENC_LIST = "T0RJeE5qQTFNalUwT1RFME5EUTVORE01TVE9PQ==";
-        const decodeList = (s) => {
-          const step1 = atob(s);
-          const step2 = atob(step1);
-          return step2.split("").reverse().join("");
-        };
+        
 
-        /* بررسی وضعیت لاگین */
+        const decodeList = (s) => atob(atob(s)).split("").reverse().join("");
         const isLoggedIn = () => localStorage.getItem("logged_in") === "true";
         const showApp = () => {
           document.getElementById("login-container").style.display = "none";
@@ -625,236 +562,124 @@
           document.getElementById("login-container").style.display = "flex";
           document.getElementById("main-app").style.display = "none";
         };
-
-        /* در صورتی که قبلاً لاگین کرده بود */
-        if (isLoggedIn()) {
-          showApp();
-        } else {
-          showLogin();
-        }
-
-        /* هندل فرم لاگین */
-        document
-          .getElementById("login-form")
-          .addEventListener("submit", (e) => {
-            e.preventDefault();
-            const u = document.getElementById("username").value.trim();
-            const p = document.getElementById("password").value.trim();
-            if (u === decodeStr(ENC_USER) && p === decodeStr(ENC_PASS)) {
-              localStorage.setItem("logged_in", "true");
-              showApp();
-              /* پس از لاگین موفق، توییت‌ها بارگذاری می‌شوند */
-              if (typeof fetchAndParseTweets === "function") {
-                fetchAndParseTweets();
-              }
-            } else {
-              document.getElementById("login-error").classList.remove("hidden");
-            }
-          });
-
-        /* دکمه خروج */
+        if (isLoggedIn()) showApp(); else showLogin();
+        document.getElementById("login-form").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const u = document.getElementById("username").value.trim();
+          const p = document.getElementById("password").value.trim();
+          if (u === decodeStr(ENC_USER) && p === decodeStr(ENC_PASS)) {
+            localStorage.setItem("logged_in", "true");
+            showApp();
+            if (typeof startApp === "function") startApp();
+          } else {
+            document.getElementById("login-error").classList.remove("hidden");
+          }
+        });
         const logoutBtn = document.getElementById("logout-btn");
-        if (logoutBtn) {
-          logoutBtn.addEventListener("click", () => {
-            localStorage.removeItem("logged_in");
-            location.reload();
-          });
-        }
-
-        window.getListId = function () {
-          return decodeList(ENC_LIST);
-        };
+        if (logoutBtn) logoutBtn.addEventListener("click", () => {localStorage.removeItem("logged_in");location.reload();});
+        window.getListId = () => decodeList(ENC_LIST);
       })();
     </script>
 
-    <!-- ***** اسکریپت اصلی برنامه (بدون تغییرات اصلی) ***** -->
+    <!-- ***** اسکریپت اصلی برنامه ***** -->
     <script>
-      // توجه: این اسکریپت بدون تغییرات اصلی آورده شده و در صورت نیاز می‌توانید آن را ویرایش کنید.
-      // بخش‌های اصلی همانند قبل است و تنها sessionStorage به localStorage تغییر یافته است.
-
+      /* ------------ CONSTANTS ------------ */
       const NITTER_INSTANCES = [
         "https://nitter.pussthecat.org",
         "https://nitter.net",
         "https://nitter.privacydev.net",
-        "https://nitter.cz",
+        "https://nitter.cz"
       ];
       const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+      const AUTO_REFRESH_INTERVAL = 60000; // 60 s
+      const INITIAL_PAGE_DEPTH = 1; // fetch 1 pages on hard refresh
+      const defaultTitle = document.title;
+
+      /* ------------ APP STATE ------------ */
       let nitterIndex = 0,
         PROXY_URL = NITTER_INSTANCES[nitterIndex];
       let nextCursor = null,
-        isLoading = false;
-      let compactMode = true;
+        isLoading = false,
+        compactMode = true;
       let allTweets = [],
         filteredTweets = [],
-        bookmarks = JSON.parse(
-          localStorage.getItem("bookmarkedTweets") || "[]"
-        );
+        newTweets = [];
+      let tweetsMap = new Map(); // id -> tweet (deduplication)
+      let bookmarks = JSON.parse(localStorage.getItem("bookmarkedTweets") || "[]");
+      bookmarks.forEach((b) => tweetsMap.set(b.id, b));
 
-      // ---- فونت ----
-      const fontSizeKey = "newsFontSize";
-      const defaultFont = "medium";
-      const fontSizes = {
-        small: "var(--tweet-font-size-small)",
-        medium: "var(--tweet-font-size-medium)",
-        large: "var(--tweet-font-size-large)",
-        xlarge: "var(--tweet-font-size-xlarge)",
-      };
-      let fontSize = localStorage.getItem(fontSizeKey) || defaultFont;
-      function setFontSize(size) {
-        fontSize = size;
-        localStorage.setItem(fontSizeKey, size);
-        document.body.style.setProperty("--tweet-font-size", fontSizes[size]);
-        Array.from(document.getElementsByClassName("tweet-card")).forEach(
-          (card) => {
-            card.style.fontSize = fontSizes[size];
-          }
-        );
-        applyFontMenuState();
-      }
-      function applyFontMenuState() {
-        document.querySelectorAll(".font-opt").forEach((opt) => {
-          opt.classList.remove("selected");
-          if (opt.getAttribute("data-size") === fontSize)
-            opt.classList.add("selected");
-        });
-      }
-      setFontSize(fontSize);
-
-      const fontBtn = document.getElementById("font-btn");
-      const fontSizeMenu = document.getElementById("fontSizeMenu");
-      fontBtn.onclick = function (e) {
-        fontSizeMenu.style.display =
-          fontSizeMenu.style.display === "block" ? "none" : "block";
-        applyFontMenuState();
-        e.stopPropagation();
-      };
-      fontSizeMenu.querySelectorAll(".font-opt").forEach((opt) => {
-        opt.onclick = function () {
-          setFontSize(opt.getAttribute("data-size"));
-          fontSizeMenu.style.display = "none";
-        };
-      });
-      document.body.addEventListener("click", function (e) {
-        if (!fontSizeMenu.contains(e.target) && e.target !== fontBtn)
-          fontSizeMenu.style.display = "none";
-      });
-
-      // --- تم ---
-      const html = document.documentElement;
-      const modeBtn = document.getElementById("mode-btn");
-      const modeDark = document.getElementById("mode-dark");
-      const modeLight = document.getElementById("mode-light");
-      function applyTheme(theme) {
-        if (theme === "dark") {
-          html.classList.add("dark");
-          modeDark.classList.add("hidden");
-          modeLight.classList.remove("hidden");
-          modeBtn.classList.add("active");
-          modeLight.classList.add("selected");
-          modeDark.classList.remove("selected");
-        } else {
-          html.classList.remove("dark");
-          modeLight.classList.add("hidden");
-          modeDark.classList.remove("hidden");
-          modeBtn.classList.add("active");
-          modeDark.classList.add("selected");
-          modeLight.classList.remove("selected");
-        }
-      }
-      modeBtn.onclick = () => {
-        const newTheme = html.classList.contains("dark") ? "light" : "dark";
-        localStorage.setItem("theme", newTheme);
-        applyTheme(newTheme);
-      };
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme =
-          localStorage.getItem("theme") ||
-          (window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light");
-        applyTheme(savedTheme);
-        // فقط زمانی که کاربر لاگین کرده باشد توییت‌ها لود می‌شود
-        if (localStorage.getItem("logged_in") === "true") {
-          fetchAndParseTweets();
-        }
-      });
-
-      // --- حالت نمایش Compact/Full ---
-      const viewBtn = document.getElementById("view-btn");
-      const viewFull = document.getElementById("view-full");
-      const viewCompact = document.getElementById("view-compact");
-      function updateCompactView() {
-        compactMode = !compactMode;
-        renderTweets(filteredTweets);
-        if (compactMode) {
-          viewCompact.classList.remove("hidden");
-          viewFull.classList.add("hidden");
-          viewBtn.classList.add("selected");
-        } else {
-          viewFull.classList.remove("hidden");
-          viewCompact.classList.add("hidden");
-          viewBtn.classList.remove("selected");
-        }
-      }
-      viewBtn.onclick = updateCompactView;
-
-      // --- رفرش ---
-      document.getElementById("refresh-btn").onclick = function () {
-        nextCursor = null;
-        nitterIndex = 0;
-        PROXY_URL = NITTER_INSTANCES[0];
-        fetchAndParseTweets();
-      };
-
-      // --- Helpers ---
+      /* ------------ DOM ------------ */
       const feedContainer = document.getElementById("feedContainer");
       const loadingSpinner = document.getElementById("loading-spinner");
       const errorMessage = document.getElementById("error-message");
       const errorText = document.getElementById("error-text");
-      function isFa(text) {
-        return /[\u0600-\u06FF]/.test(text);
-      }
-      function displayError(msg) {
+      const newUpdatesBtn = document.getElementById("newUpdatesBtn");
+
+      /*go top*/
+document.getElementById("goTopBtn").onclick = function() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+
+      /*  UTILS  */
+      const isFa = (t) => /[\u0600-\u06FF]/.test(t);
+      const displayError = (msg) => {
         errorText.innerHTML = msg;
         errorMessage.classList.remove("hidden");
         loadingSpinner.classList.add("hidden");
-      }
-      function hideError() {
-        errorMessage.classList.add("hidden");
-      }
-      function showLoading() {
-        loadingSpinner.classList.remove("hidden");
-      }
-      function hideLoading() {
-        loadingSpinner.classList.add("hidden");
-      }
-      function timeFormat(dateString) {
+      };
+      const hideError = () => errorMessage.classList.add("hidden");
+      const showLoading = () => loadingSpinner.classList.remove("hidden");
+      const hideLoading = () => loadingSpinner.classList.add("hidden");
+      const timeFormat = (ds) => {
         try {
-          if (!dateString) return "—";
-          let d = new Date(dateString);
-          if (isNaN(d)) return dateString;
+          if (!ds) return "—";
+          const d = new Date(ds);
+          if (isNaN(d)) return ds;
           return (
             d.toLocaleDateString("fa-IR") +
             "، " +
-            d.toLocaleTimeString("fa-IR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
+            d.toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" })
           );
         } catch {
-          return dateString || "—";
+          return ds || "—";
         }
-      }
-      function parseNumber(node) {
+      };
+      const parseNumber = (node) => {
         if (!node) return "—";
-        const val = node.textContent.replace(/[^\d,]/g, "").replace(/,/g, "");
-        return val ? parseInt(val, 10) : "—";
-      }
-      function fallbackImg(ev) {
-        ev.target.src = "https://via.placeholder.com/320x180?text=...";
+        const v = node.textContent.replace(/[^\d,]/g, "").replace(/,/g, "");
+        return v ? parseInt(v, 10) : "—";
+      };
+      const fallbackImg = (e) => {
+        e.target.src = "https://via.placeholder.com/320x180?text=...";
+      };
+
+      /* ------------ MERGE & DEDUPLICATE ------------ */
+      function mergeNewTweets(list) {
+        const added = [];
+        list.forEach((t) => {
+          if (!tweetsMap.has(t.id)) {
+            tweetsMap.set(t.id, t);
+            allTweets.push(t);
+            added.push(t);
+          }
+        });
+        // sort by id (numerical) descending if numeric, else by dateFull
+          // ← این بخش را جایگزین کنید
+  allTweets.sort((a, b) => {
+    const numA = /^\d+$/.test(a.id) ? BigInt(a.id) : null;
+    const numB = /^\d+$/.test(b.id) ? BigInt(b.id) : null;
+
+    if (numA !== null && numB !== null) {
+      return numB > numA ? 1 : numB < numA ? -1 : 0;   // جدیدتر بالاتر
+    }
+    // fallback: مرتب‌سازی بر اساس تاریخ
+    return new Date(b.dateFull).getTime() - new Date(a.dateFull).getTime();
+  });
+        return added;
       }
 
-      // --- لود و نمایش توییت‌ها ---
+      /* ------------ RENDER ------------ */
       function renderTweets(tweets) {
         feedContainer.innerHTML = "";
         if (!tweets.length) {
@@ -862,285 +687,277 @@
             '<div class="px-6 py-12 text-center text-gray-400 dark:text-gray-400">نتیجه‌ای یافت نشد.</div>';
           return;
         }
-        tweets.forEach((tweet) => {
-          const card = createTweetCard(tweet);
-          card.style.fontSize = fontSizes[fontSize];
-          feedContainer.appendChild(card);
+        tweets.forEach((t) => {
+          const c = createTweetCard(t);
+          c.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue(
+            "--tweet-font-size"
+          );
+          feedContainer.appendChild(c);
         });
-        Array.from(document.getElementsByClassName("tweet-card")).forEach(
-          (card) => {
-            if (compactMode) card.classList.add("compact");
-            else card.classList.remove("compact");
-          }
+        Array.from(document.getElementsByClassName("tweet-card")).forEach((c) =>
+          c.classList.toggle("compact", compactMode)
         );
       }
 
-      // --- ساخت کارت توییت ---
       function createTweetCard(tweet) {
         const isPersian = isFa(tweet.text);
         const dirClass = isPersian ? "rtl font-vazir" : "ltr";
+
+        /* media html */
         let mediaHtml = "";
-        if (tweet.media.images.length > 0) {
-          mediaHtml += `<div class="scroll-imgs mt-2 justify-center flex w-full">`;
-          tweet.media.images.forEach((imgSrc, idx) => {
-            mediaHtml += `<a href="#" data-img="${imgSrc}" class="tweet-img-link"><img src="${imgSrc}" class="tweet-media-img mx-auto" loading="lazy" onerror="fallbackImg(event)"></a>`;
+        if (tweet.media.images.length) {
+          mediaHtml += '<div class="scroll-imgs mt-2 justify-center flex w-full">';
+          tweet.media.images.forEach((img) => {
+            mediaHtml += `
+              <a href="#" data-img="${img}" class="tweet-img-link">
+                <img src="${img}" class="tweet-media-img mx-auto" loading="lazy" onerror="fallbackImg(event)" />
+              </a>`;
           });
-          mediaHtml += `</div>`;
+          mediaHtml += "</div>";
         }
-        if (tweet.media.videos.length > 0) {
-          mediaHtml += `<div class="mt-2 flex justify-center"><video controls playsinline muted class="tweet-media-video mx-auto" preload="metadata" onerror="this.poster='https://via.placeholder.com/320x180?text=VIDEO';"><source src="${tweet.media.videos[0]}" type="video/mp4">ویدیو پشتیبانی نمی‌شود.</video></div>`;
+        if (tweet.media.videos.length) {
+          mediaHtml += `
+            <div class="mt-2 flex justify-center">
+              <video controls playsinline muted class="tweet-media-video mx-auto" preload="metadata" onerror="this.poster='https://via.placeholder.com/320x180?text=VIDEO';">
+                <source src="${tweet.media.videos[0]}" type="video/mp4" />
+                ویدیو پشتیبانی نمی‌شود.
+              </video>
+            </div>`;
         }
-        const isBookmarked = bookmarks.find((b) => b.id === tweet.id);
+
+        const isBookmarked = bookmarks.some((b) => b.id === tweet.id);
+
         const card = document.createElement("article");
         card.className =
           "tweet-card bg-white/80 dark:bg-[#1b2236] px-4 py-4 transition hover:shadow-2xl relative";
         card.innerHTML = `
-        <div class="flex items-start gap-3">
-            <img src="${tweet.user.avatar}" alt="${
-          tweet.user.name
-        }" class="w-11 h-11 rounded-full border shadow" onerror="fallbackImg(event)">
+          <div class="flex items-start gap-3">
+            <img src="${tweet.user.avatar}" alt="${tweet.user.name}" class="w-11 h-11 rounded-full border shadow" onerror="fallbackImg(event)">
             <div class="flex-1 min-w-0">
-                <div class="flex flex-row items-center justify-between">
-                    <div class="tweet-author font-semibold text-[14.3px] text-gray-900 dark:text-gray-100">${
-                      tweet.user.name
-                    }
-                        <span class="mx-1 text-gray-400 text-[12.2px]">@${
-                          tweet.user.username
-                        }</span>
-                    </div>
-                    <span class="text-xs text-gray-400 dark:text-gray-400" title="${
-                      tweet.dateFull
-                    }">
-                        ${timeFormat(tweet.dateFull)}
-                    </span>
+              <div class="flex flex-row items-center justify-between">
+                <div class="tweet-author font-semibold text-[14.3px] text-gray-900 dark:text-gray-100">
+                  ${tweet.user.name}<span class="mx-1 text-gray-400 text-[12.2px]">@${tweet.user.username}</span>
                 </div>
-                <div class="tweet-text mt-1.5 text-gray-800 dark:text-gray-100 ${dirClass}">${
+                <span class="text-xs text-gray-400 dark:text-gray-400" title="${tweet.dateFull}">${timeFormat(
+          tweet.dateFull
+        )}</span>
+              </div>
+              <div class="tweet-text mt-1.5 text-gray-800 dark:text-gray-100 ${dirClass}">${
           tweet.text
         }</div>
-                ${mediaHtml}
-                <div class="tweet-meta-bar mt-3 flex items-center gap-5 text-xs text-gray-500 dark:text-gray-400 select-none">
-                    <span title="ریپلای"><i class="fa-regular fa-comment mr-1"></i> ${
-                      tweet.replies
-                    }</span>
-                    <span title="ریتوییت"><i class="fa-solid fa-retweet mr-1"></i> ${
-                      tweet.reposts
-                    }</span>
-                    <span title="لایک"><i class="fa-regular fa-heart mr-1"></i> ${
-                      tweet.likes
-                    }</span>
-                    <span title="ویو"><i class="fa-regular fa-eye mr-1"></i> ${
-                      tweet.views
-                    }</span>
-                    <button class="bookmark-btn${
-                      isBookmarked ? " active" : ""
-                    }" title="بوکمارک" data-tweetid="${tweet.id}">
-                        <i class="fa-solid fa-bookmark"></i>
-                    </button>
-                    <a href="https://x.com/${tweet.user.username}/status/${
+              ${mediaHtml}
+              <div class="tweet-meta-bar mt-3 flex items-center gap-5 text-xs text-gray-500 dark:text-gray-400 select-none">
+                <span title="ریپلای"><i class="fa-regular fa-comment mr-1"></i> ${tweet.replies}</span>
+                <span title="ریتوییت"><i class="fa-solid fa-retweet mr-1"></i> ${tweet.reposts}</span>
+                <span title="لایک"><i class="fa-regular fa-heart mr-1"></i> ${tweet.likes}</span>
+                <span title="ویو"><i class="fa-regular fa-eye mr-1"></i> ${tweet.views}</span>
+                <button class="bookmark-btn${isBookmarked ? " active" : ""}" data-tweetid="${
           tweet.id
-        }" target="_blank" class="text-blue-400 hover:underline whitespace-nowrap">
-                      مشاهده منبع<i class="fa-brands fa-x-twitter"></i>
-                    </a>
-                </div>
+        }" title="بوکمارک"><i class="fa-solid fa-bookmark"></i></button>
+                <a href="https://x.com/${tweet.user.username}/status/${tweet.id}" target="_blank" class="text-blue-400 hover:underline whitespace-nowrap">مشاهده منبع <i class="fa-brands fa-x-twitter"></i></a>
+              </div>
             </div>
-        </div>
-    `;
-        setTimeout(() => {
-          card.style.opacity = "1";
-        }, 45);
+          </div>`;
 
-        // Lightbox event
-        card.querySelectorAll(".tweet-img-link").forEach((link) => {
-          link.onclick = (e) => {
+        setTimeout(() => (card.style.opacity = "1"), 45);
+        card.querySelectorAll(".tweet-img-link").forEach((l) =>
+          l.addEventListener("click", (e) => {
             e.preventDefault();
-            showLightbox(link.getAttribute("data-img"));
-          };
-        });
-
-        // Bookmark button event
+            showLightbox(l.getAttribute("data-img"));
+          })
+        );
         card.querySelector(".bookmark-btn").onclick = function () {
-          let tweetid = this.getAttribute("data-tweetid");
+          const tid = this.getAttribute("data-tweetid");
           if (this.classList.contains("active")) {
-            bookmarks = bookmarks.filter((b) => b.id !== tweetid);
+            bookmarks = bookmarks.filter((b) => b.id !== tid);
           } else {
             bookmarks.push(tweet);
           }
           localStorage.setItem("bookmarkedTweets", JSON.stringify(bookmarks));
           this.classList.toggle("active");
         };
-
         return card;
       }
 
-      // --- لایت‌باکس تصویر ---
+      /* ------------ LIGHTBOX ------------ */
       function showLightbox(src) {
         const overlay = document.getElementById("lightbox-overlay");
         const img = document.getElementById("lightbox-img");
         img.src = src;
         overlay.classList.add("active");
       }
-      document.getElementById("lightbox-overlay").onclick = function (e) {
-        if (e.target === this || e.target.id === "lightbox-close")
-          this.classList.remove("active");
+      document.getElementById("lightbox-overlay").onclick = (e) => {
+        if (e.target === e.currentTarget || e.target.id === "lightbox-close")
+          e.currentTarget.classList.remove("active");
       };
 
-      // --- دریافت و ساخت توییت‌ها ---
-      async function fetchAndParseTweets(cursor = null, retry = true) {
+      /* ------------ FETCH HELPERS ------------ */
+      async function fetchHTML(url) {
+        const r = await fetch(`${CORS_PROXY}${encodeURIComponent(url)}`);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.text();
+      }
+
+      async function parseTweets(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const tweetEls = doc.querySelectorAll(".timeline-item:not(.show-more)");
+        if (!tweetEls.length) throw new Error("توییتی پیدا نشد.");
+        const tweets = [];
+        tweetEls.forEach((el) => {
+          const avatarNode = el.querySelector(".avatar");
+          let avatarUrl = avatarNode ? avatarNode.getAttribute("src") : "";
+          if (avatarUrl && !/^https?:\/\//.test(avatarUrl)) avatarUrl = PROXY_URL + avatarUrl;
+
+          const contentNode = el.querySelector(".tweet-content");
+          const dateFull =
+            el.querySelector(".tweet-date a")?.getAttribute("title") ||
+            el.querySelector(".tweet-date time")?.getAttribute("datetime") ||
+            "";
+          const replies = parseNumber(el.querySelector(".icon-comment")?.parentElement);
+          const reposts = parseNumber(el.querySelector(".icon-retweet")?.parentElement);
+          const likes = parseNumber(el.querySelector(".icon-heart")?.parentElement);
+          let views = "—";
+          const viewsEl = el.querySelector(
+            ".icon-chart-bar, .fa-chart-bar, .fa-eye, .icon-eye"
+          );
+          if (viewsEl) views = parseNumber(viewsEl.parentElement);
+
+          const images = [];
+          el.querySelectorAll(".attachment.image a").forEach((a) => {
+            let src = a.getAttribute("href");
+            if (src && !/^https?:\/\//.test(src)) src = PROXY_URL + src;
+            images.push(src);
+          });
+          const videos = [];
+          el.querySelectorAll(".attachment.video-container video source").forEach((s) => {
+            let src = s.getAttribute("src");
+            if (src && !/^https?:\/\//.test(src)) src = PROXY_URL + src;
+            videos.push(src);
+          });
+
+          const tweetLink = el.querySelector(".tweet-link")?.getAttribute("href") || "";
+          const userLink = el.querySelector(".username")?.parentElement?.getAttribute("href") || "";
+          const username = el.querySelector(".username")?.textContent.trim().replace("@", "") || "";
+
+          tweets.push({
+            id: tweetLink.split("/").pop(),
+            user: {
+              name: el.querySelector(".fullname")?.textContent.trim() || "",
+              username,
+              avatar: avatarUrl,
+              url: userLink,
+            },
+            text: contentNode ? contentNode.innerHTML : "",
+            dateFull,
+            replies,
+            reposts,
+            likes,
+            views,
+            media: { images, videos },
+          });
+        });
+
+        const loadMoreEl = doc.querySelector(".show-more a");
+        const cursor = loadMoreEl
+          ? new URLSearchParams(loadMoreEl.getAttribute("href").split("?")[1]).get("cursor")
+          : null;
+        return { tweets, cursor };
+      }
+
+      /* ------------ FETCH & BUILD ------------ */
+      async function fetchTweetsPage(cursor = null) {
+        const listUrl =
+          `${PROXY_URL}/i/lists/${getListId()}` + (cursor ? `?cursor=${cursor}` : "");
+        const html = await fetchHTML(listUrl);
+        return parseTweets(html);
+      }
+
+      async function fetchAndParseTweets(cursor = null, depth = 1, retry = true) {
         if (isLoading) return;
         isLoading = true;
         hideError();
         if (!cursor) {
+          // hard refresh – reset state
           showLoading();
           feedContainer.innerHTML = "";
           allTweets = [];
+          tweetsMap.clear();
         }
-        let listUrl = `${PROXY_URL}/i/lists/${getListId()}${
-          cursor ? `?cursor=${cursor}` : ""
-        }`;
-        let fetchUrl = `${CORS_PROXY}${encodeURIComponent(listUrl)}`;
         try {
-          const response = await fetch(fetchUrl);
-          if (!response.ok)
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          const html = await response.text();
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, "text/html");
-          const tweetEls = doc.querySelectorAll(
-            ".timeline-item:not(.show-more)"
-          );
-          if (!tweetEls.length)
-            throw new Error(
-              "توییتی پیدا نشد. لیست خصوصی یا سرور Nitter قطع است."
-            );
-          tweetEls.forEach((tweetEl) => {
-            const avatarNode = tweetEl.querySelector(".avatar");
-            let avatarUrl = avatarNode ? avatarNode.getAttribute("src") : "";
-            if (avatarUrl && !/^https?:\/\//.test(avatarUrl))
-              avatarUrl = PROXY_URL + avatarUrl;
-            const contentNode = tweetEl.querySelector(".tweet-content");
-            let dateFull =
-              tweetEl.querySelector(".tweet-date a")?.getAttribute("title") ||
-              tweetEl
-                .querySelector(".tweet-date time")
-                ?.getAttribute("datetime") ||
-              "";
-            const replies = parseNumber(
-              tweetEl.querySelector(".icon-comment")?.parentElement
-            );
-            const reposts = parseNumber(
-              tweetEl.querySelector(".icon-retweet")?.parentElement
-            );
-            const likes = parseNumber(
-              tweetEl.querySelector(".icon-heart")?.parentElement
-            );
-            let views = null;
-            let viewsEl = tweetEl.querySelector(
-              ".icon-chart-bar, .fa-chart-bar, .fa-eye, .icon-eye"
-            );
-            if (viewsEl) views = parseNumber(viewsEl.parentElement);
-            else views = "—";
-            let images = [];
-            tweetEl.querySelectorAll(".attachment.image a").forEach((a) => {
-              let src = a.getAttribute("href");
-              if (src && !/^https?:\/\//.test(src)) src = PROXY_URL + src;
-              images.push(src);
-            });
-            let videos = [];
-            tweetEl
-              .querySelectorAll(".attachment.video-container video source")
-              .forEach((srcNode) => {
-                let src = srcNode.getAttribute("src");
-                if (src && !/^https?:\/\//.test(src)) src = PROXY_URL + src;
-                videos.push(src);
-              });
-            const tweetLink =
-              tweetEl.querySelector(".tweet-link")?.getAttribute("href") || "";
-            const userLink =
-              tweetEl
-                .querySelector(".username")
-                ?.parentElement?.getAttribute("href") || "";
-            const username =
-              tweetEl
-                .querySelector(".username")
-                ?.textContent.trim()
-                .replace("@", "") || "";
-            allTweets.push({
-              id: tweetLink.split("/").pop(),
-              user: {
-                name:
-                  tweetEl.querySelector(".fullname")?.textContent.trim() || "",
-                username: username,
-                avatar: avatarUrl,
-                url: userLink,
-              },
-              text: contentNode ? contentNode.innerHTML : "",
-              dateFull,
-              replies,
-              reposts,
-              likes,
-              views,
-              media: { images, videos },
-            });
-          });
-          const loadMoreEl = doc.querySelector(".show-more a");
-          nextCursor = loadMoreEl
-            ? new URLSearchParams(
-                loadMoreEl.getAttribute("href").split("?")[1]
-              ).get("cursor")
-            : null;
+          let localCursor = cursor;
+          for (let i = 0; i < depth; i++) {
+            const { tweets, cursor: next } = await fetchTweetsPage(localCursor);
+            mergeNewTweets(tweets);
+            localCursor = next;
+            if (!localCursor) break;
+          }
+          nextCursor = localCursor;
           applyFilters();
-        } catch (error) {
+        } catch (err) {
           if (retry && nitterIndex < NITTER_INSTANCES.length - 1) {
             nitterIndex++;
             PROXY_URL = NITTER_INSTANCES[nitterIndex];
-            setTimeout(() => fetchAndParseTweets(cursor, false), 900);
+            setTimeout(() => fetchAndParseTweets(cursor, depth, false), 900);
           } else {
-            displayError(error.message || "بارگذاری ناموفق بود.");
+            displayError(err.message || "بارگذاری ناموفق بود.");
           }
         } finally {
           isLoading = false;
           hideLoading();
-          ptrContainer.style.height = "0";
+          document.getElementById("ptr-container").style.height = "0";
         }
       }
 
-      // --- جستجو ---
+      /* ------------ SEARCH / FILTER ------------ */
       function applyFilters() {
-        const searchTerm = document
-          .getElementById("searchBar")
-          .value.toLowerCase()
-          .trim();
-        filteredTweets = allTweets.filter((tw) => {
-          let matchesSearch =
-            !searchTerm ||
-            tw.text
-              .replace(/<[^>]+>/g, "")
-              .toLowerCase()
-              .includes(searchTerm);
-          return matchesSearch;
+        const q = document.getElementById("searchBar").value.toLowerCase().trim();
+        filteredTweets = allTweets.filter((t) => {
+          const clean = t.text.replace(/<[^>]+>/g, "").toLowerCase();
+          return !q || clean.includes(q);
         });
         renderTweets(filteredTweets);
       }
       document.getElementById("searchBar").oninput = applyFilters;
 
-      // --- Infinite Scroll ---
-      window.addEventListener("scroll", () => {
-        if (isLoading || !nextCursor) return;
-        if (
-          window.innerHeight + window.scrollY >=
-          document.body.offsetHeight - 700
-        ) {
-          fetchAndParseTweets(nextCursor);
-        }
-        if (window.scrollY > 400)
-          document.getElementById("goTopBtn").classList.add("visible");
-        else document.getElementById("goTopBtn").classList.remove("visible");
-      });
-      document.getElementById("goTopBtn").onclick = () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      /* ------------ UI CONTROLS ------------ */
+      // Compact / full view
+      const viewBtn = document.getElementById("view-btn");
+      const viewFull = document.getElementById("view-full");
+      const viewCompactIcon = document.getElementById("view-compact");
+      function updateCompactView() {
+        compactMode = !compactMode;
+        renderTweets(filteredTweets);
+        viewCompactIcon.classList.toggle("hidden", !compactMode);
+        viewFull.classList.toggle("hidden", compactMode);
+        viewBtn.classList.toggle("selected", compactMode);
+      }
+      viewBtn.onclick = updateCompactView;
+
+      // Manual refresh
+      document.getElementById("refresh-btn").onclick = () => {
+        nextCursor = null;
+        nitterIndex = 0;
+        PROXY_URL = NITTER_INSTANCES[0];
+        fetchAndParseTweets(null, INITIAL_PAGE_DEPTH);
       };
 
-      // --- Pull to Refresh (mobile) ---
+
+
+      // Infinite scroll
+// Infinite scroll & show goTopBtn
+window.addEventListener("scroll", () => {
+  // نمایش دکمه برو بالا همیشه
+  document.getElementById("goTopBtn").classList.toggle("visible", window.scrollY > 400);
+
+  // اینفینیت اسکرول فقط اگر لازم بود
+  if (isLoading || !nextCursor) return;
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 700)
+    fetchAndParseTweets(nextCursor, 1);
+});
+
+
+      // Pull-to-refresh (touch)
       const ptrContainer = document.getElementById("ptr-container");
       let startY = 0,
         pullDistance = 0,
@@ -1156,13 +973,9 @@
         "touchmove",
         (e) => {
           if (window.scrollY === 0 && startY > 0) {
-            const currentY = e.touches[0].pageY;
-            pullDistance = Math.max(0, currentY - startY);
-            if (pullDistance > 0)
-              ptrContainer.style.height = `${Math.min(
-                pullDistance,
-                ptrThreshold
-              )}px`;
+            const y = e.touches[0].pageY;
+            pullDistance = Math.max(0, y - startY);
+            if (pullDistance) ptrContainer.style.height = `${Math.min(pullDistance, ptrThreshold)}px`;
           }
         },
         { passive: true }
@@ -1173,16 +986,13 @@
           nextCursor = null;
           nitterIndex = 0;
           PROXY_URL = NITTER_INSTANCES[0];
-          fetchAndParseTweets();
-        } else {
-          ptrContainer.style.height = "0";
-        }
-        startY = 0;
-        pullDistance = 0;
+          fetchAndParseTweets(null, INITIAL_PAGE_DEPTH);
+        } else ptrContainer.style.height = "0";
+        startY = pullDistance = 0;
       });
 
-      // --- نمایش بوکمارک‌ها ---
-      document.getElementById("bookmark-btn").onclick = function () {
+      /* ------------ BOOKMARKS ------------ */
+      document.getElementById("bookmark-btn").onclick = () => {
         const sec = document.getElementById("bookmark-section");
         if (sec.classList.contains("hidden")) {
           sec.classList.remove("hidden");
@@ -1191,10 +1001,12 @@
           if (!bookmarks.length)
             sec.innerHTML +=
               "<div class='text-gray-400 dark:text-gray-400 text-center'>هنوز هیچ توییتی بوکمارک نشده.</div>";
-          bookmarks.forEach((tw) => {
-            const card = createTweetCard(tw);
-            card.style.fontSize = fontSizes[fontSize];
-            sec.appendChild(card);
+          bookmarks.forEach((t) => {
+            const c = createTweetCard(t);
+            c.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue(
+              "--tweet-font-size"
+            );
+            sec.appendChild(c);
           });
           window.scrollTo({ top: 0, behavior: "smooth" });
         } else {
@@ -1202,15 +1014,137 @@
           sec.innerHTML = "";
         }
       };
+
+      /* ------------ FONT SIZE ------------ */
+      const fontSizeKey = "newsFontSize";
+      const defaultFont = "medium";
+      const fontSizes = {
+        small: "var(--tweet-font-size-small)",
+        medium: "var(--tweet-font-size-medium)",
+        large: "var(--tweet-font-size-large)",
+        xlarge: "var(--tweet-font-size-xlarge)",
+      };
+      let fontSize = localStorage.getItem(fontSizeKey) || defaultFont;
+      function setFontSize(size) {
+        fontSize = size;
+        localStorage.setItem(fontSizeKey, size);
+        document.body.style.setProperty("--tweet-font-size", fontSizes[size]);
+        Array.from(document.getElementsByClassName("tweet-card")).forEach((c) =>
+          (c.style.fontSize = fontSizes[size])
+        );
+        applyFontMenuState();
+      }
+      function applyFontMenuState() {
+        document.querySelectorAll(".font-opt").forEach((o) => {
+          o.classList.toggle("selected", o.getAttribute("data-size") === fontSize);
+        });
+      }
+      setFontSize(fontSize);
+      const fontBtn = document.getElementById("font-btn"),
+        fontSizeMenu = document.getElementById("fontSizeMenu");
+      fontBtn.onclick = (e) => {
+        fontSizeMenu.style.display = fontSizeMenu.style.display === "block" ? "none" : "block";
+        applyFontMenuState();
+        e.stopPropagation();
+      };
+      fontSizeMenu.querySelectorAll(".font-opt").forEach((opt) =>
+        (opt.onclick = () => {
+          setFontSize(opt.getAttribute("data-size"));
+          fontSizeMenu.style.display = "none";
+        })
+      );
+      document.body.addEventListener("click", (e) => {
+        if (!fontSizeMenu.contains(e.target) && e.target !== fontBtn)
+          fontSizeMenu.style.display = "none";
+      });
+
+      /* ------------ THEME ------------ */
+      const html = document.documentElement;
+      const modeBtn = document.getElementById("mode-btn");
+      const modeDark = document.getElementById("mode-dark");
+      const modeLight = document.getElementById("mode-light");
+      function applyTheme(theme) {
+        if (theme === "dark") {
+          html.classList.add("dark");
+          modeDark.classList.add("hidden");
+          modeLight.classList.remove("hidden");
+        } else {
+          html.classList.remove("dark");
+          modeLight.classList.add("hidden");
+          modeDark.classList.remove("hidden");
+        }
+      }
+      modeBtn.onclick = () => {
+        const t = html.classList.contains("dark") ? "light" : "dark";
+        localStorage.setItem("theme", t);
+        applyTheme(t);
+      };
+
+      /* ------------ AUTO REFRESH ------------ */
+      async function checkForUpdates() {
+        if (isLoading) return;
+        try {
+          const { tweets: latest } = await fetchTweetsPage();
+          const unseen = latest.filter((t) => !tweetsMap.has(t.id));
+          if (unseen.length) {
+            newTweets.unshift(...unseen);
+            newUpdatesBtn.innerHTML = `<i class="fa fa-bell"></i> ${newTweets.length} خبر جدید`;
+
+            newUpdatesBtn.style.display = "inline-flex";
+              document.title = `(${newTweets.length}) خبر جدید - ${defaultTitle}`;
+
+          }
+        } catch (e) {
+          // silent
+        }
+      }
+      setInterval(checkForUpdates, AUTO_REFRESH_INTERVAL);
+newUpdatesBtn.onclick = () => {
+  newUpdatesBtn.style.display = "none";
+  newTweets = [];
+  nextCursor = null;
+  nitterIndex = 0;
+  PROXY_URL = NITTER_INSTANCES[0];
+  fetchAndParseTweets(null, INITIAL_PAGE_DEPTH);  // رفرش کامل فید
+  window.scrollTo({ top: 0, behavior: "smooth" });
+    document.title = defaultTitle;
+
+};
+
+
+      /* ------------ START APP AFTER LOGIN ------------ */
+      function startApp() {
+        // Apply theme immediately
+        applyTheme(
+          localStorage.getItem("theme") ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        );
+        // Initial fetch
+        fetchAndParseTweets(null, INITIAL_PAGE_DEPTH);
+      }
+      // If already logged in on load
+      if (localStorage.getItem("logged_in") === "true") startApp();
+
+
+      function showLoadingAtEnd() {
+  loadingSpinner.style.display = "flex";
+}
+function hideLoadingAtEnd() {
+  loadingSpinner.style.display = "none";
+}
+
+
+
     </script>
 
     <!-- PWA Service Worker -->
     <script>
       if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
+        window.addEventListener("load", () => {
           navigator.serviceWorker.register("sw.js").catch(() => {});
         });
       }
     </script>
+
   </body>
 </html>
