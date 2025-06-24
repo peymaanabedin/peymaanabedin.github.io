@@ -1,7 +1,4 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-
-<head>
+<!DOCTYPE html><html lang="fa" dir="rtl"><head>
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -1118,6 +1115,7 @@
         #expense-reports-page .category-report-card-new .progress-bar {
             height: 100%;
             border-radius: 3px;
+            transition: width 0.5s ease-in-out; /* Added Animation */
         }
 
         #expense-reports-page .category-report-card-new .item-actions {
@@ -1391,10 +1389,7 @@
                 font-size: 0.9rem;
             }
         }
-    </style>
-</head>
-
-<body>
+    </style></head><body>
     <div class="app-wrapper">
         <header class="app-header">
             <h1 id="app-header-title">حسابداری شخصی شمار</h1>
@@ -2289,37 +2284,38 @@
 
                 const categoryColors = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5856D6', '#FF2D55', '#5AC8FA', '#FFCC00', '#64D2FF'];
 
-                if (categoryData.filter(c => c.total > 0).length === 0) {
-                    statusEl.innerHTML = 'موردی با فیلترهای مشخص شده یافت نشد.';
-                } else {
-                    listEl.innerHTML = categoryData.map((cat, index) => {
-                        if (cat.total === 0) return ''; // Don't show categories with zero expense
-                        const percentage = totalOverallExpense > 0 ? (cat.total / totalOverallExpense) * 100 : 0;
-                        const bgColor = categoryColors[index % categoryColors.length];
-                        return `
-                        <div class="category-report-card-new" data-action="view-category-transactions" data-category-name="${cat.name}">
-                            <div class="item-icon expense" style="background-color: ${bgColor}; color: #FFF;"><i class="fas ${cat.icon}"></i></div>
-                            <div class="category-info">
-                                <h4 class="category-title">${cat.name}</h4>
-                                <div class="category-stats">
-                                    <span class="tx-count">${cat.count} تراکنش</span>
-                                </div>
-                            </div>
-                            <div class="category-amount-progress">
-                                <span class="total-amount">${formatCurrency(cat.total)}</span>
-                                <div class="progress-bar-wrapper">
-                                    <div class="percentage-text">${percentage.toFixed(0)}%</div>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-bar expense" style="width: ${percentage.toFixed(1)}%; background-color: ${bgColor};"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item-actions">
-                                <button class="action-btn edit-btn" data-type="expense-category" data-id="${cat.name}"><i class="fas fa-pen"></i></button>
-                            </div>
-                        </div>`;
-                    }).join('');
+                if (categoryData.length === 0 && filteredTxs.length > 0) {
+                     statusEl.innerHTML = 'موردی با فیلترهای مشخص شده یافت نشد.';
+                } else if (state.transactions.filter(tx => tx.type === 'expense').length === 0) {
+                    statusEl.innerHTML = 'برای مشاهده گزارش، ابتدا یک تراکنش هزینه ثبت کنید.';
                 }
+                
+                listEl.innerHTML = categoryData.map((cat, index) => {
+                    const percentage = totalOverallExpense > 0 ? (cat.total / totalOverallExpense) * 100 : 0;
+                    const bgColor = categoryColors[index % categoryColors.length];
+                    return `
+                    <div class="category-report-card-new" data-action="view-category-transactions" data-category-name="${cat.name}">
+                        <div class="item-icon expense" style="background-color: ${bgColor}; color: #FFF;"><i class="fas ${cat.icon}"></i></div>
+                        <div class="category-info">
+                            <h4 class="category-title">${cat.name}</h4>
+                            <div class="category-stats">
+                                <span class="tx-count">${cat.count} تراکنش</span>
+                            </div>
+                        </div>
+                        <div class="category-amount-progress">
+                            <span class="total-amount">${formatCurrency(cat.total)}</span>
+                            <div class="progress-bar-wrapper">
+                                <div class="percentage-text">${percentage.toFixed(0)}%</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar expense" style="width: ${percentage.toFixed(1)}%; background-color: ${bgColor};"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="action-btn edit-btn" data-type="expense-category" data-id="${cat.name}"><i class="fas fa-pen"></i></button>
+                        </div>
+                    </div>`;
+                }).join('');
             }
 
 
@@ -2460,7 +2456,7 @@
                         <div class="modal-header"><h3>بیشتر</h3></div>
                         <ul class="list-container" style="margin:0;">
                             <li class="more-menu-item" data-page="reports-page" data-title="گزارش‌های جامع"><div class="item-icon" style="background-color:rgba(255,159,10,0.15); color: #ff9f0a;"><i class="fas fa-chart-pie"></i></div><div class="item-info"><p>گزارش‌ جامع روزانه</p></div><i class="fas fa-chevron-left"></i></li>
-                            <li class="more-menu-item" data-page="expense-reports-page" data-title="گزارش هزینه‌ها"><div class="item-icon expense"><i class="fas fa-chart-bar"></i></div><div class="item-info"><p>گزارش هزینه‌ها</p></div><i class="fas fa-chevron-left"></i></li>
+                            <li class="more-menu-item" data-page="expense-reports-page" data-title="گزارش هزینه ها بر اساس دسته بندی"><div class="item-icon expense"><i class="fas fa-chart-bar"></i></div><div class="item-info"><p>گزارش هزینه ها بر اساس دسته بندی</p></div><i class="fas fa-chevron-left"></i></li>
                             <li class="more-menu-item" data-page="debts-page" data-title="بدهی‌ها"><div class="item-icon debt"><i class="fas fa-file-invoice-dollar"></i></div><div class="item-info"><p>بدهی‌ها و چک‌های صادره</p></div><i class="fas fa-chevron-left"></i></li>
                             <li class="more-menu-item" data-page="receivables-page" data-title="طلب‌ها"><div class="item-icon receivable"><i class="fas fa-hand-holding-dollar"></i></div><div class="item-info"><p>طلب‌ها و چک‌های دریافتی</p></div><i class="fas fa-chevron-left"></i></li>
                             <li class="more-menu-item" data-page="loans-page" data-title="تسهیلات"><div class="item-icon loan"><i class="fas fa-landmark"></i></div><div class="item-info"><p>تسهیلات و اقساط</p></div><i class="fas fa-chevron-left"></i></li>
@@ -3073,9 +3069,6 @@
             }, 600);
         });
 
-    </script>
-</body>
-
-</html>
+    </script></body></html>
 
 
