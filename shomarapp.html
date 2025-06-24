@@ -272,6 +272,24 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            position: relative;
+        }
+
+        /* NEW: Active Filter Indicator */
+        .btn[data-action="toggle-filters"].filter-active::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--red-ios);
+            border-radius: 50%;
+            border: 1px solid var(--card-light);
+        }
+
+        body.dark-mode .btn[data-action="toggle-filters"].filter-active::after {
+            border-color: var(--card-dark);
         }
 
         .btn-primary {
@@ -973,18 +991,7 @@
             background-color: var(--bg-dark);
         }
 
-        /* === START: REVISED EXPENSE REPORT STYLES === */
-        @keyframes card-entry {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        /* === START: NEW EXPENSE REPORT STYLES === */
         #expense-reports-page .card-section {
             padding: 1rem;
             margin-bottom: 1rem;
@@ -1033,12 +1040,14 @@
         #expense-reports-page .category-report-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.75rem;
             margin-top: 1rem;
         }
-        
+
         #expense-reports-page .category-report-card-new {
-            display: flex;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            /* Icon, Info, Amount, Actions */
             gap: 1rem;
             align-items: center;
             background-color: var(--card-light);
@@ -1046,13 +1055,10 @@
             padding: 1rem;
             cursor: pointer;
             transition: var(--transition-fast);
-            opacity: 0;
-            transform: translateY(20px);
-            animation: card-entry 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
         #expense-reports-page .category-report-card-new:hover {
-            transform: translateY(-4px) !important; 
+            transform: translateY(-2px);
             box-shadow: var(--shadow);
         }
 
@@ -1064,23 +1070,9 @@
             flex-shrink: 0;
         }
 
-        #expense-reports-page .category-report-card-new .category-details {
-            flex-grow: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        #expense-reports-page .category-report-card-new .category-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 1rem;
-        }
-
         #expense-reports-page .category-report-card-new .category-info {
             min-width: 0;
+            /* Prevent overflow */
         }
 
         #expense-reports-page .category-report-card-new .category-title {
@@ -1092,53 +1084,70 @@
             text-overflow: ellipsis;
         }
 
-        #expense-reports-page .category-report-card-new .tx-count {
-            font-size: 0.8rem;
-            color: var(--subtext-light);
+        #expense-reports-page .category-report-card-new .category-stats {
             margin-top: 0.25rem;
         }
 
-        #expense-reports-page .category-report-card-new .total-amount {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-light);
-            white-space: nowrap;
-            flex-shrink: 0;
+        #expense-reports-page .category-report-card-new .tx-count {
+            font-size: 0.8rem;
+            color: var(--subtext-light);
         }
 
-        #expense-reports-page .category-report-card-new .total-amount span {
-            font-size: 0.8rem;
-            font-weight: 500;
+        #expense-reports-page .category-report-card-new .category-amount-progress {
+            text-align: right;
+        }
+
+        #expense-reports-page .category-report-card-new .total-amount {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+
+        #expense-reports-page .category-report-card-new .progress-bar-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 100px;
+            /* Give it some space */
+        }
+
+        #expense-reports-page .category-report-card-new .percentage-text {
+            font-size: 0.75rem;
             color: var(--subtext-light);
-            margin-right: 0.25rem;
+            font-weight: 500;
         }
 
         #expense-reports-page .category-report-card-new .progress-bar-container {
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
+            flex-grow: 1;
+            height: 6px;
+            border-radius: 3px;
             background-color: var(--gray-200);
             overflow: hidden;
         }
-        
+
         body.dark-mode #expense-reports-page .category-report-card-new .progress-bar-container {
             background-color: var(--gray-800);
         }
 
         #expense-reports-page .category-report-card-new .progress-bar {
             height: 100%;
-            border-radius: 4px;
-            transition: width 1s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 3px;
+            transition: width 0.5s ease-in-out;
+            /* Added Animation */
         }
 
         #expense-reports-page .category-report-card-new .item-actions {
             margin-left: -0.5rem;
+            /* Pull it closer to the edge */
         }
-        
+
         #expense-reports-page .category-report-card-new .action-btn {
             font-size: 1rem;
         }
-        /* === END: REVISED EXPENSE REPORT STYLES === */
+
+        /* === END: NEW EXPENSE REPORT STYLES === */
+
 
         /* CHANGE: New icon picker in modal */
         .icon-picker {
@@ -1399,7 +1408,10 @@
                 font-size: 0.9rem;
             }
         }
-    </style></head><body>
+    </style>
+</head>
+
+<body>
     <div class="app-wrapper">
         <header class="app-header">
             <h1 id="app-header-title">حسابداری شخصی شمار</h1>
@@ -1630,6 +1642,22 @@
                     document.body.classList.remove('modal-open');
                 }
             };
+            const isFilterActive = (pageKey) => {
+                const f = state.filters[pageKey];
+                if (!f) return false;
+                if (f.from || f.to) return true;
+                if (f.accountId && f.accountId !== 'all') return true;
+                // Page-specific checks
+                if (pageKey === 'transactions') {
+                    if (f.searchTerm) return true;
+                    if (f.type && f.type !== 'all') return true;
+                    if (f.category && f.category !== 'all') return true;
+                }
+                if (pageKey === 'debts' || pageKey === 'receivables') {
+                    if (f.status && f.status !== 'all') return true;
+                }
+                return false;
+            };
 
             // --- NAVIGATION ---
             const switchPage = (pageId, title) => {
@@ -1828,7 +1856,7 @@
                         <div class="section-header">
                             <h3>لیست تراکنش‌ها</h3>
                             <div class="header-actions">
-                                <button class="btn btn-secondary" data-action="toggle-filters">
+                                <button class="btn btn-secondary ${isFilterActive('transactions') ? 'filter-active' : ''}" data-action="toggle-filters">
                                     <i class="fas fa-filter"></i> <span>فیلتر</span>
                                 </button>
                                 <button id="export-csv-btn" class="btn btn-success">
@@ -1966,29 +1994,29 @@
                 if (!page) return;
                 const pageKey = pageId.replace('-page', '');
                 page.innerHTML = `
+                             <div class="card-section">
+                                     <div class="section-header">
+                                         <h3>${title}</h3>
+                                         <button class="btn btn-secondary ${isFilterActive(pageKey) ? 'filter-active' : ''}" data-action="toggle-filters">
+                                             <i class="fas fa-filter"></i> <span>فیلتر</span>
+                                         </button>
+                                     </div>
+                                     <div class="filters-collapsible-container">
+                                         <div class="filter-grid">
+                                             <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter"></div>
+                                             <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter"></div>
+                                             <div class="form-group account-filter-group"><label>حساب</label><select class="form-control account-filter account-dropdown"></select></div>
+                                             <div class="form-group status-filter-group"><label>وضعیت</label><select class="form-control status-filter"></select></div>
+                                         </div>
+                                         <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
+                                     </div>
+                               </div>
+                               <div class="filter-summary" style="display: none;"></div>
                                <div class="card-section">
-                                       <div class="section-header">
-                                           <h3>${title}</h3>
-                                           <button class="btn btn-secondary" data-action="toggle-filters">
-                                               <i class="fas fa-filter"></i> <span>فیلتر</span>
-                                           </button>
-                                       </div>
-                                       <div class="filters-collapsible-container">
-                                           <div class="filter-grid">
-                                               <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter"></div>
-                                               <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter"></div>
-                                               <div class="form-group account-filter-group"><label>حساب</label><select class="form-control account-filter account-dropdown"></select></div>
-                                               <div class="form-group status-filter-group"><label>وضعیت</label><select class="form-control status-filter"></select></div>
-                                           </div>
-                                           <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
-                                       </div>
-                                   </div>
-                                   <div class="filter-summary" style="display: none;"></div>
-                                   <div class="card-section">
                                     <ul class="list-container" id="${pageKey}-list"></ul>
                                     <div class="list-status" id="${pageKey}-status"></div>
-                                   </div>
-                `;
+                               </div>
+                        `;
                 const listEl = qs(`#${pageKey}-list`);
                 const statusEl = qs(`#${pageKey}-status`);
                 populateDropdown(qs('.account-filter', page), state.accounts, 'id', 'name', { value: 'all', text: 'همه حساب‌ها' });
@@ -2068,20 +2096,20 @@
                 if (!page) return;
                 const savingsBalance = state.transactions.filter(tx => tx.type === 'transfer').reduce((acc, tx) => acc + tx.amount, 0);
                 page.innerHTML = `
-                                  <div class="card-section savings-hero-card">
-                                      <div class="hero-icon"><i class="fas fa-piggy-bank"></i></div>
-                                      <h4>موجودی صندوق پس‌انداز</h4>
-                                      <h1>${formatCurrency(savingsBalance)}<span>تومان</span></h1>
-                                      <button class="btn" data-action="add-to-fund">
-                                          <i class="fas fa-donate"></i>
-                                          <span>انتقال به صندوق</span>
-                                      </button>
-                                  </div>
-                                  <div class="card-section">
-                                      <div class="section-header"><h3>اهداف مالی</h3><button class="btn btn-primary" data-action="add-goal"><i class="fas fa-plus"></i> افزودن هدف</button></div>
-                                      <div id="savings-goals-list"></div>
-                                      <div id="savings-goals-status" class="list-status"></div>
-                                  </div>
+                                    <div class="card-section savings-hero-card">
+                                        <div class="hero-icon"><i class="fas fa-piggy-bank"></i></div>
+                                        <h4>موجودی صندوق پس‌انداز</h4>
+                                        <h1>${formatCurrency(savingsBalance)}<span>تومان</span></h1>
+                                        <button class="btn" data-action="add-to-fund">
+                                            <i class="fas fa-donate"></i>
+                                            <span>انتقال به صندوق</span>
+                                        </button>
+                                    </div>
+                                    <div class="card-section">
+                                        <div class="section-header"><h3>اهداف مالی</h3><button class="btn btn-primary" data-action="add-goal"><i class="fas fa-plus"></i> افزودن هدف</button></div>
+                                        <div id="savings-goals-list"></div>
+                                        <div id="savings-goals-status" class="list-status"></div>
+                                    </div>
                 `;
                 const listEl = qs('#savings-goals-list'), statusEl = qs('#savings-goals-status');
                 listEl.innerHTML = ''; statusEl.textContent = '';
@@ -2119,25 +2147,25 @@
                 if (!page) return;
                 const pageKey = 'reports';
                 page.innerHTML = `
-                                      <div class="card-section">
-                                          <div class="section-header">
-                                              <h3>گزارش جامع</h3>
-                                              <button class="btn btn-secondary" data-action="toggle-filters">
-                                                  <i class="fas fa-filter"></i> <span>فیلتر</span>
-                                              </button>
-                                          </div>
-                                          <div class="filters-collapsible-container">
-                                              <div class="filter-grid">
-                                                  <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter"></div>
-                                                  <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter"></div>
-                                                  <div class="form-group"><label>حساب</label><select class="form-control account-filter account-dropdown"></select></div>
-                                              </div>
-                                              <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
-                                          </div>
-                                      </div>
-                                      <div class="filter-summary" style="display: none;"></div>
-                                      <div id="daily-reports-list"></div>
-                                      <div id="reports-status" class="list-status"></div>
+                                    <div class="card-section">
+                                        <div class="section-header">
+                                            <h3>گزارش جامع</h3>
+                                            <button class="btn btn-secondary ${isFilterActive(pageKey) ? 'filter-active' : ''}" data-action="toggle-filters">
+                                                <i class="fas fa-filter"></i> <span>فیلتر</span>
+                                            </button>
+                                        </div>
+                                        <div class="filters-collapsible-container">
+                                            <div class="filter-grid">
+                                                <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter"></div>
+                                                <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter"></div>
+                                                <div class="form-group"><label>حساب</label><select class="form-control account-filter account-dropdown"></select></div>
+                                            </div>
+                                            <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
+                                        </div>
+                                    </div>
+                                    <div class="filter-summary" style="display: none;"></div>
+                                    <div id="daily-reports-list"></div>
+                                    <div id="reports-status" class="list-status"></div>
                 `;
                 populateDropdown(qs('.account-filter', page), state.accounts, 'id', 'name', { value: 'all', text: 'همه حساب‌ها' });
                 qs('.account-filter', page).value = state.filters.reports.accountId;
@@ -2161,11 +2189,11 @@
                     });
                     const netFlow = totalIncome - totalExpense;
                     summaryEl.innerHTML = `<h4>خلاصه فیلتر</h4>
-                                <div class="summary-details">
-                                    <div><span>مجموع دریافتی</span><strong style="color:var(--income);">${formatCurrency(totalIncome)}</strong></div>
-                                    <div><span>مجموع پرداختی</span><strong style="color:var(--expense);">${formatCurrency(totalExpense)}</strong></div>
-                                    <div><span>جریان خالص</span><strong style="color:${netFlow >= 0 ? 'var(--income)' : 'var(--expense)'};">${formatCurrency(netFlow)}</strong></div>
-                                </div>`;
+                                        <div class="summary-details">
+                                            <div><span>مجموع دریافتی</span><strong style="color:var(--income);">${formatCurrency(totalIncome)}</strong></div>
+                                            <div><span>مجموع پرداختی</span><strong style="color:var(--expense);">${formatCurrency(totalExpense)}</strong></div>
+                                            <div><span>جریان خالص</span><strong style="color:${netFlow >= 0 ? 'var(--income)' : 'var(--expense)'};">${formatCurrency(netFlow)}</strong></div>
+                                        </div>`;
                 } else {
                     summaryEl.style.display = 'none';
                 }
@@ -2194,101 +2222,100 @@
                     const dayNet = data.income - data.expense;
                     const m = moment(day, MOMENT_FORMAT);
                     return `<div class="daily-report-item" data-net-flow="${dayNet}">
-                                <div class="daily-report-header">
-                                    <div class="date-info">
-                                        <span class="day-of-week">${m.format('dddd')}</span>
-                                        <span class="date-full">${m.format(JALALI_DISPLAY_FORMAT)}</span>
+                                    <div class="daily-report-header">
+                                        <div class="date-info">
+                                            <span class="day-of-week">${m.format('dddd')}</span>
+                                            <span class="date-full">${m.format(JALALI_DISPLAY_FORMAT)}</span>
+                                        </div>
+                                        <div class="flow-summary">
+                                            <div class="flow-item income"><i class="fas fa-arrow-up"></i><span>${formatCurrency(data.income)}</span></div>
+                                            <div class="flow-item expense"><i class="fas fa-arrow-down"></i><span>${formatCurrency(data.expense)}</span></div>
+                                        </div>
+                                        <i class="fas fa-chevron-down expand-arrow"></i>
                                     </div>
-                                    <div class="flow-summary">
-                                        <div class="flow-item income"><i class="fas fa-arrow-up"></i><span>${formatCurrency(data.income)}</span></div>
-                                        <div class="flow-item expense"><i class="fas fa-arrow-down"></i><span>${formatCurrency(data.expense)}</span></div>
+                                    <div class="daily-report-body">
+                                        <ul class="list-container">${data.transactions.sort((a, b) => b.id - a.id).map(tx => `<li data-id="${tx.id}" data-type="transaction">${getTransactionListItemHTML(tx, { showAccount: true })}</li>`).join('')}</ul>
                                     </div>
-                                    <i class="fas fa-chevron-down expand-arrow"></i>
-                                </div>
-                                <div class="daily-report-body">
-                                    <ul class="list-container">${data.transactions.sort((a, b) => b.id - a.id).map(tx => `<li data-id="${tx.id}" data-type="transaction">${getTransactionListItemHTML(tx, { showAccount: true })}</li>`).join('')}</ul>
-                                </div>
-                            </div>`;
+                                </div>`;
                 }).join('');
             }
+            // CHANGE: Whole function rewritten for new design and logic
             function renderExpenseReportsPage() {
                 const page = qs('#expense-reports-page');
                 if (!page) return;
-                const pageKey = 'expenseReports';
-                const filters = state.filters[pageKey];
-                const sortIcons = { 'total': 'fa-sort-amount-down', 'name': 'fa-sort-alpha-down', 'count': 'fa-sort-numeric-down' };
-                const sortTooltips = { 'total': 'مرتب بر اساس بیشترین هزینه', 'name': 'مرتب بر اساس نام', 'count': 'مرتب بر اساس تعداد' };
 
                 page.innerHTML = `
-                    <div class="section-header" style="margin-bottom: 1rem; padding: 0 1.25rem;">
+                    <div class="section-header" style="margin-bottom: 1rem;">
                         <h3>گزارش هزینه ها بر اساس دسته بندی</h3>
                         <div class="header-actions">
-                            <button class="btn btn-secondary" data-action="sort-expense-reports" title="${sortTooltips[filters.sortBy]}">
-                                <i class="fas ${sortIcons[filters.sortBy]}"></i>
-                            </button>
                             <button class="btn btn-primary" data-action="add-expense-category">
-                                <i class="fas fa-plus"></i>
+                                <i class="fas fa-plus"></i> دسته جدید
                             </button>
                         </div>
                     </div>
 
-                    <div class="category-report-list" id="expense-categories-list" style="padding: 0 1rem;"></div>
+                    <div class="category-report-list" id="expense-categories-list"></div>
                     <div id="expense-reports-status" class="list-status"></div>`;
 
+
                 const expenseTxs = state.transactions.filter(tx => tx.type === 'expense');
+                // Note: Filters were removed from this page per user request. All expenses are considered.
+                const filteredTxs = expenseTxs;
+
                 const listEl = qs('#expense-categories-list');
                 const statusEl = qs('#expense-reports-status');
                 listEl.innerHTML = '';
                 statusEl.innerHTML = '';
 
                 if (state.expenseCategories.length === 0) {
-                    statusEl.innerHTML = 'هنوز دسته‌بندی هزینه‌ای تعریف نشده است. از دکمه + برای افزودن استفاده کنید.';
+                    statusEl.innerHTML = 'هنوز دسته‌بندی هزینه‌ای تعریف نشده است.';
                     return;
                 }
 
-                const totalOverallExpense = expenseTxs.reduce((sum, tx) => sum + tx.amount, 0);
+                const totalOverallExpense = filteredTxs.reduce((sum, tx) => sum + tx.amount, 0);
 
                 let categoryData = state.expenseCategories.map(category => {
-                    const txs = expenseTxs.filter(tx => tx.category === category.name);
+                    const txs = filteredTxs.filter(tx => tx.category === category.name);
                     return {
                         name: category.name,
                         icon: category.icon || 'fa-tag',
                         count: txs.length,
                         total: txs.reduce((sum, tx) => sum + tx.amount, 0)
                     };
-                }); 
+                });
 
-                if (filters.sortBy === 'name') categoryData.sort((a, b) => a.name.localeCompare(b.name, 'fa'));
-                else if (filters.sortBy === 'count') categoryData.sort((a, b) => b.count - a.count);
-                else categoryData.sort((a, b) => b.total - a.total);
+                // Default sort by total expense
+                categoryData.sort((a, b) => b.total - a.total);
 
                 const categoryColors = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5856D6', '#FF2D55', '#5AC8FA', '#FFCC00', '#64D2FF'];
-                
-                if (categoryData.length === 0) {
-                    statusEl.innerHTML = 'هنوز دسته‌بندی هزینه‌ای تعریف نشده است.';
+
+                if (categoryData.length === 0 && filteredTxs.length > 0) {
+                         statusEl.innerHTML = 'موردی با فیلترهای مشخص شده یافت نشد.';
+                } else if (state.transactions.filter(tx => tx.type === 'expense').length === 0) {
+                    statusEl.innerHTML = 'برای مشاهده گزارش، ابتدا یک تراکنش هزینه ثبت کنید.';
                 }
                 
                 listEl.innerHTML = categoryData.map((cat, index) => {
                     const percentage = totalOverallExpense > 0 ? (cat.total / totalOverallExpense) * 100 : 0;
-                    const color = categoryColors[index % categoryColors.length];
-
+                    const bgColor = categoryColors[index % categoryColors.length];
                     return `
-                    <div class="category-report-card-new" data-action="view-category-transactions" data-category-name="${cat.name}" style="animation-delay: ${index * 60}ms;">
-                        <div class="item-icon expense" style="background-color: ${color}; color: #FFF;"><i class="fas ${cat.icon}"></i></div>
-
-                        <div class="category-details">
-                            <div class="category-header">
-                                <div class="category-info">
-                                    <h4 class="category-title">${cat.name}</h4>
-                                    <div class="tx-count">${cat.count} تراکنش</div>
-                                </div>
-                                <div class="total-amount">${formatCurrency(cat.total)}<span> تومان</span></div>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: ${percentage.toFixed(1)}%; background-color: ${color};"></div>
+                    <div class="category-report-card-new" data-action="view-category-transactions" data-category-name="${cat.name}">
+                        <div class="item-icon expense" style="background-color: ${bgColor}; color: #FFF;"><i class="fas ${cat.icon}"></i></div>
+                        <div class="category-info">
+                            <h4 class="category-title">${cat.name}</h4>
+                            <div class="category-stats">
+                                <span class="tx-count">${cat.count} تراکنش</span>
                             </div>
                         </div>
-
+                        <div class="category-amount-progress">
+                            <span class="total-amount">${formatCurrency(cat.total)} تومان</span>
+                            <div class="progress-bar-wrapper">
+                                <div class="percentage-text">${percentage.toFixed(0)}%</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar expense" style="width: ${percentage.toFixed(1)}%; background-color: ${bgColor};"></div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="item-actions">
                             <button class="action-btn edit-btn" data-type="expense-category" data-id="${cat.name}"><i class="fas fa-pen"></i></button>
                         </div>
@@ -2616,10 +2643,10 @@
                         const categoryName = expenseCategoryCard.dataset.categoryName;
                         state.filters.transactions = {
                             searchTerm: '',
-                            from: null, // No filters on this page anymore
-                            to: null,
+                            from: state.filters.expenseReports.from,
+                            to: state.filters.expenseReports.to,
                             type: 'expense',
-                            accountId: 'all',
+                            accountId: state.filters.expenseReports.accountId,
                             category: categoryName
                         };
                         saveData();
@@ -2808,8 +2835,7 @@
                         }
                     }
                     // CHANGE: Updated generic filter handler
-                    const filterContainer = target.closest('.page[id$="-page"] .filters-collapsible-container');
-                    if (filterContainer) {
+                    if (target.closest('.page[id$="-page"] .filters-collapsible-container')) {
                         const pageEl = target.closest('.page');
                         const pageKey = pageEl.id.replace('-page', '');
                         if (state.filters[pageKey]) {
@@ -3021,24 +3047,10 @@
             const initDatepickers = (parent = document) => {
                 if (!parent) return;
                 try {
-                    // Destroy existing instances to prevent duplicates
                     $(parent).find(".pdate").each(function () {
                         if ($(this).hasClass('pwt-datepicker-input-element')) { $(this).pDatepicker('destroy'); }
                     });
-                    // FIX: Added onSelect callback to trigger change event immediately for filters.
-                    $(parent).find(".pdate").pDatepicker({
-                        format: 'YYYY/MM/DD',
-                        calendarType: 'persian',
-                        autoClose: true,
-                        observer: true,
-                        initialValue: false,
-                        persianDigit: true,
-                        calendar: { persian: { locale: 'fa' } },
-                        toolbox: { calendarSwitch: { enabled: false } },
-                        onSelect: function () {
-                            this.el.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                    });
+                    $(parent).find(".pdate").pDatepicker({ format: 'YYYY/MM/DD', calendarType: 'persian', autoClose: true, observer: true, initialValue: false, persianDigit: true, calendar: { persian: { locale: 'fa' } }, toolbox: { calendarSwitch: { enabled: false } } });
                 } catch (e) { console.error("Datepicker init failed", e); }
             };
 
@@ -3062,4 +3074,9 @@
             }, 600);
         });
 
-    </script></body></html>
+    </script>
+</body>
+
+</html>
+
+
