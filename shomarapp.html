@@ -188,7 +188,8 @@
         }
 
         .header-controls>.fas,
-        .header-controls .theme-switcher {
+        .header-controls .theme-switcher,
+        .header-controls .header-icon-btn {
             color: var(--subtext-light);
             cursor: pointer;
             font-size: 1.2rem;
@@ -201,7 +202,8 @@
         }
 
         .header-controls>.fas:hover,
-        .header-controls .theme-switcher:hover {
+        .header-controls .theme-switcher:hover,
+        .header-controls .header-icon-btn:hover {
             color: var(--primary);
         }
 
@@ -974,86 +976,159 @@
             background-color: var(--bg-dark);
         }
 
-        /* === NEW & IMPROVED: Expense Category Report Styling === */
+        /* CHANGE: Expense Category Reports Styling - A whole new look */
+        #expense-reports-page .category-report-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
         #expense-reports-page .category-report-card {
             background-color: var(--card-light);
             border-radius: var(--radius);
-            margin-bottom: 1.25rem;
-            padding: 1.25rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            padding: 1rem;
+            display: grid;
+            grid-template-areas:
+                "icon title actions"
+                "icon stats stats"
+                "bar bar bar";
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 0.25rem 1rem;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+            cursor: pointer;
         }
 
         #expense-reports-page .category-report-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
         }
 
-        #expense-reports-page .category-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
+        #expense-reports-page .category-report-card .item-icon {
+            grid-area: icon;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.3rem;
+            border-radius: var(--radius);
         }
 
         #expense-reports-page .category-title {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        #expense-reports-page .category-title h4 {
-            font-size: 1.15rem;
+            grid-area: title;
+            font-size: 1.1rem;
             font-weight: 600;
             margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #expense-reports-page .category-actions {
+            grid-area: actions;
+        }
+
+        #expense-reports-page .category-actions .action-btn {
+            font-size: 1.1rem;
         }
 
         #expense-reports-page .category-stats {
+            grid-area: stats;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            color: var(--subtext-light);
-            margin-bottom: 1rem;
+            align-items: baseline;
+            gap: 1rem;
         }
 
         #expense-reports-page .category-stats .total-amount {
+            font-size: 1.2rem;
             font-weight: 600;
             color: var(--text-light);
-            font-size: 1rem;
+        }
+
+        #expense-reports-page .category-stats .tx-count {
+            font-size: 0.85rem;
+            color: var(--subtext-light);
+        }
+
+        #expense-reports-page .progress-bar-wrapper {
+            grid-area: bar;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        #expense-reports-page .progress-bar-wrapper .progress-bar-container {
+            flex-grow: 1;
+            margin-bottom: 0;
+            height: 6px;
         }
 
         #expense-reports-page .progress-bar.expense {
             background: linear-gradient(90deg, var(--orange-ios), var(--red-ios));
         }
 
-        #expense-reports-page .progress-bar {
-            animation: progressAnimation 1s ease-out forwards;
+        #expense-reports-page .progress-bar-wrapper .percentage-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--subtext-light);
+            min-width: 35px;
+            text-align: left;
         }
 
-        @keyframes progressAnimation {
-            from {
-                width: 0% !important;
-            }
+        #expense-reports-page .progress-bar-wrapper,
+        #expense-reports-page .category-stats {
+            margin-left: calc(3rem + 1rem);
+            /* align with title */
         }
 
         #expense-reports-page #add-category-section {
-            background-color: transparent;
-            border: 2px dashed var(--border-light);
-            text-align: center;
-            padding: 2rem;
-            cursor: pointer;
-            transition: border-color 0.2s, background-color 0.2s;
+            /* This is no longer used, button moved to header */
+            display: none;
+        }
+
+        #expense-reports-page .card-section {
+            padding-bottom: 0.5rem;
+        }
+
+        /* CHANGE: New icon picker in modal */
+        .icon-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-light);
+            padding: 0.5rem;
             border-radius: var(--radius);
         }
 
-        #expense-reports-page #add-category-section:hover {
-            border-color: var(--primary);
-            background-color: rgba(0, 122, 255, 0.05);
+        .icon-picker-item {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+            color: var(--subtext-light);
         }
 
-        body.dark-mode #expense-reports-page #add-category-section:hover {
-            background-color: rgba(0, 122, 255, 0.1);
+        .icon-picker-item:hover {
+            background-color: var(--gray-200);
+        }
+
+        body.dark-mode .icon-picker-item:hover {
+            background-color: var(--gray-800);
+        }
+
+        .icon-picker-item.selected {
+            background-color: var(--primary);
+            color: white;
         }
 
         /* ========================================= */
@@ -1434,21 +1509,51 @@
             moment.updateLocale('fa', { jMonths: "فروردین_اردیبهشت_خرداد_تیر_مرداد_شهریور_مهر_آبان_آذر_دی_بهمن_اسفند".split("_"), weekdays: "یک‌شنبه_دوشنبه_سه‌شنبه_چهارشنبه_پنج‌شنبه_جمعه_شنبه".split("_"), weekdaysMin: "ی_د_s_چ_پ_ج_ش".split("_"), });
             const MOMENT_FORMAT = 'YYYY/MM/DD';
             const JALALI_DISPLAY_FORMAT = 'jYYYY/jMM/jDD';
-            const STORAGE_KEY = 'accountingApp_ios_v5_enhanced';
+            const STORAGE_KEY = 'accountingApp_ios_v6_redesign'; // CHANGE: Updated storage key for new state
             const TRANSACTION_TYPES = { income: '✅ دریافتی', expense: '❌ هزینه', transfer: '⤴️ انتقال به پس انداز', receivable: '💰 طلب', debt: '➖ بدهی', receivedCheck: '📄 چک دریافتی', issuedCheck: '📄 چک صادره', installmentPayment: '💳 پرداخت قسط' };
             const STATUS_TYPES = { debt: { paid: 'پرداخت شد', pending: 'در انتظار', not_paid: 'پرداخت نشد' }, receivable: { received: 'دریافت شد', pending: 'در انتظار', not_received: 'دریافت نشد' }, issuedCheck: { cleared: 'پاس شده', pending: 'در انتظار', bounced: 'پاس نشد' }, receivedCheck: { cleared: 'پاس شده', pending: 'در انتظار', bounced: 'پاس نشد' } };
-            const CATEGORY_ICONS = {
-                'خرید روزمره': 'fa-shopping-basket', 'حمل و نقل': 'fa-bus-alt', 'غذا': 'fa-utensils', 'پوشاک': 'fa-tshirt', 'سرگرمی': 'fa-gamepad', 'اجاره': 'fa-file-signature', 'درمان': 'fa-pills',
-                'حقوق': 'fa-money-bill-wave', 'پروژه': 'fa-briefcase', 'سود سهام': 'fa-chart-line', 'هدیه': 'fa-gift',
-                'default': 'fa-tag'
-            };
+
+            // CHANGE: Icons for categories are now part of state, but we need a master list for the picker.
+            const AVAILABLE_ICONS = [
+                'fa-shopping-basket', 'fa-bus-alt', 'fa-utensils', 'fa-tshirt', 'fa-gamepad', 'fa-file-signature', 'fa-pills',
+                'fa-car', 'fa-gas-pump', 'fa-home', 'fa-couch', 'fa-wifi', 'fa-mobile-alt', 'fa-book-open', 'fa-graduation-cap',
+                'fa-film', 'fa-plane', 'fa-coffee', 'fa-heart', 'fa-dumbbell', 'fa-paw', 'fa-tools', 'fa-cut', 'fa-money-bill-wave',
+                'fa-briefcase', 'fa-chart-line', 'fa-gift', 'fa-tag'
+            ];
+
             const CATEGORY_EMOJI_MAP = {
                 'خرید روزمره': '🛒', 'حمل و نقل': '🚌', 'غذا': '🍔', 'پوشاک': '👕', 'سرگرمی': '🎮', 'اجاره': '📄', 'درمان': '💊',
                 'حقوق': '💵', 'پروژه': '💼', 'سود سهام': '📈', 'هدیه': '🎁'
             };
 
+
             // --- STATE ---
-            let state = { transactions: [], accounts: [], loans: [], savingsGoals: [], expenseCategories: ['خرید روزمره', 'حمل و نقل', 'غذا', 'پوشاک', 'سرگرمی', 'اجاره'], incomeSources: ['حقوق', 'پروژه', 'سود سهام'], isBalanceVisible: true, activeAccountId: 'all', dashboardPeriod: 'all', filters: { transactions: { searchTerm: '', from: null, to: null, type: 'all', accountId: 'all', category: 'all' }, reports: { from: null, to: null, accountId: 'all' }, expenseReports: { from: null, to: null, accountId: 'all', sortBy: 'total' }, debts: { from: null, to: null, accountId: 'all', status: 'all' }, receivables: { from: null, to: null, accountId: 'all', status: 'all' } } };
+            let state = {
+                transactions: [],
+                accounts: [],
+                loans: [],
+                savingsGoals: [],
+                // CHANGE: expenseCategories is now an array of objects
+                expenseCategories: [
+                    { name: 'خرید روزمره', icon: 'fa-shopping-basket' },
+                    { name: 'حمل و نقل', icon: 'fa-bus-alt' },
+                    { name: 'غذا', icon: 'fa-utensils' },
+                    { name: 'پوشاک', icon: 'fa-tshirt' },
+                    { name: 'سرگرمی', icon: 'fa-gamepad' },
+                    { name: 'اجاره', icon: 'fa-file-signature' }
+                ],
+                // CHANGE: incomeSources also converted for consistency, though not strictly required by prompt
+                incomeSources: [
+                    { name: 'حقوق', icon: 'fa-money-bill-wave' },
+                    { name: 'پروژه', icon: 'fa-briefcase' },
+                    { name: 'سود سهام', icon: 'fa-chart-line' },
+                    { name: 'هدیه', icon: 'fa-gift' }
+                ],
+                isBalanceVisible: true,
+                activeAccountId: 'all',
+                dashboardPeriod: 'all',
+                filters: { transactions: { searchTerm: '', from: null, to: null, type: 'all', accountId: 'all', category: 'all' }, reports: { from: null, to: null, accountId: 'all' }, expenseReports: { from: null, to: null, accountId: 'all', sortBy: 'total' }, debts: { from: null, to: null, accountId: 'all', status: 'all' }, receivables: { from: null, to: null, accountId: 'all', status: 'all' } }
+            };
             let itemToDelete = { id: null, type: null };
             let preChangeSelectValue = null;
             let currentPageId = 'dashboard-page';
@@ -1507,7 +1612,33 @@
 
             // --- DATA PERSISTENCE ---
             const saveData = () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); localStorage.setItem(STORAGE_KEY + '_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); } catch (e) { console.error("Failed to save data", e); } };
-            const loadData = () => { try { const data = localStorage.getItem(STORAGE_KEY); if (data) { const parsedData = JSON.parse(data); const defaultFilters = { transactions: { searchTerm: '', from: null, to: null, type: 'all', accountId: 'all', category: 'all' }, reports: { from: null, to: null, accountId: 'all' }, expenseReports: { from: null, to: null, accountId: 'all', sortBy: 'total' }, debts: { from: null, to: null, accountId: 'all', status: 'all' }, receivables: { from: null, to: null, accountId: 'all', status: 'all' } }; parsedData.filters = { ...defaultFilters, ...(parsedData.filters || {}) }; state = { ...state, ...parsedData }; } if (state.accounts.length === 0) { state.accounts.push({ id: Date.now(), name: 'حساب اصلی' }); } if (!Array.isArray(state.savingsGoals)) state.savingsGoals = []; if (localStorage.getItem(STORAGE_KEY + '_theme') === 'dark') { document.body.classList.add('dark-mode'); updateThemeIcon(); } } catch (e) { console.error("Failed to load data", e); } };
+            const loadData = () => {
+                try {
+                    const data = localStorage.getItem(STORAGE_KEY);
+                    if (data) {
+                        const parsedData = JSON.parse(data);
+                        const defaultFilters = { transactions: { searchTerm: '', from: null, to: null, type: 'all', accountId: 'all', category: 'all' }, reports: { from: null, to: null, accountId: 'all' }, expenseReports: { from: null, to: null, accountId: 'all', sortBy: 'total' }, debts: { from: null, to: null, accountId: 'all', status: 'all' }, receivables: { from: null, to: null, accountId: 'all', status: 'all' } };
+                        parsedData.filters = { ...defaultFilters, ...(parsedData.filters || {}) };
+                        state = { ...state, ...parsedData };
+                    }
+                    if (state.accounts.length === 0) { state.accounts.push({ id: Date.now(), name: 'حساب اصلی' }); }
+                    if (!Array.isArray(state.savingsGoals)) state.savingsGoals = [];
+
+                    // CHANGE: Migration logic for old category string array format
+                    const defaultIcons = { 'خرید روزمره': 'fa-shopping-basket', 'حمل و نقل': 'fa-bus-alt', 'غذا': 'fa-utensils', 'پوشاک': 'fa-tshirt', 'سرگرمی': 'fa-gamepad', 'اجاره': 'fa-file-signature', 'درمان': 'fa-pills', 'حقوق': 'fa-money-bill-wave', 'پروژه': 'fa-briefcase', 'سود سهام': 'fa-chart-line', 'هدیه': 'fa-gift', 'default': 'fa-tag' };
+                    if (state.expenseCategories.length > 0 && typeof state.expenseCategories[0] === 'string') {
+                        console.log("Migrating expense categories to new object format...");
+                        state.expenseCategories = state.expenseCategories.map(catName => ({ name: catName, icon: defaultIcons[catName] || defaultIcons.default }));
+                    }
+                    if (state.incomeSources.length > 0 && typeof state.incomeSources[0] === 'string') {
+                        console.log("Migrating income sources to new object format...");
+                        state.incomeSources = state.incomeSources.map(catName => ({ name: catName, icon: defaultIcons[catName] || defaultIcons.default }));
+                    }
+
+
+                    if (localStorage.getItem(STORAGE_KEY + '_theme') === 'dark') { document.body.classList.add('dark-mode'); updateThemeIcon(); }
+                } catch (e) { console.error("Failed to load data", e); }
+            };
 
             // --- UI RENDERING ---
             const updateAllUI = () => {
@@ -1535,13 +1666,20 @@
                 const account = state.accounts.find(a => a.id == tx.accountId);
                 let descriptionHTML = tx.description || TRANSACTION_TYPES[tx.type] || "تراکنش";
                 if (tx.type === 'receivedCheck' || tx.type === 'issuedCheck') descriptionHTML += ` <span class="check-badge">چک</span>`;
+
                 let meta = `<div class="meta-data"><span><i class="fas fa-calendar-day" style="opacity: 0.7;"></i> ${displayDate}</span>`;
+
                 if (account && showAccount) meta += `<span> • ${account.name}</span>`;
+
                 if (tx.category) {
-                    const iconClass = CATEGORY_ICONS[tx.category] || CATEGORY_ICONS['default'];
+                    // CHANGE: Get icon from state object
+                    const categoryObj = (tx.type === 'expense' ? state.expenseCategories : state.incomeSources).find(c => c.name === tx.category);
+                    const iconClass = categoryObj ? categoryObj.icon : 'fa-tag';
                     meta += `<span> • <i class="fas ${iconClass}" style="opacity: 0.8; width: 1.2em;"></i> ${tx.category}</span>`;
                 }
+
                 if (displayDueDate) meta += `<span class="due-date-info ${isOverdue ? 'overdue' : ''}"><i class="fas fa-hourglass-half" style="opacity: 0.7;"></i> ${displayDueDate}</span>`;
+
                 const statusTypes = ['debt', 'receivable', 'issuedCheck', 'receivedCheck'];
                 if (statusTypes.includes(tx.type) && tx.status) {
                     const statuses = STATUS_TYPES[tx.type] || {};
@@ -1552,6 +1690,7 @@
                     meta += `<span class="meta-status ${statusClass}">${statusText}</span>`;
                 }
                 meta += '</div>';
+
                 let actions = `<div class="item-actions"><button class="action-btn edit-btn" data-id="${tx.id}" data-type="transaction"><i class="fas fa-pen-to-square"></i></button><button class="action-btn delete-btn" data-id="${tx.id}" data-type="transaction"><i class="fas fa-trash-alt"></i></button></div>`;
                 return `<div class="item-icon ${tx.type}"><i class="fas ${icons[tx.type] || 'fa-dollar-sign'}"></i></div> <div class="item-info"> <p>${descriptionHTML}</p> ${meta} </div> <div class="item-amount ${tx.type === 'income' ? 'income' : 'expense'}">${tx.type === 'transfer' ? '' : sign} ${formatCurrency(tx.amount)}</div> ${actions}`;
             };
@@ -1739,8 +1878,9 @@
                 let categories = [];
                 if (typeFilterVal === 'income') categories = state.incomeSources;
                 if (typeFilterVal === 'expense') categories = state.expenseCategories;
+                // CHANGE: Populate from array of objects
                 categoryFilterEl.innerHTML = '<option value="all">همه دسته‌ها</option>';
-                categories.forEach(cat => categoryFilterEl.innerHTML += `<option value="${cat}">${cat}</option>`);
+                categories.forEach(cat => categoryFilterEl.innerHTML += `<option value="${cat.name}">${cat.name}</option>`);
                 categoryFilterEl.disabled = !['income', 'expense'].includes(typeFilterVal);
             };
             function renderAccountsPage() {
@@ -1783,19 +1923,19 @@
                 page.innerHTML = `
                     <div class="card-section">
                          <div class="section-header">
-                              <h3>${title}</h3>
-                              <button class="btn btn-secondary" data-action="toggle-filters">
+                               <h3>${title}</h3>
+                               <button class="btn btn-secondary" data-action="toggle-filters">
                                    <i class="fas fa-filter"></i> <span>فیلتر</span>
-                              </button>
+                               </button>
                          </div>
                          <div class="filters-collapsible-container">
-                              <div class="filter-grid">
+                               <div class="filter-grid">
                                    <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter"></div>
                                    <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter"></div>
                                    <div class="form-group account-filter-group"><label>حساب</label><select class="form-control account-filter account-dropdown"></select></div>
                                    <div class="form-group status-filter-group"><label>وضعیت</label><select class="form-control status-filter"></select></div>
-                              </div>
-                              <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
+                               </div>
+                               <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
                          </div>
                     </div>
                     <div class="filter-summary" style="display: none;"></div>
@@ -1821,6 +1961,7 @@
                 const summaryEl = qs('.filter-summary', page);
                 const filters = state.filters[pageKey];
                 const hasActiveFilters = filters.from || filters.to || filters.accountId !== 'all' || filters.status !== 'all';
+
                 if (filteredTxs.length > 0 && hasActiveFilters) {
                     summaryEl.style.display = 'block';
                     const totalAmount = filteredTxs.reduce((sum, tx) => sum + tx.amount, 0);
@@ -1882,20 +2023,20 @@
                 if (!page) return;
                 const savingsBalance = state.transactions.filter(tx => tx.type === 'transfer').reduce((acc, tx) => acc + tx.amount, 0);
                 page.innerHTML = `
-                     <div class="card-section savings-hero-card">
-                         <div class="hero-icon"><i class="fas fa-piggy-bank"></i></div>
-                         <h4>موجودی صندوق پس‌انداز</h4>
-                         <h1>${formatCurrency(savingsBalance)}<span>تومان</span></h1>
-                         <button class="btn" data-action="add-to-fund">
-                             <i class="fas fa-donate"></i>
-                             <span>انتقال به صندوق</span>
-                         </button>
-                    </div>
-                    <div class="card-section">
-                        <div class="section-header"><h3>اهداف مالی</h3><button class="btn btn-primary" data-action="add-goal"><i class="fas fa-plus"></i> افزودن هدف</button></div>
-                        <div id="savings-goals-list"></div>
-                        <div id="savings-goals-status" class="list-status"></div>
-                    </div>
+                         <div class="card-section savings-hero-card">
+                             <div class="hero-icon"><i class="fas fa-piggy-bank"></i></div>
+                             <h4>موجودی صندوق پس‌انداز</h4>
+                             <h1>${formatCurrency(savingsBalance)}<span>تومان</span></h1>
+                             <button class="btn" data-action="add-to-fund">
+                                 <i class="fas fa-donate"></i>
+                                 <span>انتقال به صندوق</span>
+                             </button>
+                        </div>
+                        <div class="card-section">
+                            <div class="section-header"><h3>اهداف مالی</h3><button class="btn btn-primary" data-action="add-goal"><i class="fas fa-plus"></i> افزودن هدف</button></div>
+                            <div id="savings-goals-list"></div>
+                            <div id="savings-goals-status" class="list-status"></div>
+                        </div>
                 `;
                 const listEl = qs('#savings-goals-list'), statusEl = qs('#savings-goals-status');
                 listEl.innerHTML = ''; statusEl.textContent = '';
@@ -1933,39 +2074,41 @@
                 if (!page) return;
                 const pageKey = 'reports';
                 page.innerHTML = `
-                     <div class="card-section">
-                         <div class="section-header">
-                              <h3>گزارش جامع</h3>
-                               <button class="btn btn-secondary" data-action="toggle-filters">
-                                   <i class="fas fa-filter"></i> <span>فیلتر</span>
-                              </button>
-                         </div>
-                         <div class="filters-collapsible-container">
-                              <div class="filter-grid">
-                                   <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter"></div>
-                                   <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter"></div>
-                                   <div class="form-group"><label>حساب</label><select class="form-control account-filter account-dropdown"></select></div>
-                              </div>
-                              <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
-                         </div>
-                    </div>
-                     <div class="filter-summary" style="display: none;"></div>
-                    <div id="daily-reports-list"></div>
-                    <div id="reports-status" class="list-status"></div>
+                       <div class="card-section">
+                             <div class="section-header">
+                                   <h3>گزارش جامع</h3>
+                                   <button class="btn btn-secondary" data-action="toggle-filters">
+                                       <i class="fas fa-filter"></i> <span>فیلتر</span>
+                                   </button>
+                             </div>
+                             <div class="filters-collapsible-container">
+                                   <div class="filter-grid">
+                                       <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter"></div>
+                                       <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter"></div>
+                                       <div class="form-group"><label>حساب</label><select class="form-control account-filter account-dropdown"></select></div>
+                                   </div>
+                                   <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
+                             </div>
+                       </div>
+                       <div class="filter-summary" style="display: none;"></div>
+                       <div id="daily-reports-list"></div>
+                       <div id="reports-status" class="list-status"></div>
                 `;
                 populateDropdown(qs('.account-filter', page), state.accounts, 'id', 'name', { value: 'all', text: 'همه حساب‌ها' });
                 qs('.account-filter', page).value = state.filters.reports.accountId;
                 qs('.from-date-filter', page).value = state.filters.reports.from ? moment(state.filters.reports.from, MOMENT_FORMAT).format(JALALI_DISPLAY_FORMAT) : '';
                 qs('.to-date-filter', page).value = state.filters.reports.to ? moment(state.filters.reports.to, MOMENT_FORMAT).format(JALALI_DISPLAY_FORMAT) : '';
+
                 const filteredTxs = applyGenericFilters(state.transactions, 'reports');
+
                 const dailyListEl = qs('#daily-reports-list', page), statusEl = qs('#reports-status', page);
                 dailyListEl.innerHTML = '';
                 statusEl.innerHTML = '';
+
                 const summaryEl = qs('.filter-summary', page);
                 if (filteredTxs.length > 0) {
                     summaryEl.style.display = 'block';
-                    let totalIncome = 0;
-                    let totalExpense = 0;
+                    let totalIncome = 0, totalExpense = 0;
                     filteredTxs.forEach(tx => {
                         const amount = tx.amount;
                         if (tx.type === 'income' || (tx.type === 'receivable' && tx.status === 'received') || (tx.type === 'receivedCheck' && tx.status === 'cleared')) totalIncome += amount;
@@ -1981,9 +2124,11 @@
                 } else {
                     summaryEl.style.display = 'none';
                 }
+
                 if (state.transactions.length === 0) {
                     statusEl.innerHTML = 'برای نمایش گزارش، ابتدا تراکنشی ثبت کنید.'; return;
                 }
+
                 const groupedByDay = filteredTxs.reduce((acc, tx) => {
                     if (tx.date && moment(tx.date, MOMENT_FORMAT, true).isValid()) {
                         const day = tx.date;
@@ -1995,8 +2140,10 @@
                     }
                     return acc;
                 }, {});
+
                 const sortedDays = Object.keys(groupedByDay).sort((a, b) => moment(b, MOMENT_FORMAT).diff(moment(a, MOMENT_FORMAT)));
                 if (sortedDays.length === 0) statusEl.textContent = 'هیچ موردی با این فیلتر یافت نشد.';
+
                 dailyListEl.innerHTML = sortedDays.map(day => {
                     const data = groupedByDay[day];
                     const dayNet = data.income - data.expense;
@@ -2014,25 +2161,33 @@
                                     <i class="fas fa-chevron-down expand-arrow"></i>
                                 </div>
                                 <div class="daily-report-body">
-                                    <ul class="list-container">${data.transactions.sort((a, b) => b.id - a.id).map(tx => `<li data-id="${tx.id}" data-type="transaction">${getTransactionListItemHTML(tx, { showAccount: true })}</li>`).join('')}</ul>
+                                    <ul class="list-container">${data.transactions.sort((a,b) => b.id - a.id).map(tx => `<li data-id="${tx.id}" data-type="transaction">${getTransactionListItemHTML(tx, { showAccount: true })}</li>`).join('')}</ul>
                                 </div>
                             </div>`;
                 }).join('');
             }
-            // === NEW & IMPROVED: Expense Reports Page ===
+            // CHANGE: Whole function rewritten for new design and logic
             function renderExpenseReportsPage() {
                 const page = qs('#expense-reports-page');
                 if (!page) return;
                 const pageKey = 'expenseReports';
                 const filters = state.filters[pageKey];
+                const sortIcons = { 'total': 'fa-sort-amount-down', 'name': 'fa-sort-alpha-down', 'count': 'fa-sort-numeric-down' };
+                const sortTooltips = { 'total': 'مرتب بر اساس بیشترین هزینه', 'name': 'مرتب بر اساس نام', 'count': 'مرتب بر اساس تعداد' };
 
                 page.innerHTML = `
                     <div class="card-section">
                         <div class="section-header">
-                            <h3>تحلیل دسته‌بندی هزینه‌ها</h3>
+                            <h3>تحلیل هزینه‌ها</h3>
                             <div class="header-actions">
-                                <button class="btn btn-secondary" data-action="toggle-filters">
-                                    <i class="fas fa-filter"></i> <span>فیلتر</span>
+                                <button class="btn btn-primary" data-action="add-expense-category" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                    <i class="fas fa-plus"></i> دسته جدید
+                                </button>
+                                <button class="header-icon-btn" data-action="sort-expense-reports" title="${sortTooltips[filters.sortBy]}">
+                                    <i class="fas ${sortIcons[filters.sortBy]}"></i>
+                                </button>
+                                <button class="header-icon-btn" data-action="toggle-filters">
+                                    <i class="fas fa-filter"></i>
                                 </button>
                             </div>
                         </div>
@@ -2040,22 +2195,12 @@
                             <div class="filter-grid">
                                 <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter" value="${filters.from ? moment(filters.from, MOMENT_FORMAT).format(JALALI_DISPLAY_FORMAT) : ''}"></div>
                                 <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter" value="${filters.to ? moment(filters.to, MOMENT_FORMAT).format(JALALI_DISPLAY_FORMAT) : ''}"></div>
-                                <div class="form-group"><label>حساب</label><select class="form-control account-filter account-dropdown"></select></div>
-                                <div class="form-group"><label>مرتب‌سازی</label><select class="form-control" id="expense-report-sort">
-                                    <option value="total" ${filters.sortBy === 'total' ? 'selected' : ''}>بیشترین هزینه</option>
-                                    <option value="name" ${filters.sortBy === 'name' ? 'selected' : ''}>نام دسته</option>
-                                    <option value="count" ${filters.sortBy === 'count' ? 'selected' : ''}>تعداد تراکنش</option>
-                                </select></div>
+                                <div class="form-group" style="grid-column: 1 / -1;"><label>حساب</label><select class="form-control account-filter account-dropdown"></select></div>
                             </div>
                         </div>
                     </div>
-                    <div id="expense-categories-list"></div>
-                    <div id="expense-reports-status" class="list-status"></div>
-                    <div id="add-category-section" data-action="add-expense-category">
-                        <i class="fas fa-plus" style="font-size: 1.5rem; color: var(--primary);"></i>
-                        <p style="margin: 0.5rem 0 0; font-weight: 500; color: var(--primary);">افزودن دسته‌بندی جدید</p>
-                    </div>
-                `;
+                    <div class="category-report-list" id="expense-categories-list"></div>
+                    <div id="expense-reports-status" class="list-status"></div>`;
 
                 populateDropdown(qs('.account-filter', page), state.accounts, 'id', 'name', { value: 'all', text: 'همه حساب‌ها' });
                 qs('.account-filter', page).value = filters.accountId;
@@ -2068,60 +2213,54 @@
                 listEl.innerHTML = '';
                 statusEl.innerHTML = '';
 
-                if (state.expenseCategories.length === 0 && filteredTxs.length === 0) {
-                    statusEl.innerHTML = 'هیچ دسته‌بندی یا هزینه ای برای نمایش وجود ندارد.';
+                if (state.expenseCategories.length === 0) {
+                    statusEl.innerHTML = 'هنوز دسته‌بندی هزینه‌ای تعریف نشده است.';
                     return;
                 }
 
-                const categoryData = state.expenseCategories.map(category => {
-                    const txs = filteredTxs.filter(tx => tx.category === category);
+                const totalOverallExpense = filteredTxs.reduce((sum, tx) => sum + tx.amount, 0);
+
+                let categoryData = state.expenseCategories.map(category => {
+                    const txs = filteredTxs.filter(tx => tx.category === category.name);
                     return {
-                        name: category,
+                        name: category.name,
+                        icon: category.icon || 'fa-tag',
                         count: txs.length,
                         total: txs.reduce((sum, tx) => sum + tx.amount, 0)
                     };
-                }).filter(c => c.count > 0); // Only show categories with transactions in the filtered range
-
-                const totalOverallExpense = categoryData.reduce((sum, cat) => sum + cat.total, 0);
+                });
 
                 if (filters.sortBy === 'name') categoryData.sort((a, b) => a.name.localeCompare(b.name, 'fa'));
                 else if (filters.sortBy === 'count') categoryData.sort((a, b) => b.count - a.count);
                 else categoryData.sort((a, b) => b.total - a.total); // Default sort by total
-
 
                 if (categoryData.length === 0) {
                     statusEl.innerHTML = 'موردی با فیلترهای مشخص شده یافت نشد.';
                 } else {
                     listEl.innerHTML = categoryData.map(cat => {
                         const percentage = totalOverallExpense > 0 ? (cat.total / totalOverallExpense) * 100 : 0;
-                        const iconClass = CATEGORY_ICONS[cat.name] || CATEGORY_ICONS['default'];
-
                         return `
-                        <div class="category-report-card" data-category-name="${cat.name}">
-                            <div class="category-header">
-                                <div class="category-title">
-                                    <div class="item-icon expense"><i class="fas ${iconClass}"></i></div>
-                                    <h4>${cat.name}</h4>
-                                </div>
-                                <div class="item-actions">
-                                    <button class="action-btn edit-btn" data-type="expense-category" data-id="${cat.name}"><i class="fas fa-pen"></i></button>
-                                    <button class="action-btn delete-btn" data-type="expense-category" data-id="${cat.name}"><i class="fas fa-trash"></i></button>
-                                </div>
+                        <a class="category-report-card" data-action="view-category-transactions" data-category-name="${cat.name}">
+                            <div class="item-icon expense"><i class="fas ${cat.icon}"></i></div>
+                            <h4 class="category-title">${cat.name}</h4>
+                            <div class="category-actions">
+                                <button class="action-btn edit-btn" data-type="expense-category" data-id="${cat.name}"><i class="fas fa-pen"></i></button>
                             </div>
                             <div class="category-stats">
-                                <span>${cat.count} تراکنش</span>
-                                <span class="total-amount">${formatCurrency(cat.total)} تومان</span>
+                                <span class="total-amount">${formatCurrency(cat.total)}</span>
+                                <span class="tx-count">${cat.count} تراکنش</span>
                             </div>
-                            <div>
+                            <div class="progress-bar-wrapper">
                                 <div class="progress-bar-container">
-                                    <div class="progress-bar expense" style="width: ${percentage}%"></div>
+                                    <div class="progress-bar expense" style="width: ${percentage.toFixed(1)}%"></div>
                                 </div>
+                                <span class="percentage-text">${percentage.toFixed(0)}%</span>
                             </div>
-                        </div>
-                        `;
+                        </a>`;
                     }).join('');
                 }
             }
+
             const populateDropdown = (selectEl, data, valueField, textField, addOption) => {
                 if (!selectEl) return;
                 let currentValue = selectEl.value;
@@ -2187,15 +2326,18 @@
                 qs('#category-group', form).style.display = ['income', 'expense'].includes(typeVal) ? 'block' : 'none';
                 qs('#loan-payment-group', form).style.display = typeVal === 'installmentPayment' ? 'block' : 'none';
                 qs('#new-category-group', form).style.display = 'none';
+
                 if (statusTypes.includes(typeVal)) {
                     populateDropdown(qs('#status-select', form), Object.entries(STATUS_TYPES[typeVal] || {}).map(([k, v]) => ({ key: k, val: v })), 'key', 'val');
                 }
+
                 if (['income', 'expense'].includes(typeVal)) {
+                    // CHANGE: Populate from array of objects
                     let categories = (typeVal === 'income') ? state.incomeSources : state.expenseCategories;
                     const categorySelect = qs('#category-select', form);
                     const optionsHTML = categories.map(c => {
-                        const emoji = CATEGORY_EMOJI_MAP[c] || '▫️';
-                        return `<option value="${c}">${emoji} ${c}</option>`;
+                        const emoji = CATEGORY_EMOJI_MAP[c.name] || '▫️';
+                        return `<option value="${c.name}">${emoji} ${c.name}</option>`;
                     }).join('');
                     categorySelect.innerHTML = optionsHTML + '<option value="add-new" style="font-weight:bold;">+ افزودن دسته جدید...</option>';
                 }
@@ -2262,9 +2404,9 @@
                             <li class="more-menu-item" data-page="loans-page" data-title="تسهیلات"><div class="item-icon loan"><i class="fas fa-landmark"></i></div><div class="item-info"><p>تسهیلات و اقساط</p></div><i class="fas fa-chevron-left"></i></li>
                             <li class="more-menu-item" data-page="savings-page" data-title="پس‌انداز"><div class="item-icon goal"><i class="fas fa-piggy-bank"></i></div><div class="item-info"><p>اهداف و پس‌انداز</p></div><i class="fas fa-chevron-left"></i></li>
                         </ul>
-                                 <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
-                                     وب اپلیکیشن حسابداری شخصی شمار نسخه 0.8 | طراحی و کدنویسی شده توسط پیمان عابدین پور
-                                   </div>
+                             <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
+                                  وب اپلیکیشن حسابداری شخصی شمار نسخه 0.9 | طراحی و کدنویسی شده توسط پیمان عابدین پور
+                                 </div>
                     </div>`;
                 openModal('#more-menu-modal-overlay');
             };
@@ -2296,10 +2438,10 @@
                             <input type="file" id="restore-file-input" accept=".db,.json" style="display: none;">
                         </div>
                          <div class="form-actions" style="margin-top: 1.5rem; flex-direction: column; gap: 1rem;">
-                             <button class="btn btn-primary" id="install-pwa-btn" style="width:100%; display: none; background-color: var(--purple-ios);">
-                                 <i class="fas fa-cloud-download-alt" style="margin-left: 8px;"></i> نصب برنامه
-                                </button>
-                        </div>
+                              <button class="btn btn-primary" id="install-pwa-btn" style="width:100%; display: none; background-color: var(--purple-ios);">
+                                  <i class="fas fa-cloud-download-alt" style="margin-left: 8px;"></i> نصب برنامه
+                                 </button>
+                         </div>
                         <div class="form-actions" style="margin-top: 2rem; justify-content: center;">
                             <button type="button" class="btn btn-secondary" data-action="close-modal">بستن</button>
                         </div>
@@ -2380,10 +2522,17 @@
                 </div>`;
                 openModal('#account-details-modal-overlay');
             };
-            // === NEW: Expense Category Modal ===
+            // CHANGE: Updated modal to include an icon picker
             const renderExpenseCategoryModal = (categoryName = null) => {
                 const modal = qs('#expense-category-modal-overlay');
                 const isEdit = categoryName !== null;
+                const category = isEdit ? state.expenseCategories.find(c => c.name === categoryName) : null;
+                const currentIcon = category ? category.icon : 'fa-tag';
+
+                const iconPickerHTML = AVAILABLE_ICONS.map(icon =>
+                    `<i class="fas ${icon} icon-picker-item ${currentIcon === icon ? 'selected' : ''}" data-icon="${icon}"></i>`
+                ).join('');
+
                 modal.innerHTML = `
                     <div class="modal-content">
                         <form id="expense-category-form">
@@ -2393,12 +2542,26 @@
                                 <label for="category-name-input">نام دسته‌بندی</label>
                                 <input type="text" id="category-name-input" required class="form-control" value="${categoryName || ''}" placeholder="مثال: آموزش">
                             </div>
+                             <div class="form-group">
+                                <label for="category-icon-picker">آیکون</label>
+                                <div class="icon-picker" id="category-icon-picker">${iconPickerHTML}</div>
+                                <input type="hidden" id="selected-category-icon" value="${currentIcon}">
+                            </div>
                             <div class="form-actions">
                                 <button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button>
                                 <button type="submit" class="btn btn-primary">ذخیره</button>
                             </div>
                         </form>
                     </div>`;
+
+                qs('.icon-picker', modal).addEventListener('click', e => {
+                    if (e.target.classList.contains('icon-picker-item')) {
+                        qs('.icon-picker-item.selected', modal)?.classList.remove('selected');
+                        e.target.classList.add('selected');
+                        qs('#selected-category-icon', modal).value = e.target.dataset.icon;
+                    }
+                });
+
                 openModal('#expense-category-modal-overlay');
             };
 
@@ -2406,11 +2569,41 @@
                 document.body.addEventListener('click', (e) => {
                     const target = e.target;
                     const closest = (selector) => target.closest(selector);
+
                     if (closest('.nav-btn, .fab, .action-card, .btn, .more-menu-item, #theme-toggle, #toggle-balance-visibility, .summary-card')) {
                         triggerHapticFeedback();
                     }
+                    // CHANGE: New click handlers for expense report page actions
+                    const expenseCategoryCard = closest('#expense-reports-page .category-report-card');
+                    if (expenseCategoryCard && !closest('.action-btn')) {
+                        e.preventDefault();
+                        const categoryName = expenseCategoryCard.dataset.categoryName;
+                        state.filters.transactions = {
+                            searchTerm: '',
+                            from: state.filters.expenseReports.from,
+                            to: state.filters.expenseReports.to,
+                            type: 'expense',
+                            accountId: state.filters.expenseReports.accountId,
+                            category: categoryName
+                        };
+                        saveData();
+                        switchPage('transactions-page', `تراکنش‌ها: ${categoryName}`);
+                        return;
+                    }
+                    if (closest('[data-action="sort-expense-reports"]')) {
+                        const currentSort = state.filters.expenseReports.sortBy;
+                        const sortOptions = ['total', 'name', 'count'];
+                        const nextIndex = (sortOptions.indexOf(currentSort) + 1) % sortOptions.length;
+                        state.filters.expenseReports.sortBy = sortOptions[nextIndex];
+                        saveData();
+                        renderExpenseReportsPage();
+                        return;
+                    }
+
+
                     const navBtn = closest('.nav-btn');
                     if (navBtn && navBtn.dataset.page) { switchPage(navBtn.dataset.page, navBtn.dataset.title); return; }
+
                     if (closest('[data-action="open-more-menu"]')) { renderMoreMenuModal(); return; }
                     const moreMenuItem = closest('.more-menu-item');
                     if (moreMenuItem) {
@@ -2420,6 +2613,7 @@
                         }, 150);
                         return;
                     }
+
                     if (target.matches('.modal-overlay') || closest('[data-action="close-modal"]')) { closeModal('#' + closest('.modal-overlay').id); return; }
                     if (closest('.fab')) { renderTransactionModal(); return; }
                     if (closest('[data-action="add-account"]')) { renderAccountModal(); return; }
@@ -2429,6 +2623,7 @@
                         container?.classList.toggle('visible');
                         return;
                     }
+
                     const summaryCard = closest('.summary-card[data-page]');
                     if (summaryCard) {
                         const pageId = summaryCard.dataset.page;
@@ -2445,6 +2640,7 @@
                         switchPage(pageId, title);
                         return;
                     }
+
                     const quickAction = closest('.action-card');
                     if (quickAction) {
                         const action = quickAction.dataset.action;
@@ -2454,12 +2650,15 @@
                         if (action === 'quick-add-receivable') renderTransactionModal(null, 'receivable');
                         return;
                     }
+
                     if (closest('[data-action="add-to-fund"]')) { renderTransactionModal(null, 'transfer'); return; }
                     if (closest('[data-action="add-loan"]')) { renderLoanModal(); return; }
                     if (closest('[data-action="add-goal"]')) { renderGoalModal(); return; }
                     if (closest('[data-action="add-expense-category"]')) { renderExpenseCategoryModal(); return; }
                     if (closest('[data-action="go-to-loans"]')) { e.preventDefault(); closeModal('#transaction-modal-overlay'); switchPage('loans-page', 'تسهیلات'); return; }
                     if (closest('[data-action="edit-account"]')) { closeModal('#account-details-modal-overlay'); renderAccountModal(closest('[data-action="edit-account"]').dataset.id); return; }
+
+
                     const listItem = closest('.list-container li[data-id]');
                     if (listItem && !closest('.action-btn')) {
                         const id = listItem.dataset.id;
@@ -2469,9 +2668,11 @@
                         else if (type === 'transaction') renderTransactionModal(id);
                         return;
                     }
+
                     const actionBtn = closest('.action-btn');
                     if (actionBtn) {
                         e.stopPropagation();
+                        e.preventDefault(); // Prevent navigation on card click when button is pressed
                         const id = actionBtn.dataset.id;
                         const type = actionBtn.dataset.type;
                         if (actionBtn.classList.contains('edit-btn')) {
@@ -2489,6 +2690,7 @@
                         }
                         return;
                     }
+
                     const deleteBtn = closest('[data-action="delete-item"]');
                     if (deleteBtn) {
                         itemToDelete = { id: parseInt(deleteBtn.dataset.id), type: deleteBtn.dataset.type };
@@ -2500,6 +2702,7 @@
                         }
                         return;
                     }
+
                     if (closest('#confirm-delete-btn')) { handleDelete(); return; }
                     if (closest('#theme-toggle')) { document.body.classList.toggle('dark-mode'); updateThemeIcon(); saveData(); }
                     if (closest('#toggle-balance-visibility')) { state.isBalanceVisible = !state.isBalanceVisible; saveData(); renderDashboardPage(); }
@@ -2508,6 +2711,7 @@
                     if (closest('#restore-btn')) { qs('#restore-file-input').click(); return; }
                     if (closest('#export-csv-btn')) { exportTransactionsToCSV(); return; }
                     if (closest('#clear-tx-filters-btn')) { state.filters.transactions = { searchTerm: '', from: null, to: null, type: 'all', accountId: 'all', category: 'all' }; renderTransactionsPage(); saveData(); return; }
+
                     if (closest('.clear-generic-filters-btn')) {
                         const pageKey = target.dataset.pagekey;
                         if (pageKey && state.filters[pageKey]) {
@@ -2534,6 +2738,7 @@
                         return;
                     }
                 });
+
                 document.body.addEventListener('submit', (e) => {
                     e.preventDefault();
                     triggerHapticFeedback(5);
@@ -2543,10 +2748,12 @@
                     if (e.target.id === 'goal-form') { handleGoalSubmit(e.target); }
                     if (e.target.id === 'expense-category-form') { handleExpenseCategorySubmit(e.target); }
                 });
+
                 document.body.addEventListener('change', (e) => {
                     const target = e.target;
                     if (target.id === 'dashboard-period-filter') { state.dashboardPeriod = target.value; saveData(); renderDashboardPage(); }
                     if (target.id === 'account-filter-dashboard') { if (target.value !== 'add_new_account') { state.activeAccountId = target.value; saveData(); renderDashboardPage(); } }
+
                     if (target.closest('#transactions-page')) {
                         const txFilters = target.closest('.filters-collapsible-container');
                         if (txFilters) {
@@ -2564,25 +2771,28 @@
                             return;
                         }
                     }
+                    // CHANGE: Updated generic filter handler
                     if (target.closest('.page[id$="-page"] .filters-collapsible-container')) {
                         const pageEl = target.closest('.page');
                         const pageKey = pageEl.id.replace('-page', '');
                         if (state.filters[pageKey]) {
                             state.filters[pageKey] = {
+                                ...state.filters[pageKey],
                                 from: qs('.from-date-filter', pageEl)?.value ? moment(normalizeDigits(qs('.from-date-filter', pageEl).value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null,
                                 to: qs('.to-date-filter', pageEl)?.value ? moment(normalizeDigits(qs('.to-date-filter', pageEl).value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null,
                                 accountId: qs('.account-filter', pageEl) ? qs('.account-filter', pageEl).value : 'all',
                                 status: qs('.status-filter', pageEl) ? qs('.status-filter', pageEl).value : 'all',
-                                sortBy: qs('#expense-report-sort', pageEl) ? qs('#expense-report-sort', pageEl).value : (state.filters[pageKey].sortBy || null)
                             };
                             saveData();
                             switchPage(pageEl.id, qs(`#app-header-title`).textContent);
                         }
                         return;
                     }
+
                     if (target.matches('#transaction-form #type')) { handleTransactionFormChange(); }
                     if (target.matches('#transaction-form #category-select')) { qs('#new-category-group').style.display = target.value === 'add-new' ? 'block' : 'none'; }
                 });
+
                 document.body.addEventListener('input', (e) => {
                     if (e.target.id === 'search-input' && e.target.closest('#transactions-page')) {
                         state.filters.transactions.searchTerm = e.target.value.toLowerCase();
@@ -2591,21 +2801,31 @@
                     }
                     if (e.target.classList.contains('currency-input')) formatInputAsCurrency(e.target);
                 });
+
                 document.body.addEventListener('mousedown', e => { if (e.target.tagName === 'SELECT' && e.target.classList.contains('account-dropdown')) { preChangeSelectValue = e.target.value; } });
                 document.body.addEventListener('change', e => { if (e.target.tagName === 'SELECT' && e.target.classList.contains('account-dropdown')) { if (e.target.value === 'add_new_account') { const selectEl = e.target; selectEl.value = preChangeSelectValue; let modal = selectEl.closest('.modal-overlay'); if (modal) closeModal('#' + modal.id); switchPage('accounts-page', 'حساب‌ها'); setTimeout(() => renderAccountModal(), 150); } } });
+
                 qs('#restore-file-input').addEventListener('change', handleRestore);
             };
+
             function handleTransactionSubmit(form) {
                 const id = qs('#transaction-id', form).value;
                 const type = qs('#type', form).value;
                 let category = qs('#category-select', form).value;
                 const newCategory = qs('#new-category-input', form).value.trim();
+
                 if (category === 'add-new') {
                     if (!newCategory) { showToast('لطفا نام دسته جدید را وارد کنید.'); return; }
                     category = newCategory;
-                    if (type === 'expense' && !state.expenseCategories.includes(newCategory)) state.expenseCategories.push(newCategory);
-                    else if (type === 'income' && !state.incomeSources.includes(newCategory)) state.incomeSources.push(newCategory);
+                    // CHANGE: Add new category as an object
+                    if (type === 'expense' && !state.expenseCategories.some(c => c.name === newCategory)) {
+                        state.expenseCategories.push({ name: newCategory, icon: 'fa-tag' });
+                    }
+                    else if (type === 'income' && !state.incomeSources.some(c => c.name === newCategory)) {
+                        state.incomeSources.push({ name: newCategory, icon: 'fa-tag' });
+                    }
                 }
+
                 const transactionData = {
                     type: type,
                     accountId: qs('#account-select', form).value,
@@ -2618,6 +2838,7 @@
                     loanId: type === 'installmentPayment' ? qs('#loan-select', form).value : null,
                 };
                 if (!transactionData.amount || !transactionData.date || !transactionData.accountId || !moment(transactionData.date, MOMENT_FORMAT).isValid()) { showToast('لطفا مبلغ، تاریخ و حساب را به درستی وارد کنید.'); return; }
+
                 if (id) { const index = state.transactions.findIndex(tx => tx.id == id); state.transactions[index] = { ...state.transactions[index], ...transactionData }; showToast('تراکنش ویرایش شد.'); }
                 else { state.transactions.push({ id: Date.now(), ...transactionData }); showToast('تراکنش ثبت شد.'); }
                 saveData(); updateAllUI(); closeModal('#transaction-modal-overlay');
@@ -2626,35 +2847,18 @@
                 const id = qs('#account-id', form).value;
                 const name = qs('#account-name', form).value.trim();
                 if (!name) { showToast('نام حساب الزامی است.'); return; }
-                const accountData = {
-                    name: name,
-                    cardNumber: qs('#card-number', form).value.trim(),
-                    expMonth: qs('#exp-month', form).value.trim(),
-                    expYear: qs('#exp-year', form).value.trim(),
-                    cvv2: qs('#cvv2', form).value.trim(),
-                    accountNumber: qs('#account-number', form).value.trim(),
-                    shabaNumber: qs('#shaba-number', form).value.trim(),
-                    notes: qs('#notes', form).value.trim(),
-                };
+                const accountData = { name: name, cardNumber: qs('#card-number', form).value.trim(), expMonth: qs('#exp-month', form).value.trim(), expYear: qs('#exp-year', form).value.trim(), cvv2: qs('#cvv2', form).value.trim(), accountNumber: qs('#account-number', form).value.trim(), shabaNumber: qs('#shaba-number', form).value.trim(), notes: qs('#notes', form).value.trim(), };
                 if (id) { const index = state.accounts.findIndex(a => a.id == id); state.accounts[index] = { ...state.accounts[index], ...accountData }; showToast('حساب ویرایش شد.'); }
                 else { state.accounts.push({ id: Date.now(), ...accountData }); showToast('حساب جدید اضافه شد.'); }
                 saveData(); updateAllUI(); closeModal('#account-modal-overlay');
             }
             function handleLoanSubmit(form) {
                 const id = qs('#loan-id', form).value;
-                const loanData = {
-                    bankName: qs('#bank-name', form).value.trim(),
-                    description: qs('#loan-description', form).value.trim(),
-                    totalInstallments: parseInt(normalizeDigits(qs('#total-installments', form).value)),
-                    installmentAmount: parseInt(getUnformattedAmount(qs('#installment-amount', form).value)),
-                };
+                const loanData = { bankName: qs('#bank-name', form).value.trim(), description: qs('#loan-description', form).value.trim(), totalInstallments: parseInt(normalizeDigits(qs('#total-installments', form).value)), installmentAmount: parseInt(getUnformattedAmount(qs('#installment-amount', form).value)), };
                 if (!loanData.bankName || !loanData.totalInstallments || !loanData.installmentAmount) { showToast('لطفا تمام فیلدها را پر کنید.'); return; }
                 if (id) {
                     const index = state.loans.findIndex(l => l.id == id);
-                    if (index > -1) {
-                        state.loans[index] = { ...state.loans[index], ...loanData };
-                        showToast('تسهیلات ویرایش شد.');
-                    }
+                    if (index > -1) { state.loans[index] = { ...state.loans[index], ...loanData }; showToast('تسهیلات ویرایش شد.'); }
                 } else {
                     state.loans.push({ id: Date.now(), ...loanData });
                     showToast('تسهیلات جدید تعریف شد.');
@@ -2663,51 +2867,41 @@
             }
             function handleGoalSubmit(form) {
                 const id = qs('#goal-id', form).value;
-                const goalData = {
-                    name: qs('#goal-name', form).value.trim(),
-                    targetAmount: parseInt(getUnformattedAmount(qs('#target-amount', form).value)),
-                    savedAmount: parseInt(getUnformattedAmount(qs('#saved-amount', form).value || '0')),
-                };
+                const goalData = { name: qs('#goal-name', form).value.trim(), targetAmount: parseInt(getUnformattedAmount(qs('#target-amount', form).value)), savedAmount: parseInt(getUnformattedAmount(qs('#saved-amount', form).value || '0')), };
                 if (!goalData.name || !goalData.targetAmount) { showToast('لطفا عنوان و مبلغ هدف را مشخص کنید.'); return; }
                 if (id) { const index = state.savingsGoals.findIndex(g => g.id == id); state.savingsGoals[index] = { ...state.savingsGoals[index], ...goalData }; showToast('هدف ویرایش شد.'); }
                 else { state.savingsGoals.push({ id: Date.now(), ...goalData }); showToast('هدف جدید اضافه شد.'); }
                 saveData(); updateAllUI(); closeModal('#goal-modal-overlay');
             }
+            // CHANGE: Updated to handle object-based category with icon
             function handleExpenseCategorySubmit(form) {
                 const originalName = qs('#original-category-name', form).value;
                 const newName = qs('#category-name-input', form).value.trim();
+                const newIcon = qs('#selected-category-icon', form).value;
 
-                if (!newName) {
-                    showToast('نام دسته‌بندی نمی‌تواند خالی باشد.');
-                    return;
-                }
+                if (!newName) { showToast('نام دسته‌بندی نمی‌تواند خالی باشد.'); return; }
 
                 const isEditing = originalName !== '';
-                const categoryExists = state.expenseCategories.includes(newName);
+                const categoryExists = state.expenseCategories.some(c => c.name === newName);
 
                 if (isEditing) {
                     if (newName !== originalName && categoryExists) {
-                        showToast('این نام دسته‌بندی از قبل وجود دارد.');
-                        return;
+                        showToast('این نام دسته‌بندی از قبل وجود دارد.'); return;
                     }
-                    // Update category name
-                    const index = state.expenseCategories.indexOf(originalName);
+                    const index = state.expenseCategories.findIndex(c => c.name === originalName);
                     if (index > -1) {
-                        state.expenseCategories[index] = newName;
+                        state.expenseCategories[index].name = newName;
+                        state.expenseCategories[index].icon = newIcon;
                     }
-                    // Update all transactions with the old category name
-                    state.transactions.forEach(tx => {
-                        if (tx.category === originalName) {
-                            tx.category = newName;
-                        }
-                    });
+                    if (newName !== originalName) {
+                        state.transactions.forEach(tx => {
+                            if (tx.category === originalName) { tx.category = newName; }
+                        });
+                    }
                     showToast('دسته‌بندی با موفقیت ویرایش شد.');
                 } else {
-                    if (categoryExists) {
-                        showToast('این نام دسته‌بندی از قبل وجود دارد.');
-                        return;
-                    }
-                    state.expenseCategories.push(newName);
+                    if (categoryExists) { showToast('این نام دسته‌بندی از قبل وجود دارد.'); return; }
+                    state.expenseCategories.push({ name: newName, icon: newIcon });
                     showToast('دسته‌بندی جدید اضافه شد.');
                 }
 
@@ -2721,12 +2915,10 @@
                 else if (itemToDelete.type === 'goal') { state.savingsGoals = state.savingsGoals.filter(i => i.id !== itemToDelete.id); }
                 else if (itemToDelete.type === 'account') { if (state.transactions.some(t => t.accountId == itemToDelete.id)) { showToast('امکان حذف حساب دارای تراکنش وجود ندارد.'); closeModal('#confirm-modal-overlay'); return; } state.accounts = state.accounts.filter(i => i.id !== itemToDelete.id); }
                 else if (itemToDelete.type === 'expense-category') {
-                    state.expenseCategories = state.expenseCategories.filter(cat => cat !== itemToDelete.id);
-                    // Also remove the category from transactions that use it
+                    // CHANGE: Delete based on object name
+                    state.expenseCategories = state.expenseCategories.filter(cat => cat.name !== itemToDelete.id);
                     state.transactions.forEach(tx => {
-                        if (tx.category === itemToDelete.id) {
-                            tx.category = null;
-                        }
+                        if (tx.category === itemToDelete.id) { tx.category = null; }
                     });
                 }
                 showToast('مورد با موفقیت حذف شد.');
@@ -2737,11 +2929,7 @@
                     const dataStr = JSON.stringify(state);
                     const blob = new Blob([dataStr], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'shomar_backup.json';
-                    a.click();
-                    URL.revokeObjectURL(url);
+                    const a = document.createElement('a'); a.href = url; a.download = 'shomar_backup.json'; a.click(); URL.revokeObjectURL(url);
                     showToast('فایل پشتیبان با موفقیت ایجاد شد.');
                     closeModal('#settings-modal-overlay');
                 } catch (e) { showToast('خطا در ایجاد فایل پشتیبان.'); }
@@ -2788,11 +2976,7 @@
                 const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `transactions_${moment().format('jYYYY-jMM-jDD')}.csv`;
-                a.click();
-                URL.revokeObjectURL(url);
+                const a = document.createElement('a'); a.href = url; a.download = `transactions_${moment().format('jYYYY-jMM-jDD')}.csv`; a.click(); URL.revokeObjectURL(url);
             };
             const updateThemeIcon = () => {
                 qs('#theme-toggle').className = `fas ${document.body.classList.contains('dark-mode') ? 'fa-moon' : 'fa-sun'}`;
