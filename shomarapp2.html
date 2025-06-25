@@ -956,7 +956,7 @@
             justify-content: space-between;
             align-items: center;
             transition: var(--transition-fast);
-            gap: 0.5rem; /* Added gap for better spacing */
+            gap: 0.5rem; 
         }
 
         .daily-report-item.active .daily-report-header {
@@ -972,41 +972,61 @@
         }
 
         .date-info {
-            flex-shrink: 0; /* Prevent date from shrinking */
+            flex-shrink: 0; 
+            text-align: right; /* Align date to the right */
         }
 
         .date-info .day-of-week {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem; /* Slightly smaller for compactness */
             color: var(--text-light);
         }
 
         .date-info .date-full {
-            font-size: 0.8rem;
+            font-size: 0.75rem; /* Slightly smaller for compactness */
             color: var(--subtext-light);
-            display: block; /* Ensure full date is on its own line */
+            display: block; 
         }
 
         .flow-summary {
-            display: flex; /* Always display for clear summary */
-            gap: 1rem; /* Spacing between income/expense/net */
-            align-items: center;
-            flex-grow: 1; /* Allow it to take available space */
-            justify-content: flex-end; /* Align to the right */
-            min-width: 0; /* Allow flex item to shrink if needed */
+            display: flex; 
+            flex-direction: column; /* Stack income/expense/net vertically on small screens */
+            align-items: flex-end; /* Align items to the right */
+            flex-grow: 1; 
+            justify-content: center; /* Center items vertically */
+            min-width: 80px; /* Ensure a minimum width for the summary */
+            margin-right: 0.5rem; /* Space between date and summary */
+            text-align: left; /* Align text within flow items to left */
         }
+        
+        @media (min-width: 641px) { /* Adjust for larger screens */
+            .flow-summary {
+                flex-direction: row; /* Back to horizontal for larger screens */
+                justify-content: flex-end; /* Keep aligning to the right */
+                flex-wrap: wrap; /* Allow wrapping if space is limited horizontally */
+                align-items: center;
+                margin-right: 0; /* Remove margin if not needed */
+            }
+            .flow-item {
+                font-size: 0.9rem; /* Maintain original size for larger screens */
+                white-space: nowrap;
+                flex-shrink: 0; /* Prevent shrinking too much */
+                padding-left: 0.8rem; /* Space between items */
+            }
+        }
+
 
         .flow-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.3rem; /* Reduced gap for compactness */
             font-weight: 500;
-            font-size: 0.9rem;
-            white-space: nowrap; /* Prevent wrapping of amount */
+            font-size: 0.85rem; /* Slightly smaller for compactness */
+            white-space: nowrap; 
         }
         
         .flow-item span {
-            direction: ltr; /* Ensure numbers are LTR */
+            direction: ltr; 
         }
 
         .flow-item.income {
@@ -1035,8 +1055,8 @@
             color: var(--subtext-light);
             font-size: 1rem;
             transition: transform 0.3s;
-            flex-shrink: 0; /* Prevent arrow from shrinking */
-            margin-left: 0.5rem; /* Space from flow summary */
+            flex-shrink: 0; 
+            margin-left: 0.5rem; 
         }
 
         .daily-report-body {
@@ -2250,8 +2270,10 @@
                 const filters = state.filters.transactions;
                 const filtered = state.transactions.filter(tx => {
                     const txDate = moment(tx.date, MOMENT_FORMAT);
-                    if (filters.from && txDate.isBefore(moment(filters.from, MOMENT_FORMAT), 'day')) return false;
-                    if (filters.to && txDate.isAfter(moment(filters.to, MOMENT_FORMAT), 'day')) return false;
+                    // Date filtering (inclusive for start of day, end of day)
+                    if (filters.from && txDate.isBefore(moment(filters.from, MOMENT_FORMAT).startOf('day'))) return false;
+                    if (filters.to && txDate.isAfter(moment(filters.to, MOMENT_FORMAT).endOf('day'))) return false;
+
                     if (filters.accountId !== 'all' && tx.accountId != filters.accountId) return false;
                     if (filters.contactId !== 'all' && tx.contactId != filters.contactId) return false;
                     if (filters.type === 'cashflow') {
@@ -2334,8 +2356,11 @@
                     if (tx.type === 'cashflow') return false;
                     if (!tx.date || !moment(tx.date, MOMENT_FORMAT, true).isValid()) return false;
                     const date = moment(tx.date, MOMENT_FORMAT);
-                    if (filters.from && date.isBefore(moment(filters.from, MOMENT_FORMAT), 'day')) return false;
-                    if (filters.to && date.isAfter(moment(filters.to, MOMENT_FORMAT), 'day')) return false;
+
+                    // Date filtering (inclusive for entire days)
+                    if (filters.from && date.isBefore(moment(filters.from, MOMENT_FORMAT).startOf('day'))) return false;
+                    if (filters.to && date.isAfter(moment(filters.to, MOMENT_FORMAT).endOf('day'))) return false;
+                    
                     if (filters.accountId !== 'all' && tx.accountId != filters.accountId) return false;
                     if (filters.contactId && filters.contactId !== 'all' && tx.contactId != filters.contactId) return false;
                     if (filters.status && filters.status !== 'all' && tx.status !== filters.status) return false;
@@ -2538,7 +2563,9 @@
                 dailyListEl.innerHTML = '';
                 statusEl.innerHTML = '';
                 const summaryEl = qs('.filter-summary', page);
-                if (filteredTxs.length > 0) {
+                const hasActiveFilters = isFilterActive(pageKey); // Check if filters are active
+
+                if (filteredTxs.length > 0 && hasActiveFilters) { // Only show summary if there are filtered transactions AND filters are active
                     summaryEl.style.display = 'block';
                     let totalIncome = 0, totalExpense = 0;
                     filteredTxs.forEach(tx => {
@@ -3381,29 +3408,30 @@
                         renderContactsPage();
                         return;
                     }
-                    if (target.closest('#transactions-page')) {
-                        const txFilters = target.closest('#transactions-page');
-                        if (txFilters) {
+                    // This block handles filter changes for both 'transactions-page' and other filtered list pages ('reports', 'debts', 'receivables')
+                    const pageEl = target.closest('.page[id$="-page"]'); // Get the closest page element
+                    if (pageEl) {
+                        const pageId = pageEl.id;
+                        const pageKey = pageId.replace('-page', '');
+
+                        if (pageKey === 'transactions') {
                             if (target.id === 'type-filter') {
                                 state.filters.transactions.category = 'all';
                                 state.filters.transactions.contactId = 'all';
                                 renderCategoryFilter();
                             }
-                            state.filters.transactions.accountId = qs('#account-filter', txFilters).value;
-                            state.filters.transactions.type = qs('#type-filter', txFilters).value;
-                            state.filters.transactions.category = qs('#category-filter', txFilters).value;
-                            state.filters.transactions.contactId = qs('#contact-filter', txFilters).value;
-                            state.filters.transactions.from = qs('#from-date-filter-tx', txFilters).value ? moment(normalizeDigits(qs('#from-date-filter-tx').value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null;
-                            state.filters.transactions.to = qs('#to-date-filter-tx', txFilters).value ? moment(normalizeDigits(qs('#to-date-filter-tx').value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null;
+                            state.filters.transactions.accountId = qs('#account-filter', pageEl).value;
+                            state.filters.transactions.type = qs('#type-filter', pageEl).value;
+                            state.filters.transactions.category = qs('#category-filter', pageEl).value;
+                            state.filters.transactions.contactId = qs('#contact-filter', pageEl).value;
+                            // Date filters are handled by the pDatepicker's observer, but ensuring they are picked up on other changes:
+                            state.filters.transactions.from = qs('#from-date-filter-tx', pageEl).value ? moment(normalizeDigits(qs('#from-date-filter-tx', pageEl).value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null;
+                            state.filters.transactions.to = qs('#to-date-filter-tx', pageEl).value ? moment(normalizeDigits(qs('#to-date-filter-tx', pageEl).value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null;
                             renderTransactionList();
                             saveData();
                             return;
-                        }
-                    }
-                    if (target.closest('.page[id$="-page"]') && target.closest('.filters-collapsible-container')) {
-                        const pageEl = target.closest('.page');
-                        const pageKey = pageEl.id.replace('-page', '');
-                        if (state.filters[pageKey]) {
+                        } else if (state.filters[pageKey] && target.closest('.filters-collapsible-container')) {
+                            // This part handles generic filters for reports, debts, receivables
                             state.filters[pageKey] = {
                                 ...state.filters[pageKey],
                                 from: qs('.from-date-filter', pageEl)?.value ? moment(normalizeDigits(qs('.from-date-filter', pageEl).value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null,
@@ -3413,9 +3441,11 @@
                                 status: qs('.status-filter', pageEl) ? qs('.status-filter', pageEl).value : 'all',
                             };
                             saveData();
-                            switchPage(pageEl.id, qs(`#app-header-title`).textContent);
+                            // Re-render the specific page to apply new filters
+                            const pageRenderers = { 'reports': renderReportsPage, 'debts': renderDebtsPage, 'receivables': renderReceivablesPage };
+                            pageRenderers[pageKey]?.();
+                            return;
                         }
-                        return;
                     }
                     if (target.matches('#transaction-form #type')) { handleTransactionFormChange(); }
                     if (target.matches('#transaction-form #category-select')) { qs('#new-category-group').style.display = target.value === 'add-new' ? 'block' : 'none'; }
@@ -3431,24 +3461,6 @@
                 document.body.addEventListener('mousedown', e => {
                     if (e.target.tagName === 'SELECT' && (e.target.classList.contains('account-dropdown') || e.target.classList.contains('contact-dropdown'))) {
                         preChangeSelectValue = e.target.value;
-                    }
-                });
-                document.body.addEventListener('change', e => {
-                    const selectEl = e.target;
-                    if (selectEl.tagName === 'SELECT') {
-                        let modal = selectEl.closest('.modal-overlay');
-                        if (selectEl.classList.contains('account-dropdown') && selectEl.value === 'add_new_account') {
-                            selectEl.value = preChangeSelectValue;
-                            if (modal) closeModal('#' + modal.id);
-                            switchPage('accounts-page', 'حساب‌ها');
-                            setTimeout(() => renderAccountModal(), 150);
-                        }
-                        if (selectEl.classList.contains('contact-dropdown') && selectEl.value === 'add_new_contact') {
-                            selectEl.value = preChangeSelectValue;
-                            if (modal) closeModal('#' + modal.id);
-                            switchPage('contacts-page', 'طرف حساب‌ها');
-                            setTimeout(() => renderContactModal(), 150);
-                        }
                     }
                 });
                 qs('#restore-file-input').addEventListener('change', handleRestore);
