@@ -3344,9 +3344,9 @@ const parseSmsAndOpenModal = async (text) => {
         }
     }
 
-    // نرمال‌سازی: تبدیل اعداد فارسی و حذف \n و فاصله خاص
+    // نرمال‌سازی: تبدیل اعداد فارسی و حذف فاصله خاص (نه \n)
     const normalizedText = normalizeDigits(
-        text.replace(/\n/g, ' ').replace(/\u00A0/g, ' ')
+        text.replace(/\u00A0/g, ' ')
     );
 
     // الگوهای تخصصی بانک‌ها (قابل گسترش)
@@ -3359,8 +3359,8 @@ const parseSmsAndOpenModal = async (text) => {
         { bank: 'گردشگری', type: 'income', regex: /بان[کك] گردشگر[یي].*واریز به:.*مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'واریز به گردشگری' },
         { bank: 'ملی', type: 'income', regex: /بان[کك] مل[یي] ا[یي]ران\s*انتقال[یي]:\s*([\d,٬]+)\+/, desc: 'انتقال به ملی' },
         { bank: 'بلو', type: 'expense', regex: /بلو.* ([\d,٬]+) ر[یي]ال از حساب شما پرید/, desc: 'برداشت پول بلو' },
-        { bank: 'خاورمیانه', type: 'expense', regex: /بان[کك] خاورم[یي]انه.*برداشت وجه از خودپرداز\s*-?([\d,٬]+)/, desc: 'برداشت وجه خاورمیانه' },
-        { bank: 'سپه', type: 'expense', regex: /بان[کك] سپه.*مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'تراکنش بانک سپه' },
+        { bank: 'خاورمیانه', type: 'expense', regex: /بان[کك] خاورم[یي]انه.*برداشت وجه از خودپرداز\s*-?([\د,٬]+)/, desc: 'برداشت وجه خاورمیانه' },
+        { bank: 'سپه', type: 'expense', regex: /بان[کك] سپه.*مبلغ:\s*([\د,٬]+)\s*ر[یي]ال/, desc: 'تراکنش بانک سپه' },
         { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?برداشت:\s*([\د,٬]+)-?/, desc: 'برداشت از ملی' },
         { bank: 'ملت', type: 'expense', regex: /خرید Auth.*مبلغ:\s*([\د,٬]+)\s*ر[یي]ال.*بان[کك] ملت/, desc: 'خرید با کارت ملت' },
         { bank: 'ملت', type: 'expense', regex: /برداشت مبلغ ([\د,٬]+)\s*ر[یي]ال از .*بان[کك] ملت/, desc: 'برداشت از ملت' },
@@ -3394,11 +3394,22 @@ const parseSmsAndOpenModal = async (text) => {
             regex: /^\s*-([\d,٬]+)\s*$/gm,
             desc: 'برداشت بر اساس علامت منفی'
         },
+        {
+            bank: null, type: 'income',
+            regex: /^([\d,٬]+)$/gm,
+            desc: 'واریز عدد مثبت بدون علامت در خط (فقط اگر هیچ علامت منفی در هیچ خط نبود)'
+        },
+        {
+            bank: null, type: 'expense',
+            regex: /^([\d,٬]+)-$/gm,
+            desc: 'برداشت عدد با - انتهایی'
+        }
     ];
 
-    const allPatterns = [...patterns, ...extraPatterns];
+    const allPatterns = [...extraPatterns, ...patterns];
 
     let bestMatch = null;
+    // ابتدا سراغ الگوهای خطی خاص برو، بعد الگوهای بانک‌ها
     for (const pattern of allPatterns) {
         const match = normalizedText.match(pattern.regex);
         if (match && match[1]) {
@@ -3429,7 +3440,7 @@ const parseSmsAndOpenModal = async (text) => {
         }
 
         // استخراج تاریخ و ساعت
-        let date = moment().format(JALALI_DISPLAY_FORMAT); // پیش‌فرض امروز
+        let date = moment().format('jYYYY/MM/DD'); // پیش‌فرض امروز
         let time = '';
 
         // پوشش فرمت خاص مثل 0531 - 12:01 یا 04/05_15:16
@@ -3483,6 +3494,7 @@ const parseSmsAndOpenModal = async (text) => {
         renderTransactionModal(null, null, { description: text });
     }
 };
+
 
 
 
