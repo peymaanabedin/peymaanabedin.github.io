@@ -3340,28 +3340,39 @@
 
                 // A library of regex patterns for different banks and transaction types.
                 // The order matters: more specific patterns should come before general ones.
-                const patterns = [
-                    // Bank Mellat
-                    { bank: 'ملت', type: 'expense', regex: /خريد Auth.*مبلغ: ([\d,٬]+) ريال.*بانك ملت/, desc: 'خرید با کارت ملت' },
-                    { bank: 'ملت', type: 'expense', regex: /برداشت مبلغ ([\d,٬]+) ريال از .*بانك ملت/, desc: 'برداشت از بانک ملت' },
-                    { bank: 'ملت', type: 'income', regex: /واريز مبلغ ([\d,٬]+) ريال به .*بانك ملت/, desc: 'واریز به بانک ملت' },
-                    // Bank Melli
-                    { bank: 'ملی', type: 'expense', regex: /بانك ملي ايران برداشت مبلغ ([\d,٬]+) ريال/, desc: 'برداشت از بانک ملی' },
-                    { bank: 'ملی', type: 'expense', regex: /خريد مبلغ ([\d,٬]+) ريال از كارت بانك ملي/, desc: 'خرید با کارت ملی' },
-                    { bank: 'ملی', type: 'income', regex: /واريز چك .* به مبلغ ([\d,٬]+) ريال در بانك ملي/, desc: 'واریز چک به بانک ملی' },
-                    { bank: 'ملی', type: 'income', regex: /بانك ملي ايران واريز مبلغ ([\d,٬]+) ريال/, desc: 'واریز به بانک ملی' },
-                    // Bank Saderat
-                    { bank: 'صادرات', type: 'expense', regex: /برداشت مبلغ ([\d,٬]+) ريال .* سپهر بانك صادرات/, desc: 'برداشت از بانک صادرات' },
-                    { bank: 'صادرات', type: 'expense', regex: /خريد با كارت سپهر مبلغ ([\d,٬]+) ريال .* بانك صادرات/, desc: 'خرید با کارت صادرات' },
-                    { bank: 'صادرات', type: 'income', regex: /واريز به سپهر كارت مبلغ ([\d,٬]+) ريال .* بانك صادرات/, desc: 'واریز به بانک صادرات' },
-                    // Bank Pasargad
-                    { bank: 'پاسارگاد', type: 'expense', regex: /بانک پاسارگاد برداشت مبلغ ([\d,٬]+)/, desc: 'برداشت از بانک پاسارگاد' },
-                    { bank: 'پاسارگاد', type: 'expense', regex: /بانک پاسارگاد خريد مبلغ ([\d,٬]+)/, desc: 'خرید با کارت پاسارگاد' },
-                    { bank: 'پاسارگاد', type: 'income', regex: /بانک پاسارگاد واريز مبلغ ([\d,٬]+)/, desc: 'واریز به بانک پاسارگاد' },
-                    // Generic Patterns (less specific, last resort)
-                    { bank: null, type: 'expense', regex: /(?:برداشت|خريد|خرید|پرداخت|انتقال|ساتنا|پايا|کارت به کارت).*(?:مبلغ|مبلغ:)\s*([\d,٬]+)/, desc: 'تراکنش هزینه' },
-                    { bank: null, type: 'income', regex: /(?:واریز|واريز).*(?:مبلغ|مبلغ:)\s*([\d,٬]+)/, desc: 'تراکنش درآمد' },
-                ];
+               const patterns = [
+                    // --- NEW PATTERNS START ---
+                    // Blu Bank
+                    { bank: 'بلو', type: 'expense', regex: /بلو.* ([\d,٬]+) ریال از حساب شما پرید/, desc: 'برداشت پول بلو' },
+                    // Bank Khhavarmianeh
+                    { bank: 'خاورمیانه', type: 'expense', regex: /بانک خاورمیانه.*برداشت وجه از خودپرداز\s*-?([\d,٬]+)/, desc: 'برداشت وجه خاورمیانه' },
+                    // New Bank Melli format
+                    { bank: 'ملی', type: 'expense', regex: /بانك ملي ايران\s*برداشت:([\d,٬]+)-?/, desc: 'برداشت از بانک ملی' },
+                    // Generic withdrawal without the word "مبلغ"
+                    { bank: null, type: 'expense', regex: /برداشت\s*([\d,٬]+)/, desc: 'برداشت وجه' },
+                    // --- NEW PATTERNS END ---
+
+                    // Bank Mellat (existing)
+                    { bank: 'ملت', type: 'expense', regex: /خريد Auth.*مبلغ: ([\d,٬]+) ريال.*بانك ملت/, desc: 'خرید با کارت ملت' },
+                    { bank: 'ملت', type: 'expense', regex: /برداشت مبلغ ([\d,٬]+) ريال از .*بانك ملت/, desc: 'برداشت از بانک ملت' },
+                    { bank: 'ملت', type: 'income', regex: /واريز مبلغ ([\d,٬]+) ريال به .*بانك ملت/, desc: 'واریز به بانک ملت' },
+                    // Bank Melli (existing)
+                    { bank: 'ملی', type: 'expense', regex: /بانك ملي ايران برداشت مبلغ ([\d,٬]+) ريال/, desc: 'برداشت از بانک ملی' },
+                    { bank: 'ملی', type: 'expense', regex: /خريد مبلغ ([\d,٬]+) ريال از كارت بانك ملي/, desc: 'خرید با کارت ملی' },
+                    { bank: 'ملی', type: 'income', regex: /واريز چك .* به مبلغ ([\d,٬]+) ريال در بانك ملي/, desc: 'واریز چک به بانک ملی' },
+                    { bank: 'ملی', type: 'income', regex: /بانك ملي ايران واريز مبلغ ([\d,٬]+) ريال/, desc: 'واریز به بانک ملی' },
+                    // Bank Saderat (existing)
+                    { bank: 'صادرات', type: 'expense', regex: /برداشت مبلغ ([\d,٬]+) ريال .* سپهر بانك صادرات/, desc: 'برداشت از بانک صادرات' },
+                    { bank: 'صادرات', type: 'expense', regex: /خريد با كارت سپهر مبلغ ([\d,٬]+) ريال .* بانك صادرات/, desc: 'خرید با کارت صادرات' },
+                    { bank: 'صادرات', type: 'income', regex: /واريز به سپهر كارت مبلغ ([\d,٬]+) ريال .* بانك صادرات/, desc: 'واریز به بانک صادرات' },
+                    // Bank Pasargad (existing)
+                    { bank: 'پاسارگاد', type: 'expense', regex: /بانک پاسارگاد برداشت مبلغ ([\d,٬]+)/, desc: 'برداشت از بانک پاسارگاد' },
+                    { bank: 'پاسارگاد', type: 'expense', regex: /بانک پاسارگاد خريد مبلغ ([\d,٬]+)/, desc: 'خرید با کارت پاسارگاد' },
+                    { bank: 'پاسارگاد', type: 'income', regex: /بانک پاسارگاد واريز مبلغ ([\d,٬]+)/, desc: 'واریز به بانک پاسارگاد' },
+                    // Generic Patterns (existing, less specific, last resort)
+                    { bank: null, type: 'expense', regex: /(?:برداشت|خريد|خرید|پرداخت|انتقال|ساتنا|پايا|کارت به کارت).*(?:مبلغ|مبلغ:)\s*([\d,٬]+)/, desc: 'تراکنش هزینه' },
+                    { bank: null, type: 'income', regex: /(?:واریز|واريز).*(?:مبلغ|مبلغ:)\s*([\d,٬]+)/, desc: 'تراکنش درآمد' },
+                ];
 
                 let bestMatch = null;
 
@@ -3379,30 +3390,42 @@
                 }
 
                 if (bestMatch) {
-                    let amount = parseInt(getUnformattedAmount(bestMatch.amountStr));
-                    // Assume amount is in Rials if not specified, and convert to Toman
-                    if (!/تومان/.test(normalizedText) && /ريال/.test(normalizedText)) {
-                        amount = Math.floor(amount / 10);
-                    }
+    let amount = parseInt(getUnformattedAmount(bestMatch.amountStr));
+                    // Assume amount is in Rials if not specified, and convert to Toman
+                    if (!/تومان/.test(normalizedText) && /ريال/.test(normalizedText)) {
+                        amount = Math.floor(amount / 10);
+                    }
 
-                    const dateRegex = /(\d{4}|\d{2})\/(\d{1,2})\/(\d{1,2})/;
-                    const timeRegex = /(\d{2}):(\d{2})/;
-                    let date = moment().format(JALALI_DISPLAY_FORMAT); // Default to today
-                    let time = '';
+                    // --- NEW DATE/TIME PARSING LOGIC START ---
+                    let date = moment().format(JALALI_DISPLAY_FORMAT); // Default to today
+                    let time = '';
 
-                    const dateMatch = normalizedText.match(dateRegex);
-                    if (dateMatch) {
-                        let year = dateMatch[1];
-                        if (year.length === 2) { year = '14' + year; }
-                        let month = dateMatch[2].padStart(2, '0');
-                        let day = dateMatch[3].padStart(2, '0');
-                        date = `${year}/${month}/${day}`;
-                    }
+                    // Regexes for different date formats (order matters)
+                    const dateRegexes = [
+                        { regex: /(\d{4})[\/\.](\d{1,2})[\/\.](\d{1,2})/, y: 1, m: 2, d: 3 }, // Matches: 1404.04.01 or 1404/04/01
+                        { regex: /(\d{2})[\/\.](\d{1,2})[\/\.](\d{1,2})/, y: 1, m: 2, d: 3 }, // Matches: 04/04/01
+                        { regex: /(?:\s|^)(\d{2})(\d{2})-\d{2}:\d{2}/, y: null, m: 1, d: 2 },  // Matches: 0404-11:26
+                        { regex: /(?:\s|^)(\d{1,2})\/(\d{1,2})(?=\s|$)/, y: null, m: 1, d: 2 },  // Matches: 04/06 (no year)
+                    ];
 
-                    const timeMatch = normalizedText.match(timeRegex);
-                    if (timeMatch) {
-                        time = ` ${timeMatch[0]}`;
-                    }
+                    for (const dr of dateRegexes) {
+                        const dateMatch = normalizedText.match(dr.regex);
+                        if (dateMatch) {
+                            let year = dr.y ? dateMatch[dr.y] : moment().format('jYYYY');
+                            if (year.length === 2) { year = '14' + year; }
+                            let month = dateMatch[dr.m].padStart(2, '0');
+                            let day = dateMatch[dr.d].padStart(2, '0');
+                            date = `<span class="math-inline">\{year\}/</span>{month}/${day}`;
+                            break; // Found a date, stop looking
+                        }
+                    }
+
+                    const timeRegex = /(\d{2}):(\d{2})/;
+                    const timeMatch = normalizedText.match(timeRegex);
+                    if (timeMatch) {
+                        time = ` ${timeMatch[0]}`;
+                    }
+                    // --- NEW DATE/TIME PARSING LOGIC END ---
 
                     let prefillData = {
                         amount: amount,
