@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -3117,7 +3118,7 @@
                                                     <li class="more-menu-item" data-page="savings-page" data-title="پس‌انداز"><div class="item-icon goal"><i class="fas fa-piggy-bank"></i></div><div class="item-info"><p>اهداف و پس‌انداز</p></div><i class="fas fa-chevron-left"></i></li>
                                                 </ul>
                                                 <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
-                                                    وب اپلیکیشن حسابداری شخصی شمار نسخه 1.32 | طراحی و کدنویسی شده توسط پیمان عابدین پور
+                                                    وب اپلیکیشن حسابداری شخصی شمار نسخه 1.3 | طراحی و کدنویسی شده توسط پیمان عابدین پور
                                                 </div>
                                             </div>`;
                 openModal('#more-menu-modal-overlay');
@@ -3318,14 +3319,16 @@
 
             // === NEW: Smart SMS Parsing Function ===
 /**
- * این تابع پیامک تراکنش بانکی را پارس می‌کند و اطلاعات را استخراج می‌کند.
- * اگر متنی دریافت نشود، متن را از کلیپ‌بورد می‌خواند.
- * تمام مبالغ ریالی فرض شده و به تومان تبدیل می‌شوند، مگر اینکه واژه «تومان» در متن باشد.
+ * This function parses a bank transaction SMS, extracts key details,
+ * and opens a modal pre-filled with the extracted information.
  *
- * @param {string} [text] - متن پیامک بانکی. اگر مقداردهی نشود، متن از کلیپ‌بورد خوانده می‌شود.
+ * It can read the SMS text from the clipboard if no text is provided directly.
+ * The function is robust against various Persian number formats and special whitespace characters.
+ *
+ * @param {string} [text] - The SMS text content. If not provided, the function will attempt to read from the clipboard.
  */
 const parseSmsAndOpenModal = async (text) => {
-    // اگر متنی وارد نشده بود، از کلیپ‌بورد بخوان
+    // If no text is passed, try to read from clipboard
     if (!text || typeof text !== 'string') {
         try {
             if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
@@ -3333,84 +3336,59 @@ const parseSmsAndOpenModal = async (text) => {
             }
             if (!text) {
                 showToast('کلیپ‌بورد خالی است. ابتدا متن پیامک را کپی کنید.');
-                renderTransactionModal();
+                renderTransactionModal(); // Open an empty modal for manual entry
                 return;
             }
         } catch (err) {
             console.error('Failed to read clipboard contents: ', err);
             showToast('برای الصاق خودکار، دسترسی به کلیپ‌بورد لازم است.');
-            renderTransactionModal();
+            renderTransactionModal(); // Open an empty modal
             return;
         }
     }
 
-    // نرمال‌سازی: تبدیل اعداد فارسی و حذف فاصله خاص (نه \n)
-    const normalizedText = normalizeDigits(
-        text.replace(/\u00A0/g, ' ')
-    );
+    // Enhanced normalization: newlines AND non-breaking spaces replaced with normal spaces
+    const normalizedText = normalizeDigits(text.replace(/\n/g, ' ').replace(/\u00A0/g, ' '));
 
-    // الگوهای تخصصی بانک‌ها (قابل گسترش)
+    // Regex patterns (improved for multi-line, multi-space, Arabic/Persian chars)
     const patterns = [
+        // --- مهم: پیامک خودپرداز بانک ملی با عدد منفی ---
         { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?خودپرداز:\s*([\d,٬]+)-/, desc: 'برداشت خودپرداز ملی' },
+        // بانک تجارت - برداشت (پوشش پیامک چندخطی)
         { bank: 'تجارت', type: 'expense', regex: /\*بان[کك] تجارت\*[\s\S]*?برداشت:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'برداشت از تجارت' },
+        // سایر بانک‌ها
         { bank: 'بلو', type: 'income', regex: /بلو.* ([\d,٬]+) ر[یي]ال به حساب شما نشست/, desc: 'واریز به بلو' },
         { bank: 'خاورمیانه', type: 'income', regex: /بان[کك] خاورم[یي]انه.*\+([\d,٬]+)/, desc: 'واریز به خاورمیانه' },
         { bank: 'گردشگری', type: 'expense', regex: /بان[کك] گردشگر[یي].*برداشت از:.*مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'برداشت از گردشگری' },
         { bank: 'گردشگری', type: 'income', regex: /بان[کك] گردشگر[یي].*واریز به:.*مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'واریز به گردشگری' },
         { bank: 'ملی', type: 'income', regex: /بان[کك] مل[یي] ا[یي]ران\s*انتقال[یي]:\s*([\d,٬]+)\+/, desc: 'انتقال به ملی' },
         { bank: 'بلو', type: 'expense', regex: /بلو.* ([\d,٬]+) ر[یي]ال از حساب شما پرید/, desc: 'برداشت پول بلو' },
-        { bank: 'خاورمیانه', type: 'expense', regex: /بان[کك] خاورم[یي]انه.*برداشت وجه از خودپرداز\s*-?([\د,٬]+)/, desc: 'برداشت وجه خاورمیانه' },
-        { bank: 'سپه', type: 'expense', regex: /بان[کك] سپه.*مبلغ:\s*([\د,٬]+)\s*ر[یي]ال/, desc: 'تراکنش بانک سپه' },
-        { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?برداشت:\s*([\د,٬]+)-?/, desc: 'برداشت از ملی' },
-        { bank: 'ملت', type: 'expense', regex: /خرید Auth.*مبلغ:\s*([\د,٬]+)\s*ر[یي]ال.*بان[کك] ملت/, desc: 'خرید با کارت ملت' },
-        { bank: 'ملت', type: 'expense', regex: /برداشت مبلغ ([\د,٬]+)\s*ر[یي]ال از .*بان[کك] ملت/, desc: 'برداشت از ملت' },
-        { bank: 'ملت', type: 'income', regex: /واریز مبلغ ([\د,٬]+)\s*ر[یي]ال به .*بان[کك] ملت/, desc: 'واریز به ملت' },
-        { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?برداشت مبلغ ([\د,٬]+)\s*ر[یي]ال/, desc: 'برداشت از ملی' },
-        { bank: 'ملی', type: 'expense', regex: /خرید مبلغ ([\د,٬]+)\s*ر[یي]ال از [کك]ارت بان[کك] مل[یي]/, desc: 'خرید با کارت ملی' },
-        { bank: 'ملی', type: 'income', regex: /واریز چک .* به مبلغ ([\د,٬]+)\s*ر[یي]ال در بان[کك] مل[یي]/, desc: 'واریز چک به ملی' },
-        { bank: 'ملی', type: 'income', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?واریز مبلغ ([\د,٬]+)\s*ر[یي]ال/, desc: 'واریز به ملی' },
-        { bank: 'صادرات', type: 'expense', regex: /برداشت مبلغ ([\د,٬]+)\s*ر[یي]ال .* سپهر بان[کك] صادرات/, desc: 'برداشت از صادرات' },
-        { bank: 'صادرات', type: 'expense', regex: /خرید با کارت سپهر مبلغ ([\د,٬]+)\s*ر[یي]ال .* بان[کك] صادرات/, desc: 'خرید با کارت صادرات' },
-        { bank: 'صادرات', type: 'income', regex: /واریز به سپهر کارت مبلغ ([\د,٬]+)\s*ر[یي]ال .* بان[کك] صادرات/, desc: 'واریز به صادرات' },
-        { bank: 'پاسارگاد', type: 'expense', regex: /بان[کك] پاسارگاد[\s\S]*?برداشت مبلغ ([\د,٬]+)/, desc: 'برداشت از پاسارگاد' },
-        { bank: 'پاسارگاد', type: 'expense', regex: /بان[کك] پاسارگاد[\s\S]*?خرید مبلغ ([\د,٬]+)/, desc: 'خرید با کارت پاسارگاد' },
-        { bank: 'پاسارگاد', type: 'income', regex: /بان[کك] پاسارگاد[\s\S]*?واریز مبلغ ([\د,٬]+)/, desc: 'واریز به پاسارگاد' },
+        { bank: 'خاورمیانه', type: 'expense', regex: /بان[کك] خاورم[یي]انه.*برداشت وجه از خودپرداز\s*-?([\d,٬]+)/, desc: 'برداشت وجه خاورمیانه' },
+        { bank: 'سپه', type: 'expense', regex: /بان[کك] سپه.*مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'تراکنش بانک سپه' },
+        { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?برداشت:\s*([\d,٬]+)-?/, desc: 'برداشت از ملی' },
+        { bank: 'ملت', type: 'expense', regex: /خرید Auth.*مبلغ:\s*([\d,٬]+)\s*ر[یي]ال.*بان[کك] ملت/, desc: 'خرید با کارت ملت' },
+        { bank: 'ملت', type: 'expense', regex: /برداشت مبلغ ([\d,٬]+)\s*ر[یي]ال از .*بان[کك] ملت/, desc: 'برداشت از ملت' },
+        { bank: 'ملت', type: 'income', regex: /واریز مبلغ ([\d,٬]+)\s*ر[یي]ال به .*بان[کك] ملت/, desc: 'واریز به ملت' },
+        { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?برداشت مبلغ ([\d,٬]+)\s*ر[یي]ال/, desc: 'برداشت از ملی' },
+        { bank: 'ملی', type: 'expense', regex: /خرید مبلغ ([\d,٬]+)\s*ر[یي]ال از [کك]ارت بان[کك] مل[یي]/, desc: 'خرید با کارت ملی' },
+        { bank: 'ملی', type: 'income', regex: /واریز چک .* به مبلغ ([\d,٬]+)\s*ر[یي]ال در بان[کك] مل[یي]/, desc: 'واریز چک به ملی' },
+        { bank: 'ملی', type: 'income', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?واریز مبلغ ([\d,٬]+)\s*ر[یي]ال/, desc: 'واریز به ملی' },
+        { bank: 'صادرات', type: 'expense', regex: /برداشت مبلغ ([\d,٬]+)\s*ر[یي]ال .* سپهر بان[کك] صادرات/, desc: 'برداشت از صادرات' },
+        { bank: 'صادرات', type: 'expense', regex: /خرید با کارت سپهر مبلغ ([\d,٬]+)\s*ر[یي]ال .* بان[کك] صادرات/, desc: 'خرید با کارت صادرات' },
+        { bank: 'صادرات', type: 'income', regex: /واریز به سپهر کارت مبلغ ([\d,٬]+)\s*ر[یي]ال .* بان[کك] صادرات/, desc: 'واریز به صادرات' },
+        { bank: 'پاسارگاد', type: 'expense', regex: /بان[کك] پاسارگاد[\s\S]*?برداشت مبلغ ([\d,٬]+)/, desc: 'برداشت از پاسارگاد' },
+        { bank: 'پاسارگاد', type: 'expense', regex: /بان[کك] پاسارگاد[\s\S]*?خرید مبلغ ([\d,٬]+)/, desc: 'خرید با کارت پاسارگاد' },
+        { bank: 'پاسارگاد', type: 'income', regex: /بان[کك] پاسارگاد[\s\S]*?واریز مبلغ ([\d,٬]+)/, desc: 'واریز به پاسارگاد' },
         // الگوهای عمومی
-        { bank: null, type: 'income', regex: /واریز([\د,٬]+)/, desc: 'واریز وجه' },
-        { bank: null, type: 'expense', regex: /برداشت\s*([\د,٬]+)/, desc: 'برداشت وجه' },
-        { bank: null, type: 'expense', regex: /(?:برداشت|خرید|پرداخت|انتقال|ساتنا|پایا|کارت به کارت).*(?:مبلغ|مبلغ:)\s*([\د,٬]+)/, desc: 'تراکنش هزینه' },
-        { bank: null, type: 'income', regex: /(?:واریز).*(?:مبلغ|مبلغ:)\s*([\د,٬]+)/, desc: 'تراکنش درآمد' },
+        { bank: null, type: 'income', regex: /واریز([\d,٬]+)/, desc: 'واریز وجه' },
+        { bank: null, type: 'expense', regex: /برداشت\s*([\d,٬]+)/, desc: 'برداشت وجه' },
+        { bank: null, type: 'expense', regex: /(?:برداشت|خرید|پرداخت|انتقال|ساتنا|پایا|کارت به کارت).*(?:مبلغ|مبلغ:)\s*([\d,٬]+)/, desc: 'تراکنش هزینه' },
+        { bank: null, type: 'income', regex: /(?:واریز).*(?:مبلغ|مبلغ:)\s*([\d,٬]+)/, desc: 'تراکنش درآمد' },
     ];
-
-    // الگوی خطوط صرفاً مثبت/منفی؛ با تشخیص بانک صادرات/رسالت
-    const extraPatterns = [
-        {
-            bank: null, type: 'income',
-            regex: /^\s*\+([\d,٬]+)\s*$/gm,
-            desc: 'واریز بر اساس علامت مثبت'
-        },
-        {
-            bank: null, type: 'expense',
-            regex: /^\s*-([\d,٬]+)\s*$/gm,
-            desc: 'برداشت بر اساس علامت منفی'
-        },
-        {
-            bank: null, type: 'income',
-            regex: /^([\d,٬]+)$/gm,
-            desc: 'واریز عدد مثبت بدون علامت در خط (فقط اگر هیچ علامت منفی در هیچ خط نبود)'
-        },
-        {
-            bank: null, type: 'expense',
-            regex: /^([\d,٬]+)-$/gm,
-            desc: 'برداشت عدد با - انتهایی'
-        }
-    ];
-
-    const allPatterns = [...extraPatterns, ...patterns];
 
     let bestMatch = null;
-    // ابتدا سراغ الگوهای خطی خاص برو، بعد الگوهای بانک‌ها
-    for (const pattern of allPatterns) {
+
+    for (const pattern of patterns) {
         const match = normalizedText.match(pattern.regex);
         if (match && match[1]) {
             bestMatch = {
@@ -3419,60 +3397,47 @@ const parseSmsAndOpenModal = async (text) => {
                 bank: pattern.bank,
                 description: pattern.desc
             };
-            // اگر بانک صادرات یا رسالت در متن باشد و بانک خالی است، آن را ثبت کن
-            if (!bestMatch.bank && /بان[کك] صادرات/.test(normalizedText)) {
-                bestMatch.bank = 'صادرات';
-                bestMatch.description = (pattern.type === 'income' ? 'واریز بانک صادرات' : 'برداشت بانک صادرات');
-            }
-            if (!bestMatch.bank && /رسالت/.test(normalizedText)) {
-                bestMatch.bank = 'رسالت';
-                bestMatch.description = (pattern.type === 'income' ? 'واریز بانک رسالت' : 'برداشت بانک رسالت');
-            }
             break;
         }
     }
 
     if (bestMatch) {
         let amount = parseInt(getUnformattedAmount(bestMatch.amountStr));
-        // همیشه تقسیم بر 10 مگر اینکه "تومان" باشد!
-        if (!/تومان|تومانی/.test(normalizedText)) {
+        // Assume amount is in Rials if not specified, and convert to Toman
+        if (!/تومان/.test(normalizedText) && (/ر[یي]ال/.test(normalizedText) || bestMatch.bank)) {
             amount = Math.floor(amount / 10);
         }
 
-        // استخراج تاریخ و ساعت
-        let date = moment().format('jYYYY/MM/DD'); // پیش‌فرض امروز
+        // --- DATE/TIME PARSING LOGIC ---
+        let date = moment().format(JALALI_DISPLAY_FORMAT); // Default to today
         let time = '';
 
-        // پوشش فرمت خاص مثل 0531 - 12:01 یا 04/05_15:16
-        let altDateMatch = normalizedText.match(/(\d{2})(\d{2})\s*[-_]\s*(\d{2}):(\d{2})/);
-        if (!altDateMatch) {
-            altDateMatch = normalizedText.match(/(\d{2})\/(\d{2})[_\-](\d{2}):(\d{2})/);
-        }
-        if (altDateMatch) {
-            const year = moment().format('jYYYY');
-            const month = altDateMatch[1].padStart(2, '0');
-            const day = altDateMatch[2].padStart(2, '0');
-            date = `${year}/${month}/${day}`;
-            time = ` ${altDateMatch[3]}:${altDateMatch[4]}`;
-        } else {
-            // سایر فرمت‌های تاریخ
-            const dateRegexes = [
-                { regex: /(\d{4})[\/\.\-_](\d{1,2})[\/\.\-_](\d{1,2})/, y: 1, m: 2, d: 3 },
-                { regex: /(\d{2})[\/\.\-_](\d{1,2})[\/\.\-_](\d{1,2})/, y: 1, m: 2, d: 3 },
-                { regex: /(?:\s|^)(\d{1,2})\/(\d{1,2})(?=\s|$)/, y: null, m: 1, d: 2 },
-            ];
-            for (const dr of dateRegexes) {
-                const dateMatch = normalizedText.match(dr.regex);
-                if (dateMatch) {
-                    let year = dr.y ? dateMatch[dr.y] : moment().format('jYYYY');
-                    if (year.length === 2) { year = '14' + year; }
-                    let month = dateMatch[dr.m].padStart(2, '0');
-                    let day = dateMatch[dr.d].padStart(2, '0');
-                    date = `${year}/${month}/${day}`;
-                    break;
+        // Regexes for different date formats (order matters)
+        const dateRegexes = [
+            { regex: /(\d{4})[\/\.\-_](\d{1,2})[\/\.\-_](\d{1,2})/, y: 1, m: 2, d: 3 }, // 1404.04.01, 1404/04/01
+            { regex: /(\d{2})[\/\.\-_](\d{1,2})[\/\.\-_](\d{1,2})/, y: 1, m: 2, d: 3 }, // 04/04/04, 04/03/22
+            { regex: /(\d{2})(\d{2})-(\d{2}):(\d{2})/, y: null, m: 1, d: 2, t: [3,4] },  // 0403-10:59
+            { regex: /(?:\s|^)(\d{1,2})\/(\d{1,2})(?=\s|$)/, y: null, m: 1, d: 2 },  // 04/06 (no year)
+        ];
+
+        for (const dr of dateRegexes) {
+            const dateMatch = normalizedText.match(dr.regex);
+            if (dateMatch) {
+                let year = dr.y ? dateMatch[dr.y] : moment().format('jYYYY');
+                if (year.length === 2) { year = '14' + year; }
+                let month = dateMatch[dr.m].padStart(2, '0');
+                let day = dateMatch[dr.d].padStart(2, '0');
+                date = `${year}/${month}/${day}`;
+                // اگر ساعت هم در همین match بود
+                if (dr.t && dateMatch[dr.t[0]] && dateMatch[dr.t[1]]) {
+                    time = ` ${dateMatch[dr.t[0]]}:${dateMatch[dr.t[1]]}`;
                 }
+                break;
             }
-            // ساعت
+        }
+
+        // اگر زمان هنوز پیدا نشده بود
+        if (!time) {
             const timeRegex = /(\d{2}):(\d{2})/;
             const timeMatch = normalizedText.match(timeRegex);
             if (timeMatch) {
@@ -3484,8 +3449,7 @@ const parseSmsAndOpenModal = async (text) => {
             amount: amount,
             type: bestMatch.type,
             description: bestMatch.description + time,
-            date: date,
-            bank: bestMatch.bank
+            date: date
         };
         renderTransactionModal(null, null, prefillData);
 
@@ -3494,9 +3458,6 @@ const parseSmsAndOpenModal = async (text) => {
         renderTransactionModal(null, null, { description: text });
     }
 };
-
-
-
 
 
             const setupEventListeners = () => {
