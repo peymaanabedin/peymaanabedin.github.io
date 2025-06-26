@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -155,6 +156,7 @@
             right: 0;
             height: var(--header-height);
             padding: var(--safe-area-top) 1rem 0;
+            /* Adjusted padding-top for safe area */
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -208,6 +210,7 @@
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            /* Ensure content starts below header and ends above nav, accounting for safe areas */
             padding: calc(var(--header-height) + var(--safe-area-top) + 1.25rem) 1rem calc(var(--nav-height) + var(--safe-area-bottom) + 1.25rem);
         }
 
@@ -250,6 +253,9 @@
             margin: 0;
             font-size: 1.2rem;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .section-header .header-actions {
@@ -435,20 +441,37 @@
 
         .quick-actions {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+            gap: 0.75rem;
         }
 
         .action-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            padding: 1rem;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 0.75rem 0.25rem;
             border-radius: var(--radius);
             cursor: pointer;
+            background-color: var(--bg-light);
             transition: background-color 0.2s, transform 0.2s, filter 0.2s;
+            text-align: center;
+            min-height: 80px; /* Ensure cards have a minimum height */
         }
+        
+        body.dark-mode .action-card {
+             background-color: var(--card-dark);
+        }
+        
+        .action-card:hover {
+            background-color: var(--gray-200);
+        }
+        
+        body.dark-mode .action-card:hover {
+            background-color: var(--gray-800);
+        }
+
 
         .action-card i {
             font-size: 1.5rem;
@@ -457,6 +480,7 @@
         .action-card span {
             font-size: 0.8rem;
             font-weight: 500;
+            line-height: 1.2;
         }
 
         .action-card.income i {
@@ -511,6 +535,18 @@
         body.dark-mode .form-control:read-only {
             background-color: var(--gray-700);
         }
+
+        /* === NEW: Auto-fill Highlight === */
+        .form-control.auto-filled {
+            background-color: rgba(52, 199, 89, 0.2) !important;
+            border-color: var(--green-ios) !important;
+        }
+
+        body.dark-mode .form-control.auto-filled {
+            background-color: rgba(52, 199, 89, 0.25) !important;
+        }
+
+        /* === END: NEW STYLES === */
 
         select.form-control {
             direction: rtl;
@@ -956,6 +992,7 @@
             justify-content: space-between;
             align-items: center;
             transition: var(--transition-fast);
+            gap: 0.5rem;
         }
 
         .daily-report-item.active .daily-report-header {
@@ -970,25 +1007,113 @@
             transform: rotate(180deg);
         }
 
+        .date-info {
+            flex-shrink: 0;
+            text-align: right;
+            /* Align date to the right */
+        }
+
         .date-info .day-of-week {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            /* Slightly smaller for compactness */
             color: var(--text-light);
         }
 
         .date-info .date-full {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
+            /* Slightly smaller for compactness */
             color: var(--subtext-light);
+            display: block;
         }
 
         .flow-summary {
-            display: none;
+            display: flex;
+            flex-direction: column;
+            /* Stack income/expense/net vertically on small screens */
+            align-items: flex-end;
+            /* Align items to the right */
+            flex-grow: 1;
+            justify-content: center;
+            /* Center items vertically */
+            min-width: 80px;
+            /* Ensure a minimum width for the summary */
+            margin-right: 0.5rem;
+            /* Space between date and summary */
+            text-align: left;
+            /* Align text within flow items to left */
         }
+
+        @media (min-width: 641px) {
+
+            /* Adjust for larger screens */
+            .flow-summary {
+                flex-direction: row;
+                /* Back to horizontal for larger screens */
+                justify-content: flex-end;
+                /* Keep aligning to the right */
+                flex-wrap: wrap;
+                /* Allow wrapping if space is limited horizontally */
+                align-items: center;
+                margin-right: 0;
+                /* Remove margin if not needed */
+            }
+
+            .flow-item {
+                font-size: 0.9rem;
+                /* Maintain original size for larger screens */
+                white-space: nowrap;
+                flex-shrink: 0;
+                /* Prevent shrinking too much */
+                padding-left: 0.8rem;
+                /* Space between items */
+            }
+        }
+
+
+        .flow-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            /* Reduced gap for compactness */
+            font-weight: 500;
+            font-size: 0.85rem;
+            /* Slightly smaller for compactness */
+            white-space: nowrap;
+        }
+
+        .flow-item span {
+            direction: ltr;
+        }
+
+        .flow-item.income {
+            color: var(--income);
+        }
+
+        .flow-item.expense {
+            color: var(--expense);
+        }
+
+        /* Net flow color based on value */
+        .flow-item.net-positive {
+            color: var(--income);
+        }
+
+        .flow-item.net-negative {
+            color: var(--expense);
+        }
+
+        .flow-item.net-zero {
+            color: var(--subtext-light);
+        }
+
 
         .expand-arrow {
             color: var(--subtext-light);
             font-size: 1rem;
             transition: transform 0.3s;
+            flex-shrink: 0;
+            margin-left: 0.5rem;
         }
 
         .daily-report-body {
@@ -1218,12 +1343,14 @@
                 justify-content: space-between;
                 align-items: flex-end;
             }
+
             #contacts-page .control-group-container {
                 flex-direction: row;
                 flex-grow: 1;
                 justify-content: flex-start;
                 gap: 1.5rem;
             }
+
             #contacts-page .page-controls .btn-primary {
                 flex-shrink: 0;
                 min-width: fit-content;
@@ -1257,15 +1384,19 @@
             cursor: pointer;
             transition: all 0.2s ease-in-out;
             font-family: var(--font-family);
-            -webkit-appearance: none; /* For iOS Safari */
-            -moz-appearance: none; /* For Firefox */
-            appearance: none; /* Standard property */
+            -webkit-appearance: none;
+            /* For iOS Safari */
+            -moz-appearance: none;
+            /* For Firefox */
+            appearance: none;
+            /* Standard property */
         }
 
         .segmented-control .control-button.active {
             background-color: var(--card-light);
             color: var(--text-light);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow for active segment */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            /* Subtle shadow for active segment */
         }
 
         body.dark-mode .segmented-control .control-button.active {
@@ -1292,7 +1423,8 @@
             padding: 0.5rem;
             font-size: 0.9rem;
             height: auto;
-            min-height: 36px; /* Align with button height */
+            min-height: 36px;
+            /* Align with button height */
         }
 
         .sort-control-group .header-icon-btn {
@@ -1316,7 +1448,8 @@
         .contacts-list-vertical {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem; /* Reduced gap for slightly more density */
+            gap: 0.75rem;
+            /* Reduced gap for slightly more density */
         }
 
         .contact-card-new {
@@ -1328,26 +1461,32 @@
             align-items: center;
             transition: var(--transition-fast);
             cursor: pointer;
-            border-left: 5px solid transparent; /* Added for visual accent on hover/active */
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
+            border-left: 5px solid transparent;
+            /* Added for visual accent on hover/active */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            /* Subtle shadow for depth */
         }
 
         .contact-card-new:active {
-            transform: scale(0.98); /* Slightly less dramatic scale */
+            transform: scale(0.98);
+            /* Slightly less dramatic scale */
         }
 
         .contact-card-new:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow);
-            border-left-color: var(--primary); /* Highlight on hover */
+            border-left-color: var(--primary);
+            /* Highlight on hover */
         }
 
         .contact-card-new-icon .item-icon.contact {
             width: 48px;
             height: 48px;
             font-size: 1.5rem;
-            border-radius: 12px; /* Square with radius for a modern look */
-            background-color: var(--gray-200); /* Consistent icon background */
+            border-radius: 12px;
+            /* Square with radius for a modern look */
+            background-color: var(--gray-200);
+            /* Consistent icon background */
             color: var(--gray-700);
         }
 
@@ -1360,26 +1499,32 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem; /* Adjusted gap */
-            min-width: 0; /* Ensures content inside flex items shrinks */
+            gap: 0.5rem;
+            /* Adjusted gap */
+            min-width: 0;
+            /* Ensures content inside flex items shrinks */
         }
 
         .contact-card-new-row-1 {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start; /* Align name to top if actions are taller */
+            align-items: flex-start;
+            /* Align name to top if actions are taller */
             gap: 0.5rem;
-            width: 100%; /* Ensure it takes full width */
+            width: 100%;
+            /* Ensure it takes full width */
         }
 
         .contact-card-new-row-1 .contact-name-tx {
             min-width: 0;
-            flex-shrink: 1; /* Allow text to shrink */
+            flex-shrink: 1;
+            /* Allow text to shrink */
         }
 
         .contact-card-new-row-1 h4 {
             margin: 0;
-            font-size: 1.05rem; /* Slightly smaller for balance */
+            font-size: 1.05rem;
+            /* Slightly smaller for balance */
             font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
@@ -1387,23 +1532,28 @@
         }
 
         .contact-card-new-row-1 .contact-tx-count {
-            font-size: 0.75rem; /* Smaller for secondary info */
+            font-size: 0.75rem;
+            /* Smaller for secondary info */
             color: var(--subtext-light);
         }
 
         .contact-card-new-row-1 .item-actions {
-            flex-shrink: 0; /* Prevent actions from shrinking */
-            margin-left: -0.5rem; /* Adjust alignment */
+            flex-shrink: 0;
+            /* Prevent actions from shrinking */
+            margin-left: -0.5rem;
+            /* Adjust alignment */
         }
 
         .contact-card-new-row-2 {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 0.75rem; /* Adjusted gap */
+            gap: 0.75rem;
+            /* Adjusted gap */
             padding-top: 0.75rem;
             border-top: 1px solid var(--border-light);
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            flex-wrap: wrap;
+            /* Allow wrapping on smaller screens */
             width: 100%;
         }
 
@@ -1411,23 +1561,28 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            flex: 1; /* Distribute space evenly */
-            min-width: 80px; /* Ensure items don't become too small */
+            flex: 1;
+            /* Distribute space evenly */
+            min-width: 80px;
+            /* Ensure items don't become too small */
         }
 
         .contact-card-new-row-2 .balance-item span {
-            font-size: 0.7rem; /* Smaller label for balance */
+            font-size: 0.7rem;
+            /* Smaller label for balance */
             color: var(--subtext-light);
             margin-bottom: 0.1rem;
         }
 
         .contact-card-new-row-2 .balance-item strong {
             font-weight: 600;
-            font-size: 0.95rem; /* Slightly smaller for balance figures */
+            font-size: 0.95rem;
+            /* Slightly smaller for balance figures */
         }
 
         .contact-card-new-row-2 .balance-item.net strong {
-            font-size: 1.05rem; /* Slightly larger for net balance */
+            font-size: 1.05rem;
+            /* Slightly larger for net balance */
             letter-spacing: -0.2px;
         }
 
@@ -1453,6 +1608,7 @@
             right: 0;
             height: var(--nav-height);
             padding: 5px 0 var(--safe-area-bottom);
+            /* Adjusted padding-bottom for safe area */
             background-color: rgba(249, 249, 249, 0.75);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -1663,6 +1819,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="app-wrapper">
         <header class="app-header">
@@ -1682,6 +1839,7 @@
                     </div>
                     <h1 id="balance-amount"></h1>
                 </div>
+
                 <div class="card-section">
                     <div class="section-header">
                         <h3>اقدامات سریع</h3>
@@ -1695,11 +1853,15 @@
                                 class="fas fa-file-invoice-dollar"></i><span>بدهی</span></div>
                         <div class="action-card receivable" data-action="quick-add-receivable"><i
                                 class="fas fa-hand-holding-dollar"></i><span>طلب</span></div>
-                    </div>
+                        <div class="action-card" data-action="paste-from-sms" style="color: var(--purple-ios);">
+                           <i class="fas fa-paste"></i>
+                           <span>الصاق از پیامک</span>
+                        </div>
+                        </div>
                 </div>
                 <div class="card-section" id="reminders-section">
                     <div class="section-header">
-                        <h3><i class="fas fa-bell" style="color: var(--primary); margin-left: 0.5rem;"></i>یادآوری‌های
+                        <h3><i class="fas fa-bell" style="color: var(--primary);"></i>یادآوری‌های
                             نزدیک</h3>
                     </div>
                     <ul class="list-container" id="reminders-list">
@@ -1759,7 +1921,8 @@
                             </button>
                         </div>
                     </div>
-                    <button class="btn btn-primary" data-action="add-contact"><i class="fas fa-plus"></i> افزودن طرف حساب</button>
+                    <button class="btn btn-primary" data-action="add-contact"><i class="fas fa-plus"></i> افزودن طرف
+                        حساب</button>
                 </div>
 
                 <div id="contacts-list-container">
@@ -1767,7 +1930,7 @@
                     <div id="contacts-status" class="list-status"></div>
                 </div>
             </section>
-            </main>
+        </main>
         <button class="fab" data-action="add-transaction"><i class="fas fa-plus"></i></button>
         <nav class="bottom-nav">
             <button class="nav-btn active" data-page="dashboard-page" data-title="حسابداری شخصی شمار"><i
@@ -1885,7 +2048,7 @@
             let currentPageId = 'dashboard-page';
             // --- HELPERS ---
             const formatCurrency = (amount) => `${(Number(amount) || 0).toLocaleString('fa-IR')}`;
-            const getUnformattedAmount = (value) => { if (typeof value !== 'string') return ''; return normalizeDigits(value).replace(/[,٬]/g, ''); };
+            const getUnformattedAmount = (value) => { if (typeof value !== 'string') return ''; return normalizeDigits(value).replace(/[,٬]/g, '').replace('تومان', '').trim(); };
             const normalizeDigits = (str) => { if (typeof str !== 'string') return str; return str.replace(/[\u0660-\u0669]/g, c => c.charCodeAt(0) - 0x0660).replace(/[\u06F0-\u06F9]/g, c => c.charCodeAt(0) - 0x06F0); };
             const formatInputAsCurrency = (input) => {
                 if (!input) return;
@@ -2031,16 +2194,16 @@
                 }
                 meta += '</div>';
                 let actions = `<div class="item-actions"><button class="action-btn edit-btn" data-id="${tx.id}" data-type="transaction"><i class="fas fa-pen-to-square"></i></button><button class="action-btn delete-btn" data-id="${tx.id}" data-type="transaction"><i class="fas fa-trash-alt"></i></button></div>`;
-                let amountHTML = `<div class="item-amount ${tx.type === 'income' ? 'income' : 'expense'}">${sign} ${formatCurrency(tx.amount)}</div>`;
+                let amountHTML = `<div class="item-amount ${tx.type === 'income' ? 'income' : 'expense'}">${sign} ${formatCurrency(tx.amount)} تومان</div>`;
                 if (tx.type === 'transfer' || tx.type === 'cashflow') {
                     sign = '';
-                    amountHTML = `<div class="item-amount">${formatCurrency(tx.amount)}</div>`;
+                    amountHTML = `<div class="item-amount">${formatCurrency(tx.amount)} تومان</div>`;
                 }
                 let itemIconClass = tx.type;
                 if (tx.transferId) {
                     itemIconClass = tx.type === 'income' ? 'income' : 'expense';
                     sign = tx.type === 'income' ? '+' : '-';
-                    amountHTML = `<div class="item-amount ${itemIconClass}">${sign} ${formatCurrency(tx.amount)}</div>`;
+                    amountHTML = `<div class="item-amount ${itemIconClass}">${sign} ${formatCurrency(tx.amount)} تومان</div>`;
                 }
                 return `<div class="item-icon ${itemIconClass}"><i class="fas ${icons[tx.type] || 'fa-dollar-sign'}"></i></div> <div class="item-info"> <p>${descriptionHTML}</p> ${meta} </div> ${amountHTML} ${actions}`;
             };
@@ -2051,7 +2214,7 @@
                                             <p>${item.name}</p>
                                             <div class="meta-data">موجودی کل</div>
                                         </div>
-                                        <div class="item-amount">${formatCurrency(balance)}</div>
+                                        <div class="item-amount">${formatCurrency(balance)} تومان</div>
                                         <i class="fas fa-chevron-left" style="color: var(--subtext-light); margin-right: auto;"></i>`;
             };
             function renderDashboardPage() {
@@ -2074,31 +2237,31 @@
                 const totalDebt = state.transactions.filter(t => (t.type === 'debt' || t.type === 'issuedCheck') && t.status === 'pending' && (accountId === 'all' || t.accountId == accountId)).reduce((s, t) => s + t.amount, 0);
                 const totalReceivable = state.transactions.filter(t => (t.type === 'receivable' || t.type === 'receivedCheck') && t.status === 'pending' && (accountId === 'all' || t.accountId == accountId)).reduce((s, t) => s + t.amount, 0);
                 const totalLoanRemaining = state.loans.reduce((s, l) => { const paidCount = state.transactions.filter(t => t.loanId == l.id).length; const remaining = (l.totalInstallments - paidCount) * l.installmentAmount; return s + (remaining > 0 ? remaining : 0); }, 0);
-                qs('#balance-amount', page).textContent = state.isBalanceVisible ? `${formatCurrency(balance)} تومان` : '******';
+                qs('#balance-amount', page).textContent = state.isBalanceVisible ? `${formatCurrency(balance)} تومان` : '****** تومان';
                 qs('#dashboard-period-filter', page).value = period;
                 const summaryGrid = qs('#dashboard-summary-grid', page);
                 summaryGrid.innerHTML = `
-                                        <div class="summary-card income" data-page="transactions-page" data-title="تراکنش‌ها" data-filter-type="income">
-                                            <div class="card-header"><div class="card-icon"><i class="fas fa-arrow-up"></i></div><span class="card-title">درآمد</span></div>
-                                            <div class="card-amount">${formatCurrency(income)}</div>
-                                        </div>
-                                        <div class="summary-card expense" data-page="transactions-page" data-title="تراکنش‌ها" data-filter-type="expense">
-                                            <div class="card-header"><div class="card-icon"><i class="fas fa-arrow-down"></i></div><span class="card-title">هزینه</span></div>
-                                            <div class="card-amount">${formatCurrency(expenses)}</div>
-                                        </div>
-                                        <div class="summary-card receivable" data-page="receivables-page" data-title="طلب‌ها">
-                                            <div class="card-header"><div class="card-icon"><i class="fas fa-hand-holding-dollar"></i></div><span class="card-title">طلب (مانده)</span></div>
-                                            <div class="card-amount">${formatCurrency(totalReceivable)}</div>
-                                        </div>
-                                        <div class="summary-card debt" data-page="debts-page" data-title="بدهی‌ها">
-                                            <div class="card-header"><div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div><span class="card-title">بدهی (مانده)</span></div>
-                                            <div class="card-amount">${formatCurrency(totalDebt)}</div>
-                                        </div>
-                                        <div class="summary-card loan" data-page="loans-page" data-title="تسهیلات">
-                                            <div class="card-header"><div class="card-icon"><i class="fas fa-landmark"></i></div><span class="card-title">باقی‌مانده وام‌ها</span></div>
-                                            <div class="card-amount">${formatCurrency(totalLoanRemaining)}</div>
-                                        </div>
-                                        `;
+                                            <div class="summary-card income" data-page="transactions-page" data-title="تراکنش‌ها" data-filter-type="income">
+                                                <div class="card-header"><div class="card-icon"><i class="fas fa-arrow-up"></i></div><span class="card-title">درآمد</span></div>
+                                                <div class="card-amount">${formatCurrency(income)} تومان</div>
+                                            </div>
+                                            <div class="summary-card expense" data-page="transactions-page" data-title="تراکنش‌ها" data-filter-type="expense">
+                                                <div class="card-header"><div class="card-icon"><i class="fas fa-arrow-down"></i></div><span class="card-title">هزینه</span></div>
+                                                <div class="card-amount">${formatCurrency(expenses)} تومان</div>
+                                            </div>
+                                            <div class="summary-card receivable" data-page="receivables-page" data-title="طلب‌ها">
+                                                <div class="card-header"><div class="card-icon"><i class="fas fa-hand-holding-dollar"></i></div><span class="card-title">طلب (مانده)</span></div>
+                                                <div class="card-amount">${formatCurrency(totalReceivable)} تومان</div>
+                                            </div>
+                                            <div class="summary-card debt" data-page="debts-page" data-title="بدهی‌ها">
+                                                <div class="card-header"><div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div><span class="card-title">بدهی (مانده)</span></div>
+                                                <div class="card-amount">${formatCurrency(totalDebt)} تومان</div>
+                                            </div>
+                                            <div class="summary-card loan" data-page="loans-page" data-title="تسهیلات">
+                                                <div class="card-header"><div class="card-icon"><i class="fas fa-landmark"></i></div><span class="card-title">باقی‌مانده وام‌ها</span></div>
+                                                <div class="card-amount">${formatCurrency(totalLoanRemaining)} تومان</div>
+                                            </div>
+                                            `;
                 populateDropdown(qs('#account-filter-dashboard', page), state.accounts, 'id', 'name', { value: 'all', text: 'همه حساب‌ها' });
                 qs('#account-filter-dashboard', page).value = state.activeAccountId;
                 const recentsList = qs('#dashboard-recents .list-container', page);
@@ -2122,42 +2285,42 @@
                 const page = qs('#transactions-page');
                 if (!page) return;
                 page.innerHTML = `
-                                        <div class="card-section">
-                                            <div class="section-header">
-                                                <h3>لیست تراکنش‌ها</h3>
-                                                <div class="header-actions">
-                                                    <button class="btn btn-secondary ${isFilterActive('transactions') ? 'filter-active' : ''}" data-action="toggle-filters">
-                                                        <i class="fas fa-filter"></i> <span>فیلتر</span>
-                                                    </button>
-                                                    <button id="export-csv-btn" class="btn btn-success">
-                                                        <i class="fas fa-file-excel"></i>
-                                                    </button>
+                                            <div class="card-section">
+                                                <div class="section-header">
+                                                    <h3>لیست تراکنش‌ها</h3>
+                                                    <div class="header-actions">
+                                                        <button class="btn btn-secondary ${isFilterActive('transactions') ? 'filter-active' : ''}" data-action="toggle-filters">
+                                                            <i class="fas fa-filter"></i> <span>فیلتر</span>
+                                                        </button>
+                                                        <button id="export-csv-btn" class="btn btn-success">
+                                                            <i class="fas fa-file-excel"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="filters-collapsible-container">
+                                                    <div class="transaction-filters">
+                                                        <div class="form-group"><input type="text" id="search-input" placeholder="جستجو در توضیحات..." class="form-control"></div>
+                                                        <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                                            <div class="form-group"><input type="text" id="from-date-filter-tx" placeholder="از تاریخ" class="form-control pdate"></div>
+                                                            <div class="form-group"><input type="text" id="to-date-filter-tx" placeholder="تا تاریخ" class="form-control pdate"></div>
+                                                        </div>
+                                                        <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                                            <div class="form-group"><select id="account-filter" class="form-control account-dropdown"></select></div>
+                                                            <div class="form-group"><select id="type-filter" class="form-control"></select></div>
+                                                        </div>
+                                                        <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                                            <div class="form-group"><select id="category-filter" disabled class="form-control"><option value="all">همه دسته‌ها</option></select></div>
+                                                            <div class="form-group"><select id="contact-filter" disabled class="form-control contact-dropdown"></select></div>
+                                                        </div>
+                                                        <div class="form-group"><button id="clear-tx-filters-btn" class="btn btn-secondary" style="width:100%;">پاک کردن فیلترها</button></div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="filters-collapsible-container">
-                                                <div class="transaction-filters">
-                                                    <div class="form-group"><input type="text" id="search-input" placeholder="جستجو در توضیحات..." class="form-control"></div>
-                                                    <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                                        <div class="form-group"><input type="text" id="from-date-filter-tx" placeholder="از تاریخ" class="form-control pdate"></div>
-                                                        <div class="form-group"><input type="text" id="to-date-filter-tx" placeholder="تا تاریخ" class="form-control pdate"></div>
-                                                    </div>
-                                                    <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                                        <div class="form-group"><select id="account-filter" class="form-control account-dropdown"></select></div>
-                                                        <div class="form-group"><select id="type-filter" class="form-control"></select></div>
-                                                    </div>
-                                                    <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                                        <div class="form-group"><select id="category-filter" disabled class="form-control"><option value="all">همه دسته‌ها</option></select></div>
-                                                        <div class="form-group"><select id="contact-filter" disabled class="form-control contact-dropdown"></select></div>
-                                                    </div>
-                                                    <div class="form-group"><button id="clear-tx-filters-btn" class="btn btn-secondary" style="width:100%;">پاک کردن فیلترها</button></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div id="transaction-summary" class="filter-summary" style="display: none;"></div>
-                                        <div class="card-section">
-                                            <ul id="transaction-list" class="list-container"></ul>
-                                            <div id="transaction-list-status" class="list-status"></div>
-                                        </div>`;
+                                            <div id="transaction-summary" class="filter-summary" style="display: none;"></div>
+                                            <div class="card-section">
+                                                <ul id="transaction-list" class="list-container"></ul>
+                                                <div id="transaction-list-status" class="list-status"></div>
+                                            </div>`;
                 populateDropdown(qs('#account-filter', page), state.accounts, 'id', 'name', { value: 'all', text: 'همه حساب‌ها' });
                 populateDropdown(qs('#type-filter', page), Object.entries(TRANSACTION_TYPES).map(([k, v]) => ({ key: k, val: v })), 'key', 'val', { value: 'all', text: 'همه انواع' });
                 populateDropdown(qs('#contact-filter', page), state.contacts, 'id', 'name', { value: 'all', text: 'همه طرف حساب‌ها' });
@@ -2187,12 +2350,12 @@
                 });
                 const netFlow = totalIncome - totalExpense;
                 summaryEl.innerHTML = `<h4>خلاصه فیلتر</h4>
-                                        <div class="summary-details" style="gap: 0.5rem 1rem; justify-content: space-between;">
-                                            <div><span>تعداد</span><strong>${formatCurrency(filteredTxs.length)}</strong></div>
-                                            <div><span>دریافتی</span><strong style="color:var(--income);">${formatCurrency(totalIncome)}</strong></div>
-                                            <div><span>پرداختی</span><strong style="color:var(--expense);">${formatCurrency(totalExpense)}</strong></div>
-                                            <div><span>برآیند</span><strong style="direction: ltr; color:${netFlow >= 0 ? 'var(--income)' : 'var(--expense)'};">${netFlow >= 0 ? '+' : ''}${formatCurrency(netFlow)}</strong></div>
-                                        </div>`;
+                                            <div class="summary-details" style="gap: 0.5rem 1rem; justify-content: space-between;">
+                                                <div><span>تعداد</span><strong>${filteredTxs.length.toLocaleString('fa-IR')}</strong></div>
+                                                <div><span>دریافتی</span><strong style="color:var(--income);">${formatCurrency(totalIncome)} تومان</strong></div>
+                                                <div><span>پرداختی</span><strong style="color:var(--expense);">${formatCurrency(totalExpense)} تومان</strong></div>
+                                                <div><span>برآیند</span><strong style="direction: ltr; color:${netFlow >= 0 ? 'var(--income)' : 'var(--expense)'};">${netFlow >= 0 ? '+' : ''}${formatCurrency(netFlow)} تومان</strong></div>
+                                            </div>`;
                 summaryEl.style.display = 'block';
             }
             function renderTransactionList() {
@@ -2201,8 +2364,10 @@
                 const filters = state.filters.transactions;
                 const filtered = state.transactions.filter(tx => {
                     const txDate = moment(tx.date, MOMENT_FORMAT);
-                    if (filters.from && txDate.isBefore(moment(filters.from, MOMENT_FORMAT), 'day')) return false;
-                    if (filters.to && txDate.isAfter(moment(filters.to, MOMENT_FORMAT), 'day')) return false;
+                    // Date filtering (inclusive for start of day, end of day)
+                    if (filters.from && txDate.isBefore(moment(filters.from, MOMENT_FORMAT).startOf('day'))) return false;
+                    if (filters.to && txDate.isAfter(moment(filters.to, MOMENT_FORMAT).endOf('day'))) return false;
+
                     if (filters.accountId !== 'all' && tx.accountId != filters.accountId) return false;
                     if (filters.contactId !== 'all' && tx.contactId != filters.contactId) return false;
                     if (filters.type === 'cashflow') {
@@ -2262,14 +2427,14 @@
                 const page = qs('#accounts-page');
                 if (!page) return;
                 page.innerHTML = `
-                                        <div class="card-section">
-                                            <div class="section-header">
-                                                <h3>حساب‌های من</h3>
-                                                <button class="btn btn-primary" data-action="add-account"><i class="fas fa-plus"></i></button>
-                                            </div>
-                                            <div id="accounts-list" class="list-container" style="margin: 0;"></div>
-                                            <div id="accounts-status" class="list-status"></div>
-                                        </div>`;
+                                            <div class="card-section">
+                                                <div class="section-header">
+                                                    <h3>حساب‌های من</h3>
+                                                    <button class="btn btn-primary" data-action="add-account"><i class="fas fa-plus"></i></button>
+                                                </div>
+                                                <div id="accounts-list" class="list-container" style="margin: 0;"></div>
+                                                <div id="accounts-status" class="list-status"></div>
+                                            </div>`;
                 const listEl = qs('#accounts-list', page), statusEl = qs('#accounts-status', page);
                 if (state.accounts.length === 0) {
                     statusEl.textContent = 'هیچ حسابی تعریف نشده است.';
@@ -2285,8 +2450,11 @@
                     if (tx.type === 'cashflow') return false;
                     if (!tx.date || !moment(tx.date, MOMENT_FORMAT, true).isValid()) return false;
                     const date = moment(tx.date, MOMENT_FORMAT);
-                    if (filters.from && date.isBefore(moment(filters.from, MOMENT_FORMAT), 'day')) return false;
-                    if (filters.to && date.isAfter(moment(filters.to, MOMENT_FORMAT), 'day')) return false;
+
+                    // Date filtering (inclusive for entire days)
+                    if (filters.from && date.isBefore(moment(filters.from, MOMENT_FORMAT).startOf('day'))) return false;
+                    if (filters.to && date.isAfter(moment(filters.to, MOMENT_FORMAT).endOf('day'))) return false;
+
                     if (filters.accountId !== 'all' && tx.accountId != filters.accountId) return false;
                     if (filters.contactId && filters.contactId !== 'all' && tx.contactId != filters.contactId) return false;
                     if (filters.status && filters.status !== 'all' && tx.status !== filters.status) return false;
@@ -2298,32 +2466,32 @@
                 if (!page) return;
                 const pageKey = pageId.replace('-page', '');
                 page.innerHTML = `
-                                            <div class="card-section">
-                                                <div class="section-header">
-                                                    <h3>${title}</h3>
-                                                    <button class="btn btn-secondary ${isFilterActive(pageKey) ? 'filter-active' : ''}" data-action="toggle-filters">
-                                                        <i class="fas fa-filter"></i> <span>فیلتر</span>
-                                                    </button>
-                                                </div>
-                                                <div class="filters-collapsible-container">
-                                                    <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                                        <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter"></div>
-                                                        <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter"></div>
+                                                <div class="card-section">
+                                                    <div class="section-header">
+                                                        <h3>${title}</h3>
+                                                        <button class="btn btn-secondary ${isFilterActive(pageKey) ? 'filter-active' : ''}" data-action="toggle-filters">
+                                                            <i class="fas fa-filter"></i> <span>فیلتر</span>
+                                                        </button>
                                                     </div>
-                                                    <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                                        <div class="form-group"><select class="form-control account-filter account-dropdown"></select></div>
-                                                        <div class="form-group"><select class="form-control status-filter"></select></div>
+                                                    <div class="filters-collapsible-container">
+                                                        <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                                            <div class="form-group"><input type="text" placeholder="از تاریخ" class="form-control pdate from-date-filter"></div>
+                                                            <div class="form-group"><input type="text" placeholder="تا تاریخ" class="form-control pdate to-date-filter"></div>
+                                                        </div>
+                                                        <div class="filter-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                                            <div class="form-group"><select class="form-control account-filter account-dropdown"></select></div>
+                                                            <div class="form-group"><select class="form-control status-filter"></select></div>
+                                                        </div>
+                                                        <div class="form-group"><select class="form-control contact-filter contact-dropdown"></select></div>
+                                                        <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
                                                     </div>
-                                                    <div class="form-group"><select class="form-control contact-filter contact-dropdown"></select></div>
-                                                    <div class="form-group" style="margin-top: 1rem;"><button class="btn btn-secondary clear-generic-filters-btn" data-pagekey="${pageKey}" style="width:100%;">پاک کردن فیلترها</button></div>
                                                 </div>
-                                            </div>
-                                            <div class="filter-summary" style="display: none;"></div>
-                                            <div class="card-section">
-                                                <ul class="list-container" id="${pageKey}-list"></ul>
-                                                <div class="list-status" id="${pageKey}-status"></div>
-                                            </div>
-                                            `;
+                                                <div class="filter-summary" style="display: none;"></div>
+                                                <div class="card-section">
+                                                    <ul class="list-container" id="${pageKey}-list"></ul>
+                                                    <div class="list-status" id="${pageKey}-status"></div>
+                                                </div>
+                                                `;
                 const listEl = qs(`#${pageKey}-list`);
                 const statusEl = qs(`#${pageKey}-status`);
                 populateDropdown(qs('.account-filter', page), state.accounts, 'id', 'name', { value: 'all', text: 'همه حساب‌ها' });
@@ -2346,7 +2514,7 @@
                 if (filteredTxs.length > 0 && hasActiveFilters) {
                     summaryEl.style.display = 'block';
                     const totalAmount = filteredTxs.reduce((sum, tx) => sum + tx.amount, 0);
-                    summaryEl.innerHTML = `<h4>خلاصه فیلتر</h4><div class="summary-details"><div><span>تعداد</span><strong>${formatCurrency(filteredTxs.length)}</strong></div><div><span>مجموع</span><strong>${formatCurrency(totalAmount)} تومان</strong></div></div>`;
+                    summaryEl.innerHTML = `<h4>خلاصه فیلتر</h4><div class="summary-details"><div><span>تعداد</span><strong>${filteredTxs.length.toLocaleString('fa-IR')}</strong></div><div><span>مجموع</span><strong>${formatCurrency(totalAmount)} تومان</strong></div></div>`;
                 } else {
                     summaryEl.style.display = 'none';
                 }
@@ -2364,12 +2532,12 @@
                 const page = qs('#loans-page');
                 if (!page) return;
                 page.innerHTML = `
-                                        <div class="card-section">
-                                            <div class="section-header"><h3>تسهیلات و اقساط</h3><button class="btn btn-primary" data-action="add-loan"><i class="fas fa-plus"></i> تعریف تسهیلات</button></div>
-                                            <ul id="loans-list" class="list-container" style="margin: 0 -1.25rem;"></ul>
-                                            <div id="loans-status" class="list-status"></div>
-                                        </div>
-                                        `;
+                                            <div class="card-section">
+                                                <div class="section-header"><h3>تسهیلات و اقساط</h3><button class="btn btn-primary" data-action="add-loan"><i class="fas fa-plus"></i> تعریف تسهیلات</button></div>
+                                                <ul id="loans-list" class="list-container" style="margin: 0 -1.25rem;"></ul>
+                                                <div id="loans-status" class="list-status"></div>
+                                            </div>
+                                            `;
                 const listEl = qs('#loans-list'), statusEl = qs('#loans-status');
                 listEl.innerHTML = '';
                 if (state.loans.length === 0) {
@@ -2381,22 +2549,22 @@
                     const progress = (loan.totalInstallments > 0) ? (paidCount / loan.totalInstallments) * 100 : 0;
                     const remainingAmount = (loan.totalInstallments - paidCount) * loan.installmentAmount;
                     return `<li data-id="${loan.id}" data-type="loan">
-                                            <div class="item-icon loan"><i class="fas fa-landmark"></i></div>
-                                            <div class="item-info">
-                                                <p>${loan.bankName} - ${loan.description}</p>
-                                                <div class="meta-data">
-                                                    <span>اقساط: ${paidCount} از ${loan.totalInstallments}</span>
-                                                    <span>مانده: ${formatCurrency(remainingAmount)}</span>
+                                                <div class="item-icon loan"><i class="fas fa-landmark"></i></div>
+                                                <div class="item-info">
+                                                    <p>${loan.bankName} - ${loan.description}</p>
+                                                    <div class="meta-data">
+                                                        <span>اقساط: ${paidCount} از ${loan.totalInstallments}</span>
+                                                        <span>مانده: ${formatCurrency(remainingAmount)} تومان</span>
+                                                    </div>
+                                                    <div class="progress-bar-container" style="margin-top: 0.5rem; height: 6px;">
+                                                        <div class="progress-bar loan" style="width: ${progress}%"></div>
+                                                    </div>
                                                 </div>
-                                                <div class="progress-bar-container" style="margin-top: 0.5rem; height: 6px;">
-                                                    <div class="progress-bar loan" style="width: ${progress}%"></div>
+                                                <div class="item-actions">
+                                                    <button class="action-btn edit-btn" data-id="${loan.id}" data-type="loan"><i class="fas fa-pen-to-square"></i></button>
+                                                    <button class="action-btn delete-btn" data-id="${loan.id}" data-type="loan"><i class="fas fa-trash-alt"></i></button>
                                                 </div>
-                                            </div>
-                                            <div class="item-actions">
-                                                <button class="action-btn edit-btn" data-id="${loan.id}" data-type="loan"><i class="fas fa-pen-to-square"></i></button>
-                                                <button class="action-btn delete-btn" data-id="${loan.id}" data-type="loan"><i class="fas fa-trash-alt"></i></button>
-                                            </div>
-                                        </li>`;
+                                            </li>`;
                 }).join('');
             }
             function renderSavingsPage() {
@@ -2404,21 +2572,21 @@
                 if (!page) return;
                 const savingsBalance = state.transactions.filter(tx => tx.type === 'transfer').reduce((acc, tx) => acc + tx.amount, 0);
                 page.innerHTML = `
-                                        <div class="card-section savings-hero-card">
-                                            <div class="hero-icon"><i class="fas fa-piggy-bank"></i></div>
-                                            <h4>موجودی صندوق پس‌انداز</h4>
-                                            <h1>${formatCurrency(savingsBalance)}<span>تومان</span></h1>
-                                            <button class="btn" data-action="add-to-fund">
-                                                <i class="fas fa-donate"></i>
-                                                <span>انتقال به صندوق</span>
-                                            </button>
-                                        </div>
-                                        <div class="card-section">
-                                            <div class="section-header"><h3>اهداف مالی</h3><button class="btn btn-primary" data-action="add-goal"><i class="fas fa-plus"></i> افزودن هدف</button></div>
-                                            <div id="savings-goals-list"></div>
-                                            <div id="savings-goals-status" class="list-status"></div>
-                                        </div>
-                                        `;
+                                            <div class="card-section savings-hero-card">
+                                                <div class="hero-icon"><i class="fas fa-piggy-bank"></i></div>
+                                                <h4>موجودی صندوق پس‌انداز</h4>
+                                                <h1>${formatCurrency(savingsBalance)}<span> تومان</span></h1>
+                                                <button class="btn" data-action="add-to-fund">
+                                                    <i class="fas fa-donate"></i>
+                                                    <span>انتقال به صندوق</span>
+                                                </button>
+                                            </div>
+                                            <div class="card-section">
+                                                <div class="section-header"><h3>اهداف مالی</h3><button class="btn btn-primary" data-action="add-goal"><i class="fas fa-plus"></i> افزودن هدف</button></div>
+                                                <div id="savings-goals-list"></div>
+                                                <div id="savings-goals-status" class="list-status"></div>
+                                            </div>
+                                            `;
                 const listEl = qs('#savings-goals-list'), statusEl = qs('#savings-goals-status');
                 listEl.innerHTML = ''; statusEl.textContent = '';
                 if (state.savingsGoals.length === 0) {
@@ -2429,24 +2597,24 @@
                     const div = document.createElement('div');
                     div.className = 'goal-item';
                     div.innerHTML = `
-                                            <div class="goal-header">
-                                                <div class="goal-title">
-                                                    <div class="item-icon goal"><i class="fas fa-bullseye"></i></div>
-                                                    <h4>${goal.name}</h4>
+                                                <div class="goal-header">
+                                                    <div class="goal-title">
+                                                        <div class="item-icon goal"><i class="fas fa-bullseye"></i></div>
+                                                        <h4>${goal.name}</h4>
+                                                    </div>
+                                                    <div class="item-actions">
+                                                        <button class="action-btn edit-btn" data-id="${goal.id}" data-type="goal"><i class="fas fa-edit"></i></button>
+                                                        <button class="action-btn delete-btn" data-id="${goal.id}" data-type="goal"><i class="fas fa-trash-alt"></i></button>
+                                                    </div>
                                                 </div>
-                                                <div class="item-actions">
-                                                    <button class="action-btn edit-btn" data-id="${goal.id}" data-type="goal"><i class="fas fa-edit"></i></button>
-                                                    <button class="action-btn delete-btn" data-id="${goal.id}" data-type="goal"><i class="fas fa-trash-alt"></i></button>
+                                                <div class="goal-details">
+                                                    <div><span>پس انداز شده</span><strong>${formatCurrency(goal.savedAmount)} تومان</strong></div>
+                                                    <div><span>مبلغ هدف</span><strong>${formatCurrency(goal.targetAmount)} تومان</strong></div>
                                                 </div>
-                                            </div>
-                                            <div class="goal-details">
-                                                <div><span>پس انداز شده</span><strong>${formatCurrency(goal.savedAmount)} تومان</strong></div>
-                                                <div><span>مبلغ هدف</span><strong>${formatCurrency(goal.targetAmount)} تومان</strong></div>
-                                            </div>
-                                            <div>
-                                                <div class="progress-bar-container"><div class="progress-bar goal" style="width: ${progress}%"></div></div>
-                                                <div class="progress-text">${Math.round(progress)}% تکمیل شده</div>
-                                            </div>`;
+                                                <div>
+                                                    <div class="progress-bar-container"><div class="progress-bar goal" style="width: ${progress}%"></div></div>
+                                                    <div class="progress-text">${Math.round(progress)}% تکمیل شده</div>
+                                                </div>`;
                     listEl.appendChild(div);
                 });
             }
@@ -2477,7 +2645,7 @@
                                             <div class="filter-summary" style="display: none;"></div>
                                             <div id="daily-reports-list"></div>
                                             <div id="reports-status" class="list-status"></div>
-                                        `;
+                                            `;
                 populateDropdown(qs('.account-filter', page), state.accounts, 'id', 'name', { value: 'all', text: 'همه حساب‌ها' });
                 populateDropdown(qs('.contact-filter', page), state.contacts, 'id', 'name', { value: 'all', text: 'همه طرف حساب‌ها' });
                 qs('.account-filter', page).value = state.filters.reports.accountId;
@@ -2489,7 +2657,9 @@
                 dailyListEl.innerHTML = '';
                 statusEl.innerHTML = '';
                 const summaryEl = qs('.filter-summary', page);
-                if (filteredTxs.length > 0) {
+                const hasActiveFilters = isFilterActive(pageKey); // Check if filters are active
+
+                if (filteredTxs.length > 0 && hasActiveFilters) { // Only show summary if there are filtered transactions AND filters are active
                     summaryEl.style.display = 'block';
                     let totalIncome = 0, totalExpense = 0;
                     filteredTxs.forEach(tx => {
@@ -2499,11 +2669,11 @@
                     });
                     const netFlow = totalIncome - totalExpense;
                     summaryEl.innerHTML = `<h4>خلاصه فیلتر</h4>
-                                            <div class="summary-details">
-                                                <div><span>مجموع دریافتی</span><strong style="color:var(--income);">${formatCurrency(totalIncome)}</strong></div>
-                                                <div><span>مجموع پرداختی</span><strong style="color:var(--expense);">${formatCurrency(totalExpense)}</strong></div>
-                                                <div><span>جریان خالص</span><strong style="color:${netFlow >= 0 ? 'var(--income)' : 'var(--expense)'};">${formatCurrency(netFlow)}</strong></div>
-                                            </div>`;
+                                                    <div class="summary-details">
+                                                        <div><span>مجموع دریافتی</span><strong style="color:var(--income);">${formatCurrency(totalIncome)} تومان</strong></div>
+                                                        <div><span>مجموع پرداختی</span><strong style="color:var(--expense);">${formatCurrency(totalExpense)} تومان</strong></div>
+                                                        <div><span>جریان خالص</span><strong style="color:${netFlow >= 0 ? 'var(--income)' : 'var(--expense)'};">${formatCurrency(netFlow)} تومان</strong></div>
+                                                    </div>`;
                 } else {
                     summaryEl.style.display = 'none';
                 }
@@ -2526,38 +2696,40 @@
                 dailyListEl.innerHTML = sortedDays.map(day => {
                     const data = groupedByDay[day];
                     const dayNet = data.income - data.expense;
+                    const netFlowClass = dayNet > 0 ? 'net-positive' : (dayNet < 0 ? 'net-negative' : 'net-zero');
                     const m = moment(day, MOMENT_FORMAT);
                     return `<div class="daily-report-item" data-net-flow="${dayNet}">
-                                                <div class="daily-report-header">
-                                                    <div class="date-info">
-                                                        <span class="day-of-week">${m.format('dddd')}</span>
-                                                        <span class="date-full">${m.format(JALALI_DISPLAY_FORMAT)}</span>
+                                                    <div class="daily-report-header">
+                                                        <div class="date-info">
+                                                            <span class="day-of-week">${m.format('dddd')}</span>
+                                                            <span class="date-full">${m.format(JALALI_DISPLAY_FORMAT)}</span>
+                                                        </div>
+                                                        <div class="flow-summary">
+                                                            <div class="flow-item income"><i class="fas fa-arrow-up"></i><span>${formatCurrency(data.income)}</span></div>
+                                                            <div class="flow-item expense"><i class="fas fa-arrow-down"></i><span>${formatCurrency(data.expense)}</span></div>
+                                                            <div class="flow-item ${netFlowClass}"><i class="fas fa-coins"></i><span>${dayNet >= 0 ? '+' : ''}${formatCurrency(dayNet)}</span></div>
+                                                        </div>
+                                                        <i class="fas fa-chevron-down expand-arrow"></i>
                                                     </div>
-                                                    <div class="flow-summary">
-                                                        <div class="flow-item income"><i class="fas fa-arrow-up"></i><span>${formatCurrency(data.income)}</span></div>
-                                                        <div class="flow-item expense"><i class="fas fa-arrow-down"></i><span>${formatCurrency(data.expense)}</span></div>
+                                                    <div class="daily-report-body">
+                                                        <ul class="list-container">${data.transactions.sort((a, b) => b.id - a.id).map(tx => `<li data-id="${tx.id}" data-type="transaction">${getTransactionListItemHTML(tx, { showAccount: true })}</li>`).join('')}</ul>
                                                     </div>
-                                                    <i class="fas fa-chevron-down expand-arrow"></i>
-                                                </div>
-                                                <div class="daily-report-body">
-                                                    <ul class="list-container">${data.transactions.sort((a, b) => b.id - a.id).map(tx => `<li data-id="${tx.id}" data-type="transaction">${getTransactionListItemHTML(tx, { showAccount: true })}</li>`).join('')}</ul>
-                                                </div>
-                                            </div>`;
+                                                </div>`;
                 }).join('');
             }
             function renderExpenseReportsPage() {
                 const page = qs('#expense-reports-page');
                 if (!page) return;
                 page.innerHTML = `
-                                        <div class="section-header" style="margin-bottom: 1rem; justify-content: flex-end;">
-                                            <div class="header-actions">
-                                                <button class="btn btn-primary" data-action="add-expense-category">
-                                                    <i class="fas fa-plus"></i> دسته جدید
-                                                </button>
+                                            <div class="section-header" style="margin-bottom: 1rem; justify-content: flex-end;">
+                                                <div class="header-actions">
+                                                    <button class="btn btn-primary" data-action="add-expense-category">
+                                                        <i class="fas fa-plus"></i> دسته جدید
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="category-report-list" id="expense-categories-list"></div>
-                                        <div id="expense-reports-status" class="list-status"></div>`;
+                                            <div class="category-report-list" id="expense-categories-list"></div>
+                                            <div id="expense-reports-status" class="list-status"></div>`;
                 const expenseTxs = state.transactions.filter(tx => tx.type === 'expense');
                 const filteredTxs = expenseTxs; // Assuming no filters apply here yet for categories, or apply them if needed.
                 const listEl = qs('#expense-categories-list');
@@ -2592,27 +2764,27 @@
                     const percentage = totalOverallExpense > 0 ? (cat.total / totalOverallExpense) * 100 : 0;
                     const bgColor = categoryColors[index % categoryColors.length];
                     return `
-                                        <div class="category-report-card-new" data-action="view-category-transactions" data-category-name="${cat.name}">
-                                            <div class="item-icon expense" style="background-color: ${bgColor}; color: #FFF;"><i class="fas ${cat.icon}"></i></div>
-                                            <div class="category-info">
-                                                <h4 class="category-title">${cat.name}</h4>
-                                                <div class="category-stats">
-                                                    <span class="tx-count">${cat.count} تراکنش</span>
-                                                </div>
-                                            </div>
-                                            <div class="category-amount-progress">
-                                                <span class="total-amount">${formatCurrency(cat.total)} تومان</span>
-                                                <div class="progress-bar-wrapper">
-                                                    <div class="percentage-text">${percentage.toFixed(0)}%</div>
-                                                    <div class="progress-bar-container">
-                                                        <div class="progress-bar expense" style="width: ${percentage.toFixed(1)}%; background-color: ${bgColor};"></div>
+                                                <div class="category-report-card-new" data-action="view-category-transactions" data-category-name="${cat.name}">
+                                                    <div class="item-icon expense" style="background-color: ${bgColor}; color: #FFF;"><i class="fas ${cat.icon}"></i></div>
+                                                    <div class="category-info">
+                                                        <h4 class="category-title">${cat.name}</h4>
+                                                        <div class="category-stats">
+                                                            <span class="tx-count">${cat.count.toLocaleString('fa-IR')} تراکنش</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="item-actions">
-                                                <button class="action-btn edit-btn" data-type="expense-category" data-id="${cat.name}"><i class="fas fa-pen"></i></button>
-                                            </div>
-                                        </div>`;
+                                                    <div class="category-amount-progress">
+                                                        <span class="total-amount">${formatCurrency(cat.total)} تومان</span>
+                                                        <div class="progress-bar-wrapper">
+                                                            <div class="percentage-text">${percentage.toFixed(0)}%</div>
+                                                            <div class="progress-bar-container">
+                                                                <div class="progress-bar expense" style="width: ${percentage.toFixed(1)}%; background-color: ${bgColor};"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="item-actions">
+                                                        <button class="action-btn edit-btn" data-type="expense-category" data-id="${cat.name}"><i class="fas fa-pen"></i></button>
+                                                    </div>
+                                                </div>`;
                 }).join('');
             }
 
@@ -2641,7 +2813,7 @@
                 listEl.innerHTML = '';
                 statusEl.innerHTML = '';
 
-                if(state.contacts.length === 0){
+                if (state.contacts.length === 0) {
                     statusEl.textContent = 'هنوز هیچ طرف حسابی تعریف نشده است.';
                     return;
                 }
@@ -2673,7 +2845,7 @@
                 // Sorting logic
                 contactDetails.sort((a, b) => {
                     let comparison = 0;
-                    switch(filters.sortBy) {
+                    switch (filters.sortBy) {
                         case 'balance': comparison = b.netBalance - a.netBalance; break;
                         case 'debt': comparison = b.totalDebt - a.totalDebt; break;
                         case 'receivable': comparison = b.totalReceivable - a.totalReceivable; break;
@@ -2682,7 +2854,7 @@
                     return filters.sortDirection === 'asc' ? comparison : comparison * -1;
                 });
 
-                if(contactDetails.length === 0){
+                if (contactDetails.length === 0) {
                     statusEl.textContent = 'موردی با فیلترهای انتخاب شده یافت نشد.';
                     return;
                 }
@@ -2693,38 +2865,38 @@
                     if (contact.netBalance < 0) balanceClass = 'balance-negative';
 
                     return `
-                        <div class="contact-card-new" data-action="view-contact-txs" data-id="${contact.id}" data-name="${contact.name}">
-                            <div class="contact-card-new-icon">
-                                <div class="item-icon contact" style="border-radius: var(--radius);"><i class="fas ${contact.icon || 'fa-user'}"></i></div>
-                            </div>
-                            <div class="contact-card-new-details">
-                                <div class="contact-card-new-row-1">
-                                    <div class="contact-name-tx">
-                                        <h4>${contact.name}</h4>
-                                        <span class="contact-tx-count">${contact.txCount} تراکنش</span>
+                                <div class="contact-card-new" data-action="view-contact-txs" data-id="${contact.id}" data-name="${contact.name}">
+                                    <div class="contact-card-new-icon">
+                                        <div class="item-icon contact" style="border-radius: var(--radius);"><i class="fas ${contact.icon || 'fa-user'}"></i></div>
                                     </div>
-                                    <div class="item-actions">
-                                        <button class="action-btn edit-btn" data-id="${contact.id}" data-type="contact"><i class="fas fa-pen"></i></button>
-                                        <button class="action-btn delete-btn" data-id="${contact.id}" data-type="contact"><i class="fas fa-trash"></i></button>
+                                    <div class="contact-card-new-details">
+                                        <div class="contact-card-new-row-1">
+                                            <div class="contact-name-tx">
+                                                <h4>${contact.name}</h4>
+                                                <span class="contact-tx-count">${contact.txCount.toLocaleString('fa-IR')} تراکنش</span>
+                                            </div>
+                                            <div class="item-actions">
+                                                <button class="action-btn edit-btn" data-id="${contact.id}" data-type="contact"><i class="fas fa-pen"></i></button>
+                                                <button class="action-btn delete-btn" data-id="${contact.id}" data-type="contact"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="contact-card-new-row-2">
+                                            <div class="balance-item">
+                                                <span>طلب شما</span>
+                                                <strong class="balance-positive">${formatCurrency(contact.totalReceivable)} تومان</strong>
+                                            </div>
+                                            <div class="balance-item">
+                                                <span>بدهی شما</span>
+                                                <strong class="balance-negative">${formatCurrency(contact.totalDebt)} تومان</strong>
+                                            </div>
+                                            <div class="balance-item net">
+                                                <span>برآیند</span>
+                                                <strong class="${balanceClass}" style="direction: ltr;">${contact.netBalance >= 0 ? '+' : ''}${formatCurrency(contact.netBalance)} تومان</strong>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="contact-card-new-row-2">
-                                    <div class="balance-item">
-                                        <span>طلب شما</span>
-                                        <strong class="balance-positive">${formatCurrency(contact.totalReceivable)} تومان</strong>
-                                    </div>
-                                    <div class="balance-item">
-                                        <span>بدهی شما</span>
-                                        <strong class="balance-negative">${formatCurrency(contact.totalDebt)} تومان</strong>
-                                    </div>
-                                    <div class="balance-item net">
-                                        <span>برآیند</span>
-                                        <strong class="${balanceClass}" style="direction: ltr;">${contact.netBalance >= 0 ? '+' : ''}${formatCurrency(contact.netBalance)} تومان</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                                    `;
                 }).join('');
             }
             const populateDropdown = (selectEl, data, valueField, textField, addOption) => {
@@ -2738,7 +2910,7 @@
                 if (selectEl.classList.contains('contact-dropdown')) { selectEl.innerHTML += `<option value="add_new_contact" style="font-weight: bold; color: var(--primary);">+ افزودن طرف حساب جدید...</option>`; }
                 selectEl.value = currentValue;
             };
-            const renderTransactionModal = (txId = null, type = null) => {
+            const renderTransactionModal = (txId = null, type = null, prefillData = null) => {
                 const modal = qs('#transaction-modal-overlay');
                 const txToEdit = txId ? state.transactions.find(t => t.id == txId) : null;
                 if (txToEdit && txToEdit.type === 'cashflow') {
@@ -2746,32 +2918,32 @@
                     return;
                 }
                 modal.innerHTML = `
-                                        <div class="modal-content">
-                                            <div class="modal-header"><h3 id="transaction-modal-title">تراکنش جدید</h3></div>
-                                            <form id="transaction-form">
-                                                <input type="hidden" id="transaction-id">
-                                                <div class="form-group"><label for="type">نوع تراکنش</label><select id="type" required class="form-control"></select></div>
+                                            <div class="modal-content">
+                                                <div class="modal-header"><h3 id="transaction-modal-title">تراکنش جدید</h3></div>
+                                                <form id="transaction-form">
+                                                    <input type="hidden" id="transaction-id">
+                                                    <div class="form-group"><label for="type">نوع تراکنش</label><select id="type" required class="form-control"></select></div>
 
-                                                <div id="cashflow-group" style="display: none;">
-                                                    <div class="form-group"><label for="source-account-select">حساب مبدأ</label><select id="source-account-select" class="form-control account-dropdown"></select></div>
-                                                    <div class="form-group"><label for="destination-account-select">حساب مقصد</label><select id="destination-account-select" class="form-control account-dropdown"></select></div>
-                                                </div>
-                                                <div id="regular-tx-group">
-                                                    <div class="form-group"><label for="account-select">از/به حساب</label><select id="account-select" required class="form-control account-dropdown"></select></div>
-                                                    <div class="form-group" id="contact-group" style="display: none;"><label for="contact-select">طرف حساب</label><select id="contact-select" class="form-control contact-dropdown"></select></div>
-                                                    <div class="form-group" id="loan-payment-group" style="display: none;"><label for="loan-select">پرداخت قسطِ</label><select id="loan-select" class="form-control"></select><div id="add-loan-prompt" style="display: none; margin-top: 0.5rem;"><small>هنوز تسهیلاتی تعریف نشده. <a href="#" data-action="go-to-loans">برای افزودن کلیک کنید.</a></small></div></div>
-                                                    <div class="form-group" id="category-group" style="display: none;"><label for="category-select">انتخاب دسته/منبع</label><select id="category-select" class="form-control"></select></div>
-                                                    <div class="form-group" id="new-category-group" style="display: none;"><input type="text" id="new-category-input" placeholder="نام دسته/منبع جدید" class="form-control"></div>
-                                                </div>
+                                                    <div id="cashflow-group" style="display: none;">
+                                                        <div class="form-group"><label for="source-account-select">حساب مبدأ</label><select id="source-account-select" class="form-control account-dropdown"></select></div>
+                                                        <div class="form-group"><label for="destination-account-select">حساب مقصد</label><select id="destination-account-select" class="form-control account-dropdown"></select></div>
+                                                    </div>
+                                                    <div id="regular-tx-group">
+                                                        <div class="form-group"><label for="account-select">از/به حساب</label><select id="account-select" required class="form-control account-dropdown"></select></div>
+                                                        <div class="form-group" id="contact-group" style="display: none;"><label for="contact-select">طرف حساب</label><select id="contact-select" class="form-control contact-dropdown"></select></div>
+                                                        <div class="form-group" id="loan-payment-group" style="display: none;"><label for="loan-select">پرداخت قسطِ</label><select id="loan-select" class="form-control"></select><div id="add-loan-prompt" style="display: none; margin-top: 0.5rem;"><small>هنوز تسهیلاتی تعریف نشده. <a href="#" data-action="go-to-loans">برای افزودن کلیک کنید.</a></small></div></div>
+                                                        <div class="form-group" id="category-group" style="display: none;"><label for="category-select">انتخاب دسته/منبع</label><select id="category-select" class="form-control"></select></div>
+                                                        <div class="form-group" id="new-category-group" style="display: none;"><input type="text" id="new-category-input" placeholder="نام دسته/منبع جدید" class="form-control"></div>
+                                                    </div>
 
-                                                <div class="form-group"><input type="text" id="description" class="form-control" placeholder="توضیحات (اختیاری)"></div>
-                                                <div class="form-group"><input type="text" id="amount" required class="form-control currency-input" inputmode="decimal" placeholder="مبلغ (تومان)"></div>
-                                                <div class="form-group"><input type="text" id="transaction-date" required class="form-control pdate" placeholder="تاریخ تراکنش"/></div>
-                                                <div class="form-group" id="due-date-group" style="display: none;"><input type="text" id="due-date" class="form-control pdate" placeholder="تاریخ سررسید"/></div>
-                                                <div class="form-group" id="status-group" style="display: none;"><label for="status-select">وضعیت</label><select id="status-select" class="form-control"></select></div>
-                                                <div class="form-actions"><button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button><button type="submit" class="btn btn-primary">ثبت</button></div>
-                                            </form>
-                                        </div>`;
+                                                    <div class="form-group"><input type="text" id="description" class="form-control" placeholder="توضیحات (اختیاری)"></div>
+                                                    <div class="form-group"><input type="text" id="amount" required class="form-control currency-input" inputmode="decimal" placeholder="مبلغ (تومان)"></div>
+                                                    <div class="form-group"><input type="text" id="transaction-date" required class="form-control pdate" placeholder="تاریخ تراکنش"/></div>
+                                                    <div class="form-group" id="due-date-group" style="display: none;"><input type="text" id="due-date" class="form-control pdate" placeholder="تاریخ سررسید"/></div>
+                                                    <div class="form-group" id="status-group" style="display: none;"><label for="status-select">وضعیت</label><select id="status-select" class="form-control"></select></div>
+                                                    <div class="form-actions"><button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button><button type="submit" class="btn btn-primary">ثبت</button></div>
+                                                </form>
+                                            </div>`;
                 const form = qs('#transaction-form', modal);
                 qs('#transaction-modal-title', modal).textContent = txId ? 'ویرایش تراکنش' : 'تراکنش جدید';
                 qs('#transaction-id', form).value = txId || '';
@@ -2781,7 +2953,27 @@
                 populateDropdown(qs('#destination-account-select', form), state.accounts, 'id', 'name');
                 populateDropdown(qs('#contact-select', form), state.contacts, 'id', 'name');
                 if (type) qs('#type', form).value = type;
-                if (txId) {
+
+                if (prefillData) {
+                    qs('#transaction-modal-title', modal).textContent = 'بررسی تراکنش هوشمند';
+                    if (prefillData.type) {
+                        qs('#type', form).value = prefillData.type;
+                        qs('#type', form).classList.add('auto-filled');
+                    }
+                    if (prefillData.amount) {
+                        qs('#amount', form).value = formatCurrency(prefillData.amount);
+                        qs('#amount', form).classList.add('auto-filled');
+                    }
+                    if (prefillData.description) {
+                        qs('#description', form).value = prefillData.description;
+                        qs('#description', form).classList.add('auto-filled');
+                    }
+                    if (prefillData.date) {
+                        const dateValue = moment(normalizeDigits(prefillData.date), JALALI_DISPLAY_FORMAT).format(JALALI_DISPLAY_FORMAT);
+                        qs('#transaction-date', form).value = dateValue;
+                        qs('#transaction-date', form).classList.add('auto-filled');
+                    }
+                } else if (txId) {
                     const tx = state.transactions.find(t => t.id == txId);
                     qs('#type', form).value = tx.type;
                     handleTransactionFormChange();
@@ -2874,27 +3066,27 @@
             const renderAccountModal = (accId = null) => {
                 const modal = qs('#account-modal-overlay');
                 modal.innerHTML = `
-                                        <div class="modal-content">
-                                            <div class="modal-header"><h3 id="account-modal-title">${accId ? 'ویرایش حساب' : 'حساب جدید'}</h3></div>
-                                            <form id="account-form">
-                                                <input type="hidden" id="account-id" value="${accId || ''}">
-                                                <div class="form-group"><input type="text" id="account-name" required class="form-control" placeholder="نام حساب (مثال: بانک ملی، کیف پول)"></div>
-                                                <div class="form-group"><input type="text" id="card-number" placeholder="شماره کارت (اختیاری): xxxx-xxxx-xxxx-xxxx" inputmode="numeric" class="form-control"></div>
-                                                <div class="filter-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                                                    <div class="form-group"><input type="text" id="exp-month" placeholder="ماه انقضا" inputmode="numeric" class="form-control"></div>
-                                                    <div class="form-group"><input type="text" id="exp-year" placeholder="سال انقضا" inputmode="numeric" class="form-control"></div>
-                                                    <div class="form-group"><input type="text" id="cvv2" placeholder="CVV2" inputmode="numeric" class="form-control"></div>
-                                                </div>
-                                                <div class="form-group"><input type="text" id="account-number" placeholder="شماره حساب (اختیاری)" inputmode="numeric" class="form-control"></div>
-                                                <div class="form-group"><input type="text" id="shaba-number" placeholder="شماره شبا (اختیاری): IR..." inputmode="text" class="form-control"></div>
-                                                <div class="form-group"><textarea id="notes" rows="2" class="form-control" placeholder="یادداشت (اختیاری)"></textarea></div>
-                                                <div class="form-actions">
-                                                    <button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button>
-                                                    ${accId ? `<button type="button" class="btn btn-danger" data-action="delete-item" data-id="${accId}" data-type="account">حذف</button>` : ''}
-                                                    <button type="submit" class="btn btn-primary" style="flex-grow: 2;">ذخیره</button>
-                                                </div>
-                                            </form>
-                                        </div>`;
+                                            <div class="modal-content">
+                                                <div class="modal-header"><h3 id="account-modal-title">${accId ? 'ویرایش حساب' : 'حساب جدید'}</h3></div>
+                                                <form id="account-form">
+                                                    <input type="hidden" id="account-id" value="${accId || ''}">
+                                                    <div class="form-group"><input type="text" id="account-name" required class="form-control" placeholder="نام حساب (مثال: بانک ملی، کیف پول)"></div>
+                                                    <div class="form-group"><input type="text" id="card-number" placeholder="شماره کارت (اختیاری): xxxx-xxxx-xxxx-xxxx" inputmode="numeric" class="form-control"></div>
+                                                    <div class="filter-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                                        <div class="form-group"><input type="text" id="exp-month" placeholder="ماه انقضا" inputmode="numeric" class="form-control"></div>
+                                                        <div class="form-group"><input type="text" id="exp-year" placeholder="سال انقضا" inputmode="numeric" class="form-control"></div>
+                                                        <div class="form-group"><input type="text" id="cvv2" placeholder="CVV2" inputmode="numeric" class="form-control"></div>
+                                                    </div>
+                                                    <div class="form-group"><input type="text" id="account-number" placeholder="شماره حساب (اختیاری)" inputmode="numeric" class="form-control"></div>
+                                                    <div class="form-group"><input type="text" id="shaba-number" placeholder="شماره شبا (اختیاری): IR..." inputmode="text" class="form-control"></div>
+                                                    <div class="form-group"><textarea id="notes" rows="2" class="form-control" placeholder="یادداشت (اختیاری)"></textarea></div>
+                                                    <div class="form-actions">
+                                                        <button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button>
+                                                        ${accId ? `<button type="button" class="btn btn-danger" data-action="delete-item" data-id="${accId}" data-type="account">حذف</button>` : ''}
+                                                        <button type="submit" class="btn btn-primary" style="flex-grow: 2;">ذخیره</button>
+                                                    </div>
+                                                </form>
+                                            </div>`;
                 if (accId) {
                     const acc = state.accounts.find(a => a.id == accId);
                     if (acc) {
@@ -2913,59 +3105,59 @@
             const renderMoreMenuModal = () => {
                 const modal = qs('#more-menu-modal-overlay');
                 modal.innerHTML = `
-                                        <div class="modal-content">
-                                            <div class="modal-header"><h3>بیشتر</h3></div>
-                                            <ul class="list-container" style="margin:0;">
-                                                <li class="more-menu-item" data-page="reports-page" data-title="گزارش‌های جامع"><div class="item-icon" style="background-color:rgba(255,159,10,0.15); color: #ff9f0a;"><i class="fas fa-chart-pie"></i></div><div class="item-info"><p>گزارش‌ جامع روزانه</p></div><i class="fas fa-chevron-left"></i></li>
-                                                <li class="more-menu-item" data-page="expense-reports-page" data-title="گزارش هزینه ها"><div class="item-icon expense"><i class="fas fa-chart-bar"></i></div><div class="item-info"><p>گزارش هزینه ها بر اساس دسته بندی</p></div><i class="fas fa-chevron-left"></i></li>
-                                                <li class="more-menu-item" data-page="debts-page" data-title="بدهی‌ها"><div class="item-icon debt"><i class="fas fa-file-invoice-dollar"></i></div><div class="item-info"><p>بدهی‌ها و چک‌های صادره</p></div><i class="fas fa-chevron-left"></i></li>
-                                                <li class="more-menu-item" data-page="receivables-page" data-title="طلب‌ها"><div class="item-icon receivable"><i class="fas fa-hand-holding-dollar"></i></div><div class="item-info"><p>طلب‌ها و چک‌های دریافتی</p></div><i class="fas fa-chevron-left"></i></li>
-                                                <li class="more-menu-item" data-page="contacts-page" data-title="طرف حساب‌ها"><div class="item-icon contact"><i class="fas fa-users"></i></div><div class="item-info"><p>طرف حساب‌ها</p></div><i class="fas fa-chevron-left"></i></li>
-                                                <li class="more-menu-item" data-page="loans-page" data-title="تسهیلات"><div class="item-icon loan"><i class="fas fa-landmark"></i></div><div class="item-info"><p>تسهیلات و اقساط</p></div><i class="fas fa-chevron-left"></i></li>
-                                                <li class="more-menu-item" data-page="savings-page" data-title="پس‌انداز"><div class="item-icon goal"><i class="fas fa-piggy-bank"></i></div><div class="item-info"><p>اهداف و پس‌انداز</p></div><i class="fas fa-chevron-left"></i></li>
-                                            </ul>
-                                            <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
-                                                وب اپلیکیشن حسابداری شخصی شمار نسخه 1.1 | طراحی و کدنویسی شده توسط پیمان عابدین پور
-                                            </div>
-                                        </div>`;
+                                            <div class="modal-content">
+                                                <div class="modal-header"><h3>بیشتر</h3></div>
+                                                <ul class="list-container" style="margin:0;">
+                                                    <li class="more-menu-item" data-page="reports-page" data-title="گزارش‌های جامع"><div class="item-icon" style="background-color:rgba(255,159,10,0.15); color: #ff9f0a;"><i class="fas fa-chart-pie"></i></div><div class="item-info"><p>گزارش‌ جامع روزانه</p></div><i class="fas fa-chevron-left"></i></li>
+                                                    <li class="more-menu-item" data-page="expense-reports-page" data-title="گزارش هزینه ها"><div class="item-icon expense"><i class="fas fa-chart-bar"></i></div><div class="item-info"><p>گزارش هزینه ها بر اساس دسته بندی</p></div><i class="fas fa-chevron-left"></i></li>
+                                                    <li class="more-menu-item" data-page="debts-page" data-title="بدهی‌ها"><div class="item-icon debt"><i class="fas fa-file-invoice-dollar"></i></div><div class="item-info"><p>بدهی‌ها و چک‌های صادره</p></div><i class="fas fa-chevron-left"></i></li>
+                                                    <li class="more-menu-item" data-page="receivables-page" data-title="طلب‌ها"><div class="item-icon receivable"><i class="fas fa-hand-holding-dollar"></i></div><div class="item-info"><p>طلب‌ها و چک‌های دریافتی</p></div><i class="fas fa-chevron-left"></i></li>
+                                                    <li class="more-menu-item" data-page="contacts-page" data-title="طرف حساب‌ها"><div class="item-icon contact"><i class="fas fa-users"></i></div><div class="item-info"><p>طرف حساب‌ها</p></div><i class="fas fa-chevron-left"></i></li>
+                                                    <li class="more-menu-item" data-page="loans-page" data-title="تسهیلات"><div class="item-icon loan"><i class="fas fa-landmark"></i></div><div class="item-info"><p>تسهیلات و اقساط</p></div><i class="fas fa-chevron-left"></i></li>
+                                                    <li class="more-menu-item" data-page="savings-page" data-title="پس‌انداز"><div class="item-icon goal"><i class="fas fa-piggy-bank"></i></div><div class="item-info"><p>اهداف و پس‌انداز</p></div><i class="fas fa-chevron-left"></i></li>
+                                                </ul>
+                                                <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
+                                                    وب اپلیکیشن حسابداری شخصی شمار نسخه 1.3 | طراحی و کدنویسی شده توسط پیمان عابدین پور
+                                                </div>
+                                            </div>`;
                 openModal('#more-menu-modal-overlay');
             };
             const renderConfirmModal = (message) => {
                 const modal = qs('#confirm-modal-overlay');
                 modal.innerHTML = `
-                                        <div class="modal-content" style="text-align:center;">
-                                            <div class="modal-header" style="padding-bottom: 0.5rem"><h3>تایید حذف</h3></div>
-                                            <p id="confirm-delete-message" style="margin: 1rem 0 1.5rem;">${message}</p>
-                                            <div class="form-actions">
-                                                <button type="button" class="btn btn-secondary" data-action="close-modal">خیر</button>
-                                                <button type="button" class="btn btn-danger" id="confirm-delete-btn">بله، حذف کن</button>
-                                            </div>
-                                        </div>`;
+                                            <div class="modal-content" style="text-align:center;">
+                                                <div class="modal-header" style="padding-bottom: 0.5rem"><h3>تایید حذف</h3></div>
+                                                <p id="confirm-delete-message" style="margin: 1rem 0 1.5rem;">${message}</p>
+                                                <div class="form-actions">
+                                                    <button type="button" class="btn btn-secondary" data-action="close-modal">خیر</button>
+                                                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">بله، حذف کن</button>
+                                                </div>
+                                            </div>`;
                 openModal('#confirm-modal-overlay');
             };
             const renderSettingsModal = () => {
                 qs('#settings-modal-overlay').innerHTML = `
-                                        <div class="modal-content">
-                                            <div class="modal-header"><h3>تنظیمات و پشتیبان‌گیری</h3></div>
-                                            <p style="text-align: center; color: var(--subtext-light); margin-bottom: 2rem;">از اطلاعات خود فایل پشتیبان تهیه کنید یا اطلاعات قبلی خود را بازیابی نمایید.</p>
-                                            <div class="form-actions" style="flex-direction: column; gap: 1rem;">
-                                                <button class="btn btn-success" id="backup-btn" style="width: 100%;">
-                                                    <i class="fas fa-download" style="margin-left: 8px;"></i> ایجاد فایل پشتیبان
-                                                </button>
-                                                <button class="btn btn-primary" id="restore-btn" style="width: 100%;">
-                                                    <i class="fas fa-upload" style="margin-left: 8px;"></i> بازگردانی از فایل پشتیبان
-                                                </button>
-                                                <input type="file" id="restore-file-input" accept=".db,.json" style="display: none;">
-                                            </div>
-                                           <div class="form-actions" style="margin-top: 1.5rem; flex-direction: column; gap: 1rem;">
-                                               <button class="btn btn-primary" id="install-pwa-btn" style="width:100%; display: none; background-color: var(--purple-ios);">
-                                                   <i class="fas fa-cloud-download-alt" style="margin-left: 8px;"></i> نصب برنامه
-                                               </button>
-                                           </div>
-                                            <div class="form-actions" style="margin-top: 2rem; justify-content: center;">
-                                                <button type="button" class="btn btn-secondary" data-action="close-modal">بستن</button>
-                                            </div>
-                                        </div>`;
+                                            <div class="modal-content">
+                                                <div class="modal-header"><h3>تنظیمات و پشتیبان‌گیری</h3></div>
+                                                <p style="text-align: center; color: var(--subtext-light); margin-bottom: 2rem;">از اطلاعات خود فایل پشتیبان تهیه کنید یا اطلاعات قبلی خود را بازیابی نمایید.</p>
+                                                <div class="form-actions" style="flex-direction: column; gap: 1rem;">
+                                                    <button class="btn btn-success" id="backup-btn" style="width: 100%;">
+                                                        <i class="fas fa-download" style="margin-left: 8px;"></i> ایجاد فایل پشتیبان
+                                                    </button>
+                                                    <button class="btn btn-primary" id="restore-btn" style="width: 100%;">
+                                                        <i class="fas fa-upload" style="margin-left: 8px;"></i> بازگردانی از فایل پشتیبان
+                                                    </button>
+                                                    <input type="file" id="restore-file-input" accept=".db,.json" style="display: none;">
+                                                </div>
+                                               <div class="form-actions" style="margin-top: 1.5rem; flex-direction: column; gap: 1rem;">
+                                                   <button class="btn btn-primary" id="install-pwa-btn" style="width:100%; display: none; background-color: var(--purple-ios);">
+                                                       <i class="fas fa-cloud-download-alt" style="margin-left: 8px;"></i> نصب برنامه
+                                                   </button>
+                                               </div>
+                                                <div class="form-actions" style="margin-top: 2rem; justify-content: center;">
+                                                    <button type="button" class="btn btn-secondary" data-action="close-modal">بستن</button>
+                                                </div>
+                                            </div>`;
                 if (deferredPrompt) {
                     const installBtn = qs('#install-pwa-btn');
                     if (installBtn) installBtn.style.display = 'flex';
@@ -2975,17 +3167,17 @@
             const renderLoanModal = (loanId = null) => {
                 const modal = qs('#loan-modal-overlay');
                 modal.innerHTML = `
-                                        <div class="modal-content">
-                                            <form id="loan-form">
-                                                <div class="modal-header"><h3 id="loan-modal-title">${loanId ? 'ویرایش تسهیلات' : 'تعریف تسهیلات'}</h3></div>
-                                                <input type="hidden" id="loan-id" value="${loanId || ''}">
-                                                <div class="form-group"><input type="text" id="bank-name" required class="form-control" placeholder="نام بانک یا موسسه"></div>
-                                                <div class="form-group"><input type="text" id="loan-description" required class="form-control" placeholder="توضیح (مثال: وام خرید کالا)"></div>
-                                                <div class="form-group"><input type="number" id="total-installments" required min="1" class="form-control" inputmode="numeric" placeholder="تعداد کل اقساط"></div>
-                                                <div class="form-group"><input type="text" id="installment-amount" required class="form-control currency-input" inputmode="decimal" placeholder="مبلغ هر قسط (تومان)"></div>
-                                                <div class="form-actions"><button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
-                                            </form>
-                                        </div>`;
+                                            <div class="modal-content">
+                                                <form id="loan-form">
+                                                    <div class="modal-header"><h3 id="loan-modal-title">${loanId ? 'ویرایش تسهیلات' : 'تعریف تسهیلات'}</h3></div>
+                                                    <input type="hidden" id="loan-id" value="${loanId || ''}">
+                                                    <div class="form-group"><input type="text" id="bank-name" required class="form-control" placeholder="نام بانک یا موسسه"></div>
+                                                    <div class="form-group"><input type="text" id="loan-description" required class="form-control" placeholder="توضیح (مثال: وام خرید کالا)"></div>
+                                                    <div class="form-group"><input type="number" id="total-installments" required min="1" class="form-control" inputmode="numeric" placeholder="تعداد کل اقساط"></div>
+                                                    <div class="form-group"><input type="text" id="installment-amount" required class="form-control currency-input" inputmode="decimal" placeholder="مبلغ هر قسط (تومان)"></div>
+                                                    <div class="form-actions"><button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+                                                </form>
+                                            </div>`;
                 if (loanId) {
                     const loan = state.loans.find(l => l.id == loanId);
                     if (loan) {
@@ -3000,16 +3192,16 @@
             const renderGoalModal = (goalId = null) => {
                 const modal = qs('#goal-modal-overlay');
                 modal.innerHTML = `
-                                        <div class="modal-content">
-                                            <form id="goal-form">
-                                                <div class="modal-header"><h3 id="goal-modal-title">${goalId ? 'ویرایش هدف' : 'هدف مالی جدید'}</h3></div>
-                                                <input type="hidden" id="goal-id" value="${goalId || ''}">
-                                                <div class="form-group"><input type="text" id="goal-name" required class="form-control" placeholder="عنوان هدف (مثال: سفر به کیش)"></div>
-                                                <div class="form-group"><input type="text" id="target-amount" required class="form-control currency-input" inputmode="decimal" placeholder="مبلغ هدف (تومان)"></div>
-                                                <div class="form-group"><input type="text" id="saved-amount" value="0" class="form-control currency-input" inputmode="decimal" placeholder="مبلغ پس‌انداز شده اولیه (تومان)"></div>
-                                                <div class="form-actions"><button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
-                                            </form>
-                                        </div>`;
+                                            <div class="modal-content">
+                                                <form id="goal-form">
+                                                    <div class="modal-header"><h3 id="goal-modal-title">${goalId ? 'ویرایش هدف' : 'هدف مالی جدید'}</h3></div>
+                                                    <input type="hidden" id="goal-id" value="${goalId || ''}">
+                                                    <div class="form-group"><input type="text" id="goal-name" required class="form-control" placeholder="عنوان هدف (مثال: سفر به کیش)"></div>
+                                                    <div class="form-group"><input type="text" id="target-amount" required class="form-control currency-input" inputmode="decimal" placeholder="مبلغ هدف (تومان)"></div>
+                                                    <div class="form-group"><input type="text" id="saved-amount" value="0" class="form-control currency-input" inputmode="decimal" placeholder="مبلغ پس‌انداز شده اولیه (تومان)"></div>
+                                                    <div class="form-actions"><button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+                                                </form>
+                                            </div>`;
                 if (goalId) {
                     const goal = state.savingsGoals.find(g => g.id == goalId);
                     if (goal) {
@@ -3025,21 +3217,21 @@
                 if (!acc) return;
                 const modal = qs('#account-details-modal-overlay');
                 modal.innerHTML = `
-                                        <div class="modal-content" id="account-details-content">
-                                            <div class="modal-header"><h3>${acc.name}</h3></div>
-                                            <div style="text-align: right; line-height: 2; font-size: 0.9rem; padding: 0 1rem;">
-                                                <p><strong>شماره کارت:</strong> ${acc.cardNumber || '-'}</p>
-                                                <p><strong>تاریخ انقضا:</strong> ${(acc.expMonth && acc.expYear) ? `${acc.expMonth}/${acc.expYear}` : '-'}</p>
-                                                <p><strong>CVV2:</strong> ${acc.cvv2 || '-'}</p>
-                                                <p><strong>شماره حساب:</strong> ${acc.accountNumber || '-'}</p>
-                                                <p><strong>شماره شبا:</strong> ${acc.shabaNumber || '-'}</p>
-                                                <p><strong>یادداشت:</strong> ${acc.notes || '-'}</p>
-                                            </div>
-                                            <div class="form-actions">
-                                                <button type="button" class="btn btn-secondary" data-action="close-modal">بستن</button>
-                                                <button type="button" class="btn btn-primary" data-action="edit-account" data-id="${acc.id}">ویرایش</button>
-                                            </div>
-                                        </div>`;
+                                            <div class="modal-content" id="account-details-content">
+                                                <div class="modal-header"><h3>${acc.name}</h3></div>
+                                                <div style="text-align: right; line-height: 2; font-size: 0.9rem; padding: 0 1rem;">
+                                                    <p><strong>شماره کارت:</strong> ${acc.cardNumber || '-'}</p>
+                                                    <p><strong>تاریخ انقضا:</strong> ${(acc.expMonth && acc.expYear) ? `${acc.expMonth}/${acc.expYear}` : '-'}</p>
+                                                    <p><strong>CVV2:</strong> ${acc.cvv2 || '-'}</p>
+                                                    <p><strong>شماره حساب:</strong> ${acc.accountNumber || '-'}</p>
+                                                    <p><strong>شماره شبا:</strong> ${acc.shabaNumber || '-'}</p>
+                                                    <p><strong>یادداشت:</strong> ${acc.notes || '-'}</p>
+                                                </div>
+                                                <div class="form-actions">
+                                                    <button type="button" class="btn btn-secondary" data-action="close-modal">بستن</button>
+                                                    <button type="button" class="btn btn-primary" data-action="edit-account" data-id="${acc.id}">ویرایش</button>
+                                                </div>
+                                            </div>`;
                 openModal('#account-details-modal-overlay');
             };
             const renderExpenseCategoryModal = (categoryName = null) => {
@@ -3051,25 +3243,25 @@
                     `<i class="fas ${icon} icon-picker-item ${currentIcon === icon ? 'selected' : ''}" data-icon="${icon}"></i>`
                 ).join('');
                 modal.innerHTML = `
-                                        <div class="modal-content">
-                                            <form id="expense-category-form">
-                                                <div class="modal-header"><h3>${isEdit ? 'ویرایش دسته‌بندی' : 'دسته‌بندی هزینه جدید'}</h3></div>
-                                                <input type="hidden" id="original-category-name" value="${categoryName || ''}">
-                                                <div class="form-group">
-                                                    <label for="category-name-input">نام دسته‌بندی</label>
-                                                    <input type="text" id="category-name-input" required class="form-control" value="${categoryName || ''}" placeholder="مثال: آموزش">
-                                                </div>
-                                               <div class="form-group">
-                                                   <label for="category-icon-picker">آیکون</label>
-                                                   <div class="icon-picker" id="category-icon-picker">${iconPickerHTML}</div>
-                                                   <input type="hidden" id="selected-category-icon" value="${currentIcon}">
-                                               </div>
-                                                <div class="form-actions">
-                                                    <button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button>
-                                                    <button type="submit" class="btn btn-primary">ذخیره</button>
-                                                </div>
-                                            </form>
-                                        </div>`;
+                                            <div class="modal-content">
+                                                <form id="expense-category-form">
+                                                    <div class="modal-header"><h3>${isEdit ? 'ویرایش دسته‌بندی' : 'دسته‌بندی هزینه جدید'}</h3></div>
+                                                    <input type="hidden" id="original-category-name" value="${categoryName || ''}">
+                                                    <div class="form-group">
+                                                        <label for="category-name-input">نام دسته‌بندی</label>
+                                                        <input type="text" id="category-name-input" required class="form-control" value="${categoryName || ''}" placeholder="مثال: آموزش">
+                                                    </div>
+                                                   <div class="form-group">
+                                                     <label for="category-icon-picker">آیکون</label>
+                                                     <div class="icon-picker" id="category-icon-picker">${iconPickerHTML}</div>
+                                                     <input type="hidden" id="selected-category-icon" value="${currentIcon}">
+                                                   </div>
+                                                    <div class="form-actions">
+                                                        <button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button>
+                                                        <button type="submit" class="btn btn-primary">ذخیره</button>
+                                                    </div>
+                                                </form>
+                                            </div>`;
                 qs('.icon-picker', modal).addEventListener('click', e => {
                     if (e.target.classList.contains('icon-picker-item')) {
                         qs('.icon-picker-item.selected', modal)?.classList.remove('selected');
@@ -3089,30 +3281,30 @@
                     `<i class="fas ${icon} icon-picker-item ${currentIcon === icon ? 'selected' : ''}" data-icon="${icon}"></i>`
                 ).join('');
                 modal.innerHTML = `
-                                        <div class="modal-content">
-                                            <form id="contact-form">
-                                                <div class="modal-header"><h3>${isEdit ? 'ویرایش طرف حساب' : 'طرف حساب جدید'}</h3></div>
-                                                <input type="hidden" id="contact-id" value="${contactId || ''}">
-                                                <div class="form-group">
-                                                    <label for="contact-name-input">نام</label>
-                                                    <input type="text" id="contact-name-input" required class="form-control" value="${contact ? contact.name : ''}" placeholder="نام و نام خانوادگی">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>آیکون</label>
-                                                    <div class="icon-picker" id="contact-icon-picker">${iconPickerHTML}</div>
-                                                    <input type="hidden" id="selected-contact-icon" value="${currentIcon}">
-                                                </div>
-                                                <div class="form-group"><input type="text" id="contact-phone" class="form-control" value="${contact ? contact.phone || '' : ''}" inputmode="tel" placeholder="تلفن (اختیاری)"></div>
-                                                <div class="form-group"><input type="text" id="contact-card-number" class="form-control" value="${contact ? contact.cardNumber || '' : ''}" inputmode="numeric" placeholder="شماره کارت (اختیاری)"></div>
-                                                <div class="form-group"><input type="text" id="contact-account-number" class="form-control" value="${contact ? contact.accountNumber || '' : ''}" inputmode="numeric" placeholder="شماره حساب (اختیاری)"></div>
-                                                <div class="form-group"><textarea id="contact-notes" rows="2" class="form-control" placeholder="یادداشت (اختیاری)">${contact ? contact.notes || '' : ''}</textarea></div>
-                                                <div class="form-actions">
-                                                    <button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button>
-                                                    ${isEdit ? `<button type="button" class="btn btn-danger" data-action="delete-item" data-id="${contactId}" data-type="contact">حذف</button>` : ''}
-                                                    <button type="submit" class="btn btn-primary" style="flex-grow: 2;">ذخیره</button>
-                                                </div>
-                                            </form>
-                                        </div>`;
+                                            <div class="modal-content">
+                                                <form id="contact-form">
+                                                    <div class="modal-header"><h3>${isEdit ? 'ویرایش طرف حساب' : 'طرف حساب جدید'}</h3></div>
+                                                    <input type="hidden" id="contact-id" value="${contactId || ''}">
+                                                    <div class="form-group">
+                                                        <label for="contact-name-input">نام</label>
+                                                        <input type="text" id="contact-name-input" required class="form-control" value="${contact ? contact.name : ''}" placeholder="نام و نام خانوادگی">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>آیکون</label>
+                                                        <div class="icon-picker" id="contact-icon-picker">${iconPickerHTML}</div>
+                                                        <input type="hidden" id="selected-contact-icon" value="${currentIcon}">
+                                                    </div>
+                                                    <div class="form-group"><input type="text" id="contact-phone" class="form-control" value="${contact ? contact.phone || '' : ''}" inputmode="tel" placeholder="تلفن (اختیاری)"></div>
+                                                    <div class="form-group"><input type="text" id="contact-card-number" class="form-control" value="${contact ? contact.cardNumber || '' : ''}" inputmode="numeric" placeholder="شماره کارت (اختیاری)"></div>
+                                                    <div class="form-group"><input type="text" id="contact-account-number" class="form-control" value="${contact ? contact.accountNumber || '' : ''}" inputmode="numeric" placeholder="شماره حساب (اختیاری)"></div>
+                                                    <div class="form-group"><textarea id="contact-notes" rows="2" class="form-control" placeholder="یادداشت (اختیاری)">${contact ? contact.notes || '' : ''}</textarea></div>
+                                                    <div class="form-actions">
+                                                        <button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button>
+                                                        ${isEdit ? `<button type="button" class="btn btn-danger" data-action="delete-item" data-id="${contactId}" data-type="contact">حذف</button>` : ''}
+                                                        <button type="submit" class="btn btn-primary" style="flex-grow: 2;">ذخیره</button>
+                                                    </div>
+                                                </form>
+                                            </div>`;
                 qs('.icon-picker', modal).addEventListener('click', e => {
                     if (e.target.classList.contains('icon-picker-item')) {
                         qs('.icon-picker-item.selected', modal)?.classList.remove('selected');
@@ -3123,6 +3315,162 @@
 
                 openModal('#contact-modal-overlay');
             };
+
+            // === NEW: Smart SMS Parsing Function ===
+/**
+ * این تابع پیامک تراکنش بانکی را پارس کرده و اطلاعات را استخراج می‌کند.
+ * اگر متنی دریافت نشود، متن را از کلیپ‌بورد می‌خواند.
+ * از فرمت‌های مختلف اعداد فارسی، انگلیسی و فضاهای خاص پشتیبانی می‌کند.
+ *
+ * @param {string} [text] - متن پیامک بانکی. اگر مقداردهی نشود، متن از کلیپ‌بورد خوانده می‌شود.
+ */
+const parseSmsAndOpenModal = async (text) => {
+    // اگر متنی وارد نشده بود، از کلیپ‌بورد بخوان
+    if (!text || typeof text !== 'string') {
+        try {
+            if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+                text = await navigator.clipboard.readText();
+            }
+            if (!text) {
+                showToast('کلیپ‌بورد خالی است. ابتدا متن پیامک را کپی کنید.');
+                renderTransactionModal(); // باز کردن مودال خالی
+                return;
+            }
+        } catch (err) {
+            console.error('Failed to read clipboard contents: ', err);
+            showToast('برای الصاق خودکار، دسترسی به کلیپ‌بورد لازم است.');
+            renderTransactionModal(); // باز کردن مودال خالی
+            return;
+        }
+    }
+
+    // نرمال‌سازی: تبدیل همه اعداد به انگلیسی + جایگزینی فاصله و \n
+    const normalizedText = normalizeDigits(
+        text.replace(/\n/g, ' ').replace(/\u00A0/g, ' ')
+    );
+
+    // الگوهای تخصصی بانک‌ها و تراکنش‌های عمومی
+    const patterns = [
+        // نمونه‌هایی برای بانک‌های مختلف (قابلیت توسعه دارد)
+        { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?خودپرداز:\s*([\d,٬]+)-/, desc: 'برداشت خودپرداز ملی' },
+        { bank: 'تجارت', type: 'expense', regex: /\*بان[کك] تجارت\*[\s\S]*?برداشت:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'برداشت از تجارت' },
+        { bank: 'بلو', type: 'income', regex: /بلو.* ([\d,٬]+) ر[یي]ال به حساب شما نشست/, desc: 'واریز به بلو' },
+        { bank: 'خاورمیانه', type: 'income', regex: /بان[کك] خاورم[یي]انه.*\+([\d,٬]+)/, desc: 'واریز به خاورمیانه' },
+        { bank: 'گردشگری', type: 'expense', regex: /بان[کك] گردشگر[یي].*برداشت از:.*مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'برداشت از گردشگری' },
+        { bank: 'گردشگری', type: 'income', regex: /بان[کك] گردشگر[یي].*واریز به:.*مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'واریز به گردشگری' },
+        { bank: 'ملی', type: 'income', regex: /بان[کك] مل[یي] ا[یي]ران\s*انتقال[یي]:\s*([\d,٬]+)\+/, desc: 'انتقال به ملی' },
+        { bank: 'بلو', type: 'expense', regex: /بلو.* ([\d,٬]+) ر[یي]ال از حساب شما پرید/, desc: 'برداشت پول بلو' },
+        { bank: 'خاورمیانه', type: 'expense', regex: /بان[کك] خاورم[یي]انه.*برداشت وجه از خودپرداز\s*-?([\d,٬]+)/, desc: 'برداشت وجه خاورمیانه' },
+        { bank: 'سپه', type: 'expense', regex: /بان[کك] سپه.*مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'تراکنش بانک سپه' },
+        { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?برداشت:\s*([\د,٬]+)-?/, desc: 'برداشت از ملی' },
+        { bank: 'ملت', type: 'expense', regex: /خرید Auth.*مبلغ:\s*([\د,٬]+)\s*ر[یي]ال.*بان[کك] ملت/, desc: 'خرید با کارت ملت' },
+        { bank: 'ملت', type: 'expense', regex: /برداشت مبلغ ([\د,٬]+)\s*ر[یي]ال از .*بان[کك] ملت/, desc: 'برداشت از ملت' },
+        { bank: 'ملت', type: 'income', regex: /واریز مبلغ ([\د,٬]+)\s*ر[یي]ال به .*بان[کك] ملت/, desc: 'واریز به ملت' },
+        { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?برداشت مبلغ ([\د,٬]+)\s*ر[یي]ال/, desc: 'برداشت از ملی' },
+        { bank: 'ملی', type: 'expense', regex: /خرید مبلغ ([\د,٬]+)\s*ر[یي]ال از [کك]ارت بان[کك] مل[یي]/, desc: 'خرید با کارت ملی' },
+        { bank: 'ملی', type: 'income', regex: /واریز چک .* به مبلغ ([\د,٬]+)\s*ر[یي]ال در بان[کك] مل[یي]/, desc: 'واریز چک به ملی' },
+        { bank: 'ملی', type: 'income', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?واریز مبلغ ([\د,٬]+)\s*ر[یي]ال/, desc: 'واریز به ملی' },
+        { bank: 'صادرات', type: 'expense', regex: /برداشت مبلغ ([\د,٬]+)\s*ر[یي]ال .* سپهر بان[کك] صادرات/, desc: 'برداشت از صادرات' },
+        { bank: 'صادرات', type: 'expense', regex: /خرید با کارت سپهر مبلغ ([\د,٬]+)\s*ر[یي]ال .* بان[کك] صادرات/, desc: 'خرید با کارت صادرات' },
+        { bank: 'صادرات', type: 'income', regex: /واریز به سپهر کارت مبلغ ([\د,٬]+)\s*ر[یي]ال .* بان[کك] صادرات/, desc: 'واریز به صادرات' },
+        { bank: 'پاسارگاد', type: 'expense', regex: /بان[کك] پاسارگاد[\s\S]*?برداشت مبلغ ([\د,٬]+)/, desc: 'برداشت از پاسارگاد' },
+        { bank: 'پاسارگاد', type: 'expense', regex: /بان[کك] پاسارگاد[\s\S]*?خرید مبلغ ([\د,٬]+)/, desc: 'خرید با کارت پاسارگاد' },
+        { bank: 'پاسارگاد', type: 'income', regex: /بان[کك] پاسارگاد[\s\S]*?واریز مبلغ ([\د,٬]+)/, desc: 'واریز به پاسارگاد' },
+        // الگوهای عمومی
+        { bank: null, type: 'income', regex: /واریز([\د,٬]+)/, desc: 'واریز وجه' },
+        { bank: null, type: 'expense', regex: /برداشت\s*([\د,٬]+)/, desc: 'برداشت وجه' },
+        { bank: null, type: 'expense', regex: /(?:برداشت|خرید|پرداخت|انتقال|ساتنا|پایا|کارت به کارت).*(?:مبلغ|مبلغ:)\s*([\د,٬]+)/, desc: 'تراکنش هزینه' },
+        { bank: null, type: 'income', regex: /(?:واریز).*(?:مبلغ|مبلغ:)\s*([\د,٬]+)/, desc: 'تراکنش درآمد' },
+    ];
+
+    // الگوهای اضافه برای شناسایی خطوط فقط عدد مثبت/منفی
+    const extraPatterns = [
+        { bank: null, type: 'income', regex: /^\s*\+([\d,٬]+)\s*$/m, desc: 'واریز بر اساس علامت مثبت ابتدای خط' },
+        { bank: null, type: 'expense', regex: /^\s*-([\d,٬]+)\s*$/m, desc: 'برداشت بر اساس علامت منفی ابتدای خط' },
+        { bank: null, type: 'income', regex: /^\s*\+([\d,٬]+)\s*$/gm, desc: 'واریز بر اساس علامت مثبت در هر خط' },
+        { bank: null, type: 'expense', regex: /^\s*-([\d,٬]+)\s*$/gm, desc: 'برداشت بر اساس علامت منفی در هر خط' },
+    ];
+
+    const allPatterns = [...patterns, ...extraPatterns];
+
+    let bestMatch = null;
+    for (const pattern of allPatterns) {
+        const match = normalizedText.match(pattern.regex);
+        if (match && match[1]) {
+            bestMatch = {
+                amountStr: match[1],
+                type: pattern.type,
+                bank: pattern.bank,
+                description: pattern.desc
+            };
+            break;
+        }
+    }
+
+    if (bestMatch) {
+        let amount = parseInt(getUnformattedAmount(bestMatch.amountStr));
+        // تبدیل به تومان اگر نشانه تومان وجود ندارد
+        if (!/تومان/.test(normalizedText) && (/ر[یي]ال/.test(normalizedText) || bestMatch.bank)) {
+            amount = Math.floor(amount / 10);
+        }
+
+        // استخراج تاریخ و ساعت
+        let date = moment().format(JALALI_DISPLAY_FORMAT); // پیش‌فرض امروز
+        let time = '';
+
+        // --- اول بررسی حالت خاص مثل 0531 - 12:01 یا 04/05_15:16 ---
+        let altDateMatch = normalizedText.match(/(\d{2})(\d{2})\s*[-_]\s*(\d{2}):(\d{2})/);
+        if (!altDateMatch) {
+            altDateMatch = normalizedText.match(/(\d{2})\/(\d{2})[_\-](\d{2}):(\d{2})/);
+        }
+        if (altDateMatch) {
+            const year = moment().format('jYYYY');
+            const month = altDateMatch[1].padStart(2, '0');
+            const day = altDateMatch[2].padStart(2, '0');
+            date = `${year}/${month}/${day}`;
+            time = ` ${altDateMatch[3]}:${altDateMatch[4]}`;
+        } else {
+            // بررسی سایر فرمت‌های تاریخ
+            const dateRegexes = [
+                { regex: /(\d{4})[\/\.\-_](\d{1,2})[\/\.\-_](\d{1,2})/, y: 1, m: 2, d: 3 }, // 1404.04.01, 1404/04/01
+                { regex: /(\d{2})[\/\.\-_](\d{1,2})[\/\.\-_](\d{1,2})/, y: 1, m: 2, d: 3 }, // 04/04/04, 04/03/22
+                { regex: /(?:\s|^)(\d{1,2})\/(\d{1,2})(?=\s|$)/, y: null, m: 1, d: 2 },      // 04/06 (بدون سال)
+            ];
+            for (const dr of dateRegexes) {
+                const dateMatch = normalizedText.match(dr.regex);
+                if (dateMatch) {
+                    let year = dr.y ? dateMatch[dr.y] : moment().format('jYYYY');
+                    if (year.length === 2) { year = '14' + year; }
+                    let month = dateMatch[dr.m].padStart(2, '0');
+                    let day = dateMatch[dr.d].padStart(2, '0');
+                    date = `${year}/${month}/${day}`;
+                    break;
+                }
+            }
+            // ساعت
+            const timeRegex = /(\d{2}):(\d{2})/;
+            const timeMatch = normalizedText.match(timeRegex);
+            if (timeMatch) {
+                time = ` ${timeMatch[0]}`;
+            }
+        }
+
+        let prefillData = {
+            amount: amount,
+            type: bestMatch.type,
+            description: bestMatch.description + time,
+            date: date
+        };
+        renderTransactionModal(null, null, prefillData);
+
+    } else {
+        showToast('قالب پیامک شناسایی نشد. لطفا دستی وارد کنید.');
+        renderTransactionModal(null, null, { description: text });
+    }
+};
+
+
+
             const setupEventListeners = () => {
                 document.body.addEventListener('click', (e) => {
                     const target = e.target;
@@ -3182,8 +3530,8 @@
                             state.filters.transactions = { searchTerm: '', from: null, to: null, type: filterType || 'all', accountId: state.activeAccountId, category: 'all', contactId: 'all' };
                         } else {
                             const pageKey = pageId.replace('-page', '');
-                            if(state.filters[pageKey]) {
-                               state.filters[pageKey] = { ...state.filters[pageKey], from: null, to: null, accountId: 'all', status: 'all', contactId: 'all' };
+                            if (state.filters[pageKey]) {
+                                state.filters[pageKey] = { ...state.filters[pageKey], from: null, to: null, accountId: 'all', status: 'all', contactId: 'all' };
                             }
                         }
                         saveData();
@@ -3197,6 +3545,7 @@
                         if (action === 'quick-add-expense') renderTransactionModal(null, 'expense');
                         if (action === 'quick-add-debt') renderTransactionModal(null, 'debt');
                         if (action === 'quick-add-receivable') renderTransactionModal(null, 'receivable');
+                        if (action === 'paste-from-sms') parseSmsAndOpenModal(); // New action
                         return;
                     }
                     if (closest('[data-action="add-to-fund"]')) { renderTransactionModal(null, 'transfer'); return; }
@@ -3206,7 +3555,7 @@
                     if (closest('[data-action="go-to-loans"]')) { e.preventDefault(); closeModal('#transaction-modal-overlay'); switchPage('loans-page', 'تسهیلات'); return; }
                     if (closest('[data-action="edit-account"]')) { closeModal('#account-details-modal-overlay'); renderAccountModal(closest('[data-action="edit-account"]').dataset.id); return; }
                     const contactCard = closest('[data-action="view-contact-txs"]');
-                    if(contactCard && !closest('.action-btn')) {
+                    if (contactCard && !closest('.action-btn')) {
                         const contactId = contactCard.dataset.id;
                         const contactName = contactCard.dataset.name;
                         state.filters.transactions = { searchTerm: '', from: null, to: null, type: 'all', accountId: 'all', category: 'all', contactId: contactId };
@@ -3324,35 +3673,36 @@
                     if (target.id === 'dashboard-period-filter') { state.dashboardPeriod = target.value; saveData(); renderDashboardPage(); }
                     if (target.id === 'account-filter-dashboard') { if (target.value !== 'add_new_account') { state.activeAccountId = target.value; saveData(); renderDashboardPage(); } }
 
-                    if(target.id === 'contact-sort-filter'){
+                    if (target.id === 'contact-sort-filter') {
                         state.filters.contacts.sortBy = qs('#contact-sort-filter').value;
                         saveData();
                         renderContactsPage();
                         return;
                     }
-                    if (target.closest('#transactions-page')) {
-                        const txFilters = target.closest('#transactions-page');
-                        if (txFilters) {
+                    // This block handles filter changes for both 'transactions-page' and other filtered list pages ('reports', 'debts', 'receivables')
+                    const pageEl = target.closest('.page[id$="-page"]'); // Get the closest page element
+                    if (pageEl) {
+                        const pageId = pageEl.id;
+                        const pageKey = pageId.replace('-page', '');
+
+                        if (pageKey === 'transactions') {
                             if (target.id === 'type-filter') {
                                 state.filters.transactions.category = 'all';
                                 state.filters.transactions.contactId = 'all';
                                 renderCategoryFilter();
                             }
-                            state.filters.transactions.accountId = qs('#account-filter', txFilters).value;
-                            state.filters.transactions.type = qs('#type-filter', txFilters).value;
-                            state.filters.transactions.category = qs('#category-filter', txFilters).value;
-                            state.filters.transactions.contactId = qs('#contact-filter', txFilters).value;
-                            state.filters.transactions.from = qs('#from-date-filter-tx', txFilters).value ? moment(normalizeDigits(qs('#from-date-filter-tx').value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null;
-                            state.filters.transactions.to = qs('#to-date-filter-tx', txFilters).value ? moment(normalizeDigits(qs('#to-date-filter-tx').value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null;
+                            state.filters.transactions.accountId = qs('#account-filter', pageEl).value;
+                            state.filters.transactions.type = qs('#type-filter', pageEl).value;
+                            state.filters.transactions.category = qs('#category-filter', pageEl).value;
+                            state.filters.transactions.contactId = qs('#contact-filter', pageEl).value;
+                            // Date filters are handled by the pDatepicker's observer, but ensuring they are picked up on other changes:
+                            state.filters.transactions.from = qs('#from-date-filter-tx', pageEl).value ? moment(normalizeDigits(qs('#from-date-filter-tx', pageEl).value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null;
+                            state.filters.transactions.to = qs('#to-date-filter-tx', pageEl).value ? moment(normalizeDigits(qs('#to-date-filter-tx', pageEl).value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null;
                             renderTransactionList();
                             saveData();
                             return;
-                        }
-                    }
-                    if (target.closest('.page[id$="-page"]') && target.closest('.filters-collapsible-container')) {
-                        const pageEl = target.closest('.page');
-                        const pageKey = pageEl.id.replace('-page', '');
-                        if (state.filters[pageKey]) {
+                        } else if (state.filters[pageKey] && target.closest('.filters-collapsible-container')) {
+                            // This part handles generic filters for reports, debts, receivables
                             state.filters[pageKey] = {
                                 ...state.filters[pageKey],
                                 from: qs('.from-date-filter', pageEl)?.value ? moment(normalizeDigits(qs('.from-date-filter', pageEl).value), JALALI_DISPLAY_FORMAT).format(MOMENT_FORMAT) : null,
@@ -3362,9 +3712,11 @@
                                 status: qs('.status-filter', pageEl) ? qs('.status-filter', pageEl).value : 'all',
                             };
                             saveData();
-                            switchPage(pageEl.id, qs(`#app-header-title`).textContent);
+                            // Re-render the specific page to apply new filters
+                            const pageRenderers = { 'reports': renderReportsPage, 'debts': renderDebtsPage, 'receivables': renderReceivablesPage };
+                            pageRenderers[pageKey]?.();
+                            return;
                         }
-                        return;
                     }
                     if (target.matches('#transaction-form #type')) { handleTransactionFormChange(); }
                     if (target.matches('#transaction-form #category-select')) { qs('#new-category-group').style.display = target.value === 'add-new' ? 'block' : 'none'; }
@@ -3382,28 +3734,9 @@
                         preChangeSelectValue = e.target.value;
                     }
                 });
-                document.body.addEventListener('change', e => {
-                    const selectEl = e.target;
-                    if (selectEl.tagName === 'SELECT') {
-                        let modal = selectEl.closest('.modal-overlay');
-                        if (selectEl.classList.contains('account-dropdown') && selectEl.value === 'add_new_account') {
-                            selectEl.value = preChangeSelectValue;
-                            if (modal) closeModal('#' + modal.id);
-                            switchPage('accounts-page', 'حساب‌ها');
-                            setTimeout(() => renderAccountModal(), 150);
-                        }
-                        if (selectEl.classList.contains('contact-dropdown') && selectEl.value === 'add_new_contact') {
-                            selectEl.value = preChangeSelectValue;
-                            if (modal) closeModal('#' + modal.id);
-                            switchPage('contacts-page', 'طرف حساب‌ها');
-                            setTimeout(() => renderContactModal(), 150);
-                        }
-                    }
-                });
                 qs('#restore-file-input').addEventListener('change', handleRestore);
             };
-
-            function handleTransactionSubmit(form) {
+  function handleTransactionSubmit(form) {
                 const id = qs('#transaction-id', form).value;
                 const type = qs('#type', form).value;
                 if (type === 'cashflow') {
@@ -3473,7 +3806,7 @@
             function handleContactSubmit(form) {
                 const id = qs('#contact-id', form).value;
                 const name = qs('#contact-name-input', form).value.trim();
-                if(!name){ showToast('نام طرف حساب الزامی است.'); return; }
+                if (!name) { showToast('نام طرف حساب الزامی است.'); return; }
 
                 const isEditing = id !== '';
                 const nameExists = state.contacts.some(c => c.name.toLowerCase() === name.toLowerCase() && c.id != id);
@@ -3566,8 +3899,8 @@
                 else if (itemToDelete.type === 'goal') { state.savingsGoals = state.savingsGoals.filter(i => i.id !== itemToDelete.id); }
                 else if (itemToDelete.type === 'account') { if (state.transactions.some(t => t.accountId == itemToDelete.id)) { showToast('امکان حذف حساب دارای تراکنش وجود ندارد.'); closeModal('#confirm-modal-overlay'); return; } state.accounts = state.accounts.filter(i => i.id !== itemToDelete.id); }
                 else if (itemToDelete.type === 'contact') {
-                        state.contacts = state.contacts.filter(i => i.id !== itemToDelete.id);
-                        state.transactions.forEach(tx => { if(tx.contactId == itemToDelete.id) { tx.contactId = null; } });
+                    state.contacts = state.contacts.filter(i => i.id !== itemToDelete.id);
+                    state.transactions.forEach(tx => { if (tx.contactId == itemToDelete.id) { tx.contactId = null; } });
                 }
                 else if (itemToDelete.type === 'expense-category') {
                     state.expenseCategories = state.expenseCategories.filter(cat => cat.name !== itemToDelete.id);
