@@ -3317,17 +3317,7 @@
             };
 
             // === NEW: Smart SMS Parsing Function ===
-/**
- * This function parses a bank transaction SMS, extracts key details,
- * and opens a modal pre-filled with the extracted information.
- *
- * It can read the SMS text from the clipboard if no text is provided directly.
- * The function is robust against various Persian number formats and special whitespace characters.
- *
- * @param {string} [text] - The SMS text content. If not provided, the function will attempt to read from the clipboard.
- */
 const parseSmsAndOpenModal = async (text) => {
-    // If no text is passed, try to read from clipboard
     if (!text || typeof text !== 'string') {
         try {
             if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
@@ -3335,21 +3325,19 @@ const parseSmsAndOpenModal = async (text) => {
             }
             if (!text) {
                 showToast('کلیپ‌بورد خالی است. ابتدا متن پیامک را کپی کنید.');
-                renderTransactionModal(); // Open an empty modal for manual entry
+                renderTransactionModal();
                 return;
             }
         } catch (err) {
             console.error('Failed to read clipboard contents: ', err);
             showToast('برای الصاق خودکار، دسترسی به کلیپ‌بورد لازم است.');
-            renderTransactionModal(); // Open an empty modal
+            renderTransactionModal();
             return;
         }
     }
 
-    // Enhanced normalization: newlines AND non-breaking spaces replaced with normal spaces
     const normalizedText = normalizeDigits(text.replace(/\n/g, ' ').replace(/\u00A0/g, ' '));
 
-    // Regex patterns (improved for multi-line, multi-space, sign, Arabic/Persian chars)
     const patterns = [
         // برداشت یا واریز صرفاً با علامت + یا - (در هر جای پیامک)
         { bank: null, type: 'income', regex: /(?:^|\s)\+[\s]*([\d,٬]+)/, desc: 'واریز وجه' },
@@ -3417,8 +3405,13 @@ const parseSmsAndOpenModal = async (text) => {
 
     if (bestMatch) {
         let amount = parseInt(getUnformattedAmount(bestMatch.amountStr));
-        // Assume amount is in Rials if not specified, and convert to Toman
-        if (!/تومان/.test(normalizedText) && (/ر[یي]ال/.test(normalizedText) || bestMatch.bank)) {
+
+        // آیا باید به تومان تبدیل کنیم؟ اگر هیچ واحدی نباشد، فرض را بر ریال بگذاریم
+        const hasToman = /تومان/.test(normalizedText);
+        const hasRial = /ر[یي]ال/.test(normalizedText);
+        const hasSignOnly = /^[\s\S]*[+\-][\s]*[\d,٬]+[\s\S]*$|^[\s\S]*[\d,٬]+[\s]*[+\-][\s\S]*$/.test(normalizedText);
+
+        if (!hasToman && (hasRial || hasSignOnly || bestMatch.bank)) {
             amount = Math.floor(amount / 10);
         }
 
@@ -3432,12 +3425,14 @@ const parseSmsAndOpenModal = async (text) => {
             { regex: /(\d{4})[\/\.\-_](\d{1,2})[\/\.\-_](\d{1,2})/, y: 1, m: 2, d: 3 },
             // 04/04/04, 04/03/22
             { regex: /(\d{2})[\/\.\-_](\d{1,2})[\/\.\-_](\d{1,2})/, y: 1, m: 2, d: 3 },
-            // 0405_15:16 یا 0531-12:01
+            // 0405_15:16 یا 0531-12:01 (بدون سال)
             { regex: /(\d{2})(\d{2})[-_ ](\d{2}):(\d{2})/, y: null, m: 1, d: 2, t: [3,4] },
             // 04/05_15:16
             { regex: /(\d{2})\/(\d{2})[-_ ](\d{2}):(\d{2})/, y: null, m: 1, d: 2, t: [3,4] },
             // 04/05 (فقط ماه/روز)
             { regex: /(\d{2})\/(\d{2})(?:\s|$)/, y: null, m: 1, d: 2 },
+            // 0531 یا 0405 (بدون سال و بدون جداکننده)
+            { regex: /(?:^|\s)(\d{2})(\d{2})(?:\s|-|_)/, y: null, m: 1, d: 2 },
         ];
 
         for (const dr of dateRegexes) {
@@ -3475,6 +3470,7 @@ const parseSmsAndOpenModal = async (text) => {
         renderTransactionModal(null, null, { description: text });
     }
 };
+
 
 
 
