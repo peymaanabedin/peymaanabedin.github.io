@@ -3471,27 +3471,6 @@ const parseSmsAndOpenModal = async (text) => {
     }
 };
 
-// --- Helper functions (assuming they exist from the original context) ---
-// You need to have these functions defined elsewhere in your code.
-
-/**
- * Normalizes Persian/Arabic digits to English digits.
- * @param {string} s The input string.
- * @returns {string} Normalized string.
- */
-function normalizeDigits(s) {
-    return s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-            .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-}
-
-/**
- * Removes formatting (like commas) from a number string.
- * @param {string} amountStr The formatted amount string.
- * @returns {string} The unformatted amount string.
- */
-function getUnformattedAmount(amountStr) {
-    return amountStr.replace(/[,٬]/g, '');
-}
 
 
             const setupEventListeners = () => {
