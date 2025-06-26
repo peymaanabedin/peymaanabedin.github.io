@@ -3117,7 +3117,7 @@
                                                     <li class="more-menu-item" data-page="savings-page" data-title="پس‌انداز"><div class="item-icon goal"><i class="fas fa-piggy-bank"></i></div><div class="item-info"><p>اهداف و پس‌انداز</p></div><i class="fas fa-chevron-left"></i></li>
                                                 </ul>
                                                 <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
-                                                    وب اپلیکیشن حسابداری شخصی شمارا نسخه 1.3 | طراحی و کدنویسی شده توسط پیمان عابدین پور
+                                                    وب اپلیکیشن حسابداری شخصی شمارا نسخه 0.01 | طراحی و کدنویسی شده توسط پیمان عابدین پور
                                                 </div>
                                             </div>`;
                 openModal('#more-menu-modal-overlay');
@@ -3339,27 +3339,38 @@ const parseSmsAndOpenModal = async (text) => {
     // --- Normalization ---
     const normalizedText = normalizeDigits(text.replace(/\n/g, ' ').replace(/\u00A0/g, ' '));
 
-    // --- Patterns for all cases ---
+    // --- تابع استخراج فقط رقم ---
+    function extractAmount(str) {
+        return str.replace(/[^\d]/g, '');
+    }
+
+    // --- Patterns (بدون حذف قبلی‌ها + الگویی که هم فاصله و هم نبود فاصله را پوشش دهد) ---
     const patterns = [
-        // برداشت یا واریز صرفاً با علامت + یا - (در هر جای پیامک)
+        // برداشت و واریز با یا بدون فاصله (ابتدای آرایه تا همیشه اول بررسی شود)
+        { bank: null, type: 'expense', regex: /برداشت\s*([\d,٬]+)/, desc: 'برداشت وجه' },
+        { bank: null, type: 'income', regex: /واریز\s*([\d,٬]+)/, desc: 'واریز وجه' },
+
+        // علامت + یا - در هر جای پیامک
         { bank: null, type: 'income', regex: /(?:^|\s)\+[\s]*([\d,٬]+)/, desc: 'واریز وجه' },
         { bank: null, type: 'expense', regex: /(?:^|\s)-[\s]*([\d,٬]+)/, desc: 'برداشت وجه' },
         { bank: null, type: 'income', regex: /([\d,٬]+)[\s]*\+/, desc: 'واریز وجه' },
         { bank: null, type: 'expense', regex: /([\d,٬]+)[\s]*-/, desc: 'برداشت وجه' },
 
-        // بانک صادرات: عدد منفی/مثبت در خط اول
+        // بانک صادرات
         { bank: 'صادرات', type: 'expense', regex: /بان[کك] صادرات[\s\S]*?([\d,٬]+)[\s]*-/, desc: 'برداشت از صادرات' },
         { bank: 'صادرات', type: 'income', regex: /بان[کك] صادرات[\s\S]*?([\d,٬]+)[\s]*\+/, desc: 'واریز به صادرات' },
 
-        // بانک گردشگری: واریز و برداشت با مبلغ
+        // بانک گردشگری
         { bank: 'گردشگری', type: 'income', regex: /\*?بان[کك] گردشگر[یي][\s\S]*?واریز به:.*?مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'واریز به گردشگری' },
         { bank: 'گردشگری', type: 'expense', regex: /\*?بان[کك] گردشگر[یي][\s\S]*?برداشت از:.*?مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'برداشت از گردشگری' },
         { bank: 'گردشگری', type: 'income', regex: /\*?بان[کك] گردشگر[یي][\s\S]*?مبلغ:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'واریز به گردشگری' },
 
         // پیامک خودپرداز بانک ملی با عدد منفی
         { bank: 'ملی', type: 'expense', regex: /بان[کك] مل[یي] ا[یي]ران[\s\S]*?خودپرداز:\s*([\d,٬]+)-/, desc: 'برداشت خودپرداز ملی' },
-        // بانک تجارت - برداشت (پوشش پیامک چندخطی)
+
+        // بانک تجارت - برداشت
         { bank: 'تجارت', type: 'expense', regex: /\*بان[کك] تجارت\*[\s\S]*?برداشت:\s*([\d,٬]+)\s*ر[یي]ال/, desc: 'برداشت از تجارت' },
+
         // سایر بانک‌ها
         { bank: 'بلو', type: 'income', regex: /بلو.* ([\d,٬]+) ر[یي]ال به حساب شما نشست/, desc: 'واریز به بلو' },
         { bank: 'خاورمیانه', type: 'income', regex: /بان[کك] خاورم[یي]انه.*\+([\d,٬]+)/, desc: 'واریز به خاورمیانه' },
@@ -3383,17 +3394,11 @@ const parseSmsAndOpenModal = async (text) => {
         { bank: 'پاسارگاد', type: 'expense', regex: /بان[کك] پاسارگاد[\s\S]*?برداشت مبلغ ([\d,٬]+)/, desc: 'برداشت از پاسارگاد' },
         { bank: 'پاسارگاد', type: 'expense', regex: /بان[کك] پاسارگاد[\s\S]*?خرید مبلغ ([\d,٬]+)/, desc: 'خرید با کارت پاسارگاد' },
         { bank: 'پاسارگاد', type: 'income', regex: /بان[کك] پاسارگاد[\s\S]*?واریز مبلغ ([\d,٬]+)/, desc: 'واریز به پاسارگاد' },
+
         // الگوهای عمومی
-        { bank: null, type: 'income', regex: /واریز([\d,٬]+)/, desc: 'واریز وجه' },
-        { bank: null, type: 'expense', regex: /برداشت\s*([\d,٬]+)/, desc: 'برداشت وجه' },
         { bank: null, type: 'expense', regex: /(?:برداشت|خرید|پرداخت|انتقال|ساتنا|پایا|کارت به کارت).*(?:مبلغ|مبلغ:)\s*([\d,٬]+)/, desc: 'تراکنش هزینه' },
         { bank: null, type: 'income', regex: /(?:واریز).*(?:مبلغ|مبلغ:)\s*([\d,٬]+)/, desc: 'تراکنش درآمد' },
     ];
-
-    // --- تابع استخراج عدد صحیح فقط از ارقام و , و ٬ ---
-    function extractAmount(str) {
-        return str.replace(/[^\d,٬]/g, '').replace(/[٬,]/g, '');
-    }
 
     let bestMatch = null;
 
@@ -3412,8 +3417,6 @@ const parseSmsAndOpenModal = async (text) => {
 
     if (bestMatch) {
         let amount = parseInt(extractAmount(bestMatch.amountStr));
-
-        // اگر واحد ذکر نشده، یا فقط علامت است، یا بانک بود، فرض ریال و تقسیم بر ۱۰
         const hasToman = /تومان/.test(normalizedText);
         const hasRial = /ر[یي]ال/.test(normalizedText);
         const hasSignOnly = /^[\s\S]*[+\-][\s]*[\d,٬]+[\s\S]*$|^[\s\S]*[\d,٬]+[\s]*[+\-][\s\S]*$/.test(normalizedText);
@@ -3468,8 +3471,6 @@ const parseSmsAndOpenModal = async (text) => {
         renderTransactionModal(null, null, { description: text });
     }
 };
-
-
 
 
             const setupEventListeners = () => {
