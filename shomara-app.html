@@ -6,7 +6,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>شمارا</title>
-    <meta name="description" content="حسابداری شخصی شمارا">
+    <meta name="description" content="مدیریت مالی شخصی شمارا">
     <meta name="application-name" content="شمارا">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,7 +16,7 @@
     <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
         &quot;name&quot;: &quot;شمارا&quot;,
         &quot;short_name&quot;: &quot;شمارا&quot;,
-        &quot;description&quot;: &quot;حسابداری شخصی شمارا&quot;,
+        &quot;description&quot;: &quot;مدیریت مالی شخصی شمارا&quot;,
         &quot;start_url&quot;: &quot;.&quot;,
         &quot;display&quot;: &quot;standalone&quot;,
         &quot;background_color&quot;: &quot;#f2f2f7&quot;,
@@ -1823,7 +1823,7 @@
 <body>
     <div class="app-wrapper">
         <header class="app-header">
-            <h1 id="app-header-title">حسابداری شخصی شمارا</h1>
+            <h1 id="app-header-title">مدیریت مالی شخصی شمارا</h1>
             <div class="header-controls">
                 <i class="fas fa-cog" id="settings-btn"></i>
                 <div class="theme-switcher"><i class="fas fa-sun" id="theme-toggle"></i></div>
@@ -1933,7 +1933,7 @@
         </main>
         <button class="fab" data-action="add-transaction"><i class="fas fa-plus"></i></button>
         <nav class="bottom-nav">
-            <button class="nav-btn active" data-page="dashboard-page" data-title="حسابداری شخصی شمارا"><i
+            <button class="nav-btn active" data-page="dashboard-page" data-title="مدیریت مالی شخصی شمارا"><i
                     class="fas fa-tachometer-alt"></i><span>داشبورد</span></button>
             <button class="nav-btn" data-page="transactions-page" data-title="تراکنش‌ها"><i
                     class="fas fa-exchange-alt"></i><span>تراکنش‌ها</span></button>
@@ -2146,7 +2146,7 @@
             // --- UI RENDERING ---
             const updateAllUI = () => {
                 const currentPageNavBtn = qs(`.nav-btn[data-page="${currentPageId}"]`) || qs('.nav-btn.active');
-                const currentPageTitle = currentPageNavBtn ? currentPageNavBtn.dataset.title : "حسابداری شخصی شمارا";
+                const currentPageTitle = currentPageNavBtn ? currentPageNavBtn.dataset.title : "مدیریت مالی شخصی شمارا";
                 if (currentPageId) {
                     switchPage(currentPageId, currentPageTitle);
                 }
@@ -3117,7 +3117,7 @@
                                                     <li class="more-menu-item" data-page="savings-page" data-title="پس‌انداز"><div class="item-icon goal"><i class="fas fa-piggy-bank"></i></div><div class="item-info"><p>اهداف و پس‌انداز</p></div><i class="fas fa-chevron-left"></i></li>
                                                 </ul>
                                                 <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
-                                                    وب اپلیکیشن حسابداری شخصی شمارا نسخه 0.01 | طراحی و کدنویسی شده توسط پیمان عابدین پور
+                                                    وب اپلیکیشن مدیریت مالی شخصی شمارا نسخه 0.01 | طراحی و کدنویسی شده توسط پیمان عابدین پور
                                                 </div>
                                             </div>`;
                 openModal('#more-menu-modal-overlay');
@@ -3986,7 +3986,7 @@ const parseSmsAndOpenModal = async (text) => {
                 loadData();
                 setupEventListeners();
                 setTimeout(() => {
-                    const initialTitle = qs('.nav-btn.active')?.dataset?.title || "حسابداری شخصی شمارا";
+                    const initialTitle = qs('.nav-btn.active')?.dataset?.title || "مدیریت مالی شخصی شمارا";
                     switchPage('dashboard-page', initialTitle);
                 }, 50);
             };
