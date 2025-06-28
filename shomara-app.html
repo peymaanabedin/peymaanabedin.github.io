@@ -13,6 +13,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="شمارا">
+    <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
     <link rel="icon" type="image/png" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
     <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
@@ -170,6 +171,10 @@ body.modal-open {
     transition: var(--transition-fast);
     box-sizing: content-box;
     /* Explicitly set for clarity */
+        /* ... */
+    padding: var(--safe-area-top) 1rem 0; /* Adjusted padding-top for safe area */
+    /* ... */
+    box-sizing: content-box; /* Explicitly set for clarity */
 }
 
 body.dark-mode .app-header {
