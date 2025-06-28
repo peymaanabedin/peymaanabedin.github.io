@@ -5,8 +5,8 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>شمارا</title>
     <meta name="description" content="مدیریت مالی شخصی شمارا">
     <meta name="application-name" content="شمارا">
@@ -16,6 +16,21 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
     <link rel="icon" type="image/png" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+        &quot;name&quot;: &quot;شمارا&quot;,
+        &quot;short_name&quot;: &quot;شمارا&quot;,
+        &quot;description&quot;: &quot;مدیریت مالی شخصی شمارا&quot;,
+        &quot;start_url&quot;: &quot;.&quot;,
+        &quot;display&quot;: &quot;standalone&quot;,
+        &quot;background_color&quot;: &quot;#f2f2f7&quot;,
+        &quot;theme_color&quot;: &quot;#007AFF&quot;,
+        &quot;icons&quot;: [
+            { &quot;src&quot;: &quot;https://i.postimg.cc/pX061LJC/shomara-app.png&quot;, &quot;sizes&quot;: &quot;192x192&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot; },
+            { &quot;src&quot;: &quot;https://i.postimg.cc/pX061LJC/shomara-app.png&quot;, &quot;sizes&quot;: &quot;512x512&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot; },
+            { &quot;src&quot;: &quot;https://i.postimg.cc/pX061LJC/shomara-app.png&quot;, &quot;sizes&quot;: &quot;192x192&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;maskable&quot; },
+            { &quot;src&quot;: &quot;https://i.postimg.cc/pX061LJC/shomara-app.png&quot;, &quot;sizes&quot;: &quot;512x512&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;maskable&quot; }
+        ]
+    }">
     <link rel="apple-touch-startup-image" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"
@@ -118,7 +133,7 @@ body {
     /* Fallback */
     height: -webkit-fill-available;
     /* Critical for iOS PWA */
-   /*overflow: hidden;/*
+    overflow: hidden;
     /* Prevent wrapper from scrolling */
 }
 
@@ -3218,7 +3233,7 @@ body.dark-mode #toast {
                                                     <li class="more-menu-item" data-page="savings-page" data-title="پس‌انداز"><div class="item-icon goal"><i class="fas fa-piggy-bank"></i></div><div class="item-info"><p>اهداف و پس‌انداز</p></div><i class="fas fa-chevron-left"></i></li>
                                                 </ul>
                                                 <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
-                                                    وب اپلیکیشن مدیریت مالی شخصی شمارا نسخه 0.011 | طراحی و کدنویسی شده توسط پیمان عابدین پور
+                                                    وب اپلیکیشن مدیریت مالی شخصی شمارا نسخه 0.01 | طراحی و کدنویسی شده توسط پیمان عابدین پور
                                                 </div>
                                             </div>`;
                 openModal('#more-menu-modal-overlay');
