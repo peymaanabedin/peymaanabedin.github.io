@@ -2,7 +2,7 @@
   "name": "شمارا",
   "short_name": "شمارا",
   "description": "مدیریت مالی شخصی شمارا",
-  "start_url": ".",
+  "start_url": "/shomara-app.html",
   "display": "standalone",
   "background_color": "#f2f2f7",
   "theme_color": "#007AFF",
