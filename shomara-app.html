@@ -5,15 +5,14 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-    <title>شمارا</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"> <title>شمارا</title>
     <meta name="description" content="مدیریت مالی شخصی شمارا">
     <meta name="application-name" content="شمارا">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="شمارا">
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.json"> 
     <link rel="apple-touch-icon" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
     <link rel="icon" type="image/png" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
     <link rel="apple-touch-startup-image" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
@@ -118,7 +117,7 @@ body {
     /* Fallback */
     height: -webkit-fill-available;
     /* Critical for iOS PWA */
-   /*overflow: hidden;/*
+    overflow: hidden;
     /* Prevent wrapper from scrolling */
 }
 
@@ -2141,10 +2140,17 @@ body.dark-mode #toast {
             };
             const showToast = (message) => { const t = qs('#toast'); t.textContent = message; t.classList.add('show'); setTimeout(() => { t.classList.remove('show'); }, 3000); };
             const triggerHapticFeedback = (duration = 1) => { if (navigator.vibrate) { try { navigator.vibrate(duration); } catch (e) { /* Fail silently */ } } };
-            const openModal = (modalId) => {
-                qs(modalId)?.classList.add('active');
-                document.body.classList.add('modal-open');
-            };
+    const openModal = (modalId) => {
+    qs(modalId)?.classList.add('active');
+    document.body.classList.add('modal-open');
+    // Attempt to focus the first input field within the modal after a short delay
+    setTimeout(() => {
+        const firstInput = qs(`${modalId} input.form-control:not([type="hidden"]), ${modalId} textarea.form-control, ${modalId} select.form-control`);
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }, 50); // Small delay to ensure the modal is fully rendered and interactable
+};
             const closeModal = (modalId) => {
                 qs(modalId)?.classList.remove('active');
                 if (qsa('.modal-overlay.active').length === 0) {
@@ -3218,7 +3224,7 @@ body.dark-mode #toast {
                                                     <li class="more-menu-item" data-page="savings-page" data-title="پس‌انداز"><div class="item-icon goal"><i class="fas fa-piggy-bank"></i></div><div class="item-info"><p>اهداف و پس‌انداز</p></div><i class="fas fa-chevron-left"></i></li>
                                                 </ul>
                                                 <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
-                                                    وب اپلیکیشن مدیریت مالی شخصی شمارا نسخه 0.011 | طراحی و کدنویسی شده توسط پیمان عابدین پور
+                                                    وب اپلیکیشن مدیریت مالی شخصی شمارا نسخه 0.012 | طراحی و کدنویسی شده توسط پیمان عابدین پور
                                                 </div>
                                             </div>`;
                 openModal('#more-menu-modal-overlay');
