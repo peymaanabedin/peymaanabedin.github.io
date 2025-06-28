@@ -5,9 +5,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,viewport-fit=cover">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <title>شمارا</title>
     <meta name="description" content="مدیریت مالی شخصی شمارا">
     <meta name="application-name" content="شمارا">
@@ -17,6 +15,7 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
     <link rel="icon" type="image/png" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
+
     <link rel="apple-touch-startup-image" href="https://i.postimg.cc/pX061LJC/shomara-app.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"
@@ -115,9 +114,9 @@ body {
 .app-wrapper {
     display: flex;
     flex-direction: column;
-  min-height:100%;
-  height:auto;          /* یا height:100dvh در iOS16.4+ */
-  overflow:auto;
+    height: 100vh;
+    height: -webkit-fill-available;
+    /* overflow: hidden; */ /* <-- COMMENT OUT OR REMOVE THIS LINE */
 }
 
 body.dark-mode {
@@ -200,7 +199,7 @@ body.dark-mode .app-header {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    /* Ensure content starts below header and ends above nav, accounting for safe areas */
+    /* Your padding calculation is good, it should adapt */
     padding: calc(var(--header-height) + var(--safe-area-top) + 1.25rem) 1rem calc(var(--nav-height) + var(--safe-area-bottom) + 1.25rem);
 }
 
@@ -1892,10 +1891,6 @@ body.dark-mode #toast {
         font-weight: 500;
         font-size: 0.9rem;
     }
-    
-}
-@media (display-mode:standalone){
-  input,textarea,select{-webkit-user-select:text!important;}
 }
     </style>
 </head>
@@ -3220,7 +3215,7 @@ body.dark-mode #toast {
                                                     <li class="more-menu-item" data-page="savings-page" data-title="پس‌انداز"><div class="item-icon goal"><i class="fas fa-piggy-bank"></i></div><div class="item-info"><p>اهداف و پس‌انداز</p></div><i class="fas fa-chevron-left"></i></li>
                                                 </ul>
                                                 <div style="text-align: center; padding: 15px 10px 5px; font-size: 0.75rem; color: var(--subtext-light);">
-                                                    وب اپلیکیشن مدیریت مالی شخصی شمارا نسخه 0.04 | طراحی و کدنویسی شده توسط پیمان عابدین پور
+                                                    وب اپلیکیشن مدیریت مالی شخصی شمارا نسخه 0.05 | طراحی و کدنویسی شده توسط پیمان عابدین پور
                                                 </div>
                                             </div>`;
                 openModal('#more-menu-modal-overlay');
