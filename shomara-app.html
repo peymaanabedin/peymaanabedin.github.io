@@ -695,7 +695,7 @@ body.dark-mode .filter-summary {
 /* --- REDESIGNED TRANSACTION & REPORT CARDS --- */
 /* Base container for a transaction item inside the list */
 .list-container li {
-    display: block;
+    display: flex;
     /* Change from flex to block to contain the new card structure */
     padding: 1rem 1.25rem;
     /* Slightly more padding for a cleaner look */
@@ -2537,7 +2537,7 @@ body.dark-mode #toast {
                                                     <h3>حساب‌های من</h3>
                                                     <button class="btn btn-primary" data-action="add-account"><i class="fas fa-plus"></i></button>
                                                 </div>
-                                                <div id="accounts-list" class="list-container2" style="margin: 0;"></div>
+                                                <div id="accounts-list" class="list-container" style="margin: 0;"></div>
                                                 <div id="accounts-status" class="list-status"></div>
                                             </div>`;
                 const listEl = qs('#accounts-list', page), statusEl = qs('#accounts-status', page);
@@ -3331,11 +3331,11 @@ body.dark-mode #toast {
                                             <div class="modal-content" id="account-details-content">
                                                 <div class="modal-header"><h3>${acc.name}</h3></div>
                                                 <div style="text-align: right; line-height: 2; font-size: 0.9rem; padding: 0 1rem;">
-                                                    <p><strong>شماراه کارت:</strong> ${acc.cardNumber || '-'}</p>
+                                                    <p><strong>شماره کارت:</strong> ${acc.cardNumber || '-'}</p>
                                                     <p><strong>تاریخ انقضا:</strong> ${(acc.expMonth && acc.expYear) ? `${acc.expMonth}/${acc.expYear}` : '-'}</p>
                                                     <p><strong>CVV2:</strong> ${acc.cvv2 || '-'}</p>
-                                                    <p><strong>شماراه حساب:</strong> ${acc.accountNumber || '-'}</p>
-                                                    <p><strong>شماراه شبا:</strong> ${acc.shabaNumber || '-'}</p>
+                                                    <p><strong>شماره حساب:</strong> ${acc.accountNumber || '-'}</p>
+                                                    <p><strong>شماره شبا:</strong> ${acc.shabaNumber || '-'}</p>
                                                     <p><strong>یادداشت:</strong> ${acc.notes || '-'}</p>
                                                 </div>
                                                 <div class="form-actions">
