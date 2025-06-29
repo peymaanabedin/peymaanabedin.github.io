@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -689,6 +690,7 @@ body.dark-mode .filter-summary {
     display: flex;
     /* Change from flex to block to contain the new card structure */
     padding: 1rem 1.25rem;
+    flex-direction: column;
     /* Slightly more padding for a cleaner look */
     border-bottom: 1px solid var(--border-light);
     cursor: pointer;
@@ -966,7 +968,7 @@ body.dark-mode .item-icon.contact {
 .item-amount {
     font-weight: 600;
     font-size: 1.1rem;
-    direction: ltr;
+    direction: rtl;
     margin-left: 0.5rem;
 }
 
@@ -1896,6 +1898,10 @@ body.dark-mode #toast {
         font-size: 0.9rem;
     }
 }
+input, textarea {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+}
     </style>
 </head>
 
@@ -2450,7 +2456,7 @@ body.dark-mode #toast {
                                                 <div><span>تعداد</span><strong>${filteredTxs.length.toLocaleString('fa-IR')}</strong></div>
                                                 <div><span>دریافتی</span><strong style="color:var(--income);">${formatCurrency(totalIncome)} تومان</strong></div>
                                                 <div><span>پرداختی</span><strong style="color:var(--expense);">${formatCurrency(totalExpense)} تومان</strong></div>
-                                                <div><span>برآیند</span><strong style="direction: ltr; color:${netFlow >= 0 ? 'var(--income)' : 'var(--expense)'};">${netFlow >= 0 ? '+' : ''}${formatCurrency(netFlow)} تومان</strong></div>
+                                                <div><span>برآیند</span><strong style="direction: rtl; color:${netFlow >= 0 ? 'var(--income)' : 'var(--expense)'};">${netFlow >= 0 ? '+' : ''}${formatCurrency(netFlow)} تومان</strong></div>
                                             </div>`;
                 summaryEl.style.display = 'block';
             }
@@ -2988,7 +2994,7 @@ body.dark-mode #toast {
                                             </div>
                                             <div class="balance-item net">
                                                 <span>برآیند</span>
-                                                <strong class="${balanceClass}" style="direction: ltr;">${contact.netBalance >= 0 ? '+' : ''}${formatCurrency(contact.netBalance)} تومان</strong>
+                                                <strong class="${balanceClass}" style="direction: rtl;">${contact.netBalance >= 0 ? '+' : ''}${formatCurrency(contact.netBalance)} تومان</strong>
                                             </div>
                                         </div>
                                     </div>
