@@ -2,12 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               minimum-scale=1.0,
-               maximum-scale=1.0,
-               viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>همراه من</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -888,13 +883,6 @@
                 }
                 applyTheme(getTheme());
             }
-            // ADD this right after your existing DOM-ready code
-document.querySelectorAll('input, textarea').forEach(el => {
-  el.addEventListener('touchend', function(e) {
-    e.stopPropagation();
-    this.focus();
-  }, false);
-});
             // --- GLOBAL EVENT LISTENERS ---
             document.body.addEventListener('click', (e) => {
                 const actionTarget = e.target.closest('[data-action]');
@@ -1010,7 +998,13 @@ document.querySelectorAll('input, textarea').forEach(el => {
 
        // =====================================================================
         // NEW FIX FOR IOS KEYBOARD:
- =====================================================================
+        // Force focus on input fields when a touch starts.
+        document.body.addEventListener('touchstart', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                e.target.focus();
+            }
+        }, { passive: true }); // Use passive for better scroll performance.
+        // =====================================================================
 
 
             document.body.addEventListener('change', e => {
