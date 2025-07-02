@@ -2,12 +2,9 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width,
-                   initial-scale=1.0,
-                   minimum-scale=1.0,
-                  maximum-scale=1.0,
-                   viewport-fit=cover">    <title>همراه من</title>
+
+    
+    <title>همراه من</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="همراه من">
@@ -248,7 +245,6 @@
             font-size: 2rem; font-weight: 800; border: none; background: transparent; width: 100%;
             color: var(--c-text-primary); padding: 16px 0 8px 0; margin-top: var(--spacing-md); box-sizing: border-box;
             font-family: var(--font-family);
-                cursor: pointer; /* <-- ADD THIS LINE */
         }
         .editor-view #note-title::placeholder, .editor-view #note-content::placeholder { color: var(--c-text-secondary); opacity: 0.7; }
         .editor-view #note-title:focus, .editor-view #note-content:focus { outline: none; }
@@ -256,7 +252,6 @@
             font-size: 1.1rem; line-height: 1.8; border: none; background: transparent; width: 100%;
             min-height: 60vh; color: var(--c-text-primary); resize: none; padding: 8px 0; box-sizing: border-box;
             font-family: var(--font-family);
-                cursor: pointer; /* <-- ADD THIS LINE */
         }
         .save-status { color: var(--c-text-secondary); font-size: 0.9rem; font-weight: 600; transition: opacity 0.5s, transform 0.5s; opacity: 0; transform: translateY(5px);}
         .save-status.visible { opacity: 1; transform: translateY(0); }
@@ -999,31 +994,6 @@
                     }
                 }
             });
-
-       // =====================================================================
-        // NEW FIX FOR IOS KEYBOARD:
-     
-        function ensureIOSKeyboard() {
-            document.querySelectorAll('input, textarea').forEach(el => {
-                el.addEventListener('touchend', function (e) {
-                   // stop bubbling so Sortable / other libs don’t swallow it+                    e.stopPropagation();
-                    this.focus();
-                }, false);   // <-- NOT passive
-            });
-       }
-
-        // call once after DOMContentLoaded and again
-        // whenever you dynamically render inputs (editor view, modals, …)
-        document.addEventListener('DOMContentLoaded', ensureIOSKeyboard);
-        const _origRenderCurrentView = renderCurrentView;
-        renderCurrentView = function () {
-            _origRenderCurrentView();
-            ensureIOSKeyboard();
-        };
-performance.
-        // =====================================================================
-
-
             document.body.addEventListener('change', e => {
                 if (e.target.id === 'theme-toggle') {
                     const newTheme = e.target.checked ? 'dark' : 'light';

@@ -2,12 +2,8 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width,
-                   initial-scale=1.0,
-                   minimum-scale=1.0,
-                  maximum-scale=1.0,
-                   viewport-fit=cover">    <title>همراه من</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>همراه من</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="همراه من">
@@ -1002,25 +998,12 @@
 
        // =====================================================================
         // NEW FIX FOR IOS KEYBOARD:
-     
-        function ensureIOSKeyboard() {
-            document.querySelectorAll('input, textarea').forEach(el => {
-                el.addEventListener('touchend', function (e) {
-                   // stop bubbling so Sortable / other libs don’t swallow it+                    e.stopPropagation();
-                    this.focus();
-                }, false);   // <-- NOT passive
-            });
-       }
-
-        // call once after DOMContentLoaded and again
-        // whenever you dynamically render inputs (editor view, modals, …)
-        document.addEventListener('DOMContentLoaded', ensureIOSKeyboard);
-        const _origRenderCurrentView = renderCurrentView;
-        renderCurrentView = function () {
-            _origRenderCurrentView();
-            ensureIOSKeyboard();
-        };
-performance.
+        // Force focus on input fields when a touch starts.
+        document.body.addEventListener('touchstart', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                e.target.focus();
+            }
+        }, { passive: true }); // Use passive for better scroll performance.
         // =====================================================================
 
 
