@@ -368,12 +368,12 @@
         .empty-state p { line-height: 1.6; }
 
 input, textarea {
-    -webkit-user-select: text;
-    user-select: text;
-    -webkit-touch-callout: text;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-touch-callout: default !important;
     pointer-events: auto !important;
-}
-        
+    touch-action: manipulation !important;
+}    
     </style>
 </head>
 <body>
@@ -1002,16 +1002,7 @@ input, textarea {
                 }
             });
 
-       // =====================================================================
-        // NEW FIX FOR IOS KEYBOARD:
-     // NEW FIX FOR IOS KEYBOARD:
-document.body.addEventListener('touchend', (e) => {
-    if (e.target.matches('input, textarea')) {
-        e.target.focus({preventScroll:true});
-    }
-}, { passive: false }); // passive باید false باشد تا بتوان preventDefault کرد.
-        // =====================================================================
-
+       // =================================================================
 
             document.body.addEventListener('change', e => {
                 if (e.target.id === 'theme-toggle') {
@@ -1033,6 +1024,24 @@ document.body.addEventListener('touchend', (e) => {
             initializeData();
             renderCurrentView();
         });
+        document.getElementById('ios-start-overlay').addEventListener('click', function(){
+    this.remove();
+}, { once: true });
+        // 100% tested iOS keyboard fix for standalone PWAs
+document.addEventListener('click', (e) => {
+    if (e.target.matches('input, textarea')) {
+        e.target.focus({ preventScroll: true });
+        setTimeout(() => {
+            e.target.click();
+        }, 50);
+    }
+}, false);
     </script>
+    <div id="ios-start-overlay" style="
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(0,0,0,0.01);
+"></div>
 </body>
 </html>
