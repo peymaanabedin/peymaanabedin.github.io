@@ -17,7 +17,7 @@
     <style>
         /* --- CORE DESIGN SYSTEM --- */
         :root {
-            /* Colors */
+            /* Default Colors (Fallback) */
             --c-primary: #D98BAA;
             --c-primary-light: color-mix(in srgb, var(--c-primary) 20%, white);
             --c-mood-happy: #F8C8A8; --c-mood-calm: #EAA2A2; --c-mood-creative: #C5B0E0;
@@ -25,8 +25,7 @@
             --c-danger: #e74c3c;
             --c-danger-light: color-mix(in srgb, var(--c-danger) 15%, transparent);
             /* Light Theme */
-            --c-bg-light: #F4F0F1;
-            --c-card-bg-light: #FFFFFF; --c-text-primary-light: #332C33;
+            --c-bg-light: #F4F0F1; --c-card-bg-light: #FFFFFF; --c-text-primary-light: #332C33;
             --c-text-secondary-light: #7E787E; --c-border-light: #EAE3E4; --shadow-color-light: rgba(149, 157, 165, 0.1);
             --c-pinned-bg-light: color-mix(in srgb, var(--c-primary) 5%, var(--c-card-bg-light));
             /* Dark Theme */
@@ -38,6 +37,10 @@
             --radius-card: 24px; --radius-btn: 16px;
             --spacing-md: 16px; --spacing-lg: 24px;
             --transition-speed: 0.3s;
+        }
+        /* --- IMPROVEMENT: SMOOTH SCROLLBAR --- */
+        html {
+            overflow-y: scroll; /* Always show scrollbar to prevent layout shifts */
         }
         /* --- THEME SETUP --- */
         body {
@@ -58,17 +61,107 @@
             --c-text-secondary: var(--c-text-secondary-light); --c-border: var(--c-border-light); --shadow-color: var(--shadow-color-light);
             --c-pinned-bg: var(--c-pinned-bg-light);
         }
-        /* --- GENERAL & PAGE TRANSITIONS --- */
-        .page {
-            min-height: 100vh;
-            animation: page-enter 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-        }
+        /* --- CUSTOM THEMES (80 Total) --- */
+        /* Dark Themes (40) */
+        body.theme-dracula { --c-primary: #ff79c6; --c-bg-dark: #282a36; --c-card-bg-dark: #44475a; --c-text-primary-dark: #f8f8f2; --c-text-secondary-dark: #bd93f9; --c-border-dark: #6272a4; }
+        body.theme-monokai { --c-primary: #f92672; --c-bg-dark: #272822; --c-card-bg-dark: #3e3d32; --c-text-primary-dark: #f8f8f2; --c-text-secondary-dark: #a6e22e; --c-border-dark: #75715e; }
+        body.theme-nord { --c-primary: #88c0d0; --c-bg-dark: #2e3440; --c-card-bg-dark: #3b4252; --c-text-primary-dark: #d8dee9; --c-text-secondary-dark: #a3be8c; --c-border-dark: #4c566a; }
+        body.theme-gruvbox-dark { --c-primary: #fe8019; --c-bg-dark: #282828; --c-card-bg-dark: #3c3836; --c-text-primary-dark: #ebdbb2; --c-text-secondary-dark: #b8bb26; --c-border-dark: #504945; }
+        body.theme-solarized-dark { --c-primary: #268bd2; --c-bg-dark: #002b36; --c-card-bg-dark: #073642; --c-text-primary-dark: #eee8d5; --c-text-secondary-dark: #859900; --c-border-dark: #586e75; }
+        body.theme-cyberpunk { --c-primary: #f9f871; --c-bg-dark: #0c0c27; --c-card-bg-dark: #20204b; --c-text-primary-dark: #a6fffa; --c-text-secondary-dark: #ff00ff; --c-border-dark: #4f4f8e; }
+        body.theme-old-terminal { --c-primary: #33ff33; --c-bg-dark: #000000; --c-card-bg-dark: #1a1a1a; --c-text-primary-dark: #33ff33; --c-text-secondary-dark: #55ff55; --c-border-dark: #2c2c2c; }
+        body.theme-vaporwave { --c-primary: #ff77cc; --c-bg-dark: #200c38; --c-card-bg-dark: #35195e; --c-text-primary-dark: #00e5e5; --c-text-secondary-dark: #fbb03b; --c-border-dark: #5d3a9b; }
+        body.theme-twilight { --c-primary: #ffc880; --c-bg-dark: #1e1e3f; --c-card-bg-dark: #2a2a57; --c-text-primary-dark: #d4d4ff; --c-text-secondary-dark: #9d80ff; --c-border-dark: #4b4b8a; }
+        body.theme-forest { --c-primary: #b4e982; --c-bg-dark: #1a2b23; --c-card-bg-dark: #243e31; --c-text-primary-dark: #d3e5d7; --c-text-secondary-dark: #6e9a7e; --c-border-dark: #365b45; }
+        body.theme-matrix { --c-primary: #00ff41; --c-bg-dark: #0d0208; --c-card-bg-dark: #1a0a1f; --c-text-primary-dark: #008f11; --c-text-secondary-dark: #003b00; --c-border-dark: #2c1a3b; }
+        body.theme-noir { --c-primary: #f4a261; --c-bg-dark: #1c1c1c; --c-card-bg-dark: #2d2d2d; --c-text-primary-dark: #e0e0e0; --c-text-secondary-dark: #a0a0a0; --c-border-dark: #444444; }
+        body.theme-deep-space { --c-primary: #9d80ff; --c-bg-dark: #00001a; --c-card-bg-dark: #101030; --c-text-primary-dark: #f0f0ff; --c-text-secondary-dark: #a0a0ff; --c-border-dark: #2c2c5a; }
+        body.theme-velvet { --c-primary: #ffd700; --c-bg-dark: #4a0404; --c-card-bg-dark: #6b0f0f; --c-text-primary-dark: #fff0f0; --c-text-secondary-dark: #e8a8a8; --c-border-dark: #8c1a1a; }
+        body.theme-oled { --c-primary: #ff3385; --c-bg-dark: #000000; --c-card-bg-dark: #181818; --c-text-primary-dark: #e5e5e5; --c-text-secondary-dark: #00f2ea; --c-border-dark: #2a2a2a; }
+        body.theme-sublime { --c-primary: #fd971f; --c-bg-dark: #232323; --c-card-bg-dark: #313131; --c-text-primary-dark: #f8f8f2; --c-text-secondary-dark: #66d9ef; --c-border-dark: #454545; }
+        body.theme-8bit-sunset { --c-primary: #f9d868; --c-bg-dark: #34294b; --c-card-bg-dark: #4c3c6f; --c-text-primary-dark: #f0e5ff; --c-text-secondary-dark: #f38ba3; --c-border-dark: #675395; }
+        body.theme-arcade { --c-primary: #ffcc00; --c-bg-dark: #1d1a33; --c-card-bg-dark: #2d284d; --c-text-primary-dark: #eeebff; --c-text-secondary-dark: #ff4d94; --c-border-dark: #443c73; }
+        body.theme-midnight-city { --c-primary: #f1fa8c; --c-bg-dark: #191a21; --c-card-bg-dark: #2c2e3b; --c-text-primary-dark: #e1e1e6; --c-text-secondary-dark: #bd93f9; --c-border-dark: #44475a; }
+        body.theme-evergreen { --c-primary: #f4a261; --c-bg-dark: #2a3d34; --c-card-bg-dark: #3c5348; --c-text-primary-dark: #e8e4d1; --c-text-secondary-dark: #a3b899; --c-border-dark: #506a5e; }
+        body.theme-snes-dark { --c-primary: #aca8dd; --c-bg-dark: #212121; --c-card-bg-dark: #353535; --c-text-primary-dark: #e0e0e0; --c-text-secondary-dark: #e60012; --c-border-dark: #4f4f4f; }
+        body.theme-playstation-dark { --c-primary: #006fcd; --c-bg-dark: #1f1f2e; --c-card-bg-dark: #2e2e42; --c-text-primary-dark: #f0f0f5; --c-text-secondary-dark: #e60012; --c-border-dark: #44445e; }
+        body.theme-gameboy-dark { --c-primary: #3f6946; --c-bg-dark: #0f380f; --c-card-bg-dark: #306230; --c-text-primary-dark: #9bbc0f; --c-text-secondary-dark: #8bac0f; --c-border-dark: #000000; }
+        body.theme-blade-runner-dark { --c-primary: #f05a28; --c-bg-dark: #0a1128; --c-card-bg-dark: #121c3d; --c-text-primary-dark: #00f6ff; --c-text-secondary-dark: #bdc3c7; --c-border-dark: #1c2e55; }
+        body.theme-dune-dark { --c-primary: #e89f48; --c-bg-dark: #2c221c; --c-card-bg-dark: #40322b; --c-text-primary-dark: #d5c8b8; --c-text-secondary-dark: #a08a73; --c-border-dark: #5a483c; }
+        body.theme-gold-dark { --c-primary: #ffd700; --c-bg-dark: #141414; --c-card-bg-dark: #262626; --c-text-primary-dark: #e8e8e8; --c-text-secondary-dark: #b8b8b8; --c-border-dark: #404040; }
+        body.theme-rose-gold-dark { --c-primary: #b76e79; --c-bg-dark: #2c2426; --c-card-bg-dark: #3d3537; --c-text-primary-dark: #f5f1f2; --c-text-secondary-dark: #a8a1a4; --c-border-dark: #524a4c; }
+        body.theme-silver-dark { --c-primary: #c0c0c0; --c-bg-dark: #25282a; --c-card-bg-dark: #36393e; --c-text-primary-dark: #f0f0f0; --c-text-secondary-dark: #99aab5; --c-border-dark: #4f545c; }
+        body.theme-ios-dark { --c-primary: #0a84ff; --c-bg-dark: #000000; --c-card-bg-dark: #1c1c1e; --c-text-primary-dark: #ffffff; --c-text-secondary-dark: #8e8e93; --c-border-dark: #38383a; }
+        body.theme-ocean-dark { --c-primary: #5efff5; --c-bg-dark: #0b192f; --c-card-bg-dark: #172a45; --c-text-primary-dark: #ccd6f6; --c-text-secondary-dark: #8892b0; --c-border-dark: #233554; }
+        body.theme-blood-moon { --c-primary: #ff4d4d; --c-bg-dark: #1a0000; --c-card-bg-dark: #330000; --c-text-primary-dark: #ffcccc; --c-text-secondary-dark: #cc8888; --c-border-dark: #550000; }
+        body.theme-nebula { --c-primary: #d67ae9; --c-bg-dark: #1d0f2b; --c-card-bg-dark: #2e1e40; --c-text-primary-dark: #e1d8f5; --c-text-secondary-dark: #9279a9; --c-border-dark: #442d5f; }
+        body.theme-volcano { --c-primary: #ff7a00; --c-bg-dark: #1f120c; --c-card-bg-dark: #36221a; --c-text-primary-dark: #ffd8c9; --c-text-secondary-dark: #b8917f; --c-border-dark: #57372b; }
+        body.theme-aurora { --c-primary: #45fcd1; --c-bg-dark: #011627; --c-card-bg-dark: #011221; --c-text-primary-dark: #d6deeb; --c-text-secondary-dark: #82aaff; --c-border-dark: #1d2d3e; }
+        body.theme-gothic { --c-primary: #9400d3; --c-bg-dark: #121212; --c-card-bg-dark: #1e1e1e; --c-text-primary-dark: #c8c8c8; --c-text-secondary-dark: #8a8a8a; --c-border-dark: #333333; }
+        body.theme-retro-orange { --c-primary: #e27d60; --c-bg-dark: #27211e; --c-card-bg-dark: #3a322e; --c-text-primary-dark: #e4d7d0; --c-text-secondary-dark: #8590aa; --c-border-dark: #524842; }
+        body.theme-synthwave-84 { --c-primary: #ff8b42; --c-bg-dark: #2b213a; --c-card-bg-dark: #382c4c; --c-text-primary-dark: #f9f7f2; --c-text-secondary-dark: #b57edc; --c-border-dark: #514269; }
+        body.theme-emerald { --c-primary: #50c878; --c-bg-dark: #1f2e2a; --c-card-bg-dark: #2e443e; --c-text-primary-dark: #d4e9e2; --c-text-secondary-dark: #a3b8b1; --c-border-dark: #435e55; }
+        body.theme-coffee { --c-primary: #c4a68a; --c-bg-dark: #2a211c; --c-card-bg-dark: #3c2f28; --c-text-primary-dark: #d1c7b7; --c-text-secondary-dark: #907f71; --c-border-dark: #57463b; }
+        body.theme-atlantis { --c-primary: #96e072; --c-bg-dark: #262a33; --c-card-bg-dark: #363b46; --c-text-primary-dark: #f8f8f2; --c-text-secondary-dark: #ffb86c; --c-border-dark: #464b56; }
+        /* Light Themes (40) */
+        body.theme-solarized-light { --c-primary: #d33682; --c-bg-light: #fdf6e3; --c-card-bg-light: #eee8d5; --c-text-primary-light: #586e75; --c-text-secondary-light: #859900; --c-border-light: #93a1a1; }
+        body.theme-gruvbox-light { --c-primary: #d65d0e; --c-bg-light: #fbf1c7; --c-card-bg-light: #ebdbb2; --c-text-primary-light: #3c3836; --c-text-secondary-light: #7c6f64; --c-border-light: #d5c4a1; }
+        body.theme-sakura { --c-primary: #db88b5; --c-bg-light: #fff6f9; --c-card-bg-light: #ffffff; --c-text-primary-light: #5b4d53; --c-text-secondary-light: #a38c97; --c-border-light: #f2e6e9; }
+        body.theme-seaside { --c-primary: #1d74c4; --c-bg-light: #eef7ff; --c-card-bg-light: #ffffff; --c-text-primary-light: #0b3954; --c-text-secondary-light: #ff6663; --c-border-light: #d1e2f0; }
+        body.theme-matcha { --c-primary: #75a99c; --c-bg-light: #f5f5e8; --c-card-bg-light: #ffffff; --c-text-primary-light: #4a4a42; --c-text-secondary-light: #8a8a7e; --c-border-light: #e5e5d3; }
+        body.theme-daylight { --c-primary: #007bff; --c-bg-light: #f0f8ff; --c-card-bg-light: #ffffff; --c-text-primary-light: #212529; --c-text-secondary-light: #6c757d; --c-border-light: #dee2e6; }
+        body.theme-peaches { --c-primary: #ff6b6b; --c-bg-light: #fff2f2; --c-card-bg-light: #ffffff; --c-text-primary-light: #5e3b3b; --c-text-secondary-light: #ffa4a4; --c-border-light: #ffdede; }
+        body.theme-lavender { --c-primary: #8a63d2; --c-bg-light: #f7f4ff; --c-card-bg-light: #ffffff; --c-text-primary-light: #4b3d60; --c-text-secondary-light: #9d8ab7; --c-border-light: #e9e2f9; }
+        body.theme-paper { --c-primary: #d94d41; --c-bg-light: #f7f6f1; --c-card-bg-light: #ffffff; --c-text-primary-light: #3a3a3a; --c-text-secondary-light: #888888; --c-border-light: #e8e6df; }
+        body.theme-classic-mac { --c-primary: #000000; --c-bg-light: #e0e0e0; --c-card-bg-light: #ffffff; --c-text-primary-light: #000000; --c-text-secondary-light: #444444; --c-border-light: #aaaaaa; }
+        body.theme-blueprint { --c-primary: #295ddc; --c-bg-light: #eff3f9; --c-card-bg-light: #ffffff; --c-text-primary-light: #333a56; --c-text-secondary-light: #52658f; --c-border-light: #d8dee8; }
+        body.theme-sepia { --c-primary: #704214; --c-bg-light: #fbf0d9; --c-card-bg-light: #f4e8c8; --c-text-primary-light: #4a2d0b; --c-text-secondary-light: #8f6d48; --c-border-light: #e0d2b1; }
+        body.theme-mint-choco { --c-primary: #3d2b24; --c-bg-light: #f0fff0; --c-card-bg-light: #ffffff; --c-text-primary-light: #513e36; --c-text-secondary-light: #6aa38a; --c-border-light: #d8e8d8; }
+        body.theme-cotton-candy { --c-primary: #ff9dcb; --c-bg-light: #f0f8ff; --c-card-bg-light: #ffffff; --c-text-primary-light: #5b6a78; --c-text-secondary-light: #a3d4f5; --c-border-light: #e0ecf5; }
+        body.theme-desert-oasis { --c-primary: #00bcd4; --c-bg-light: #faf3e0; --c-card-bg-light: #fff8eb; --c-text-primary-light: #7a6a53; --c-text-secondary-light: #c2ad8f; --c-border-light: #eadfc9; }
+        body.theme-botanical { --c-primary: #4caf50; --c-bg-light: #f5fcf5; --c-card-bg-light: #ffffff; --c-text-primary-light: #3e503f; --c-text-secondary-light: #819a82; --c-border-light: #e3ebe3; }
+        body.theme-e-ink { --c-primary: #000000; --c-bg-light: #f5f5f5; --c-card-bg-light: #ffffff; --c-text-primary-light: #333333; --c-text-secondary-light: #777777; --c-border-light: #e0e0e0; }
+        body.theme-minimal-white { --c-primary: #888888; --c-bg-light: #ffffff; --c-card-bg-light: #f7f7f7; --c-text-primary-light: #222222; --c-text-secondary-light: #aaaaaa; --c-border-light: #eeeeee; }
+        body.theme-gummybear { --c-primary: #ef476f; --c-bg-light: #ffffff; --c-card-bg-light: #f9f9f9; --c-text-primary-light: #073b4c; --c-text-secondary-light: #118ab2; --c-border-light: #eef1f2; }
+        body.theme-newspaper { --c-primary: #d11c11; --c-bg-light: #f8f8f2; --c-card-bg-light: #ffffff; --c-text-primary-light: #1c1c1a; --c-text-secondary-light: #888883; --c-border-light: #e8e8e0; }
+        body.theme-snes-light { --c-primary: #e60012; --c-bg-light: #e8e8e8; --c-card-bg-light: #ffffff; --c-text-primary-light: #2c2c2c; --c-text-secondary-light: #524f95; --c-border-light: #d0d0d0; }
+        body.theme-playstation-light { --c-primary: #006fcd; --c-bg-light: #eef2f7; --c-card-bg-light: #ffffff; --c-text-primary-light: #333333; --c-text-secondary-light: #555555; --c-border-light: #dce1e6; }
+        body.theme-gameboy-light { --c-primary: #0f380f; --c-bg-light: #9bbc0f; --c-card-bg-light: #cde456; --c-text-primary-light: #0f380f; --c-text-secondary-light: #306230; --c-border-light: #8bac0f; }
+        body.theme-dune-light { --c-primary: #a0522d; --c-bg-light: #f4e8d8; --c-card-bg-light: #fffaf0; --c-text-primary-light: #5d4037; --c-text-secondary-light: #8d6e63; --c-border-light: #d7ccc8; }
+        body.theme-gold-light { --c-primary: #b59410; --c-bg-light: #fdfaf0; --c-card-bg-light: #ffffff; --c-text-primary-light: #3d3419; --c-text-secondary-light: #8c783e; --c-border-light: #f3eedc; }
+        body.theme-rose-gold-light { --c-primary: #b76e79; --c-bg-light: #fcf6f7; --c-card-bg-light: #ffffff; --c-text-primary-light: #5c373d; --c-text-secondary-light: #a38c97; --c-border-light: #f2e6e9; }
+        body.theme-silver-light { --c-primary: #8c8c8c; --c-bg-light: #f7f7f7; --c-card-bg-light: #ffffff; --c-text-primary-light: #333333; --c-text-secondary-light: #767676; --c-border-light: #e1e1e1; }
+        body.theme-ios-light { --c-primary: #007aff; --c-bg-light: #f2f2f7; --c-card-bg-light: #ffffff; --c-text-primary-light: #000000; --c-text-secondary-light: #6e6e73; --c-border-light: #dcdce1; }
+        body.theme-pastel-dream { --c-primary: #ffc0cb; --c-bg-light: #fdf5f6; --c-card-bg-light: #ffffff; --c-text-primary-light: #6d5458; --c-text-secondary-light: #b0a8b9; --c-border-light: #f1e4e8; }
+        body.theme-floral { --c-primary: #de5b83; --c-bg-light: #f9f2f5; --c-card-bg-light: #ffffff; --c-text-primary-light: #573a45; --c-text-secondary-light: #7f9a76; --c-border-light: #eedfe5; }
+        body.theme-strawberry { --c-primary: #e53935; --c-bg-light: #fff2f2; --c-card-bg-light: #ffffff; --c-text-primary-light: #5e3b3b; --c-text-secondary-light: #7e8c53; --c-border-light: #ffdede; }
+        body.theme-blueberry { --c-primary: #3f51b5; --c-bg-light: #f2f3ff; --c-card-bg-light: #ffffff; --c-text-primary-light: #39405f; --c-text-secondary-light: #7986cb; --c-border-light: #dee2ff; }
+        body.theme-apricot { --c-primary: #fb8c00; --c-bg-light: #fff8f0; --c-card-bg-light: #ffffff; --c-text-primary-light: #613800; --c-text-secondary-light: #ffb74d; --c-border-light: #ffeeda; }
+        body.theme-vanilla { --c-primary: #8d6e63; --c-bg-light: #fdfcf7; --c-card-bg-light: #ffffff; --c-text-primary-light: #4e342e; --c-text-secondary-light: #a1887f; --c-border-light: #f3f0e9; }
+        body.theme-pistachio { --c-primary: #7cb342; --c-bg-light: #f7fff2; --c-card-bg-light: #ffffff; --c-text-primary-light: #33491c; --c-text-secondary-light: #9ccc65; --c-border-light: #eaf6e1; }
+        body.theme-sky { --c-primary: #03a9f4; --c-bg-light: #f0f9ff; --c-card-bg-light: #ffffff; --c-text-primary-light: #014361; --c-text-secondary-light: #4fc3f7; --c-border-light: #dcf2ff; }
+        body.theme-sand { --c-primary: #c2b280; --c-bg-light: #fbf9f4; --c-card-bg-light: #ffffff; --c-text-primary-light: #5a523c; --c-text-secondary-light: #8d7a5b; --c-border-light: #e8e4d8; }
+        body.theme-rose-quartz { --c-primary: #f0a1b8; --c-bg-light: #fdf6f8; --c-card-bg-light: #ffffff; --c-text-primary-light: #6b404c; --c-text-secondary-light: #c48a9b; --c-border-light: #f4e5e9; }
+        body.theme-serenity { --c-primary: #92a8d1; --c-bg-light: #f6f8fd; --c-card-bg-light: #ffffff; --c-text-primary-light: #444e60; --c-text-secondary-light: #7c8da9; --c-border-light: #e5e9f4; }
+        body.theme-lilac { --c-primary: #b39ddb; --c-bg-light: #f9f7fd; --c-card-bg-light: #ffffff; --c-text-primary-light: #512da8; --c-text-secondary-light: #9575cd; --c-border-light: #e6e0f3; }
+        /* --- THEME MODAL (IMPROVED) --- */
+        .modal-tabs { display: flex; flex-wrap: wrap; border-bottom: 2px solid var(--c-border); margin-bottom: var(--spacing-md); }
+        .modal-tab-btn { padding: 8px 16px; border: none; background: none; font-family: inherit; font-size: 0.9rem; font-weight: 600; color: var(--c-text-secondary); cursor: pointer; transition: color 0.2s, border-bottom 0.2s; border-bottom: 3px solid transparent; flex-shrink: 0; }
+        .modal-tab-btn.active { color: var(--c-primary); border-bottom-color: var(--c-primary); }
+        .theme-grid-container { display: none; }
+        .theme-grid-container.active { display: block; }
+        .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 12px; }
+        .theme-swatch { aspect-ratio: 4 / 3; border-radius: var(--radius-btn); cursor: pointer; border: 2px solid var(--c-border); transition: all 0.2s ease; position: relative; overflow: hidden; }
+        .theme-swatch:hover { transform: scale(1.05); box-shadow: 0 4px 10px var(--shadow-color); }
+        .theme-swatch.selected { border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 50%, transparent); transform: scale(1.05); }
+        .theme-swatch .theme-name { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 0.7rem; font-weight: 700; color: var(--swatch-text); background: rgba(0,0,0,0.3); padding: 4px 2px; text-shadow: 0 0 2px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        /* GENERAL STYLES */
+        .page { min-height: 100vh; animation: page-enter 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
         @keyframes page-enter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .container { max-width: 520px; margin: 0 auto; padding: var(--spacing-md); }
         header { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md) 0; gap: var(--spacing-md);}
         h1 { font-size: 1.8rem; font-weight: 800; color: var(--c-primary); transition: color 0.3s ease; margin: 0; }
         .header-controls { display: flex; align-items: center; gap: 12px; }
-        /* --- THEME SWITCHER --- */
         .theme-switcher { display: flex; align-items: center; gap: 8px; color: var(--c-text-secondary); }
         .theme-switcher .icon { font-size: 1.2rem; }
         .theme-switcher .fa-sun { display: none; }
@@ -80,206 +173,149 @@
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--c-primary); }
         input:checked + .slider:before { transform: translateX(24px); }
-        /* --- BUTTONS --- */
         .btn { padding: 12px 20px; border-radius: var(--radius-btn); border: none; font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px var(--shadow-color); }
+        /* --- IMPROVEMENT: SMOOTHER BUTTON HOVER --- */
+        .btn:hover {
+            transform: none; /* Removed translateY to stop shaking */
+            box-shadow: 0 4px 12px var(--shadow-color); /* Slightly enhanced shadow for feedback */
+            filter: brightness(1.05); /* Subtle brightness increase */
+        }
         .btn-primary { background: var(--c-primary); color: white; }
         .btn-secondary { background-color: var(--c-card-bg); color: var(--c-primary); border: 1px solid var(--c-border); }
-        .btn-danger { background: none; color: var(--c-danger); border: 1px solid var(--c-danger-light); flex-grow: 0; }
-        .btn-danger:hover { background: var(--c-danger-light); color: var(--c-danger); }
+        /* --- NEW/IMPROVED DANGER BUTTON --- */
+        .btn-danger {
+             background-color: var(--c-danger);
+             color: white;
+             border: none;
+             flex-grow: 0;
+        }
+        .btn-danger:hover {
+            background-color: var(--c-danger);
+            filter: brightness(1.1);
+        }
+        /* Special case for edit modal delete button */
+        .modal-actions .btn-danger[data-action="delete-notebook"] {
+            background: none;
+            color: var(--c-danger);
+            border: 1px solid var(--c-danger-light);
+        }
+        .modal-actions .btn-danger[data-action="delete-notebook"]:hover {
+            background: var(--c-danger-light);
+            color: var(--c-danger);
+            filter: brightness(1);
+        }
+        /* --- IMPROVEMENT: SUBTLE FLOAT BUTTON ANIMATION --- */
         .btn-float {
-            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; font-size: 1.5rem; z-index: 100; box-shadow: 0 8px 25px color-mix(in srgb, var(--c-primary) 40%, transparent);
-            transform: scale(1); transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; z-index: 100;
+            box-shadow: 0 8px 25px color-mix(in srgb, var(--c-primary) 40%, transparent);
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
         }
-        .btn-float:hover { transform: scale(1.1) rotate(15deg); }
-        .btn-icon { background: none; color: var(--c-text-secondary); font-size: 1.2rem; border-radius: 50%; width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; transition: background-color 0.2s, color 0.2s;}
+        .btn-float:hover {
+            transform: scale(1.1); /* Removed rotate for a cleaner look */
+            filter: brightness(1.1);
+        }
+        .btn-icon { background: none; color: var(--c-text-secondary); font-size: 1.2rem; border-radius: 50%; width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; transition: background-color 0.2s, color 0.2s; }
         .btn-icon:hover { background-color: var(--c-border); color: var(--c-primary); transform: none; box-shadow: none; }
-        .btn-link {
-            background: none; border: none; color: var(--c-primary); font-weight: 700;
-            font-family: var(--font-family); font-size: 1rem; cursor: pointer; display: flex; align-items: center;
-            gap: 8px; padding: 8px; border-radius: var(--radius-btn); transition: background-color 0.2s, color 0.2s;
-        }
-        .btn-link:hover { background-color: var(--c-border); transform: none; box-shadow: none;}
-        /* FIX: Ensure Sortable.js ghost element doesn't interfere with clicks */
-        .sortable-ghost {
-            pointer-events: none;
-        }
-        /* --- FLAT NOTEBOOK DESIGN --- */
-        .notebook-shelf {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 40px 32px;
-            padding: var(--spacing-md) 0;
-            padding-bottom: 100px; /* Space for float button */
-        }
+        .btn-link { background: none; border: none; color: var(--c-primary); font-weight: 700; font-family: var(--font-family); font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: var(--radius-btn); transition: background-color 0.2s, color 0.2s; }
+        .btn-link:hover { background-color: var(--c-border); transform: none; box-shadow: none; }
+        .sortable-ghost { pointer-events: none; }
+        .notebook-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 40px 32px; padding: var(--spacing-md) 0; padding-bottom: 100px; }
+        /* --- IMPROVEMENT: SMOOTHER NOTEBOOK HOVER --- */
         .notebook-cover {
-            --notebook-depth: 14px;
-            --notebook-spine-color: color-mix(in srgb, var(--notebook-color) 65%, black);
-            --notebook-page-color: #FDFDFD;
-            --notebook-page-shadow: #EAEAEA;
-            aspect-ratio: 3 / 4;
-            position: relative;
-            cursor: pointer;
-            background-color: var(--notebook-color);
-            border-radius: 2px 8px 8px 2px;
-            padding: 20px;
-            padding-left: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            margin-left: var(--notebook-depth);
+            --notebook-depth: 14px; --notebook-spine-color: color-mix(in srgb, var(--notebook-color) 65%, black);
+            --notebook-page-color: #FDFDFD; --notebook-page-shadow: #EAEAEA;
+            aspect-ratio: 3 / 4; position: relative; cursor: pointer; background-color: var(--notebook-color);
+            border-radius: 2px 8px 8px 2px; padding: 20px; padding-left: 16px;
+            display: flex; flex-direction: column; justify-content: space-between; margin-left: var(--notebook-depth);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .notebook-cover:hover {
-            transform: translateY(-5px);
+            transform: scale(1.03); /* Changed from translateY to a subtle scale */
             box-shadow: 0 8px 20px -4px var(--shadow-color);
         }
-        .notebook-cover::before {
-            content: '';
-            position: absolute;
-            top: 4px;
-            bottom: 4px;
-            left: 0;
-            width: var(--notebook-depth);
-            transform: translateX(-100%);
-            background: repeating-linear-gradient(
-                to right,
-                var(--notebook-page-shadow),
-                var(--notebook-page-shadow) 1px,
-                var(--notebook-page-color) 1px,
-                var(--notebook-page-color) 2px
-            );
-            border-radius: 3px 0 0 3px;
-            border-left: 0.5px solid var(--notebook-spine-color);
-            box-shadow: -1px 0 3px rgba(0,0,0,0.1) inset;
-        }
-        .notebook-cover .title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: white;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            pointer-events: none;
-        }
-        .notebook-cover .note-count {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: white;
-            opacity: 0.8;
-            pointer-events: none;
-        }
-        .notebook-cover.sortable-ghost {
-             transform: translateY(-5px);
-            opacity: 0.7;
-             cursor: grabbing;
-         }
-        /* --- MODALS --- */
+        .notebook-cover::before { content: ''; position: absolute; top: 4px; bottom: 4px; left: 0; width: var(--notebook-depth); transform: translateX(-100%); background: repeating-linear-gradient( to right, var(--notebook-page-shadow), var(--notebook-page-shadow) 1px, var(--notebook-page-color) 1px, var(--notebook-page-color) 2px ); border-radius: 3px 0 0 3px; border-left: 0.5px solid var(--notebook-spine-color); box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3) inset; }
+        .notebook-cover .title { font-size: 1.1rem; font-weight: 700; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3); pointer-events: none; }
+        .notebook-cover .note-count { font-size: 0.8rem; font-weight: 500; color: white; opacity: 0.8; pointer-events: none; }
+        .notebook-cover.sortable-ghost { transform: translateY(-5px); opacity: 0.7; cursor: grabbing; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s; backdrop-filter: blur(5px); }
         .modal-overlay.visible { opacity: 1; visibility: visible; }
-        .modal-content { background: var(--c-card-bg); padding: var(--spacing-lg); border-radius: var(--radius-card); width: 90%; max-width: 400px; transform: translateY(20px) scale(0.98); opacity: 0; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .modal-content { background: var(--c-card-bg); padding: var(--spacing-lg); border-radius: var(--radius-card); width: 90%; max-width: 500px; transform: translateY(20px) scale(0.98); opacity: 0; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
         .modal-overlay.visible .modal-content { transform: translateY(0) scale(1); opacity: 1; }
         .modal-content h3 { margin-top: 0; text-align: center; color: var(--c-primary); }
         .modal-content p { color: var(--c-text-secondary); text-align: center; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+        /* --- NEW: Confirmation Dialog Styles --- */
+        .confirm-modal-content {
+            text-align: center;
+        }
+        .confirm-modal-content .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .confirm-modal-content .icon .fa-trash-can,
+        .confirm-modal-content .icon .fa-exclamation-triangle {
+            color: var(--c-danger);
+        }
+        .confirm-modal-content .icon .fa-upload {
+             color: var(--c-primary);
+        }
+        .confirm-modal-content h3 {
+            color: var(--c-text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .confirm-modal-content p {
+            font-size: 1rem;
+            line-height: 1.7;
+        }
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
         .form-group input { box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid var(--c-border); border-radius: var(--radius-btn); background: var(--c-bg); font-family: inherit; color: var(--c-text-primary); transition: border-color 0.2s, box-shadow 0.2s;}
         .form-group input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px var(--c-primary-light); }
-        .color-palette { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 0.5rem;}
+        .color-palette-container { max-height: 250px; overflow-y: auto; padding: 4px; margin-right: -4px; }
+        .color-category { margin-bottom: var(--spacing-md); }
+        .color-category-title { font-weight: 700; font-size: 0.9rem; color: var(--c-text-secondary); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid var(--c-border); }
+        .color-palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 10px; justify-content: center; }
         .color-palette .color-dot { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.2s; position: relative; }
         .color-palette .color-dot:hover { transform: scale(1.1); }
-        .color-palette .color-dot.selected { border-color: var(--c-primary); transform: scale(1.1); }
+        .color-palette .color-dot.selected { border-color: var(--c-primary); transform: scale(1.1); box-shadow: 0 0 0 3px var(--c-primary-light); }
         .modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
         .modal-actions .btn { flex-grow: 1; }
-        /* --- ABOUT MODAL --- */
         .app-logo { width: 80px; height: 80px; border-radius: 20px; margin: 0 auto 1rem; display: block; }
         .about-text { text-align: center; line-height: 1.7; color: var(--c-text-secondary); }
         .about-text strong { color: var(--c-text-primary); font-weight: 700; }
-        /* --- SETTINGS DROPDOWN MENU --- */
         .settings-container { position: relative; }
-        .dropdown-menu {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            background-color: var(--c-card-bg);
-            border-radius: var(--radius-btn);
-            box-shadow: 0 8px 24px var(--shadow-color);
-            border: 1px solid var(--c-border);
-            list-style: none;
-            padding: 8px;
-            margin: 0;
-            width: 200px;
-            z-index: 110;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px) scale(0.95);
-            transition: all 0.2s ease-out;
-        }
-        .dropdown-menu.visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0) scale(1);
-        }
-        .dropdown-item a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            color: var(--c-text-primary);
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
+        .dropdown-menu { position: absolute; top: calc(100% + 8px); left: 0; background-color: var(--c-card-bg); border-radius: var(--radius-btn); box-shadow: 0 8px 24px var(--shadow-color); border: 1px solid var(--c-border); list-style: none; padding: 8px; margin: 0; width: 220px; z-index: 110; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95); transition: all 0.2s ease-out; }
+        .dropdown-menu.visible { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .dropdown-item a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: var(--c-text-primary); text-decoration: none; border-radius: 12px; font-weight: 600; transition: background-color 0.2s; }
         .dropdown-item a:hover { background-color: var(--c-border); }
         .dropdown-item i { width: 20px; text-align: center; color: var(--c-text-secondary); }
-        /* --- NOTE EDITOR VIEW --- */
-        .editor-view .editor-header {
-            display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md);
-            position: sticky; top: 0; background: color-mix(in srgb, var(--c-bg) 80%, transparent); backdrop-filter: blur(10px); z-index: 10;
-            border-bottom: 1px solid var(--c-border);
-        }
+        .editor-view .editor-header { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md); position: sticky; top: 0; background: color-mix(in srgb, var(--c-bg) 80%, transparent); backdrop-filter: blur(10px); z-index: 10; border-bottom: 1px solid var(--c-border); }
         .editor-view main { padding: 0 var(--spacing-md); }
-        .editor-view #note-title {
-            font-size: 2rem; font-weight: 800; border: none; background: transparent; width: 100%;
-            color: var(--c-text-primary); padding: 16px 0 8px 0; margin-top: var(--spacing-md); box-sizing: border-box;
-            font-family: var(--font-family);
-        }
+        .editor-view #note-title { font-size: 2rem; font-weight: 800; border: none; background: transparent; width: 100%; color: var(--c-text-primary); padding: 16px 0 8px 0; margin-top: var(--spacing-md); box-sizing: border-box; font-family: var(--font-family); cursor: pointer; }
         .editor-view #note-title::placeholder, .editor-view #note-content::placeholder { color: var(--c-text-secondary); opacity: 0.7; }
         .editor-view #note-title:focus, .editor-view #note-content:focus { outline: none; }
-        .editor-view #note-content {
-            font-size: 1.1rem; line-height: 1.8; border: none; background: transparent; width: 100%;
-            min-height: 60vh; color: var(--c-text-primary); resize: none; padding: 8px 0; box-sizing: border-box;
-            font-family: var(--font-family);
-        }
+        .editor-view #note-content { font-size: 1.1rem; line-height: 1.8; border: none; background: transparent; width: 100%; min-height: 60vh; color: var(--c-text-primary); resize: none; padding: 8px 0; box-sizing: border-box; font-family: var(--font-family); cursor: pointer; }
         .save-status { color: var(--c-text-secondary); font-size: 0.9rem; font-weight: 600; transition: opacity 0.5s, transform 0.5s; opacity: 0; transform: translateY(5px);}
         .save-status.visible { opacity: 1; transform: translateY(0); }
-        .mood-title { text-align: center; color: var(--c-text-secondary); font-weight: 600; margin-top: 24px; font-size: 0.9rem; }
+        .mood-title { text-align: center; color: var(--c-text-secondary); font-weight: 600; margin-top: 24px; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.3s ease; }
+        .mood-title:hover { opacity: 1; }
         .editor-view .mood-selector { display: flex; justify-content: center; gap: var(--spacing-lg); padding: 1rem 0 1.5rem 0; }
-        .editor-view .mood-selector label {
-            width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
-            border-radius: 50%; cursor: pointer; color: var(--c-text-secondary); transition: all 0.3s ease;
-        }
+        .editor-view .mood-selector label { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 50%; cursor: pointer; color: var(--c-text-secondary); transition: all 0.3s ease; }
         .editor-view .mood-selector input[type="radio"] { display: none; }
         .editor-view .mood-selector input[type="radio"]:checked + label { transform: scale(1.2); color: var(--dynamic-mood-color); }
-        /* --- NOTEBOOK VIEW HEADER (SEARCH & VIEW MODE) --- */
         .notebook-header { display: flex; flex-direction: column; gap: var(--spacing-md); padding: var(--spacing-md) 0; }
         .notebook-controls { display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-md); }
         .search-box { flex-grow: 1; position: relative; }
-        .search-box input {
-            width: 100%; box-sizing: border-box; padding: 10px 40px 10px 16px; border-radius: var(--radius-btn);
-            border: 1px solid var(--c-border); background-color: var(--c-card-bg); font-family: inherit; color: var(--c-text-primary);
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
+        .search-box input { width: 100%; box-sizing: border-box; padding: 10px 40px 10px 16px; border-radius: var(--radius-btn); border: 1px solid var(--c-border); background-color: var(--c-card-bg); font-family: inherit; color: var(--c-text-primary); transition: border-color 0.2s, box-shadow 0.2s; }
         .search-box input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px var(--c-primary-light); }
-        .search-box .fa-search {
-            position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--c-text-secondary);
-        }
+        .search-box .fa-search { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--c-text-secondary); }
         .view-switcher { display: flex; align-items: center; background-color: var(--c-card-bg); border-radius: var(--radius-btn); border: 1px solid var(--c-border); padding: 2px;}
         .view-switcher .btn-icon { width: 36px; height: 36px; font-size: 1rem; color: var(--c-text-secondary); }
         .view-switcher .btn-icon.active { background-color: var(--c-primary); color: white; }
-        /* --- NOTE CARDS --- */
         #notes-grid { display: grid; gap: var(--spacing-md); transition: all 0.3s ease; padding-bottom: 80px; }
+        /* --- IMPROVEMENT: SMOOTHER NOTE CARD HOVER --- */
         .note-card {
             background-color: var(--c-card-bg); border-radius: var(--radius-card);
             box-shadow: 0 4px 16px var(--shadow-color);
@@ -287,85 +323,41 @@
             display: flex; align-items: stretch; position: relative;
         }
         .note-card.pinned { background-color: var(--c-pinned-bg); }
-        .note-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px var(--shadow-color); }
-        .note-date {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            flex-shrink: 0; width: 45px; color: var(--c-text-secondary);
-            border-left: 2px solid var(--c-border); padding-left: var(--spacing-md);
+        .note-card:hover {
+            transform: none; /* Removed translateY to stop shaking */
+            box-shadow: 0 8px 24px var(--shadow-color); /* Enhanced shadow for clear feedback */
         }
+        .note-date { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; width: 45px; color: var(--c-text-secondary); border-left: 2px solid var(--c-border); padding-left: var(--spacing-md); }
         .note-date .day { font-size: 1.6rem; font-weight: 700; opacity: 0.9; }
         .note-date .month { font-size: 0.9rem; font-weight: 600; opacity: 0.7; }
-        .note-card-clickable-area {
-            flex-grow: 1; cursor: pointer; display: flex; flex-direction: column;
-            gap: 8px; min-width: 0; padding: var(--spacing-lg);
-        }
-        .note-card h3 {
-            font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--c-text-primary);
-            line-height: 1.4; display: flex; align-items: center;
-            gap: 10px; word-break: break-word;
-        }
+        .note-card-clickable-area { flex-grow: 1; cursor: pointer; display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: var(--spacing-lg); }
+        .note-card h3 { font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--c-text-primary); line-height: 1.4; display: flex; align-items: center; gap: 10px; word-break: break-word; }
         .note-card h3 .fas { color: var(--dynamic-mood-color); }
-        .note-card p {
-            margin: 0; font-size: 1rem; color: var(--c-text-secondary); line-height: 1.7;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden; flex-grow: 1; padding-bottom: 30px; /* Space for actions */
-        }
-        .note-actions {
-            position: absolute; bottom: 8px; left: 8px; z-index: 5;
-            display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s, transform 0.2s;
-        }
+        .note-card p { margin: 0; font-size: 1rem; color: var(--c-text-secondary); line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1; padding-bottom: 30px; }
+        .note-actions { position: absolute; bottom: 8px; left: 8px; z-index: 5; display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s, transform 0.2s; }
         .note-card:hover .note-actions { opacity: 1; }
-        .note-actions .btn-icon {
-            color: var(--c-text-secondary); background-color: transparent; width: 32px; height: 32px;
-            font-size: 0.9rem; transition: opacity 0.2s, color 0.2s, background-color 0.2s;
-        }
+        .note-actions .btn-icon { color: var(--c-text-secondary); background-color: transparent; width: 32px; height: 32px; font-size: 0.9rem; transition: opacity 0.2s, color 0.2s, background-color 0.2s; }
         .note-actions .btn-icon:hover { background: var(--c-border); transform: none; box-shadow: none;}
-        .note-actions .btn-icon.delete:hover {
-            color: var(--c-danger); background: color-mix(in srgb, var(--c-danger) 10%, transparent);
-        }
+        .note-actions .btn-icon.delete:hover { color: var(--c-danger); background: color-mix(in srgb, var(--c-danger) 10%, transparent); }
         .note-actions .btn-icon.pin.active { color: var(--c-primary); }
-        /* --- Note View Mode Adjustments --- */
         #notes-grid.view-list { grid-template-columns: 1fr; }
-        #notes-grid.view-list .note-card {
-            flex-direction: row; padding: 0; padding-left: var(--spacing-md);
-        }
-        #notes-grid.view-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        }
+        #notes-grid.view-list .note-card { flex-direction: row; padding: 0; padding-left: var(--spacing-md); }
+        #notes-grid.view-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
         #notes-grid.view-grid .note-card { flex-direction: column; }
-        #notes-grid.view-grid .note-date {
-            flex-direction: row; width: auto; border-left: none;
-            border-bottom: 2px solid var(--c-border); padding: 8px var(--spacing-md);
-            justify-content: flex-start; gap: 8px; align-items: center;
-        }
+        #notes-grid.view-grid .note-date { flex-direction: row; width: auto; border-left: none; border-bottom: 2px solid var(--c-border); padding: 8px var(--spacing-md); justify-content: flex-start; gap: 8px; align-items: center; }
         #notes-grid.view-grid .note-date .day,
         #notes-grid.view-grid .note-date .month { font-size: 0.9rem; }
         #notes-grid.view-title { grid-template-columns: 1fr; gap: 8px; }
-        #notes-grid.view-title .note-card {
-            padding: 0;
-            min-height: 56px;
-            align-items: center;
-        }
-        #notes-grid.view-title .note-card-clickable-area {
-            padding: 12px var(--spacing-md);
-        }
+        #notes-grid.view-title .note-card { padding: 0; min-height: 56px; align-items: center; }
+        #notes-grid.view-title .note-card-clickable-area { padding: 12px var(--spacing-md); }
         #notes-grid.view-title .note-card h3 { margin: 0; }
         #notes-grid.view-title p,
         #notes-grid.view-title .note-date { display: none; }
-        #notes-grid.view-title .note-actions {
-            left: 8px;
-            right: auto;
-            bottom: 50%;
-            transform: translateY(50%);
-        }
-        /* --- Empty State --- */
+        #notes-grid.view-title .note-actions { left: 8px; right: auto; bottom: 50%; transform: translateY(50%); }
         .empty-state { text-align: center; padding: 60px 20px; color: var(--c-text-secondary); }
         .empty-state .icon { font-size: 4rem; color: var(--c-border); margin-bottom: 1.5rem; display: block; }
         .empty-state h3 { color: var(--c-text-primary); }
         .empty-state p { line-height: 1.6; }
-
-
-        
     </style>
 </head>
 <body>
@@ -375,641 +367,272 @@
         document.addEventListener('DOMContentLoaded', () => {
             const app = document.getElementById('app');
             const modalContainer = document.getElementById('modalContainer');
-            // --- STATE MANAGEMENT ---
-            let editingNoteId = null;
-            let autosaveTimeout = null;
-            let unsavedChanges = false;
-            let sortableNotebooks = null;
-            let longPressTimer = null;
-            let isLongPress = false;
-            // --- DATA MODELS & STORAGE ---
+            let editingNoteId = null, autosaveTimeout = null, unsavedChanges = false, sortableNotebooks = null, longPressTimer = null, isLongPress = false;
             const getNotebooks = () => JSON.parse(localStorage.getItem('myCompanionNotebooks')) || [];
             const saveNotebooks = (notebooks) => localStorage.setItem('myCompanionNotebooks', JSON.stringify(notebooks));
             const getNotes = () => JSON.parse(localStorage.getItem('myCompanionNotes')) || [];
             const saveNotes = (notes) => localStorage.setItem('myCompanionNotes', JSON.stringify(notes));
             const getTheme = () => localStorage.getItem('myCompanionTheme') || 'light';
             const saveTheme = (theme) => localStorage.setItem('myCompanionTheme', theme);
-            // --- INITIAL DATA SETUP ---
+            const getCustomTheme = () => localStorage.getItem('myCompanionCustomTheme') || '';
+            const saveCustomTheme = (themeName) => localStorage.setItem('myCompanionCustomTheme', themeName);
             function initializeData() {
                 if (getNotebooks().length === 0) {
-                    saveNotebooks([
-                        { id: 1, title: 'دفتر اصلی من', color: '#D98BAA', viewMode: 'grid', order: 1 }
-                    ]);
-                    saveNotes([
-                        {id: Date.now(), title: "خوش آمدی!", content: "این اولین یادداشت تو در همراه من است. می‌توانی از اینجا شروع به نوشتن کنی یا دفترهای جدید با رنگ‌های مختلف بسازی.", mood: "happy", notebookId: 1, lastModified: Date.now(), isPinned: false}
-                    ]);
+                    saveNotebooks([{ id: 1, title: 'دفتر اصلی من', color: '#f8b195', viewMode: 'grid', order: 1 }]);
+                    saveNotes([{id: Date.now(), title: "خوش آمدی!", content: "این اولین یادداشت تو در همراه من است. می‌توانی از اینجا شروع به نوشتن کنی یا دفترهای جدید با رنگ‌های مختلف بسازی.", mood: "happy", notebookId: 1, lastModified: Date.now(), isPinned: false}]);
                 }
             }
-            // --- HELPERS & CONSTANTS ---
-            function toPersianDigits(n) {
-                const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-                return n.toString().replace(/\d/g, d => persianDigits[d]);
-            }
-            function toJalali(gy, gm, gd) {
-                let g_d_m = [0, 31, (gy % 4 == 0 && gy % 100 != 0) || (gy % 400 == 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-                let jy, jm, jd;
-                let gy2 = gy - 1600;
-                let gm2 = gm - 1;
-                let gd2 = gd - 1;
-                let g_day_no = 365 * gy2 + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400);
-                for (let i = 0; i < gm2; ++i) g_day_no += g_d_m[i + 1];
-                g_day_no += gd2;
-                let j_day_no = g_day_no - 79;
-                let j_np = Math.floor(j_day_no / 12053);
-                j_day_no %= 12053;
-                jy = 979 + 33 * j_np + 4 * Math.floor(j_day_no / 1461);
-                j_day_no %= 1461;
-                if (j_day_no >= 366) {
-                    jy += Math.floor((j_day_no - 1) / 365);
-                    j_day_no = (j_day_no - 1) % 365;
-                }
-                let jmList = [0, 31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-                for (jm = 1; jm <= 12 && j_day_no >= jmList[jm]; ++jm) {
-                    j_day_no -= jmList[jm];
-                }
-                jd = j_day_no + 1;
-                return { year: jy, month: jm, day: jd };
-            }
-            const jalaliMonthsFa = ['', 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
-            function getJalaliDateParts(date = new Date()) {
-                if (!(date instanceof Date) || isNaN(date)) {
-                    return { day: '', month: '', year: ''};
-                }
-                let gy = date.getFullYear();
-                let gm = date.getMonth() + 1;
-                let gd = date.getDate();
-                let { day, month } = toJalali(gy, gm, gd);
-                return { day: toPersianDigits(day), month: jalaliMonthsFa[month] };
-            }
-            const moods = {
-                happy: { icon: 'fa-smile', text: 'شاد', color: 'var(--c-mood-happy)' },
-                calm: { icon: 'fa-leaf', text: 'آرام', color: 'var(--c-mood-calm)' },
-                creative: { icon: 'fa-lightbulb', text: 'خلاق', color: 'var(--c-mood-creative)' },
-                grateful: { icon: 'fa-heart', text: 'شکرگزار', color: 'var(--c-mood-grateful)' },
-                neutral: { icon: 'fa-circle', text: 'خنثی', color: 'var(--c-mood-neutral)' },
+            function toPersianDigits(n) { const p = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹']; return n.toString().replace(/\d/g, d => p[d]); }
+            function toJalali(gy,gm,gd){let g_d_m=[0,31,(gy%4==0&&gy%100!=0)||(gy%400==0)?29:28,31,30,31,30,31,31,30,31,30,31];let jy,jm,jd;let gy2=gy-1600,gm2=gm-1,gd2=gd-1;let g_day_no=365*gy2+Math.floor((gy2+3)/4)-Math.floor((gy2+99)/100)+Math.floor((gy2+399)/400);for(let i=0;i<gm2;++i)g_day_no+=g_d_m[i+1];g_day_no+=gd2;let j_day_no=g_day_no-79;let j_np=Math.floor(j_day_no/12053);j_day_no%=12053;jy=979+33*j_np+4*Math.floor(j_day_no/1461);j_day_no%=1461;if(j_day_no>=366){jy+=Math.floor((j_day_no-1)/365);j_day_no=(j_day_no-1)%365;}let jmList=[0,31,31,31,31,31,31,30,30,30,30,30,29];for(jm=1;jm<=12&&j_day_no>=jmList[jm];++jm)j_day_no-=jmList[jm];jd=j_day_no+1;return{year:jy,month:jm,day:jd};}
+            const jalaliMonthsFa = ['','فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+            function getJalaliDateParts(date=new Date()){if(!(date instanceof Date)||isNaN(date))return{day:'',month:'',year:''};let gy=date.getFullYear(),gm=date.getMonth()+1,gd=date.getDate();let{day,month}=toJalali(gy,gm,gd);return{day:toPersianDigits(day),month:jalaliMonthsFa[month]};}
+            const moods = { happy:{icon:'fa-smile',text:'شاد',color:'var(--c-mood-happy)'},calm:{icon:'fa-leaf',text:'آرام',color:'var(--c-mood-calm)'},creative:{icon:'fa-lightbulb',text:'خلاق',color:'var(--c-mood-creative)'},grateful:{icon:'fa-heart',text:'شکرگزار',color:'var(--c-mood-grateful)'},neutral:{icon:'fa-circle',text:'خنثی',color:'var(--c-mood-neutral)'}};
+            const notebookColorCategories = {
+                'گرم و شاد': ['#ff8a80', '#ffadad', '#ffd6a5', '#fdffb6', '#f26b21', '#f7941d', '#fbb040', '#ffdd00', '#ed1c24', '#d4145a', '#ff4500', '#ff8c00', '#ffa500'],
+                'آرام و طبیعی': ['#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#cce100', '#8dc73f', '#009444', '#00a651', '#00a99d', '#adff2f', '#32cd32', '#6b8e23', '#20b2aa', '#98fb98'],
+                'سرد و مدرن': ['#00a7c0', '#009edb', '#0072bc', '#0053a0', '#2e3192', '#1b1464', '#662d91', '#93278f', '#c21c80', '#00ced1', '#4682b4', '#4169e1', '#1e90ff', '#8a2be2'],
+                'پاستلی و لطیف': ['#ffc6ff', '#f0e6ef', '#d4afb9', '#9cadce', '#7ec4cf', '#ffefd5', '#ffe4e1', '#e6e6fa', '#d8bfd8', '#ff1493', '#ff69b4', '#db7093', '#da70d6', '#ba55d3'],
+                'کلاسیک و خنثی': ['#000000', '#c0c0c0', '#ffd700', '#b76e79', '#808080', '#a9a9a9', '#d3d3d3', '#f5f5dc', '#fffacd', '#b91d47', '#9e0039', '#70201f', '#ffdead', '#f0e68c']
             };
-            const notebookColors = ['#D98BAA', '#EAA2A2', '#F8C8A8', '#C5B0E0', '#B4A0C2', '#A8D8B4', '#A1C9F4', '#F6EAC2'];
-            const journalPrompts = [
-                "امروز چه چیزی باعث لبخندت شد؟", "یک فکر کوچک که دوست داری به خاطر بسپاری...",
-                "چه چیزی رو امروز یاد گرفتی؟", "یک آهنگ که امروز حالت رو خوب کرد...",
-                "یک حس خوب...", "چه چیزی نگرانت کرده؟ راحت بنویس..."
-            ];
-            // --- THEME & COLOR ---
-            const applyTheme = (theme) => document.body.classList.toggle('dark-theme', theme === 'dark');
-            function setAppColor(color = null) {
-                const root = document.documentElement;
-                root.style.setProperty('--c-primary', color || '#D98BAA');
+            const journalPrompts = ["امروز چه چیزی باعث لبخندت شد?","یک فکر کوچک که دوست داری به خاطر بسپاری...","چه چیزی رو امروز یاد گرفتی?","یک آهنگ که امروز حالت رو خوب کرد...","یک حس خوب...","چه چیزی نگرانت کرده؟ راحت بنویس..."];
+            const themes = {
+                modernDark: [ { id: 'theme-cyberpunk', name: 'سایبرپانک', primary: '#f9f871', bg: '#0c0c27', text: '#a6fffa' }, { id: 'theme-vaporwave', name: 'ویپورویو', primary: '#ff77cc', bg: '#200c38', text: '#00e5e5' }, { id: 'theme-twilight', name: 'گرگ و میش', primary: '#ffc880', bg: '#1e1e3f', text: '#d4d4ff' }, { id: 'theme-matrix', name: 'ماتریکس', primary: '#00ff41', bg: '#0d0208', text: '#008f11' }, { id: 'theme-deep-space', name: 'اعماق فضا', primary: '#9d80ff', bg: '#00001a', text: '#f0f0ff' }, { id: 'theme-oled', name: 'OLED', primary: '#ff3385', bg: '#000000', text: '#e5e5e5' }, { id: 'theme-8bit-sunset', name: 'غروب ۸ بیتی', primary: '#f9d868', bg: '#34294b', text: '#f0e5ff' }, { id: 'theme-arcade', name: 'آرکید', primary: '#ffcc00', bg: '#1d1a33', text: '#eeebff' }, { id: 'theme-midnight-city', name: 'شهر نیمه‌شب', primary: '#f1fa8c', bg: '#191a21', text: '#e1e1e6' }, { id: 'theme-snes-dark', name: 'SNES', primary: '#aca8dd', bg: '#212121', text: '#e0e0e0' }, { id: 'theme-playstation-dark', name: 'پلی‌استیشن', primary: '#006fcd', bg: '#1f1f2e', text: '#f0f0f5' }, { id: 'theme-blade-runner-dark', name: 'بلیدرانر', primary: '#f05a28', bg: '#0a1128', text: '#00f6ff' }, { id: 'theme-dune-dark', name: 'تل‌ماسه', primary: '#e89f48', bg: '#2c221c', text: '#d5c8b8' }, { id: 'theme-ocean-dark', name: 'اقیانوس', primary: '#5efff5', bg: '#0b192f', text: '#ccd6f6' }, { id: 'theme-blood-moon', name: 'ماه خونین', primary: '#ff4d4d', bg: '#1a0000', text: '#ffcccc' }, { id: 'theme-nebula', name: 'سحابی', primary: '#d67ae9', bg: '#1d0f2b', text: '#e1d8f5' }, { id: 'theme-volcano', name: 'آتشفشان', primary: '#ff7a00', bg: '#1f120c', text: '#ffd8c9' }, { id: 'theme-aurora', name: 'شفق قطبی', primary: '#45fcd1', bg: '#011627', text: '#d6deeb' }, { id: 'theme-synthwave-84', name: 'موج سینتی', primary: '#ff8b42', bg: '#2b213a', text: '#f9f7f2' }, { id: 'theme-atlantis', name: 'آتلانتیس', primary: '#96e072', bg: '#262a33', text: '#f8f8f2' }],
+                classicDark: [ { id: 'theme-dracula', name: 'دراکولا', primary: '#ff79c6', bg: '#282a36', text: '#f8f8f2' }, { id: 'theme-monokai', name: 'مونوکای', primary: '#f92672', bg: '#272822', text: '#f8f8f2' }, { id: 'theme-nord', name: 'نورد', primary: '#88c0d0', bg: '#2e3440', text: '#d8dee9' }, { id: 'theme-gruvbox-dark', name: 'گراوباکس', primary: '#fe8019', bg: '#282828', text: '#ebdbb2' }, { id: 'theme-solarized-dark', name: 'سولارایزد', primary: '#268bd2', bg: '#002b36', text: '#eee8d5' }, { id: 'theme-old-terminal', name: 'ترمینال', primary: '#33ff33', bg: '#000000', text: '#33ff33' }, { id: 'theme-forest', name: 'جنگل', primary: '#b4e982', bg: '#1a2b23', text: '#d3e5d7' }, { id: 'theme-noir', name: 'نوآر', primary: '#f4a261', bg: '#1c1c1c', text: '#e0e0e0' }, { id: 'theme-velvet', name: 'مخملی', primary: '#ffd700', bg: '#4a0404', text: '#fff0f0' }, { id: 'theme-sublime', name: 'کدنویسی', primary: '#fd971f', bg: '#232323', text: '#f8f8f2' }, { id: 'theme-evergreen', name: 'همیشه‌سبز', primary: '#f4a261', bg: '#2a3d34', text: '#e8e4d1' }, { id: 'theme-gameboy-dark', name: 'گیم‌بوی', primary: '#3f6946', bg: '#0f380f', text: '#9bbc0f' }, { id: 'theme-gold-dark', name: 'طلای تیره', primary: '#ffd700', bg: '#141414', text: '#e8e8e8' }, { id: 'theme-rose-gold-dark', name: 'رزگلد تیره', primary: '#b76e79', bg: '#2c2426', text: '#f5f1f2' }, { id: 'theme-silver-dark', name: 'نقره‌ای تیره', primary: '#c0c0c0', bg: '#25282a', text: '#f0f0f0' }, { id: 'theme-ios-dark', name: 'iOS تیره', primary: '#0a84ff', bg: '#000000', text: '#ffffff' }, { id: 'theme-gothic', name: 'گوتیک', primary: '#9400d3', bg: '#121212', text: '#c8c8c8' }, { id: 'theme-retro-orange', name: 'نارنجی رترو', primary: '#e27d60', bg: '#27211e', text: '#e4d7d0' }, { id: 'theme-emerald', name: 'زمرد', primary: '#50c878', bg: '#1f2e2a', text: '#d4e9e2' }, { id: 'theme-coffee', name: 'قهوه', primary: '#c4a68a', bg: '#2a211c', text: '#d1c7b7' }],
+                modernLight: [ { id: 'theme-sakura', name: 'ساکورا', primary: '#db88b5', bg: '#fff6f9', text: '#5b4d53' }, { id: 'theme-seaside', name: 'ساحلی', primary: '#1d74c4', bg: '#eef7ff', text: '#0b3954' }, { id: 'theme-matcha', name: 'ماچا', primary: '#75a99c', bg: '#f5f5e8', text: '#4a4a42' }, { id: 'theme-peaches', name: 'هلو', primary: '#ff6b6b', bg: '#fff2f2', text: '#5e3b3b' }, { id: 'theme-lavender', name: 'اسطوخودوس', primary: '#8a63d2', bg: '#f7f4ff', text: '#4b3d60' }, { id: 'theme-cotton-candy', name: 'پشمک', primary: '#ff9dcb', bg: '#f0f8ff', text: '#5b6a78' }, { id: 'theme-gummybear', name: 'پاستیلی', primary: '#ef476f', bg: '#ffffff', text: '#073b4c' }, { id: 'theme-snes-light', name: 'SNES روشن', primary: '#e60012', bg: '#e8e8e8', text: '#2c2c2c' }, { id: 'theme-playstation-light', name: 'پلی‌استیشن روشن', primary: '#006fcd', bg: '#eef2f7', text: '#333333' }, { id: 'theme-gold-light', name: 'طلای روشن', primary: '#b59410', bg: '#fdfaf0', text: '#3d3419' }, { id: 'theme-rose-gold-light', name: 'رزگلد روشن', primary: '#b76e79', bg: '#fcf6f7', text: '#5c373d' }, { id: 'theme-silver-light', name: 'نقره‌ای روشن', primary: '#8c8c8c', bg: '#f7f7f7', text: '#333333' }, { id: 'theme-ios-light', name: 'iOS روشن', primary: '#007aff', bg: '#f2f2f7', text: '#000000' }, { id: 'theme-pastel-dream', name: 'رویای پاستلی', primary: '#ffc0cb', bg: '#fdf5f6', text: '#6d5458' }, { id: 'theme-floral', name: 'گل‌گلی', primary: '#de5b83', bg: '#f9f2f5', text: '#573a45' }, { id: 'theme-strawberry', name: 'توت‌فرنگی', primary: '#e53935', bg: '#fff2f2', text: '#5e3b3b' }, { id: 'theme-blueberry', name: 'بلوبری', primary: '#3f51b5', bg: '#f2f3ff', text: '#39405f' }, { id: 'theme-apricot', name: 'زردآلو', primary: '#fb8c00', bg: '#fff8f0', text: '#613800' }, { id: 'theme-sky', name: 'آسمان', primary: '#03a9f4', bg: '#f0f9ff', text: '#014361' }, { id: 'theme-lilac', name: 'یاسی', primary: '#b39ddb', bg: '#f9f7fd', text: '#512da8' }],
+                classicLight: [ { id: 'theme-solarized-light', name: 'سولارایزد', primary: '#d33682', bg: '#fdf6e3', text: '#586e75' }, { id: 'theme-gruvbox-light', name: 'گراوباکس', primary: '#d65d0e', bg: '#fbf1c7', text: '#3c3836' }, { id: 'theme-daylight', name: 'روز روشن', primary: '#007bff', bg: '#f0f8ff', text: '#212529' }, { id: 'theme-paper', name: 'کاغذی', primary: '#d94d41', bg: '#f7f6f1', text: '#3a3a3a' }, { id: 'theme-classic-mac', name: 'مک کلاسیک', primary: '#000000', bg: '#e0e0e0', text: '#000000' }, { id: 'theme-blueprint', name: 'بلوپرینت', primary: '#295ddc', bg: '#eff3f9', text: '#333a56' }, { id: 'theme-sepia', name: 'سپیا', primary: '#704214', bg: '#fbf0d9', text: '#4a2d0b' }, { id: 'theme-mint-choco', name: 'نعنا شکلاتی', primary: '#3d2b24', bg: '#f0fff0', text: '#513e36' }, { id: 'theme-desert-oasis', name: 'واحه', primary: '#00bcd4', bg: '#faf3e0', text: '#7a6a53' }, { id: 'theme-botanical', name: 'گیاه‌شناسی', primary: '#4caf50', bg: '#f5fcf5', text: '#3e503f' }, { id: 'theme-e-ink', name: 'جوهر الکترونیک', primary: '#000000', bg: '#f5f5f5', text: '#333333' }, { id: 'theme-minimal-white', name: 'مینیمال', primary: '#888888', bg: '#ffffff', text: '#222222' }, { id: 'theme-newspaper', name: 'روزنامه', primary: '#d11c11', bg: '#f8f8f2', text: '#1c1c1a' }, { id: 'theme-gameboy-light', name: 'گیم‌بوی روشن', primary: '#0f380f', bg: '#9bbc0f', text: '#0f380f' }, { id: 'theme-dune-light', name: 'تل‌ماسه روشن', primary: '#a0522d', bg: '#f4e8d8', text: '#5d4037' }, { id: 'theme-vanilla', name: 'وانیلی', primary: '#8d6e63', bg: '#fdfcf7', text: '#4e342e' }, { id: 'theme-pistachio', name: 'پسته‌ای', primary: '#7cb342', bg: '#f7fff2', text: '#33491c' }, { id: 'theme-sand', name: 'شنی', primary: '#c2b280', bg: '#fbf9f4', text: '#5a523c' }, { id: 'theme-rose-quartz', name: 'رز کوارتز', primary: '#f0a1b8', bg: '#fdf6f8', text: '#6b404c' }, { id: 'theme-serenity', name: 'آرامش', primary: '#92a8d1', bg: '#f6f8fd', text: '#444e60' }]
+            };
+            function applyTheme(baseTheme, customTheme) {
+                document.body.className = '';
+                if (customTheme) {
+                    document.body.classList.add(customTheme);
+                    const isDark = themes.modernDark.some(t => t.id === customTheme) || themes.classicDark.some(t => t.id === customTheme);
+                    document.body.classList.toggle('dark-theme', isDark);
+                } else {
+                    document.body.classList.toggle('dark-theme', baseTheme === 'dark');
+                }
             }
-            // --- MODAL RENDERING ---
-            function renderNotebookModal({ isEditing = false, notebook = {} } = {}) {
-                const title = isEditing ? 'ویرایش دفتر' : 'دفتر جدیدت رو بساز';
-                const buttonText = isEditing ? 'ذخیره تغییرات' : 'ساختن';
-                const selectedColor = notebook.color || notebookColors[0];
-                const deleteButtonHTML = isEditing ?
-                     `<button type="button" class="btn btn-danger" data-action="delete-notebook">${'حذف'}</button>` : '';
+            function setAppColor(color=null){document.documentElement.style.setProperty('--c-primary',color||'');}
+            
+            // --- NEW: Reusable Confirmation Modal ---
+            function renderConfirmationModal({ title, message, confirmText, iconClass, onConfirm }) {
+                modalContainer.innerHTML = `
+                    <div class="modal-content confirm-modal-content">
+                        <div class="icon"><i class="fas ${iconClass}"></i></div>
+                        <h3>${title}</h3>
+                        <p>${message}</p>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button>
+                            <button type="button" id="confirm-action-btn" class="btn btn-danger">${confirmText}</button>
+                        </div>
+                    </div>`;
+                modalContainer.classList.add("visible");
+                document.getElementById('confirm-action-btn').addEventListener('click', () => {
+                    onConfirm();
+                    // The onConfirm function is responsible for hiding the modal if needed
+                });
+            }
+
+            function renderNotebookModal({isEditing=false, notebook={}} = {}) {
+                const modalTitle = isEditing ? 'ویرایش دفتر' : 'دفتر جدیدت رو بساز';
+                const submitButtonText = isEditing ? 'ذخیره تغییرات' : 'ساختن';
+                const selectedColor = notebook.color || notebookColorCategories['گرم و شاد'][0];
+                const deleteButtonHTML = isEditing ? `<button type="button" class="btn btn-danger" data-action="delete-notebook">حذف دفتر</button>` : "";
+                let colorPaletteHTML = '<div class="color-palette-container">';
+                for (const category in notebookColorCategories) {
+                    colorPaletteHTML += `
+                        <div class="color-category">
+                            <div class="color-category-title">${category}</div>
+                            <div class="color-palette">
+                                ${notebookColorCategories[category].map(color => `
+                                    <div class="color-dot ${color === selectedColor ? "selected" : ""}" style="background-color: ${color};" data-action="select-color" data-color="${color}"></div>
+                                `).join("")}
+                            </div>
+                        </div>`;
+                }
+                colorPaletteHTML += '</div>';
                 modalContainer.innerHTML = `
                     <div class="modal-content">
-                        <h3>${title}</h3>
+                        <h3>${modalTitle}</h3>
                         <form id="notebookForm">
-                            <input type="hidden" id="notebookId" value="${notebook.id || ''}">
+                            <input type="hidden" id="notebookId" value="${notebook.id || ""}">
                             <div class="form-group">
                                 <label for="notebookTitle">عنوان دفتر</label>
-                                <input type="text" id="notebookTitle" placeholder="مثلا: خاطرات من" required value="${notebook.title || ''}">
+                                <input type="text" id="notebookTitle" placeholder="مثلا: خاطرات من" required value="${notebook.title || ""}">
                             </div>
                             <div class="form-group">
                                 <label>رنگ جلد</label>
-                                <div class="color-palette">
-                                ${notebookColors.map(color =>
-                                     `<div class="color-dot ${color === selectedColor ? 'selected' : ''}" style="background-color: ${color};" data-action="select-color" data-color="${color}"></div>`
-                                ).join('')}
-                                </div>
+                                ${colorPaletteHTML}
                             </div>
                             <div class="modal-actions">
                                 ${deleteButtonHTML}
                                 <button type="button" class="btn btn-secondary" data-action="close-modal">انصراف</button>
-                                <button type="button" data-action="save-notebook" class="btn btn-primary">${buttonText}</button>
+                                <button type="button" data-action="save-notebook" class="btn btn-primary">${submitButtonText}</button>
                             </div>
                         </form>
                     </div>`;
-                modalContainer.classList.add('visible');
+                modalContainer.classList.add("visible");
             }
-            function renderBackupModal() {
+            function renderBackupModal(){modalContainer.innerHTML=`<div class="modal-content"><h3>پشتیبان‌گیری و بازیابی</h3><p>می‌توانید از تمام دفترها و یادداشت‌های خود یک فایل پشتیبان تهیه کنید یا اطلاعات خود را از یک فایل پشتیبان بازگردانی نمایید.</p><div class="modal-actions"><button type="button" class="btn btn-secondary" data-action="trigger-restore"><i class="fas fa-upload" style="margin-left: 8px;"></i>بازیابی</button><button type="button" class="btn btn-primary" data-action="backup-data"><i class="fas fa-download" style="margin-left: 8px;"></i>پشتیبان‌گیری</button></div><input type="file" id="restore-input" style="display: none;" accept=".json"><div class="modal-actions" style="margin-top: 24px;"><button type="button" class="btn" data-action="close-modal" style="width: 100%; background: none; color: var(--c-text-secondary);">بستن</button></div></div>`;modalContainer.classList.add('visible');}
+            function renderAboutModal(){modalContainer.innerHTML=`<div class="modal-content"><img src="https://i.postimg.cc/SKgT4hTn/notes-app.png" alt="لوگوی برنامه همراه من" class="app-logo"><h3>همراه من</h3><p class="about-text"><strong>نسخه ۲.۰</strong><br>یک دفترچه یادداشت ساده و زیبا برای ثبت افکار، احساسات و خاطرات شما. تمام اطلاعات شما به صورت امن روی دستگاه خودتان ذخیره می‌شود.</p><div class="modal-actions" style="margin-top: 24px;"><button type="button" class="btn btn-primary" data-action="close-modal" style="width: 100%;">فهمیدم</button></div></div>`;modalContainer.classList.add('visible');}
+            function renderThemeModal() {
+                const currentTheme = getCustomTheme();
+                const renderSwatch = (theme) => `
+                    <div class="theme-swatch ${currentTheme === theme.id ? 'selected' : ''}" data-action="select-theme" data-theme-id="${theme.id}" style="background-color: ${theme.bg}; --swatch-text: ${theme.text};" title="${theme.name}">
+                         <div style="width: 50%; height: 100%; background: ${theme.primary}; position: absolute; left: 0; top: 0; opacity: 0.5;"></div>
+                         <div class="theme-name">${theme.name}</div>
+                    </div>`;
                 modalContainer.innerHTML = `
                     <div class="modal-content">
-                        <h3>پشتیبان‌گیری و بازیابی</h3>
-                        <p>می‌توانید از تمام دفترها و یادداشت‌های خود یک فایل پشتیبان تهیه کنید یا اطلاعات خود را از یک فایل پشتیبان بازگردانی نمایید.</p>
-                        <div class="modal-actions">
-                             <button type="button" class="btn btn-secondary" data-action="trigger-restore">
-                                 <i class="fas fa-upload" style="margin-left: 8px;"></i>بازیابی
-                            </button>
-                            <button type="button" class="btn btn-primary" data-action="backup-data">
-                                <i class="fas fa-download" style="margin-left: 8px;"></i>پشتیبان‌گیری
-                            </button>
+                        <h3>انتخاب پوسته</h3>
+                        <div class="modal-tabs">
+                            <button class="modal-tab-btn active" data-action="switch-theme-tab" data-tab="modern-light-themes">مدرن روشن</button>
+                            <button class="modal-tab-btn" data-action="switch-theme-tab" data-tab="classic-light-themes">کلاسیک روشن</button>
+                            <button class="modal-tab-btn" data-action="switch-theme-tab" data-tab="modern-dark-themes">مدرن تیره</button>
+                            <button class="modal-tab-btn" data-action="switch-theme-tab" data-tab="classic-dark-themes">کلاسیک تیره</button>
                         </div>
-                        <input type="file" id="restore-input" style="display: none;" accept=".json">
-                           <div class="modal-actions" style="margin-top: 24px;">
-                                 <button type="button" class="btn" data-action="close-modal" style="width: 100%; background: none; color: var(--c-text-secondary);">بستن</button>
-                           </div>
+                        <div id="modern-light-themes" class="theme-grid-container active">
+                            <div class="theme-grid">${themes.modernLight.map(renderSwatch).join('')}</div>
+                        </div>
+                        <div id="classic-light-themes" class="theme-grid-container">
+                            <div class="theme-grid">${themes.classicLight.map(renderSwatch).join('')}</div>
+                        </div>
+                        <div id="modern-dark-themes" class="theme-grid-container">
+                             <div class="theme-grid">${themes.modernDark.map(renderSwatch).join('')}</div>
+                        </div>
+                        <div id="classic-dark-themes" class="theme-grid-container">
+                             <div class="theme-grid">${themes.classicDark.map(renderSwatch).join('')}</div>
+                        </div>
+                        <div class="modal-actions" style="margin-top: 24px;">
+                            <button type="button" class="btn btn-primary" data-action="close-modal" style="width: 100%;">بستن</button>
+                        </div>
                     </div>`;
                 modalContainer.classList.add('visible');
             }
-            function renderAboutModal() {
-                modalContainer.innerHTML = `
-                    <div class="modal-content">
-                        <img src="https://i.postimg.cc/SKgT4hTn/notes-app.png" alt="لوگوی برنامه همراه من" class="app-logo">
-                        <h3>همراه من</h3>
-                        <p class="about-text">
-                            <strong>نسخه ۱.۸</strong>
-                            <br>
-                            یک دفترچه یادداشت ساده و زیبا برای ثبت افکار، احساسات و خاطرات شما. تمام اطلاعات شما به صورت امن روی دستگاه خودتان ذخیره می‌شود.
-                        </p>
-                           <div class="modal-actions" style="margin-top: 24px;">
-                                 <button type="button" class="btn btn-primary" data-action="close-modal" style="width: 100%;">فهمیدم</button>
-                           </div>
-                    </div>`;
-                modalContainer.classList.add('visible');
-            }
-            // --- VIEW RENDERING ---
-            function renderHeader(title, showBackButton = false, showSettingsButton = false) {
-                const backBtnHTML = showBackButton ? `<button class="btn btn-icon" data-action="back"><i class="fas fa-arrow-right"></i></button>` : `<div></div>`;
-                const settingsBtnHTML = showSettingsButton ? `
-                    <div class="settings-container">
-                        <button class="btn btn-icon" data-action="toggle-settings-menu" title="تنظیمات">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                        <ul class="dropdown-menu" id="settings-dropdown">
-                            <li class="dropdown-item">
-                                <a href="#" data-action="open-backup-modal">
-                                    <i class="fas fa-save"></i>
-                                    <span>پشتیبان‌گیری و بازیابی</span>
-                                </a>
-                            </li>
-                            <li class="dropdown-item">
-                                <a href="#" data-action="open-about-modal">
-                                    <i class="fas fa-info-circle"></i>
-                                    <span>درباره</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                ` : '';
-                const themeSwitcherHTML = `<div class="theme-switcher">
-                    <i class="fas fa-moon icon"></i>
-                    <label class="switch"><input type="checkbox" id="theme-toggle" ${getTheme() === 'dark' ? 'checked' : ''}><span class="slider"></span></label>
-                    <i class="fas fa-sun icon"></i>
-                </div>`;
-                return `<header>${backBtnHTML}<h1>${title}</h1><div class="header-controls">${settingsBtnHTML}${themeSwitcherHTML}</div></header>`;
-            }
-            function renderNotebookShelf() {
-                setAppColor(null);
-                const notebooks = getNotebooks().sort((a,b) => a.order - b.order);
-                const notes = getNotes();
-                let shelfHTML = '<div id="notebookShelf" class="notebook-shelf">';
-                notebooks.forEach(nb => {
-                    const count = notes.filter(n => n.notebookId === nb.id).length;
-                    shelfHTML += `<div class="notebook-cover" data-id="${nb.id}" style="--notebook-color: ${nb.color};">
-                        <div class="title">${nb.title}</div>
-                        <div class="note-count">${toPersianDigits(count)} یادداشت</div>
-                    </div>`;
-                });
-                shelfHTML += '</div>'; // Close the notebook shelf container
-                app.innerHTML = `<div class="page shelf-view">
-                                    <div class="container">${renderHeader('همراه من', false, true)}${shelfHTML}</div>
-                                    <button class="btn btn-primary btn-float" data-action="new-notebook" title="دفتر جدید">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                 </div>`;
-                initSortableNotebooks();
-                setupNotebookListeners();
-            }
-            function renderNotebookView(notebookId, searchTerm = '') {
-                const notebook = getNotebooks().find(nb => nb.id === notebookId);
-                if (!notebook) {
-                    navigateTo('shelf', null, true);
-                     return;
-                 }
-                setAppColor(notebook.color);
-                const viewMode = notebook.viewMode || 'grid';
-                let notesInNotebook = getNotes()
-                    .filter(n => n.notebookId === notebookId)
-                    .sort((a, b) => {
-                        if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-                        return b.lastModified - a.lastModified;
-                    });
-                if (searchTerm) {
-                    const lowerCaseSearch = searchTerm.toLowerCase();
-                    notesInNotebook = notesInNotebook.filter(n =>
-                        (n.title && n.title.toLowerCase().includes(lowerCaseSearch)) ||
-                        (n.content && n.content.toLowerCase().includes(lowerCaseSearch))
-                    );
-                }
-                let notesHTML = '';
-                if (notesInNotebook.length === 0) {
-                    notesHTML = searchTerm
-                        ? `<div class="empty-state"><div class="icon"><i class="fas fa-search"></i></div><h3>نتیجه‌ای یافت نشد</h3><p>برای عبارت «${searchTerm}» یادداشتی پیدا نکردیم.</p></div>`
-                        : `<div class="empty-state"><div class="icon"><i class="fas fa-feather-alt"></i></div><h3>این دفتر هنوز خالیه</h3><p>اولین یادداشتت رو با دکمه + پایین صفحه بنویس.</p></div>`;
-                } else {
-                    notesHTML = `<div id="notes-grid" class="view-${viewMode}">`;
-                    notesInNotebook.forEach(note => {
-                        const moodInfo = moods[note.mood] || moods.neutral;
-                        const shortContent = note.content ? (note.content.substring(0, 120) + (note.content.length > 120 ? '...' : '')) : '';
-                        const dateParts = getJalaliDateParts(new Date(note.lastModified));
-                        notesHTML += `
-                        <div class="note-card ${note.isPinned ? 'pinned' : ''}" data-note-id="${note.id}">
-                            <div class="note-date">
-                                <span class="day">${dateParts.day}</span>
-                                <span class="month">${dateParts.month}</span>
-                            </div>
-                            <div class="note-card-clickable-area" data-action="edit-note" data-note-id="${note.id}">
-                                <h3><i class="fas ${moodInfo.icon}" style="--dynamic-mood-color: ${moodInfo.color}"></i>${note.title || 'بدون عنوان'}</h3>
-                                <p>${shortContent || 'بدون محتوا'}</p>
-                            </div>
-                            <div class="note-actions">
-                                <button class="btn btn-icon pin ${note.isPinned ? 'active' : ''}" data-action="toggle-pin-note" data-note-id="${note.id}" title="پین کردن">
-                                    <i class="fas fa-thumbtack"></i>
-                                </button>
-                                <button class="btn btn-icon delete" data-action="delete-note" data-note-id="${note.id}" title="حذف">
-                                    <i class="fas fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>`;
-                    });
-                    notesHTML += '</div>';
-                }
-                const notebookControls = `
-                    <div class="notebook-header">
-                        <div class="notebook-controls">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="search" id="noteSearchInput" placeholder="جستجو در یادداشت‌ها..." value="${searchTerm || ''}">
-                            </div>
-                            <div class="view-switcher">
-                                <button class="btn btn-icon ${viewMode === 'grid' ? 'active' : ''}" data-action="set-view-mode" data-mode="grid" title="شبکه‌ای"><i class="fas fa-grip"></i></button>
-                                <button class="btn btn-icon ${viewMode === 'list' ? 'active' : ''}" data-action="set-view-mode" data-mode="list" title="لیستی"><i class="fas fa-list"></i></button>
-                                <button class="btn btn-icon ${viewMode === 'title' ? 'active' : ''}" data-action="set-view-mode" data-mode="title" title="فقط عنوان"><i class="fas fa-align-justify"></i></button>
-                            </div>
-                        </div>
-                    </div>`;
-                app.innerHTML = `<div class="page notebook-view">
-                    <div class="container">
-                        ${renderHeader(notebook.title, true)}
-                        ${notebookControls}
-                        ${notesHTML}
-                    </div>
-                    <button class="btn btn-primary btn-float" data-action="new-note" data-notebook-id="${notebookId}" title="یادداشت جدید">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>`;
-                const searchInput = document.getElementById('noteSearchInput');
-                if (searchInput) {
-                    searchInput.addEventListener('input', (e) => {
-                        renderNotebookView(notebookId, e.target.value);
-                    });
-                }
-            }
-            function renderEditorPage(context) {
-                unsavedChanges = false;
-                clearTimeout(autosaveTimeout);
-                let note = { id: null, title: '', content: '', mood: 'happy', notebookId: context.notebookId, isPinned: false };
-                if (context.noteId) {
-                    const foundNote = getNotes().find(n => n.id === context.noteId);
-                    if (foundNote) note = { ...foundNote };
-                }
-                editingNoteId = note.id;
-                const currentNotebook = getNotebooks().find(nb => nb.id === note.notebookId);
-                if (currentNotebook) setAppColor(currentNotebook.color);
-                const randomPrompt = journalPrompts[Math.floor(Math.random() * journalPrompts.length)];
-                let moodSelectorsHTML = Object.entries(moods).map(([key, val]) => `
-                    <div style="--dynamic-mood-color: ${val.color};">
-                        <input type="radio" id="mood-${key}" name="mood" value="${key}" ${key === note.mood ? 'checked' : ''}>
-                        <label for="mood-${key}" title="${val.text}"><i class="fas ${val.icon}"></i></label>
-                    </div>`).join('');
-                app.innerHTML = `
-                    <div class="page editor-view">
-                        <div class="editor-header container">
-                            <button class="btn-link" data-action="confirm-exit-editor">
-                                <i class="fas fa-check"></i>
-                                <span>انجام شد</span>
-                            </button>
-                            <div id="save-status" class="save-status"></div>
-                        </div>
-                        <main class="container">
-                            <input type="hidden" id="note-notebook-id" value="${note.notebookId}">
-                            <input type="text" id="note-title" placeholder="یک عنوان برای حست..." value="${note.title || ''}" required>
-                            <textarea id="note-content" placeholder="${randomPrompt}" required>${note.content || ''}</textarea>
-                            <div class="mood-title">حس و حالت رو انتخاب کن:</div>
-                            <div class="mood-selector">${moodSelectorsHTML}</div>
-                        </main>
-                    </div>`;
-                setupAutosave();
-                document.getElementById('note-title').focus();
-            }
-            function saveNote() {
-                const titleInput = document.getElementById('note-title');
-                const contentInput = document.getElementById('note-content');
-                if (!titleInput || !contentInput) return;
-                const title = titleInput.value;
-                const content = contentInput.value;
-                const mood = document.querySelector('input[name="mood"]:checked').value;
-                const notebookId = parseInt(document.getElementById('note-notebook-id').value);
-                const lastModified = Date.now();
-                if (!editingNoteId && !title.trim() && !content.trim()) {
-                    return;
-                }
-                let notes = getNotes();
-                if (editingNoteId) {
-                    notes = notes.map(n => n.id === editingNoteId ? { ...n, title, content, mood, lastModified } : n);
-                } else {
-                    const newNote = { id: Date.now(), title, content, mood, notebookId, lastModified, isPinned: false };
-                    notes.push(newNote);
-                    editingNoteId = newNote.id;
-                 }
-                saveNotes(notes);
-                unsavedChanges = false;
-                const statusEl = document.getElementById('save-status');
-                if(statusEl) {
-                    statusEl.textContent = 'ذخیره شد';
-                    statusEl.classList.add('visible');
-                }
-            }
-            function setupAutosave() {
-                const titleInput = document.getElementById('note-title');
-                const contentInput = document.getElementById('note-content');
-                const moodInputs = document.querySelectorAll('input[name="mood"]');
-                const statusEl = document.getElementById('save-status');
-                if (editingNoteId) {
-                    statusEl.textContent = 'ذخیره شده';
-                    statusEl.classList.add('visible');
-                } else {
-                    statusEl.textContent = 'آماده نوشتن...';
-                    statusEl.classList.add('visible');
-                }
-                const handleInput = () => {
-                    unsavedChanges = true;
-                    statusEl.textContent = 'در حال نوشتن...';
-                    statusEl.classList.add('visible');
-                    clearTimeout(autosaveTimeout);
-                    autosaveTimeout = setTimeout(() => {
-                        saveNote();
-                        statusEl.textContent = 'ذخیره شد';
-                    }, 1500);
-                };
-                titleInput.addEventListener('input', handleInput);
-                contentInput.addEventListener('input', handleInput);
-                moodInputs.forEach(input => input.addEventListener('change', handleInput));
-            }
-            // --- DRAG & DROP INITIALIZATION ---
-            function initSortableNotebooks() {
-                const shelf = document.getElementById('notebookShelf');
-                if (!shelf) return;
-                if (sortableNotebooks) sortableNotebooks.destroy();
-                sortableNotebooks = new Sortable(shelf, {
-                    animation: 200,
-                    ghostClass: 'sortable-ghost',
-                    onStart: () => {
-                        clearTimeout(longPressTimer);
-                    },
-                    onEnd: (evt) => {
-                        let notebooks = getNotebooks();
-                        const element = notebooks.splice(evt.oldIndex, 1)[0];
-                        notebooks.splice(evt.newIndex, 0, element);
-                        notebooks.forEach((nb, index) => nb.order = index + 1);
-                        saveNotebooks(notebooks);
-                    }
-                });
-            }
-            // --- NOTEBOOK CLICK & LONG-PRESS LOGIC ---
-            function setupNotebookListeners() {
-                const notebookCovers = document.querySelectorAll('.notebook-cover');
-                notebookCovers.forEach(cover => {
-                    const notebookId = parseInt(cover.dataset.id);
-                    const pressStart = (e) => {
-                        isLongPress = false;
-                        clearTimeout(longPressTimer);
-                        longPressTimer = setTimeout(() => {
-                            isLongPress = true;
-                            const notebook = getNotebooks().find(nb => nb.id === notebookId);
-                            if (notebook) {
-                                renderNotebookModal({ isEditing: true, notebook });
-                            }
-                        }, 500);
-                    };
-                    const pressEnd = () => clearTimeout(longPressTimer);
-                    const clickHandler = (e) => {
-                        if (isLongPress) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                        } else {
-                            navigateTo('notebook', notebookId);
-                        }
-                    };
-                    cover.addEventListener('mousedown', pressStart);
-                    cover.addEventListener('touchstart', pressStart, { passive: true });
-                    cover.addEventListener('mouseup', pressEnd);
-                    cover.addEventListener('mouseleave', pressEnd);
-                    cover.addEventListener('touchend', pressEnd);
-                    cover.addEventListener('touchcancel', pressEnd);
-                    cover.addEventListener('click', clickHandler);
-                });
-            }
-            // --- BACKUP & RESTORE LOGIC ---
-            function handleBackup() {
-                const backupData = {
-                    metadata: { appName: "Hamrahe Man", backupDate: new Date().toISOString() },
-                    notebooks: getNotebooks(),
-                    notes: getNotes()
-                };
-                const dataStr = JSON.stringify(backupData, null, 2);
-                const blob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const date = new Date().toISOString().slice(0, 10);
-                a.download = `hamrahe-man-backup-${date}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-            function handleRestore(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        if (!data.notebooks || !data.notes || !Array.isArray(data.notebooks) || !Array.isArray(data.notes)) {
+            function renderHeader(title,showBackButton=false,showSettingsButton=false){const backBtnHTML=showBackButton?`<button class="btn btn-icon" data-action="back"><i class="fas fa-arrow-right"></i></button>`:`<div></div>`;const settingsBtnHTML=showSettingsButton?`<div class="settings-container"><button class="btn btn-icon" data-action="toggle-settings-menu" title="تنظیمات"><i class="fas fa-cog"></i></button><ul class="dropdown-menu" id="settings-dropdown"><li class="dropdown-item"><a href="#" data-action="open-theme-modal"><i class="fas fa-palette"></i><span>انتخاب پوسته</span></a></li><li class="dropdown-item"><a href="#" data-action="open-backup-modal"><i class="fas fa-save"></i><span>پشتیبان‌گیری</span></a></li><li class="dropdown-item"><a href="#" data-action="open-about-modal"><i class="fas fa-info-circle"></i><span>درباره</span></a></li></ul></div>`:'';const themeSwitcherHTML=`<div class="theme-switcher"><i class="fas fa-moon icon"></i><label class="switch"><input type="checkbox" id="theme-toggle" ${document.body.classList.contains('dark-theme')?'checked':''}><span class="slider"></span></label><i class="fas fa-sun icon"></i></div>`;return `<header>${backBtnHTML}<h1>${title}</h1><div class="header-controls">${settingsBtnHTML}${themeSwitcherHTML}</div></header>`;}
+            function renderNotebookShelf(){setAppColor(null);const notebooks=getNotebooks().sort((a,b)=>a.order - b.order);const notes=getNotes();let shelfHTML='<div id="notebookShelf" class="notebook-shelf">';notebooks.forEach(nb=>{const count=notes.filter(n=>n.notebookId===nb.id).length;shelfHTML+=`<div class="notebook-cover" data-id="${nb.id}" style="--notebook-color: ${nb.color};"><div class="title">${nb.title}</div><div class="note-count">${toPersianDigits(count)} یادداشت</div></div>`;});shelfHTML+='</div>';app.innerHTML=`<div class="page shelf-view"><div class="container">${renderHeader('همراه من',false,true)}${shelfHTML}</div><button class="btn btn-primary btn-float" data-action="new-notebook" title="دفتر جدید"><i class="fas fa-plus"></i></button></div>`;initSortableNotebooks();setupNotebookListeners();}
+            function renderNotebookView(notebookId,searchTerm=''){const notebook=getNotebooks().find(nb=>nb.id===notebookId);if(!notebook){navigateTo('shelf',null,true);return;}setAppColor(notebook.color);const viewMode=notebook.viewMode||'grid';let notesInNotebook=getNotes().filter(n=>n.notebookId===notebookId).sort((a,b)=>(a.isPinned!==b.isPinned)?(a.isPinned?-1:1):(b.lastModified-a.lastModified));if(searchTerm){const lowerCaseSearch=searchTerm.toLowerCase();notesInNotebook=notesInNotebook.filter(n=>(n.title&&n.title.toLowerCase().includes(lowerCaseSearch))||(n.content&&n.content.toLowerCase().includes(lowerCaseSearch)));}let notesHTML='';if(notesInNotebook.length===0){notesHTML=searchTerm?`<div class="empty-state"><div class="icon"><i class="fas fa-search"></i></div><h3>نتیجه‌ای یافت نشد</h3><p>برای عبارت «${searchTerm}» یادداشتی پیدا نکردیم.</p></div>`:`<div class="empty-state"><div class="icon"><i class="fas fa-feather-alt"></i></div><h3>این دفتر هنوز خالیه</h3><p>اولین یادداشتت رو با دکمه + پایین صفحه بنویس.</p></div>`;}else{notesHTML=`<div id="notes-grid" class="view-${viewMode}">`;notesInNotebook.forEach(note=>{const moodInfo=moods[note.mood]||moods.neutral;const shortContent=note.content?(note.content.substring(0,120)+(note.content.length>120?'...':'')):'';const dateParts=getJalaliDateParts(new Date(note.lastModified));notesHTML+=`<div class="note-card ${note.isPinned?'pinned':''}" data-note-id="${note.id}"><div class="note-date"><span class="day">${dateParts.day}</span><span class="month">${dateParts.month}</span></div><div class="note-card-clickable-area" data-action="edit-note" data-note-id="${note.id}"><h3><i class="fas ${moodInfo.icon}" style="--dynamic-mood-color: ${moodInfo.color}"></i>${note.title||'بدون عنوان'}</h3><p>${shortContent||'بدون محتوا'}</p></div><div class="note-actions"><button class="btn btn-icon pin ${note.isPinned?'active':''}" data-action="toggle-pin-note" data-note-id="${note.id}" title="پین کردن"><i class="fas fa-thumbtack"></i></button><button class="btn btn-icon delete" data-action="delete-note" data-note-id="${note.id}" title="حذف"><i class="fas fa-trash-can"></i></button></div></div>`;});notesHTML+='</div>';}const notebookControls=`<div class="notebook-header"><div class="notebook-controls"><div class="search-box"><i class="fas fa-search"></i><input type="search" id="noteSearchInput" placeholder="جستجو در یادداشت‌ها..." value="${searchTerm||''}"></div><div class="view-switcher"><button class="btn btn-icon ${viewMode==='grid'?'active':''}" data-action="set-view-mode" data-mode="grid" title="شبکه‌ای"><i class="fas fa-grip"></i></button><button class="btn btn-icon ${viewMode==='list'?'active':''}" data-action="set-view-mode" data-mode="list" title="لیستی"><i class="fas fa-list"></i></button><button class="btn btn-icon ${viewMode==='title'?'active':''}" data-action="set-view-mode" data-mode="title" title="فقط عنوان"><i class="fas fa-align-justify"></i></button></div></div></div>`;app.innerHTML=`<div class="page notebook-view"><div class="container">${renderHeader(notebook.title,true)}${notebookControls}${notesHTML}</div><button class="btn btn-primary btn-float" data-action="new-note" data-notebook-id="${notebookId}" title="یادداشت جدید"><i class="fas fa-plus"></i></button></div>`;const searchInput=document.getElementById('noteSearchInput');if(searchInput)searchInput.addEventListener('input',(e)=>renderNotebookView(notebookId,e.target.value));}
+            function renderEditorPage(context){unsavedChanges=false;clearTimeout(autosaveTimeout);let note={id:null,title:'',content:'',mood:'happy',notebookId:context.notebookId,isPinned:false};if(context.noteId){const foundNote=getNotes().find(n=>n.id===context.noteId);if(foundNote)note={...foundNote};}editingNoteId=note.id;const currentNotebook=getNotebooks().find(nb=>nb.id===note.notebookId);if(currentNotebook)setAppColor(currentNotebook.color);const randomPrompt=journalPrompts[Math.floor(Math.random()*journalPrompts.length)];let moodSelectorsHTML=Object.entries(moods).map(([key,val])=>`<div style="--dynamic-mood-color: ${val.color};"><input type="radio" id="mood-${key}" name="mood" value="${key}" ${key===note.mood?'checked':''}> <label for="mood-${key}" title="${val.text}"><i class="fas ${val.icon}"></i></label></div>`).join('');app.innerHTML=`<div class="page editor-view"><div class="editor-header container"><button class="btn-link" data-action="confirm-exit-editor"><i class="fas fa-check"></i><span>انجام شد</span></button><div id="save-status" class="save-status"></div></div><main class="container"><input type="hidden" id="note-notebook-id" value="${note.notebookId}"><input type="text" id="note-title" placeholder="یک عنوان برای حست..." value="${note.title||''}" required><textarea id="note-content" placeholder="${randomPrompt}" required>${note.content||''}</textarea><div class="mood-title">حس و حالت رو انتخاب کن:</div><div class="mood-selector">${moodSelectorsHTML}</div></main></div>`;setupAutosave();document.getElementById('note-title').focus();}
+            function saveNote(){const titleInput=document.getElementById('note-title');const contentInput=document.getElementById('note-content');if(!titleInput||!contentInput)return;const title=titleInput.value;const content=contentInput.value;const mood=document.querySelector('input[name="mood"]:checked').value;const notebookId=parseInt(document.getElementById('note-notebook-id').value);const lastModified=Date.now();if(!editingNoteId&&!title.trim()&&!content.trim())return;let notes=getNotes();if(editingNoteId){notes=notes.map(n=>n.id===editingNoteId?{...n,title,content,mood,lastModified}:n);}else{const newNote={id:Date.now(),title,content,mood,notebookId,lastModified,isPinned:false};notes.push(newNote);editingNoteId=newNote.id;}saveNotes(notes);unsavedChanges=false;const statusEl=document.getElementById('save-status');if(statusEl){statusEl.textContent='ذخیره شد';statusEl.classList.add('visible');}}
+            function setupAutosave(){const titleInput=document.getElementById('note-title');const contentInput=document.getElementById('note-content');const moodInputs=document.querySelectorAll('input[name="mood"]');const statusEl=document.getElementById('save-status');if(editingNoteId){statusEl.textContent='ذخیره شده';statusEl.classList.add('visible');}else{statusEl.textContent='آماده نوشتن...';statusEl.classList.add('visible');}const handleInput=()=>{unsavedChanges=true;statusEl.textContent='در حال نوشتن...';statusEl.classList.add('visible');clearTimeout(autosaveTimeout);autosaveTimeout=setTimeout(()=>{saveNote();statusEl.textContent='ذخیره شد';},1500);};titleInput.addEventListener('input',handleInput);contentInput.addEventListener('input',handleInput);moodInputs.forEach(input=>input.addEventListener('change',handleInput));}
+            function initSortableNotebooks(){const shelf=document.getElementById('notebookShelf');if(!shelf)return;if(sortableNotebooks)sortableNotebooks.destroy();sortableNotebooks=new Sortable(shelf,{animation:200,ghostClass:'sortable-ghost',onStart:()=>clearTimeout(longPressTimer),onEnd:(evt)=>{let notebooks=getNotebooks();const element=notebooks.splice(evt.oldIndex,1)[0];notebooks.splice(evt.newIndex,0,element);notebooks.forEach((nb,index)=>nb.order=index+1);saveNotebooks(notebooks);}});}
+            function setupNotebookListeners(){const notebookCovers=document.querySelectorAll('.notebook-cover');notebookCovers.forEach(cover=>{const notebookId=parseInt(cover.dataset.id);const pressStart=(e)=>{isLongPress=false;clearTimeout(longPressTimer);longPressTimer=setTimeout(()=>{isLongPress=true;const notebook=getNotebooks().find(nb=>nb.id===notebookId);if(notebook)renderNotebookModal({isEditing:true,notebook});},500);};const pressEnd=()=>clearTimeout(longPressTimer);const clickHandler=(e)=>{if(isLongPress){e.preventDefault();e.stopPropagation();}else{navigateTo('notebook',notebookId);}};cover.addEventListener('mousedown',pressStart);cover.addEventListener('touchstart',pressStart,{passive:true});cover.addEventListener('mouseup',pressEnd);cover.addEventListener('mouseleave',pressEnd);cover.addEventListener('touchend',pressEnd);cover.addEventListener('touchcancel',pressEnd);cover.addEventListener('click',clickHandler);});}
+            function handleBackup(){const backupData={metadata:{appName:"Hamrahe Man",backupDate:new Date().toISOString()},notebooks:getNotebooks(),notes:getNotes()};const dataStr=JSON.stringify(backupData,null,2);const blob=new Blob([dataStr],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;const date=new Date().toISOString().slice(0,10);a.download=`hamrahe-man-backup-${date}.json`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}
+            function handleRestore(event){
+                const file=event.target.files[0];
+                if(!file)return;
+                const reader=new FileReader();
+                reader.onload=(e)=>{
+                    try{
+                        const data=JSON.parse(e.target.result);
+                        if(!data.notebooks||!data.notes||!Array.isArray(data.notebooks)||!Array.isArray(data.notes)){
                             alert('فایل پشتیبان معتبر نیست.');
                             return;
                         }
-                        if (confirm('آیا مطمئنید؟ تمام اطلاعات فعلی شما با اطلاعات فایل پشتیبان جایگزین خواهد شد.')) {
-                            saveNotebooks(data.notebooks);
-                            saveNotes(data.notes);
-                            alert('اطلاعات با موفقیت بازگردانی شد.');
-                            modalContainer.classList.remove('visible');
-                            navigateTo('shelf', null, true);
-                        }
-                    } catch (error) {
+                        renderConfirmationModal({
+                            title: 'بازیابی اطلاعات',
+                            message: 'تمام دفترها و یادداشت‌های فعلی شما حذف و با اطلاعات فایل پشتیبان جایگزین خواهند شد. ادامه می‌دهید؟',
+                            confirmText: 'بله، بازیابی کن',
+                            iconClass: 'fa-upload',
+                            onConfirm: () => {
+                                saveNotebooks(data.notebooks);
+                                saveNotes(data.notes);
+                                alert('اطلاعات با موفقیت بازگردانی شد.');
+                                modalContainer.classList.remove('visible');
+                                navigateTo('shelf', null, true);
+                            }
+                        });
+                    }catch(error){
                         alert('خطا در خواندن فایل. لطفا از معتبر بودن فایل پشتیبان اطمینان حاصل کنید.');
                     }
                 };
                 reader.readAsText(file);
-                event.target.value = '';
+                event.target.value='';
             }
-            // --- NAVIGATION LOGIC ---
             let historyStack = [{page: 'shelf', context: null}];
-            function navigateTo(page, context = null, force = false) {
-                if (force) {
-                    historyStack = [{page, context}];
-                } else {
-                    historyStack.push({page, context});
-                }
-                renderCurrentView();
-            }
-            function goBack() {
-                if (historyStack.length <= 1) return;
-                historyStack.pop();
-                renderCurrentView();
-            }
-            function renderCurrentView() {
-                const state = historyStack[historyStack.length - 1];
-                if (!state) return;
-                switch(state.page) {
-                    case 'shelf': renderNotebookShelf(); break;
-                    case 'notebook': renderNotebookView(state.context); break;
-                    case 'editor': renderEditorPage(state.context); break;
-                }
-                applyTheme(getTheme());
-            }
-            // --- GLOBAL EVENT LISTENERS ---
+            function navigateTo(page, context = null, force = false) { if (force) { historyStack = [{page, context}]; } else { historyStack.push({page, context}); } renderCurrentView(); }
+            function goBack() { if (historyStack.length <= 1) return; historyStack.pop(); renderCurrentView(); }
+            function renderCurrentView() { const state = historyStack[historyStack.length - 1]; if (!state) return; switch(state.page) { case 'shelf': renderNotebookShelf(); break; case 'notebook': renderNotebookView(state.context); break; case 'editor': renderEditorPage(state.context); break; } applyTheme(getTheme(), getCustomTheme()); }
             document.body.addEventListener('click', (e) => {
                 const actionTarget = e.target.closest('[data-action]');
-                const settingsContainer = e.target.closest('.settings-container');
-                const dropdown = document.getElementById('settings-dropdown');
-                if (dropdown && !settingsContainer) {
-                    dropdown.classList.remove('visible');
-                }
+                if (document.getElementById('settings-dropdown') && !e.target.closest('.settings-container')) { document.getElementById('settings-dropdown').classList.remove('visible'); }
                 if (!actionTarget) return;
-                const { action, noteId, notebookId, mode } = actionTarget.dataset;
+                const { action, noteId, notebookId, mode, themeId, tab } = actionTarget.dataset;
                 switch(action) {
-                    case 'new-note': navigateTo('editor', { notebookId: parseInt(notebookId) }); break;
-                    case 'edit-note': {
-                        const noteToEdit = getNotes().find(n => n.id === parseInt(noteId));
-                        if(noteToEdit) navigateTo('editor', { notebookId: noteToEdit.notebookId, noteId: noteToEdit.id });
-                        break;
-                    }
-                    case 'delete-note': {
-                        if (confirm('آیا از حذف این یادداشت مطمئن هستید؟ این عمل قابل بازگشت نیست.')) {
-                            let notes = getNotes().filter(n => n.id !== parseInt(noteId));
-                            saveNotes(notes);
-                            renderCurrentView();
-                        }
-                        break;
-                    }
-                    case 'toggle-pin-note': {
-                        let notes = getNotes();
-                        const noteToPin = notes.find(n => n.id === parseInt(noteId));
-                        if (noteToPin) {
-                            noteToPin.isPinned = !noteToPin.isPinned;
-                            noteToPin.lastModified = Date.now();
-                            saveNotes(notes);
-                            renderCurrentView();
-                        }
-                        break;
-                    }
-                    case 'back': goBack(); break;
-                    case 'confirm-exit-editor':
-                        clearTimeout(autosaveTimeout);
-                        if (unsavedChanges) saveNote();
-                        goBack();
-                        break;
-                    case 'new-notebook':
-                         renderNotebookModal({});
-                         break;
-                    case 'save-notebook': {
-                        const form = document.getElementById('notebookForm');
-                        if (form) {
-                            const title = form.querySelector('#notebookTitle').value.trim();
-                            const color = form.querySelector('.color-dot.selected')?.dataset.color;
-                            if (!title) { alert('لطفا یک عنوان برای دفترت انتخاب کن.'); return; }
-                            if (!color) { alert('لطفا یک رنگ برای دفترت انتخاب کن.'); return; }
-                            const notebookIdInput = form.querySelector('#notebookId');
-                            const id = notebookIdInput && notebookIdInput.value ? parseInt(notebookIdInput.value) : null;
-                            let notebooks = getNotebooks();
-                            if (id) {
-                                notebooks = notebooks.map(nb => nb.id === id ? { ...nb, title, color } : nb);
-                            } else {
-                                const maxOrder = notebooks.reduce((max, nb) => Math.max(max, nb.order || 0), 0);
-                                notebooks.push({ id: Date.now(), title, color, viewMode: 'grid', order: maxOrder + 1 });
-                            }
-                            saveNotebooks(notebooks);
-                            modalContainer.classList.remove('visible');
-                            renderCurrentView();
-                        }
-                        break;
-                    }
-                    case 'delete-notebook': {
-                        const notebookIdToDelete = parseInt(document.getElementById('notebookId').value);
-                        const notebooks = getNotebooks();
-                        if(notebooks.length <= 1) {
-                            alert("شما نمی‌توانید آخرین دفتر خود را حذف کنید.");
-                            return;
-                        }
-                        if (confirm('آیا از حذف این دفتر مطمئن هستید؟ تمام یادداشت‌های داخل آن نیز حذف خواهند شد!')) {
-                            let updatedNotebooks = notebooks.filter(nb => nb.id !== notebookIdToDelete);
-                            let notes = getNotes().filter(n => n.notebookId !== notebookIdToDelete);
-                            saveNotebooks(updatedNotebooks);
-                            saveNotes(notes);
-                            modalContainer.classList.remove('visible');
-                            navigateTo('shelf', null, true);
-                        }
-                        break;
-                    }
-                    case 'close-modal': modalContainer.classList.remove('visible'); break;
-                    case 'toggle-settings-menu':
-                        document.getElementById('settings-dropdown')?.classList.toggle('visible');
-                        break;
-                    case 'open-backup-modal':
-                         renderBackupModal();
-                        document.getElementById('settings-dropdown')?.classList.remove('visible');
-                        break;
-                    case 'open-about-modal':
-                        renderAboutModal();
-                        document.getElementById('settings-dropdown')?.classList.remove('visible');
-                        break;
-                    case 'backup-data': handleBackup(); break;
-                    case 'trigger-restore': document.getElementById('restore-input').click(); break;
-                    case 'select-color':
-                        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+                    case 'open-theme-modal': renderThemeModal(); document.getElementById('settings-dropdown')?.classList.remove('visible'); break;
+                    case 'select-theme':
+                        saveCustomTheme(themeId);
+                        applyTheme(getTheme(), themeId);
+                        document.querySelectorAll('.theme-swatch').forEach(sw => sw.classList.remove('selected'));
                         actionTarget.classList.add('selected');
                         break;
-                    case 'set-view-mode': {
-                        const state = historyStack[historyStack.length - 1];
-                        const currentNotebookId = state.context;
-                        const notebooks = getNotebooks().map(nb => nb.id === currentNotebookId ? { ...nb, viewMode: mode } : nb);
-                        saveNotebooks(notebooks);
-                        renderCurrentView();
+                    case 'switch-theme-tab':
+                        document.querySelectorAll('.modal-tab-btn, .theme-grid-container').forEach(el => el.classList.remove('active'));
+                        actionTarget.classList.add('active');
+                        document.getElementById(tab).classList.add('active');
+                        break;
+                    case 'new-note':navigateTo('editor',{notebookId:parseInt(notebookId)});break;
+                    case 'edit-note':{const noteToEdit=getNotes().find(n=>n.id===parseInt(noteId));if(noteToEdit)navigateTo('editor',{notebookId:noteToEdit.notebookId,noteId:noteToEdit.id});break;}
+                    case 'delete-note':{
+                        renderConfirmationModal({
+                            title: 'حذف یادداشت',
+                            message: 'آیا برای همیشه این یادداشت را حذف می‌کنید؟ این عمل قابل بازگشت نیست.',
+                            confirmText: 'بله، حذف کن',
+                            iconClass: 'fa-trash-can',
+                            onConfirm: () => {
+                                saveNotes(getNotes().filter(n => n.id !== parseInt(noteId)));
+                                modalContainer.classList.remove('visible');
+                                renderCurrentView();
+                            }
+                        });
                         break;
                     }
+                    case 'toggle-pin-note':{let notes=getNotes();const noteToPin=notes.find(n=>n.id===parseInt(noteId));if(noteToPin){noteToPin.isPinned=!noteToPin.isPinned;noteToPin.lastModified=Date.now();saveNotes(notes);renderCurrentView();}break;}
+                    case 'back':goBack();break;
+                    case 'confirm-exit-editor':clearTimeout(autosaveTimeout);if(unsavedChanges)saveNote();goBack();break;
+                    case 'new-notebook':renderNotebookModal({});break;
+                    case 'save-notebook':{const form=document.getElementById('notebookForm');if(form){const title=form.querySelector('#notebookTitle').value.trim();const color=form.querySelector('.color-dot.selected')?.dataset.color;if(!title){alert('لطفا یک عنوان انتخاب کنید.');return;}if(!color){alert('لطفا یک رنگ انتخاب کنید.');return;}const id=parseInt(form.querySelector('#notebookId').value)||null;let notebooks=getNotebooks();if(id){notebooks=notebooks.map(nb=>nb.id===id?{...nb,title,color}:nb);}else{const maxOrder=notebooks.reduce((max,nb)=>Math.max(max,nb.order||0),0);notebooks.push({id:Date.now(),title,color,viewMode:'grid',order:maxOrder+1});}saveNotebooks(notebooks);modalContainer.classList.remove('visible');renderCurrentView();}break;}
+                    case 'delete-notebook':{
+                        const notebookIdToDelete=parseInt(document.getElementById('notebookId').value);
+                        const notebooks=getNotebooks();
+                        if(notebooks.length<=1){
+                            alert("نمی‌توانید آخرین دفتر را حذف کنید.");
+                            return;
+                        }
+                        renderConfirmationModal({
+                            title: 'حذف دفتر',
+                            message: 'با حذف این دفتر، <strong>تمام یادداشت‌های داخل آن</strong> نیز برای همیشه حذف خواهند شد. آیا مطمئنید؟',
+                            confirmText: 'بله، دفتر را حذف کن',
+                            iconClass: 'fa-exclamation-triangle',
+                            onConfirm: () => {
+                                saveNotebooks(notebooks.filter(nb => nb.id !== notebookIdToDelete));
+                                saveNotes(getNotes().filter(n => n.notebookId !== notebookIdToDelete));
+                                modalContainer.classList.remove('visible');
+                                navigateTo('shelf', null, true);
+                            }
+                        });
+                        break;
+                    }
+                    case 'close-modal':modalContainer.classList.remove('visible');break;
+                    case 'toggle-settings-menu':document.getElementById('settings-dropdown')?.classList.toggle('visible');break;
+                    case 'open-backup-modal':renderBackupModal();document.getElementById('settings-dropdown')?.classList.remove('visible');break;
+                    case 'open-about-modal':renderAboutModal();document.getElementById('settings-dropdown')?.classList.remove('visible');break;
+                    case 'backup-data':handleBackup();break;
+                    case 'trigger-restore':document.getElementById('restore-input').click();break;
+                    case 'select-color':document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('selected'));actionTarget.classList.add('selected');break;
+                    case 'set-view-mode':{const currentNotebookId=historyStack[historyStack.length-1].context;saveNotebooks(getNotebooks().map(nb=>nb.id===currentNotebookId?{...nb,viewMode:mode}:nb));renderCurrentView();break;}
                 }
             });
+            document.body.addEventListener('touchstart', (e) => { if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') e.target.focus(); }, { passive: true });
             document.body.addEventListener('change', e => {
                 if (e.target.id === 'theme-toggle') {
+                    saveCustomTheme('');
                     const newTheme = e.target.checked ? 'dark' : 'light';
                     saveTheme(newTheme);
-                    applyTheme(newTheme);
+                    applyTheme(newTheme, '');
                 }
-                if (e.target.id === 'restore-input') {
-                    handleRestore(e);
-                }
+                if (e.target.id === 'restore-input') handleRestore(e);
             });
-            window.onbeforeunload = () => {
-                const currentState = historyStack[historyStack.length - 1];
-                if (currentState && currentState.page === 'editor' && unsavedChanges) {
-                    saveNote();
-                }
-            };
-            // --- INITIAL LOAD ---
+            window.onbeforeunload = () => { const state = historyStack[historyStack.length - 1]; if (state && state.page === 'editor' && unsavedChanges) saveNote(); };
             initializeData();
             renderCurrentView();
         });
