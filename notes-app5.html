@@ -2,10 +2,11 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>همراه من</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
     <meta name="apple-mobile-web-app-title" content="همراه من">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/SKgT4hTn/notes-app.png">
     <link rel="icon" type="image/png" href="https://i.postimg.cc/SKgT4hTn/notes-app.png">
@@ -366,7 +367,12 @@
         .empty-state h3 { color: var(--c-text-primary); }
         .empty-state p { line-height: 1.6; }
 
-
+input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: text;
+    pointer-events: auto !important;
+}
         
     </style>
 </head>
@@ -998,12 +1004,12 @@
 
        // =====================================================================
         // NEW FIX FOR IOS KEYBOARD:
-        // Force focus on input fields when a touch starts.
-        document.body.addEventListener('touchstart', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                e.target.focus();
-            }
-        }, { passive: true }); // Use passive for better scroll performance.
+     // NEW FIX FOR IOS KEYBOARD:
+document.body.addEventListener('touchend', (e) => {
+    if (e.target.matches('input, textarea')) {
+        e.target.focus({preventScroll:true});
+    }
+}, { passive: false }); // passive باید false باشد تا بتوان preventDefault کرد.
         // =====================================================================
 
 
