@@ -384,13 +384,19 @@
             .controls-row {
                 gap: var(--spacing-md);
             }
-            .sort-switcher {
-                flex-basis: 45%;
-            }
-            .view-switcher {
-                flex-basis: 45%;
-                justify-content: flex-end;
-            }
+/* --- START: Mobile Controls Layout Fix --- */
+.controls-row .search-box {
+    flex: 1 0 100%; /* جستجو را در یک سطر کامل قرار می‌دهد */
+}
+.controls-row .sort-switcher,
+.controls-row .view-switcher {
+    flex-grow: 1; /* باعث می‌شود دو گزینه باقی‌مانده فضا را به طور مساوی تقسیم کنند */
+    flex-basis: 0;
+}
+.controls-row .view-switcher {
+    justify-content: center; /* آیکون‌های چینش را در مرکز قرار می‌دهد */
+}
+/* --- END: Mobile Controls Layout Fix --- */
             .editor-view #note-title {
                 font-size: 1.8rem;
             }
