@@ -462,11 +462,10 @@ function fullRender() {
    function renderSingleGoalCard(goal) {
     const weekDates = getWeekDates(appState.currentWeek);
     const currentWeekId = weekIdForDate(appState.currentWeek);
-    const { weekly } = calculateScores(goal);
+    const { weekly, allTime } = calculateScores(goal); // دریافت شمارشگر کل
     const streak = calculateStreak(goal);
-
     const dayCellsHtml = weekDates.map((date, i) => {
-        const weekDayIndexForData = (i + 6) % 7; // Convert visual index (Sat=0) to data index (Sun=0, Sat=6)
+        const weekDayIndexForData = (i + 6) % 7;
         const isActive = !!goal.days[weekDayIndexForData];
         const dayData = goal.history?.[currentWeekId]?.[weekDayIndexForData] || { entries: [], note: '' };
         const dayCompleted = dayData.entries.length > 0;
@@ -476,18 +475,20 @@ function fullRender() {
         let classes = `${baseClasses} ${isActive ? activeClasses : disabledClasses}`;
         if(dayCompleted) classes += ' day-completed';
         if (isActive && isToday(date)) classes += ` ring-2 ring-sky-500 shadow-md shadow-sky-500/30`;
-
         let cellContent = `<div class="w-full h-full flex flex-wrap items-center justify-center gap-px leading-none">${dayData.entries.map(em => {
             if (!em) return '';
             if (em.startsWith('<svg')) return `<span class="inline-flex items-center justify-center w-8 h-8">${em}</span>`;
             return `<span class="text-sm md:text-base">${escapeHtml(em)}</span>`;
         }).join('')}</div>`;
-
-        // The data-day-index MUST be the data index (Sun=0) for history updates to work correctly.
         return `<div class="${classes}" data-goal-id="${goal.id}" data-day-index="${weekDayIndexForData}" tabindex="0">${cellContent}${dayData.note ? `<div class="absolute top-0 right-0 w-2 h-2 bg-amber-400 rounded-full" title="${escapeHtml(dayData.note)}"></div>` : ''}</div>`;
     }).join('');
 
-    const statsHtml = `<div class="goal-stats-desktop hidden md:flex items-center gap-x-2 text-xs font-medium text-app-text-muted whitespace-nowrap"><span>${goal.category}</span><span>•</span><span>هفته: ${toFa(weekly)}</span><span>•</span><span>استریک: ${toFa(streak)}</span></div>`;
+    // بخش آمار با آیکون‌های جدید جایگزین شد
+    const statsHtml = `<div class="goal-stats-desktop hidden md:flex items-center gap-x-4 text-xs font-medium text-app-text-muted whitespace-nowrap">
+        <span class="flex items-center gap-1" title="کل"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span>${toFa(allTime)}</span></span>
+        <span class="flex items-center gap-1" title="استریک"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span>${toFa(streak)}</span></span>
+        <span class="flex items-center gap-1" title="هفته"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><span>${toFa(weekly)}</span></span>
+    </div>`;
 
     return `<div class="goal-card bg-app-card shadow-md rounded-2xl p-4 goal-anim-in ${goal.archived ? 'opacity-60' : ''}" data-id="${goal.id}">
         <div class="flex items-center gap-3 mb-4">
@@ -567,7 +568,31 @@ function calculateStreak(goal) {
     
     return streak;
 }
-    function calculateScores(goal) { let weekly=0,allTime=0;const currentWeekId=weekIdForDate(appState.currentWeek);if(goal.history){for(const weekId in goal.history){const weekData=goal.history[weekId];if(!weekData)continue;let scoreForWeek=0;weekData.forEach((dayData,dayIndex)=>{if(!dayData)return;if(goal.days[dayIndex]){scoreForWeek+=(dayData.entries.length||0);}});if(weekId===currentWeekId)weekly=scoreForWeek;allTime+=scoreForWeek;}}return{weekly,allTime};}
+function calculateScores(goal) {
+    let weekly = 0;
+    let allTime = 0;
+    const currentWeekId = weekIdForDate(appState.currentWeek);
+
+    if (goal.history) {
+        for (const weekId in goal.history) {
+            const weekData = goal.history[weekId];
+            if (!weekData) continue;
+
+            weekData.forEach((dayData) => {
+                if (dayData && dayData.entries) {
+                    const entryCount = dayData.entries.length;
+                    // اضافه کردن به شمارشگر کل
+                    allTime += entryCount;
+                    // محاسبه آمار هفتگی فقط برای هفته جاری
+                    if (weekId === currentWeekId) {
+                        weekly += entryCount;
+                    }
+                }
+            });
+        }
+    }
+    return { weekly, allTime };
+}
     // --- MODALS & MENUS ---
     function closeModal() { const modalArea=document.getElementById('modalArea'); if (modalArea.lastElementChild) { modalArea.removeChild(modalArea.lastElementChild); } }
     function closeContextMenu() { const menu=document.getElementById('contextMenu'); menu.style.display='none'; appState.contextMenuGoalId=null; }
@@ -810,14 +835,16 @@ function updateGoalCardStats(goalId) {
     if (!goal) return;
     const card = document.querySelector(`.goal-card[data-id="${goalId}"]`);
     if (!card) return;
-
-    // Use the new reliable selector
     const statsContainer = card.querySelector('.goal-stats-desktop');
     if (statsContainer) {
-        // Recalculate scores and update the innerHTML
-        const { weekly } = calculateScores(goal);
+        // محاسبه مجدد تمام آمار
+        const { weekly, allTime } = calculateScores(goal);
         const streak = calculateStreak(goal);
-        statsContainer.innerHTML = `<span>${goal.category}</span><span>•</span><span>هفته: ${toFa(weekly)}</span><span>•</span><span>استریک: ${toFa(streak)}</span>`;
+        // به‌روزرسانی بخش آمار با ساختار جدید
+        statsContainer.innerHTML = `
+            <span class="flex items-center gap-1" title="کل"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span>${toFa(allTime)}</span></span>
+            <span class="flex items-center gap-1" title="استریک"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span>${toFa(streak)}</span></span>
+            <span class="flex items-center gap-1" title="هفته"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><span>${toFa(weekly)}</span></span>`;
     }
 }
     //report
