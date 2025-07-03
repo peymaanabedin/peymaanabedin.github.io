@@ -578,8 +578,149 @@
             codeContextMenu.addEventListener('click', e => { e.preventDefault(); const actionTarget = e.target.closest('a'); if (actionTarget && activeCodeBlockForContextMenu) { const { codeAction } = actionTarget.dataset; if (codeAction === 'delete') { activeCodeBlockForContextMenu.remove(); document.getElementById('note-content').dispatchEvent(new Event('input')); } } hideAllContextMenus(); });
             function initSortableNotebooks() { const shelf = document.getElementById('notebookShelf'); if (!shelf) return; if (sortableNotebooks) sortableNotebooks.destroy(); sortableNotebooks = new Sortable(shelf, { animation: 200, ghostClass: 'sortable-ghost', onEnd: (evt) => { let notebooks = getNotebooks(); const element = notebooks.splice(evt.oldIndex, 1)[0]; notebooks.splice(evt.newIndex, 0, element); notebooks.forEach((nb, index) => nb.order = index + 1); saveNotebooks(notebooks); } }); }
             function setupNotebookListeners() { let longPressTimer, isLongPress = false; const notebookCovers = document.querySelectorAll('.notebook-cover'); notebookCovers.forEach(cover => { const notebookId = parseInt(cover.dataset.id); const pressStart = (e) => { isLongPress = false; clearTimeout(longPressTimer); longPressTimer = setTimeout(() => { isLongPress = true; const notebook = getNotebooks().find(nb => nb.id === notebookId); if (notebook) renderNotebookModal({ isEditing: true, notebook }); }, 500); }; const pressEnd = () => clearTimeout(longPressTimer); const clickHandler = (e) => { if (isLongPress) { e.preventDefault(); e.stopPropagation(); } else { navigateTo('notebook', { id: notebookId }); } }; cover.addEventListener('mousedown', pressStart); cover.addEventListener('touchstart', pressStart, { passive: true }); cover.addEventListener('mouseup', pressEnd); cover.addEventListener('mouseleave', pressEnd); cover.addEventListener('touchend', pressEnd); cover.addEventListener('touchcancel', pressEnd); cover.addEventListener('click', clickHandler); }); }
-            function handleBackup() { const backupData = { metadata: { appName: "Hamrahe Man", backupDate: new Date().toISOString(), version: 3.8 }, notebooks: getNotebooks(), notes: getNotes() }; const dataStr = JSON.stringify(backupData, null, 2); const blob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; const date = new Date().toISOString().slice(0, 10); a.download = `hamrahe-man-backup-${date}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-            function handleRestore(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (!data.notebooks || !data.notes) { throw new Error('Invalid file structure'); } renderConfirmationModal({ title: 'بازیابی اطلاعات', message: 'تمام دفترها و یادداشت‌های فعلی شما حذف و با اطلاعات فایل پشتیبان جایگزین خواهند شد. ادامه می‌دهید؟', confirmText: 'بله، بازیابی کن', iconClass: 'fa-upload', isDanger: false, onConfirm: () => { saveNotebooks(data.notebooks); saveNotes(data.notes); alert('اطلاعات با موفقیت بازگردانی شد.'); modalContainer.classList.remove('visible'); navigateTo('shelf', null, true); } }); } catch (error) { alert('خطا در خواندن فایل. لطفا از معتبر بودن فایل پشتیبان اطمینان حاصل کنید.'); } }; reader.readAsText(file); event.target.value = ''; }
+   function handleBackup() {
+    // -- START: کد اصلاح شده برای پشتیبان‌گیری کامل از فایل‌های صوتی و تصویری --
+    
+    // نمایش یک پیام انتظار به کاربر
+    const originalButtonContent = document.querySelector('[data-action="backup-data"]').innerHTML;
+    document.querySelector('[data-action="backup-data"]').innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left: 8px;"></i>در حال آماده‌سازی...';
+    document.querySelector('[data-action="backup-data"]').disabled = true;
+
+    // استفاده از یک Timeout کوتاه تا UI فرصت به‌روزرسانی داشته باشد
+    setTimeout(() => {
+        try {
+            const notebooks = getNotebooks();
+            const notes = getNotes();
+
+            // ساخت یک کپی عمیق از یادداشت‌ها برای جلوگیری از تغییر داده اصلی
+            const notesForBackup = JSON.parse(JSON.stringify(notes));
+
+            // پیدا کردن تمام فایل‌های صوتی و تصویری که به صورت Data URL ذخیره شده‌اند
+            notesForBackup.forEach(note => {
+                if (note.content) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = note.content;
+                    
+                    // استخراج فایل‌های تصویری
+                    const images = tempDiv.querySelectorAll('img');
+                    images.forEach((img, index) => {
+                        const dataUrl = img.src;
+                        if (dataUrl.startsWith('data:image')) {
+                            // جایگزین کردن Data URL با یک شناسه منحصر به فرد
+                            const imageId = `image_${note.id}_${index}`;
+                            img.src = `backup_asset://${imageId}`;
+                            
+                            // اضافه کردن فایل به یک بخش جداگانه در یادداشت
+                            if (!note.assets) note.assets = {};
+                            note.assets[imageId] = dataUrl;
+                        }
+                    });
+
+                    // استخراج فایل‌های صوتی
+                    const audios = tempDiv.querySelectorAll('audio');
+                    audios.forEach((audio, index) => {
+                        const dataUrl = audio.src;
+                        if (dataUrl.startsWith('data:audio')) {
+                            // جایگزین کردن Data URL با یک شناسه منحصر به فرد
+                            const audioId = `audio_${note.id}_${index}`;
+                            audio.src = `backup_asset://${audioId}`;
+
+                            // اضافه کردن فایل به یک بخش جداگانه در یادداشت
+                            if (!note.assets) note.assets = {};
+                            note.assets[audioId] = dataUrl;
+                        }
+                    });
+                    
+                    // به‌روزرسانی محتوای یادداشت با شناسه‌های جدید
+                    note.content = tempDiv.innerHTML;
+                }
+            });
+
+            const backupData = {
+                metadata: { appName: "Hamrahe Man", backupDate: new Date().toISOString(), version: 4.0 }, // نسخه به ۴.۰ ارتقا یافت
+                notebooks: notebooks,
+                notes: notesForBackup // استفاده از یادداشت‌های پردازش شده
+            };
+
+            const dataStr = JSON.stringify(backupData); // حذف форматирование برای کاهش حجم
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = `hamrahe-man-backup-full-${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error("خطا در هنگام ایجاد فایل پشتیبان:", error);
+            alert("متاسفانه در هنگام ایجاد فایل پشتیبان خطایی رخ داد. لطفاً دوباره تلاش کنید.");
+        } finally {
+            // بازگرداندن دکمه به حالت اولیه
+            document.querySelector('[data-action="backup-data"]').innerHTML = originalButtonContent;
+            document.querySelector('[data-action="backup-data"]').disabled = false;
+        }
+    }, 100); // تاخیر ۱۰۰ میلی‌ثانیه‌ای
+    // -- END: پایان کد اصلاح شده --
+}
+       function handleRestore(event) {
+    // -- START: کد اصلاح شده برای بازیابی کامل فایل‌های صوتی و تصویری --
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!data.notebooks || !data.notes) {
+                throw new Error('ساختار فایل پشتیبان معتبر نیست.');
+            }
+
+            // پردازش یادداشت‌ها برای بازیابی فایل‌های صوتی و تصویری
+            data.notes.forEach(note => {
+                if (note.assets && note.content) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = note.content;
+
+                    const elements = tempDiv.querySelectorAll('[src^="backup_asset://"]');
+                    elements.forEach(el => {
+                        const assetId = el.src.replace('backup_asset://', '');
+                        if (note.assets[assetId]) {
+                            el.src = note.assets[assetId]; // جایگزین کردن شناسه با Data URL اصلی
+                        }
+                    });
+                    
+                    note.content = tempDiv.innerHTML;
+                    delete note.assets; // حذف بخش اضافی پس از بازیابی
+                }
+            });
+
+            renderConfirmationModal({
+                title: 'بازیابی اطلاعات',
+                message: 'تمام دفترها و یادداشت‌های فعلی شما حذف و با اطلاعات فایل پشتیبان جایگزین خواهند شد. ادامه می‌دهید؟',
+                confirmText: 'بله، بازیابی کن',
+                iconClass: 'fa-upload',
+                isDanger: false,
+                onConfirm: () => {
+                    saveNotebooks(data.notebooks);
+                    saveNotes(data.notes);
+                    alert('اطلاعات با موفقیت بازگردانی شد.');
+                    modalContainer.classList.remove('visible');
+                    navigateTo('shelf', null, true);
+                }
+            });
+
+        } catch (error) {
+            console.error("خطا در هنگام بازیابی اطلاعات:", error);
+            alert('خطا در خواندن فایل. لطفا از معتبر بودن فایل پشتیبان اطمینان حاصل کنید.');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+    // -- END: پایان کد اصلاح شده --
+}
             
             // --- NAVIGATION ---
             let historyStack = [{ page: 'shelf', context: null }];
