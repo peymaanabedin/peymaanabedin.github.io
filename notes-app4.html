@@ -627,7 +627,60 @@
                     case 'backup-data': handleBackup(); break;
                     case 'trigger-restore': document.getElementById('restore-input').click(); break;
                     case 'attach-image': { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = e => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (readEvent) => { document.execCommand('insertHTML', false, `<p><img src="${readEvent.target.result}" style="width: 100%; height: auto;" /></p>`); document.getElementById('note-content').dispatchEvent(new Event('input')); }; reader.readAsDataURL(file); } }; input.click(); break; }
-                    case 'record-audio': { if (mediaRecorder && mediaRecorder.state === "recording") { mediaRecorder.stop(); } else { navigator.mediaDevices.getUserMedia({ audio: true }) .then(stream => { mediaRecorder = new MediaRecorder(stream); mediaRecorder.start(); audioChunks = []; document.getElementById('record-indicator').style.display = 'block'; mediaRecorder.addEventListener("dataavailable", event => { audioChunks.push(event.data); }); mediaRecorder.addEventListener("stop", () => { document.getElementById('record-indicator').style.display = 'none'; const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); const reader = new FileReader(); reader.onload = (readEvent) => { const audioHtml = `<audio controls src="${readEvent.target.result}"></audio>`; document.getElementById('note-content').focus(); document.execCommand('insertHTML', false, audioHtml); document.getElementById('note-content').dispatchEvent(new Event('input')); }; reader.readAsDataURL(audioBlob); stream.getTracks().forEach(track => track.stop()); }); }) .catch(err => { console.error("Error accessing microphone:", err); alert("اجازه دسترسی به میکروفون داده نشد."); }); } break; }
+                case 'record-audio': {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+    } else {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                // -- START: کد اصلاح شده برای سازگاری با آیفون --
+
+                // لیستی از فرمت‌های مورد نظر، mp4 برای سازگاری با آیفون در اولویت است
+                const mimeTypes = ['audio/mp4', 'audio/webm'];
+                const supportedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
+
+                if (!supportedMimeType) {
+                    alert("متاسفانه مرورگر شما از فرمت مناسب برای ضبط صدا پشتیبانی نمی‌کند.");
+                    return;
+                }
+                
+                audioChunks = [];
+                // استفاده از فرمت پشتیبانی شده هنگام ساخت MediaRecorder
+                mediaRecorder = new MediaRecorder(stream, { mimeType: supportedMimeType });
+
+                mediaRecorder.addEventListener("dataavailable", event => {
+                    audioChunks.push(event.data);
+                });
+
+                mediaRecorder.addEventListener("stop", () => {
+                    document.getElementById('record-indicator').style.display = 'none';
+                    
+                    // ساخت فایل نهایی با همان فرمت ضبط شده
+                    const audioBlob = new Blob(audioChunks, { type: supportedMimeType });
+                    const reader = new FileReader();
+                    
+                    reader.onload = (readEvent) => {
+                        const audioHtml = `<audio controls src="${readEvent.target.result}"></audio>`;
+                        document.getElementById('note-content').focus();
+                        document.execCommand('insertHTML', false, audioHtml);
+                        document.getElementById('note-content').dispatchEvent(new Event('input'));
+                    };
+                    
+                    reader.readAsDataURL(audioBlob);
+                    stream.getTracks().forEach(track => track.stop());
+                });
+                
+                mediaRecorder.start();
+                document.getElementById('record-indicator').style.display = 'block';
+                // -- END: پایان کد اصلاح شده --
+            })
+            .catch(err => {
+                console.error("Error accessing microphone:", err);
+                alert("اجازه دسترسی به میکروفون داده نشد.");
+            });
+    }
+    break;
+}
                     case 'copy-code': { const wrapper = actionTarget.closest('.code-box-wrapper'); if (wrapper) { const code = wrapper.querySelector('pre code'); if (code) { navigator.clipboard.writeText(code.textContent).then(() => { actionTarget.innerHTML = '<i class="fas fa-check"></i>'; setTimeout(() => { actionTarget.innerHTML = '<i class="fas fa-copy"></i>'; }, 2000); }).catch(err => { console.error('Failed to copy code: ', err); alert('خطا در کپی کردن کد.'); }); } } break; }
                     case 'toggle-sort-menu': { actionTarget.parentElement.classList.toggle('open'); break; }
                     case 'set-sort-mode': { e.preventDefault(); const currentNotebookId = historyStack[historyStack.length - 1].context.id; const notebooks = getNotebooks().map(nb => nb.id === currentNotebookId ? { ...nb, sortMode: value } : nb); saveNotebooks(notebooks); renderCurrentView(); break; }
