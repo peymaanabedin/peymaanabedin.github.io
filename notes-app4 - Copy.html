@@ -89,8 +89,7 @@
         input:checked + .slider:before { transform: translateX(24px); }
         
         /* --- MOBILE HAMBURGER MENU --- */
-        .hamburger-btn { display: none; }
-        #mobile-nav-overlay { display: none; }
+    
 
         .btn { padding: 12px 20px; border-radius: var(--radius-btn); border: none; font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
         .btn:hover { transform: none; box-shadow: 0 4px 12px var(--shadow-color); filter: brightness(1.05); }
@@ -364,13 +363,7 @@
             .header-controls {
                 display: none; /* Hide original theme switcher on mobile header */
             }
-            .header-left .settings-container {
-                display: none; /* Hide gear icon on mobile */
-            }
-            .hamburger-btn {
-                display: flex; /* Show hamburger button on mobile */
-                z-index: 1002;
-            }
+    
             .modal-content {
                 width: 95%;
                 padding: var(--spacing-md);
@@ -405,7 +398,17 @@
                 left: 20px;
             }
         }
-
+/* --- START: Unified Menu Icon Display --- */
+.header-left .settings-container {
+    display: none; /* حذف کامل آیکون چرخ‌دنده در تمام نمایشگرها */
+}
+.hamburger-btn {
+    display: flex; /* نمایش همیشگی آیکون همبرگر در تمام نمایشگرها */
+}
+#mobile-nav-overlay { 
+    display: none; 
+}
+/* --- END: Unified Menu Icon Display --- */
     </style>
 </head>
 <body>
