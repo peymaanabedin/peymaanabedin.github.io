@@ -174,8 +174,7 @@
     const STORAGE_KEY = 'goal_tracker_data_v13_ltr';
     const STORAGE_ORDER = 'goal_tracker_order_v13_ltr';
     const STORAGE_ACTIVE_THEME = 'goal_tracker_active_theme_v5';
-    const WEEKDAY_NAMES_SHORT = ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش'];
-    const JALALI_MONTH_NAMES = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
+const WEEKDAY_NAMES_SHORT = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];    const JALALI_MONTH_NAMES = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
         
     let appState = {
         currentWeek: getStartOfWeek(new Date()),
@@ -190,11 +189,17 @@
     function isJalaliLeap(year) { return (((((year-474)%2820)+512)*682)%2816)<682; }
     function jalaliMonthLength(year, month) { if (month<=6) return 31; if (month<=11) return 30; if (isJalaliLeap(year)) return 30; return 29; }
     function toFa(num) { return (''+num).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]); }
-    function getStartOfWeek(date) { const d = new Date(date); d.setHours(0,0,0,0); d.setDate(d.getDate()-d.getDay()); return d; }
+    function getStartOfWeek(date) { const d = new Date(date); d.setHours(0,0,0,0); const day = d.getDay(); const diff = (day + 1) % 7; d.setDate(d.getDate() - diff); return d; }
     function getWeekDates(base) { return Array.from({length:7}, (_,i) => { const d = new Date(base); d.setDate(base.getDate()+i); return d; }); }
     function formatWeekRange(base) { const week=getWeekDates(base); const startDate=week[0]; const endDate=week[6]; const [startJy, startJm, startJd]=toJalali(startDate.getFullYear(), startDate.getMonth()+1, startDate.getDate()); const [endJy, endJm, endJd]=toJalali(endDate.getFullYear(), endDate.getMonth()+1, endDate.getDate()); if (startJm === endJm) { const startDay=toFa(startJd); const endDay=toFa(endJd); const monthName=JALALI_MONTH_NAMES[startJm - 1]; return `${startDay} – ${endDay} ${monthName}`; } else { const fmt=(d) => d.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' }); return `${fmt(startDate)} – ${fmt(endDate)}`; }}
     function isToday(date) { const now = new Date(); return date.toDateString() === now.toDateString(); }
-    function weekIdForDate(date) { const d = getStartOfWeek(date); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
+   function weekIdForDate(date) {
+    const d = getStartOfWeek(date);
+    // This creates a reliable YYYY-MM-DD format
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    return `${d.getFullYear()}-${month}-${day}`;
+}
     function escapeHtml(txt) { return (''+txt).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g, '&quot;'); }
 function getDefaultGoals() {
         const creationDate = "2025-07-03T17:13:33.798Z";
@@ -454,15 +459,16 @@ function fullRender() {
             archivedContainer.classList.add('hidden');
         }
     }
-    function renderSingleGoalCard(goal) {
+   function renderSingleGoalCard(goal) {
     const weekDates = getWeekDates(appState.currentWeek);
     const currentWeekId = weekIdForDate(appState.currentWeek);
     const { weekly } = calculateScores(goal);
     const streak = calculateStreak(goal);
 
     const dayCellsHtml = weekDates.map((date, i) => {
-        const isActive = !!goal.days[i];
-        const dayData = goal.history?.[currentWeekId]?.[i] || { entries: [], note: '' };
+        const weekDayIndexForData = (i + 6) % 7; // Convert visual index (Sat=0) to data index (Sun=0, Sat=6)
+        const isActive = !!goal.days[weekDayIndexForData];
+        const dayData = goal.history?.[currentWeekId]?.[weekDayIndexForData] || { entries: [], note: '' };
         const dayCompleted = dayData.entries.length > 0;
         const baseClasses = "goal-day group aspect-square rounded-full flex items-center justify-center relative transition-colors cursor-pointer";
         const activeClasses = "active bg-app-cell-inactive hover:opacity-80";
@@ -477,10 +483,10 @@ function fullRender() {
             return `<span class="text-sm md:text-base">${escapeHtml(em)}</span>`;
         }).join('')}</div>`;
 
-        return `<div class="${classes}" data-goal-id="${goal.id}" data-day-index="${i}" tabindex="0">${cellContent}${dayData.note ? `<div class="absolute top-0 right-0 w-2 h-2 bg-amber-400 rounded-full" title="${escapeHtml(dayData.note)}"></div>` : ''}</div>`;
+        // The data-day-index MUST be the data index (Sun=0) for history updates to work correctly.
+        return `<div class="${classes}" data-goal-id="${goal.id}" data-day-index="${weekDayIndexForData}" tabindex="0">${cellContent}${dayData.note ? `<div class="absolute top-0 right-0 w-2 h-2 bg-amber-400 rounded-full" title="${escapeHtml(dayData.note)}"></div>` : ''}</div>`;
     }).join('');
 
-    // CHANGE IS HERE: Added 'goal-stats-desktop' class for a reliable selector
     const statsHtml = `<div class="goal-stats-desktop hidden md:flex items-center gap-x-2 text-xs font-medium text-app-text-muted whitespace-nowrap"><span>${goal.category}</span><span>•</span><span>هفته: ${toFa(weekly)}</span><span>•</span><span>استریک: ${toFa(streak)}</span></div>`;
 
     return `<div class="goal-card bg-app-card shadow-md rounded-2xl p-4 goal-anim-in ${goal.archived ? 'opacity-60' : ''}" data-id="${goal.id}">
@@ -503,9 +509,64 @@ function fullRender() {
     </div>`;
 }
     // --- CALCULATIONS ---
-    function getHistoricalDayInfo(goal, targetDate) { const d=new Date(targetDate);d.setHours(0,0,0,0);const dayIndex=d.getDay();const startOfWeekDate=new Date(d);startOfWeekDate.setDate(d.getDate()-dayIndex);const weekId=`${startOfWeekDate.getFullYear()}-${startOfWeekDate.getMonth()+1}-${startOfWeekDate.getDate()}`;const dayData=goal.history?.[weekId]?.[dayIndex];const entryCount=dayData?.entries?.length||0;return{dayIndex,entryCount};}
+   function getHistoricalDayInfo(goal, targetDate) {
+    const d = new Date(targetDate);
+    d.setHours(0, 0, 0, 0);
+    const dayIndex = d.getDay();
+
+    const startOfWeekDate = getStartOfWeek(d);
+    // Use the exact same reliable YYYY-MM-DD format for reading
+    const month = (startOfWeekDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = startOfWeekDate.getDate().toString().padStart(2, '0');
+    const weekId = `${startOfWeekDate.getFullYear()}-${month}-${day}`;
+
+    const dayData = goal.history?.[weekId]?.[dayIndex];
+    const entryCount = dayData?.entries?.length || 0;
+    
+    return { dayIndex, entryCount };
+}
     function getEntryCountOnDate(goal, date) { return getHistoricalDayInfo(goal, date).entryCount; }
-    function calculateStreak(goal) { let streak=0;let today=new Date();today.setHours(0,0,0,0);let currentDate=new Date(today);if(getEntryCountOnDate(goal,currentDate)===0){currentDate.setDate(currentDate.getDate()-1);}for(let i=0;i<365*5;i++){const dayIndex=currentDate.getDay();if(goal.days[dayIndex]){if(getEntryCountOnDate(goal,currentDate)>0){streak++;}else{break;}}currentDate.setDate(currentDate.getDate()-1);}return streak; }
+function calculateStreak(goal) {
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const isScheduledToday = goal.days[today.getDay()];
+    const isCompleteToday = getEntryCountOnDate(goal, today) > 0;
+
+    let dateToCheck = new Date(today);
+
+    if (isScheduledToday && !isCompleteToday) {
+        // If scheduled for today but not done, the current streak is 0.
+        return 0;
+    }
+    
+    if (!isScheduledToday) {
+        // If not scheduled for today, start counting from yesterday.
+        dateToCheck.setDate(dateToCheck.getDate() - 1);
+    }
+    // If it was scheduled and completed today, the count will start from today.
+
+    for (let i = 0; i < 365 * 5; i++) {
+        const dayOfWeek = dateToCheck.getDay();
+        const isScheduled = goal.days[dayOfWeek];
+        
+        if (isScheduled) {
+            const isComplete = getEntryCountOnDate(goal, dateToCheck) > 0;
+            if (isComplete) {
+                streak++;
+            } else {
+                // If it was scheduled but not complete, the streak is broken.
+                break;
+            }
+        }
+        // If not scheduled for a given day, we ignore it and continue the streak.
+        
+        dateToCheck.setDate(dateToCheck.getDate() - 1);
+    }
+    
+    return streak;
+}
     function calculateScores(goal) { let weekly=0,allTime=0;const currentWeekId=weekIdForDate(appState.currentWeek);if(goal.history){for(const weekId in goal.history){const weekData=goal.history[weekId];if(!weekData)continue;let scoreForWeek=0;weekData.forEach((dayData,dayIndex)=>{if(!dayData)return;if(goal.days[dayIndex]){scoreForWeek+=(dayData.entries.length||0);}});if(weekId===currentWeekId)weekly=scoreForWeek;allTime+=scoreForWeek;}}return{weekly,allTime};}
     // --- MODALS & MENUS ---
     function closeModal() { const modalArea=document.getElementById('modalArea'); if (modalArea.lastElementChild) { modalArea.removeChild(modalArea.lastElementChild); } }
@@ -701,7 +762,46 @@ function setupGlobalListeners() {
     function setupCellListeners(){document.querySelectorAll('.goal-day').forEach(cell=>{let pressTimer=null;let longPressTriggered=false;let startY=0,startX=0;let isDragging=false;let swipeTriggered=false;let hasMoved=false;const handlePressStart=(e)=>{if(cell.classList.contains('!cursor-not-allowed'))return;startY=e.type==='touchstart'?e.touches[0].clientY:e.clientY;startX=e.type==='touchstart'?e.touches[0].clientX:e.clientX;isDragging=true;swipeTriggered=false;longPressTriggered=false;hasMoved=false;pressTimer=setTimeout(()=>{longPressTriggered=true;isDragging=false;const{goalId,dayIndex}=cell.dataset;showDayDetailModal(goalId,parseInt(dayIndex));cleanupListeners();},500);document.addEventListener('mousemove',handlePressMove);document.addEventListener('touchmove',handlePressMove,{passive:false});document.addEventListener('mouseup',handlePressEnd,{once:true});document.addEventListener('touchend',handlePressEnd,{once:true});};const handlePressMove=(e)=>{if(!isDragging||longPressTriggered||swipeTriggered)return;const currentY=e.type==='touchmove'?e.touches[0].clientY:e.clientY;const currentX=e.type==='touchmove'?e.touches[0].clientX:e.clientX;const deltaY=currentY-startY;const deltaX=currentX-startX;const SWIPE_THRESHOLD=30;if(Math.abs(deltaY)>10||Math.abs(deltaX)>10){hasMoved=true;clearTimeout(pressTimer);if(Math.abs(deltaY)>Math.abs(deltaX)){e.preventDefault();}}if(Math.abs(deltaY)>SWIPE_THRESHOLD&&Math.abs(deltaY)>Math.abs(deltaX)){swipeTriggered=true;const{goalId,dayIndex}=cell.dataset;if(deltaY<0){addCheckmark(goalId,parseInt(dayIndex),cell);}else{removeLastEmoji(goalId,parseInt(dayIndex),cell);}cleanupListeners();}};const handlePressEnd=()=>{clearTimeout(pressTimer);if(isDragging&&!longPressTriggered&&!swipeTriggered&&!hasMoved){const{goalId,dayIndex}=cell.dataset;showLogModal(goalId,parseInt(dayIndex));}cleanupListeners();};const cleanupListeners=()=>{isDragging=false;clearTimeout(pressTimer);document.removeEventListener('mousemove',handlePressMove);document.removeEventListener('touchmove',handlePressMove);document.removeEventListener('mouseup',handlePressEnd);document.removeEventListener('touchend',handlePressEnd);}
     cell.removeEventListener('mousedown',handlePressStart);cell.removeEventListener('touchstart',handlePressStart);cell.addEventListener('mousedown',handlePressStart);cell.addEventListener('touchstart',handlePressStart,{passive:false});});}
     function initSortable(){if(sortable)sortable.destroy();const list=document.getElementById('goalList');if(!list)return;sortable=Sortable.create(list,{handle:'.goal-handle',animation:200,ghostClass:'sortable-ghost',onEnd:(evt)=>{appState.order=Array.from(evt.to.children).map(card=>card.dataset.id);persistState();}});}
-    showGoalModal = (goal) => { const isEdit=!!goal;const draft=isEdit?JSON.parse(JSON.stringify(goal)):{id:''+Date.now(),name:'',emoji:'🎯',days:Array(7).fill(true),history:{},type:'binary',archived:false,category:'شخصی',creationDate:new Date().toISOString()};const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-end justify-center';modal.innerHTML=`<div class="modal-content bg-app-bg rounded-t-2xl p-4 w-full max-w-lg pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"><h2 class="text-xl font-bold text-center mb-6 text-primary">${isEdit?'ویرایش هدف':'هدف جدید'}</h2><div class="space-y-4"><div class="flex gap-4"><div class="flex-grow"><label for="goalName" class="font-semibold mb-2 block text-sm">نام هدف</label><input type="text" id="goalName" value="${escapeHtml(draft.name)}" placeholder="مثلا: ورزش روزانه" class="w-full p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition"></div><div><label for="goalEmoji" class="font-semibold mb-2 block text-sm">ایموجی</label><input type="text" id="goalEmoji" value="${draft.emoji}" maxlength="2" class="w-20 text-center p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition"></div></div><div><label class="font-semibold mb-2 block text-sm">دسته‌بندی</label><select id="goalCategory" class="w-full p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition">${Object.keys(CATEGORIES).map(cat=>`<option value="${cat}" ${draft.category===cat?'selected':''}>${cat}</option>`).join('')}</select></div><div><label class="font-semibold mb-2 block text-sm">روزهای فعال</label><div class="grid grid-cols-7 gap-2 rounded-lg bg-app-cell-inactive p-1 weekday-toggle-row">${WEEKDAY_NAMES_SHORT.map((d,i)=>`<div class="weekday-toggle text-center font-bold p-2 rounded-md cursor-pointer transition-colors ${draft.days[i]?'bg-primary text-primary-text':'hover:bg-app-hover'}" data-day="${i}">${d}</div>`).join('')}</div></div></div><div class="grid grid-cols-2 gap-4 mt-8"><button class="action-btn-cancel w-full p-4 rounded-lg font-bold bg-app-cell-inactive hover:opacity-80 transition">لغو</button><button id="saveGoalBtn" class="w-full p-4 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition">${isEdit?'ذخیره':'افزودن'}</button></div></div>`;document.getElementById('modalArea').appendChild(modal);document.getElementById('goalName').focus();modal.onclick=e=>{if(e.target===modal)closeModal();};modal.querySelector('.action-btn-cancel').onclick=closeModal;modal.querySelectorAll('.weekday-toggle').forEach(toggle=>{toggle.onclick=()=>{const day=parseInt(toggle.dataset.day);draft.days[day]=!draft.days[day];toggle.classList.toggle('bg-primary');toggle.classList.toggle('text-primary-text');};});modal.querySelector('#saveGoalBtn').onclick=()=>{draft.name=modal.querySelector('#goalName').value.trim();draft.emoji=modal.querySelector('#goalEmoji').value;draft.category=modal.querySelector('#goalCategory').value;draft.type='binary';if(isEdit){const index=appState.goals.findIndex(g=>g.id===goal.id);if(index>-1)appState.goals[index]=draft;}else{appState.goals.push(draft);appState.order.push(draft.id);}persistState();closeModal();fullRender();};};
+
+    showGoalModal = (goal) => {
+    const isEdit = !!goal;
+    const draft = isEdit ? JSON.parse(JSON.stringify(goal)) : { id: '' + Date.now(), name: '', emoji: '🎯', days: Array(7).fill(true), history: {}, type: 'binary', archived: false, category: 'شخصی', creationDate: new Date().toISOString() };
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-end justify-center';
+    modal.innerHTML = `<div class="modal-content bg-app-bg rounded-t-2xl p-4 w-full max-w-lg pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"><h2 class="text-xl font-bold text-center mb-6 text-primary">${isEdit?'ویرایش هدف':'هدف جدید'}</h2><div class="space-y-4"><div class="flex gap-4"><div class="flex-grow"><label for="goalName" class="font-semibold mb-2 block text-sm">نام هدف</label><input type="text" id="goalName" value="${escapeHtml(draft.name)}" placeholder="مثلا: ورزش روزانه" class="w-full p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition"></div><div><label for="goalEmoji" class="font-semibold mb-2 block text-sm">ایموجی</label><input type="text" id="goalEmoji" value="${draft.emoji}" maxlength="2" class="w-20 text-center p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition"></div></div><div><label class="font-semibold mb-2 block text-sm">دسته‌بندی</label><select id="goalCategory" class="w-full p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition">${Object.keys(CATEGORIES).map(cat=>`<option value="${cat}" ${draft.category===cat?'selected':''}>${cat}</option>`).join('')}</select></div><div><label class="font-semibold mb-2 block text-sm">روزهای فعال</label><div class="grid grid-cols-7 gap-2 rounded-lg bg-app-cell-inactive p-1 weekday-toggle-row">${WEEKDAY_NAMES_SHORT.map((d, i) => {
+        const dataIndex = (i + 6) % 7; // Convert visual index (Sat=0) to data index (Sun=0)
+        return `<div class="weekday-toggle text-center font-bold p-2 rounded-md cursor-pointer transition-colors ${draft.days[dataIndex] ? 'bg-primary text-primary-text' : 'hover:bg-app-hover'}" data-day="${dataIndex}">${d}</div>`;
+    }).join('')}</div></div></div><div class="grid grid-cols-2 gap-4 mt-8"><button class="action-btn-cancel w-full p-4 rounded-lg font-bold bg-app-cell-inactive hover:opacity-80 transition">لغو</button><button id="saveGoalBtn" class="w-full p-4 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition">${isEdit ? 'ذخیره' : 'افزودن'}</button></div></div>`;
+    document.getElementById('modalArea').appendChild(modal);
+    document.getElementById('goalName').focus();
+    modal.onclick = e => { if (e.target === modal) closeModal(); };
+    modal.querySelector('.action-btn-cancel').onclick = closeModal;
+    modal.querySelectorAll('.weekday-toggle').forEach(toggle => {
+        toggle.onclick = () => {
+            const day = parseInt(toggle.dataset.day); // This is already the correct data index (Sun=0)
+            draft.days[day] = !draft.days[day];
+            toggle.classList.toggle('bg-primary');
+            toggle.classList.toggle('text-primary-text');
+        };
+    });
+    modal.querySelector('#saveGoalBtn').onclick = () => {
+        draft.name = modal.querySelector('#goalName').value.trim();
+        draft.emoji = modal.querySelector('#goalEmoji').value;
+        draft.category = modal.querySelector('#goalCategory').value;
+        draft.type = 'binary';
+        if (isEdit) {
+            const index = appState.goals.findIndex(g => g.id === goal.id);
+            if (index > -1) appState.goals[index] = draft;
+        } else {
+            appState.goals.push(draft);
+            appState.order.push(draft.id);
+        }
+        persistState();
+        closeModal();
+        fullRender();
+    };
+};
+
     showLogModal = (goalId,dayIndex)=>{const goal=appState.goals.find(g=>g.id===goalId);if(!goal||!goal.days[dayIndex])return;const weekId=weekIdForDate(appState.currentWeek);if(!goal.history)goal.history={};if(!goal.history[weekId])goal.history[weekId]=Array(7).fill(null).map(()=>({entries:[],note:''}));if(!goal.history[weekId][dayIndex])goal.history[weekId][dayIndex]={entries:[],note:''};const dayData=goal.history[weekId][dayIndex];const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-end justify-center';const renderEntriesInModal=(container)=>{const listHtml=dayData.entries.map((entry,i)=>{const content=entry.startsWith('<svg')?`<span class="w-6 h-6 inline-block">${entry}</span>`:escapeHtml(entry);return`<div class="flex items-center justify-between gap-1 bg-app-cell-inactive rounded-lg px-2 py-1 text-sm"><span>${content}</span><button data-index="${i}" class="delete-entry-btn text-red-500 hover:text-red-700 font-bold text-lg">&times;</button></div>`;}).join('');container.innerHTML=listHtml||`<span class="text-app-text-muted text-sm p-2">موردی ثبت نشده</span>`;};modal.innerHTML=`<div class="modal-content bg-app-bg rounded-t-2xl p-4 w-full max-w-lg pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"><h2 class="text-xl font-bold text-center mb-4 truncate">${goal.name}</h2><div class="space-y-4"><div><label class="font-semibold mb-2 block text-sm">موارد ثبت شده امروز</label><div id="entries-list" class="flex flex-wrap gap-2 min-h-[40px] bg-app-card p-2 rounded-lg border border-app-border"></div></div><div><label class="font-semibold mb-2 block text-sm">ثبت ایموجی</label><div class="emoji-grid grid grid-cols-7 gap-2 text-3xl">${EMOJIS.map(em=>{const content=em.startsWith('<svg')?`<span class="w-8 h-8 inline-block">${em}</span>`:escapeHtml(em);return`<button class="emoji-btn text-center rounded-lg p-2 hover:bg-app-hover transition-transform active:scale-125 focus:outline-none focus:ring-2 focus:ring-primary">${content}</button>`;}).join('')}</div></div><div><label for="note-input" class="font-semibold mb-2 block text-sm">یادداشت</label><textarea id="note-input" class="w-full p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition" rows="2" placeholder="یادداشت امروز...">${escapeHtml(dayData.note)}</textarea></div></div><div class="mt-8"><button class="action-btn-done w-full p-4 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition">انجام شد</button></div></div>`;document.getElementById('modalArea').appendChild(modal);const entriesList=modal.querySelector('#entries-list');renderEntriesInModal(entriesList);const saveAndClose=()=>{goal.history[weekId][dayIndex].note=modal.querySelector('#note-input').value;persistState();fullRender();closeModal();};modal.onclick=e=>{if(e.target===modal)saveAndClose();};modal.querySelector('.action-btn-done').onclick=saveAndClose;const updateData=()=>{persistState();renderEntriesInModal(entriesList);updateGoalCardStats(goalId);};entriesList.addEventListener('click',e=>{if(e.target.classList.contains('delete-entry-btn')){const index=parseInt(e.target.dataset.index);dayData.entries.splice(index,1);updateData();}});modal.querySelectorAll('.emoji-btn').forEach((btn,index)=>{btn.onclick=()=>{dayData.entries.push(EMOJIS[index]);updateData();};});}
     showDayDetailModal = (goalId,dayIndex)=>{const goal=appState.goals.find(g=>g.id===goalId);if(!goal)return;const weekDates=getWeekDates(appState.currentWeek);const date=weekDates[dayIndex];const weekId=weekIdForDate(appState.currentWeek);const dayData=goal.history?.[weekId]?.[dayIndex]||{entries:[],note:''};const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';const formattedDate=date.toLocaleDateString('fa-IR',{weekday:'long',month:'long',day:'numeric'});const entriesHtml=dayData.entries.length>0?dayData.entries.map(entry=>{if(entry.startsWith('<svg')){return`<span class="inline-block align-middle w-8 h-8">${entry}</span>`;}return`<span class="text-2xl">${escapeHtml(entry)}</span>`;}).join(''):'<span class="text-sm text-app-text-muted">موردی ثبت نشده</span>';const noteHtml=dayData.note?`<p class="text-sm bg-amber-500/10 p-3 rounded-lg">${escapeHtml(dayData.note)}</p>`:'<span class="text-sm text-app-text-muted">یادداشتی وجود ندارد</span>';modal.innerHTML=`<div class="modal-content bg-app-card rounded-2xl p-5 w-full max-w-sm shadow-2xl"><h3 class="font-bold text-lg text-primary mb-2">${escapeHtml(goal.name)}</h3><p class="text-sm text-app-text-muted font-semibold mb-4">${formattedDate}</p><div class="space-y-4"><div><h4 class="font-semibold text-sm mb-2">موارد ثبت شده</h4><div class="flex flex-wrap gap-3 items-center min-h-[40px] bg-app-bg p-3 rounded-lg">${entriesHtml}</div></div><div><h4 class="font-semibold text-sm mb-2">یادداشت</h4><div class="min-h-[40px]">${noteHtml}</div></div></div><button class="close-modal-btn w-full mt-6 p-3 rounded-lg font-bold bg-app-cell-inactive hover:opacity-80 transition">بستن</button></div>`;document.getElementById('modalArea').appendChild(modal);modal.onclick=e=>{if(e.target===modal||e.target.classList.contains('close-modal-btn'))closeModal();};}
     showContextMenu=(e,goalId)=>{e.preventDefault();e.stopPropagation();if(appState.contextMenuGoalId===goalId){closeContextMenu();return;}closeContextMenu();const goal=appState.goals.find(g=>g.id===goalId);if(!goal)return;const menu=document.getElementById('contextMenu');menu.innerHTML=`<button onclick="editGoal('${goalId}')" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg">✏️ <span>ویرایش</span></button><button onclick="duplicateGoal('${goalId}')" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg">🗂️ <span>کپی</span></button><button onclick="toggleArchiveGoal('${goalId}')" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg">${goal.archived?'📂 <span>لغو آرشیو</span>':'🗄️ <span>آرشیو</span>'}</button><div class="my-1 h-px bg-app-border"></div><button onclick="deleteGoal('${goalId}')" class="w-full text-left flex items-center gap-3 p-3 text-red-500 hover:bg-red-500/10 rounded-lg">🗑️ <span>حذف</span></button>`;menu.style.display='block';const rect=menu.getBoundingClientRect();let left=e.clientX;let top=e.clientY;if(left+rect.width>window.innerWidth-10){left=window.innerWidth-rect.width-10;}if(top+rect.height>window.innerHeight-10){top=window.innerHeight-rect.height-10;}menu.style.left=`${left}px`;menu.style.top=`${top}px`;appState.contextMenuGoalId=goalId;setTimeout(()=>document.addEventListener('click',closeContextMenu,{once:true}),10);};
@@ -779,30 +879,17 @@ function renderGoalHeatmap(container, goal, jYear, weekdayTotals) {
     const maxCompletions = Math.max(1, ...Object.values(completionsByJalaliDate));
     const theme = findThemeById(appState.activeThemeId);
     
-    /**
-     * NEW: Returns style classes for heatmap cells based on completion count.
-     * Provides a more vibrant green-based color scale.
-     * @param {number} count Number of completions for the day.
-     * @returns {{bg: string, text: string}} Object with background and text color classes.
-     */
     const getDayStyle = (count) => {
         if (!count || count === 0) {
-            return {
-                bg: 'bg-app-cell-inactive opacity-75',
-                text: '' // Use default text color
-            };
+            return { bg: 'bg-app-cell-inactive opacity-75', text: '' };
         }
-
-        const intensity = Math.min(count / maxCompletions, 1.0); // Simple intensity from 0 to 1
-
+        const intensity = Math.min(count / maxCompletions, 1.0);
         if (theme.isDark) {
-            // A scale from a dark teal to a bright emerald for dark themes
             if (intensity < 0.25) return { bg: 'bg-emerald-900', text: 'text-emerald-200' };
             if (intensity < 0.5) return { bg: 'bg-emerald-700', text: 'text-emerald-100' };
             if (intensity < 0.75) return { bg: 'bg-emerald-500', text: 'text-black' };
             return { bg: 'bg-emerald-300', text: 'text-black font-bold' };
         } else {
-            // A scale from a light green to a dark green for light themes
             if (intensity < 0.25) return { bg: 'bg-green-200', text: 'text-green-900' };
             if (intensity < 0.5) return { bg: 'bg-green-400', text: 'text-green-900' };
             if (intensity < 0.75) return { bg: 'bg-green-600', text: 'text-white' };
@@ -811,7 +898,8 @@ function renderGoalHeatmap(container, goal, jYear, weekdayTotals) {
     };
 
     const weekdayHeaders = WEEKDAY_NAMES_SHORT.map((dayName, index) => {
-        const count = weekdayTotals[index];
+        const dataIndex = (index + 6) % 7; // Map visual index (Sat=0) to data index (Sun=0)
+        const count = weekdayTotals[dataIndex];
         if (count > 0) {
             return `<div class="relative flex items-center justify-center">
                         ${dayName}
@@ -825,14 +913,14 @@ function renderGoalHeatmap(container, goal, jYear, weekdayTotals) {
     for (let jm = 1; jm <= 12; jm++) {
         const monthLength = jalaliMonthLength(jYear, jm);
         const firstGregorianDate = toGregorian(jYear, jm, 1);
-        const startOffset = firstGregorianDate.getDay();
+        const startOffset = (firstGregorianDate.getDay() + 1) % 7; // Adjusted for Sat start
         
         let monthHtml = `<div class="p-3 bg-app-bg rounded-lg">
             <h4 class="font-semibold text-center text-sm mb-2">${JALALI_MONTH_NAMES[jm-1]}</h4>
             <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-app-text-muted mb-1.5">
                ${weekdayHeaders}
             </div>
-            <div class="grid grid-cols-7 gap-1.5 text-xs">`; // Removed aspect-square to fit text better
+            <div class="grid grid-cols-7 gap-1.5 text-xs">`;
         
         for (let i = 0; i < startOffset; i++) { monthHtml += '<div></div>'; }
         for (let jd = 1; jd <= monthLength; jd++) {
@@ -840,7 +928,6 @@ function renderGoalHeatmap(container, goal, jYear, weekdayTotals) {
             const count = completionsByJalaliDate[jDateStr] || 0;
             const gDate = toGregorian(jYear, jm, jd);
             
-            // UPDATED: Apply dynamic styles for background and text
             const style = getDayStyle(count);
             const todayClass = isToday(gDate) ? 'ring-2 ring-primary' : '';
             const title = `${toFa(jd)} ${JALALI_MONTH_NAMES[jm-1]} ${toFa(jYear)}: ${toFa(count)} مورد`;
@@ -853,7 +940,6 @@ function renderGoalHeatmap(container, goal, jYear, weekdayTotals) {
     html += `</div>`;
     container.innerHTML = html;
 }
-
 /**
  * Creates and displays the goal-specific heatmap modal.
  * @param {string} goalId The ID of the goal to display.
@@ -1091,63 +1177,63 @@ function showGoalHeatmapModal(goalId) {
         const busiestDay = totalCompletions > 0 ? dayNames[busiestDayIndex] : '-';
         return { totalCompletions, busiestDay };
     }
-    function renderYearlyHeatmap(container, jYear) {
-        const completionsByJalaliDate = {};
-        appState.goals.filter(g => !g.archived).forEach(goal => {
-            if(goal.history) {
-                for(const weekId in goal.history) {
-                    const weekStartDate = new Date(weekId.replace(/-/g, '/'));
-                    goal.history[weekId].forEach((dayData, dayIndex) => {
-                        if (dayData && dayData.entries.length > 0) {
-                            const date = new Date(weekStartDate);
-                            date.setDate(date.getDate() + dayIndex);
-                            const [jy, jm, jd] = toJalali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-                            if (jy === jYear) {
-                                const jDateStr = `${jy}-${jm}-${jd}`;
-                                completionsByJalaliDate[jDateStr] = (completionsByJalaliDate[jDateStr] || 0) + dayData.entries.length;
-                            }
+   function renderYearlyHeatmap(container, jYear) {
+    const completionsByJalaliDate = {};
+    appState.goals.filter(g => !g.archived).forEach(goal => {
+        if(goal.history) {
+            for(const weekId in goal.history) {
+                const weekStartDate = new Date(weekId.replace(/-/g, '/'));
+                goal.history[weekId].forEach((dayData, dayIndex) => {
+                    if (dayData && dayData.entries.length > 0) {
+                        const date = new Date(weekStartDate);
+                        date.setDate(date.getDate() + dayIndex);
+                        const [jy, jm, jd] = toJalali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+                        if (jy === jYear) {
+                            const jDateStr = `${jy}-${jm}-${jd}`;
+                            completionsByJalaliDate[jDateStr] = (completionsByJalaliDate[jDateStr] || 0) + dayData.entries.length;
                         }
-                    });
-                }
+                    }
+                });
             }
-        });
-        const maxCompletions = Math.max(1, ...Object.values(completionsByJalaliDate));
-        const getColor = (count) => {
-            if (!count || count === 0) return 'bg-slate-200 dark:bg-slate-700/80';
-            const intensity = Math.min(count / (maxCompletions * 0.6 + 1), 1);
-            if (intensity < 0.25) return 'bg-emerald-200 dark:bg-emerald-900';
-            if (intensity < 0.5) return 'bg-emerald-400 dark:bg-emerald-700';
-            if (intensity < 0.75) return 'bg-emerald-600 dark:bg-emerald-500';
-            return 'bg-emerald-800 dark:bg-emerald-300';
-        };
-        let html = `<h3 class="font-bold mb-4 text-center">نقشه فعالیت سال ${toFa(jYear)}</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">`;
-        for (let jm = 1; jm <= 12; jm++) {
-            const monthLength = jalaliMonthLength(jYear, jm);
-            const firstGregorianDate = toGregorian(jYear, jm, 1);
-            const startOffset = firstGregorianDate.getDay(); // Sunday is 0
-            let monthHtml = `<div class="p-3 bg-slate-100 dark:bg-slate-900/50 rounded-lg">
-                <h4 class="font-semibold text-center text-sm mb-2">${JALALI_MONTH_NAMES[jm-1]}</h4>
-                <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-400 mb-1.5">
-                   ${WEEKDAY_NAMES_SHORT.map(d => `<div>${d}</div>`).join('')}
-                </div>
-                <div class="grid grid-cols-7 gap-1.5">`;
-            for (let i = 0; i < startOffset; i++) { monthHtml += '<div></div>'; }
-            for (let jd = 1; jd <= monthLength; jd++) {
-                const jDateStr = `${jYear}-${jm}-${jd}`;
-                const count = completionsByJalaliDate[jDateStr] || 0;
-                const gDate = toGregorian(jYear, jm, jd);
-                const colorClass = getColor(count);
-                const todayClass = isToday(gDate) ? 'ring-2 ring-sky-500' : '';
-                const title = `${toFa(jd)} ${JALALI_MONTH_NAMES[jm-1]} ${toFa(jYear)}: ${toFa(count)} مورد`;
-                monthHtml += `<div onclick="showDailySummaryModal(${jYear}, ${jm}, ${jd})" class="${colorClass} ${todayClass} heatmap-day text-slate-800 dark:text-slate-200 font-bold" title="${title}">${toFa(jd)}</div>`;
-            }
-            monthHtml += `</div></div>`;
-            html += monthHtml;
         }
-        html += `</div>`;
-        container.innerHTML = html;
+    });
+    const maxCompletions = Math.max(1, ...Object.values(completionsByJalaliDate));
+    const getColor = (count) => {
+        if (!count || count === 0) return 'bg-slate-200 dark:bg-slate-700/80';
+        const intensity = Math.min(count / (maxCompletions * 0.6 + 1), 1);
+        if (intensity < 0.25) return 'bg-emerald-200 dark:bg-emerald-900';
+        if (intensity < 0.5) return 'bg-emerald-400 dark:bg-emerald-700';
+        if (intensity < 0.75) return 'bg-emerald-600 dark:bg-emerald-500';
+        return 'bg-emerald-800 dark:bg-emerald-300';
+    };
+    let html = `<h3 class="font-bold mb-4 text-center">نقشه فعالیت سال ${toFa(jYear)}</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">`;
+    for (let jm = 1; jm <= 12; jm++) {
+        const monthLength = jalaliMonthLength(jYear, jm);
+        const firstGregorianDate = toGregorian(jYear, jm, 1);
+        const startOffset = (firstGregorianDate.getDay() + 1) % 7; // Adjusted for Sat start
+        let monthHtml = `<div class="p-3 bg-slate-100 dark:bg-slate-900/50 rounded-lg">
+            <h4 class="font-semibold text-center text-sm mb-2">${JALALI_MONTH_NAMES[jm-1]}</h4>
+            <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-400 mb-1.5">
+               ${WEEKDAY_NAMES_SHORT.map(d => `<div>${d}</div>`).join('')}
+            </div>
+            <div class="grid grid-cols-7 gap-1.5">`;
+        for (let i = 0; i < startOffset; i++) { monthHtml += '<div></div>'; }
+        for (let jd = 1; jd <= monthLength; jd++) {
+            const jDateStr = `${jYear}-${jm}-${jd}`;
+            const count = completionsByJalaliDate[jDateStr] || 0;
+            const gDate = toGregorian(jYear, jm, jd);
+            const colorClass = getColor(count);
+            const todayClass = isToday(gDate) ? 'ring-2 ring-sky-500' : '';
+            const title = `${toFa(jd)} ${JALALI_MONTH_NAMES[jm-1]} ${toFa(jYear)}: ${toFa(count)} مورد`;
+            monthHtml += `<div onclick="showDailySummaryModal(${jYear}, ${jm}, ${jd})" class="${colorClass} ${todayClass} heatmap-day text-slate-800 dark:text-slate-200 font-bold" title="${title}">${toFa(jd)}</div>`;
+        }
+        monthHtml += `</div></div>`;
+        html += monthHtml;
     }
+    html += `</div>`;
+    container.innerHTML = html;
+}
     function showDailySummaryModal(jYear, jMonth, jDay) {
         const gDate = toGregorian(jYear, jMonth, jDay);
         const formattedDate = gDate.toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
