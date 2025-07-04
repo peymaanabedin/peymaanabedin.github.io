@@ -91,19 +91,15 @@
 <body class="bg-app-bg text-app-text antialiased">
     <div class="min-h-screen pt-[env(safe-area-inset-top)]">
        <header id="navbar" class="sticky top-0 z-50 bg-app-header backdrop-blur-lg flex items-center justify-between p-4 border-b border-app-border">
-<div class="md:hidden flex items-center justify-between w-full">
+    <div class="md:hidden flex items-center justify-between w-full">
+        <div class="w-8"></div> 
+        
+        <div id="weekTitleMobile" class="text-base font-bold text-primary text-center truncate"></div>
 
-    <button id="mobileReportsBtn" aria-label="گزارش‌ها" class="text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-    </button>
-
-    <div id="weekTitleMobile" class="text-base font-bold text-primary text-center truncate"></div>
-
-    <button id="hamburgerBtn" aria-label="Open menu" class="text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-    </button>
-
-</div>
+        <button id="hamburgerBtn" aria-label="Open menu" class="text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
 
     <div class="hidden md:flex flex-1">
         <button id="todayBtn" class="text-sm text-app-text-muted font-semibold hover:text-primary transition-colors"></button>
@@ -707,6 +703,54 @@ function removeFavoriteTheme(themeId) {
     persistState();
 }
 
+function showThemeContextMenu(event, themeId) {
+    event.preventDefault();
+    event.stopPropagation();
+    closeContextMenu(); // Close any other open context menus
+
+    const menu = document.getElementById('contextMenu');
+    const isFavorite = appState.favoriteThemes.includes(themeId);
+    const activeTab = document.querySelector('#theme-modal-tabs .bg-primary')?.dataset.tab;
+
+    let menuAction;
+    if (isFavorite) {
+        menuAction = `<button id="remove-favorite-btn" class="w-full text-left flex items-center gap-3 p-3 text-red-500 hover:bg-red-500/10 rounded-lg">💔 <span>حذف از علاقه‌مندی‌ها</span></button>`;
+    } else {
+        menuAction = `<button id="add-favorite-btn" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg">❤️ <span>افزودن به علاقه‌مندی‌ها</span></button>`;
+    }
+
+    menu.innerHTML = menuAction;
+    menu.style.display = 'block';
+    
+    // Position menu
+    const rect = menu.getBoundingClientRect();
+    let left = event.clientX;
+    let top = event.clientY;
+    if (left + rect.width > window.innerWidth - 10) { left = window.innerWidth - rect.width - 10; }
+    if (top + rect.height > window.innerHeight - 10) { top = window.innerHeight - rect.height - 10; }
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+
+    const handleAction = (action) => {
+        closeContextMenu();
+        const scrollContainer = document.getElementById('theme-scroll-container');
+        const scrollPosition = scrollContainer ? scrollContainer.scrollTop : 0;
+        
+        action(themeId);
+
+        // Refresh the modal to show the change in the favorites list
+        showThemeSelectorModal({ scrollPosition, activeTab });
+    };
+
+    const addBtn = document.getElementById('add-favorite-btn');
+    const removeBtn = document.getElementById('remove-favorite-btn');
+
+    if (addBtn) addBtn.onclick = () => handleAction(addFavoriteTheme);
+    if (removeBtn) removeBtn.onclick = () => handleAction(removeFavoriteTheme);
+
+    setTimeout(() => document.addEventListener('click', closeContextMenu, { once: true }), 10);
+}
+
 // REPLACE THIS FUNCTION
 function persistState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.goals));
@@ -1060,7 +1104,6 @@ function calculateScores(goal) {
     function closeCategoryMenuOnClickOutside(e) { if (!e.target.closest('#categoryMenu') && !e.target.closest('#categoryMenuBtn')) { toggleCategoryMenu(false); } else { document.addEventListener('click', closeCategoryMenuOnClickOutside, { once: true }); } }
     
 // REPLACE THIS FUNCTION
-// REPLACE THIS FUNCTION
 function showThemeSelectorModal(options = {}) {
     const { scrollPosition = 0, activeTab: initialActiveTab } = options;
     closeModal();
@@ -1068,7 +1111,7 @@ function showThemeSelectorModal(options = {}) {
     modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';
 
     const themeCategories = [
-        { key: 'favorites', title: 'مورد علاقه ها' },
+        { key: 'favorites', title: 'مورد علاقه ها' }, // New Favorites Tab
         { key: 'modernDark', title: 'مدرن تیره' },
         { key: 'classicDark', title: 'کلاسیک تیره' },
         { key: 'modernLight', title: 'مدرن روشن' },
@@ -1076,11 +1119,11 @@ function showThemeSelectorModal(options = {}) {
     ];
     
     const activeTheme = findThemeById(appState.activeThemeId);
-    let activeTabKey = initialActiveTab || 'favorites';
+    let activeTabKey = initialActiveTab || 'favorites'; // Default to favorites tab
 
     if (!initialActiveTab) {
         for (const cat of themeCategories) {
-            if (cat.key !== 'favorites' && themesData[cat.key] && themesData[cat.key].some(t => t.id === appState.activeThemeId)) {
+            if (cat.key !== 'favorites' && themesData[cat.key].some(t => t.id === appState.activeThemeId)) {
                 activeTabKey = cat.key;
                 break;
             }
@@ -1088,25 +1131,19 @@ function showThemeSelectorModal(options = {}) {
     }
     
     const renderThemes = (themes) => {
-        if (!themes || themes.length === 0) {
-            return `<div class="col-span-1 sm:col-span-2 text-center text-app-text-muted p-8">برای افزودن، ستاره ⭐ کنار هر تم را لمس کنید.</div>`;
+        if (themes.length === 0) {
+            return `<div class="col-span-1 sm:col-span-2 text-center text-app-text-muted p-8">برای افزودن به این لیست، روی یک تم طولانی فشار دهید.</div>`;
         }
         return themes.map(theme => {
             const isActive = theme.id === appState.activeThemeId;
-            const isFavorite = appState.favoriteThemes.includes(theme.id);
             return `
-                <div class="theme-btn-wrapper flex items-center rounded-lg transition-colors ${isActive ? 'bg-primary/20 ring-2 ring-primary' : 'hover:bg-app-hover'}">
-                    <button data-theme-id="${theme.id}" class="theme-select-btn flex-grow text-right p-3 flex items-center gap-4">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center" style="background-color:${theme.bg}; border: 2px solid ${theme.primary};">
-                            <div class="w-4 h-4 rounded-full" style="background-color: ${theme.text}"></div>
-                        </div>
-                        <span class="font-semibold">${theme.name}</span>
-                        ${isActive ? '<span class="selected-checkmark ml-auto text-primary font-bold">✓</span>' : ''}
-                    </button>
-                    <button class="favorite-star-btn p-3 text-2xl text-amber-400 hover:opacity-75 transition-opacity" data-theme-id="${theme.id}">
-                        ${isFavorite ? '★' : '☆'}
-                    </button>
-                </div>
+                <button data-theme-id="${theme.id}" class="theme-btn w-full text-right p-3 rounded-lg flex items-center gap-4 transition-colors ${isActive ? 'bg-primary/20 ring-2 ring-primary' : 'hover:bg-app-hover'}">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center" style="background-color:${theme.bg}; border: 2px solid ${theme.primary};">
+                        <div class="w-4 h-4 rounded-full" style="background-color: ${theme.text}"></div>
+                    </div>
+                    <span class="font-semibold">${theme.name}</span>
+                    ${isActive ? '<span class="ml-auto text-primary font-bold">✓</span>' : ''}
+                </button>
             `;
         }).join('');
     }
@@ -1114,7 +1151,7 @@ function showThemeSelectorModal(options = {}) {
     const favoriteThemesData = appState.favoriteThemes.map(id => findThemeById(id)).filter(Boolean);
 
     const tabContentsHtml = themeCategories.map((cat) => {
-        const themes = cat.key === 'favorites' ? favoriteThemesData : (themesData[cat.key] || []);
+        const themes = cat.key === 'favorites' ? favoriteThemesData : themesData[cat.key];
         return `<div id="tab-content-${cat.key}" class="tab-content grid grid-cols-1 sm:grid-cols-2 gap-2 ${cat.key !== activeTabKey ? 'hidden' : ''}">${renderThemes(themes)}</div>`;
     }).join('');
 
@@ -1129,7 +1166,7 @@ function showThemeSelectorModal(options = {}) {
             <div id="theme-modal-tabs" class="flex-shrink-0 flex flex-wrap items-center gap-2 p-1 mb-4 bg-app-card rounded-xl">
                 ${themeCategories.map(c => `<button data-tab="${c.key}" class="tab-btn flex-1 p-3 font-semibold text-sm rounded-lg transition-colors ${c.key === activeTabKey ? 'bg-primary text-primary-text' : 'text-app-text-muted hover:bg-app-hover'}">${c.title}</button>`).join('')}
             </div>
-            <div id="theme-scroll-container" class="flex-grow overflow-y-auto space-y-3 p-1 -ml-2 pl-2">
+            <div id="theme-scroll-container" class="flex-grow overflow-y-auto space-y-3 p-1 -ml-2 pl-2 no-scrollbar">
                 ${tabContentsHtml}
             </div>
         </div>`;
@@ -1151,43 +1188,43 @@ function showThemeSelectorModal(options = {}) {
         });
     });
 
-    modal.querySelectorAll('.theme-select-btn').forEach(button => {
+    modal.querySelectorAll('.theme-btn').forEach(button => {
+        // --- Logic for single click to select theme ---
         button.addEventListener('click', () => {
             const newThemeId = button.dataset.themeId;
             if (newThemeId === appState.activeThemeId) return;
             setActiveTheme(newThemeId);
             const newTheme = findThemeById(newThemeId);
-            const oldActiveWrapper = modal.querySelector('.theme-btn-wrapper.bg-primary\\/20');
-            if (oldActiveWrapper) {
-                oldActiveWrapper.classList.remove('bg-primary/20', 'ring-2', 'ring-primary');
-                oldActiveWrapper.querySelector('.selected-checkmark')?.remove();
+            const oldActiveButton = modal.querySelector('.theme-btn.bg-primary\\/20');
+            if (oldActiveButton) {
+                oldActiveButton.classList.remove('bg-primary/20', 'ring-2', 'ring-primary');
+                oldActiveButton.querySelector('.ml-auto')?.remove();
             }
-            const newWrapper = button.closest('.theme-btn-wrapper');
-            newWrapper.classList.add('bg-primary/20', 'ring-2', 'ring-primary');
-            button.insertAdjacentHTML('beforeend', '<span class="selected-checkmark ml-auto text-primary font-bold">✓</span>');
+            button.classList.add('bg-primary/20', 'ring-2', 'ring-primary');
+            button.insertAdjacentHTML('beforeend', '<span class="ml-auto text-primary font-bold">✓</span>');
             modal.querySelector('#theme-modal-title').innerHTML = `انتخاب تم: <span class="text-primary">${escapeHtml(newTheme.name)}</span>`;
         });
-    });
 
-    modal.querySelectorAll('.favorite-star-btn').forEach(starButton => {
-        starButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const themeId = starButton.dataset.themeId;
-            const isFavorite = appState.favoriteThemes.includes(themeId);
-            
-            if (isFavorite) {
-                removeFavoriteTheme(themeId);
-            } else {
-                addFavoriteTheme(themeId);
-            }
-
-            const currentScroll = scrollContainer ? scrollContainer.scrollTop : 0;
-            const currentTab = modal.querySelector('.tab-btn.bg-primary')?.dataset.tab;
-            showThemeSelectorModal({ scrollPosition: currentScroll, activeTab: currentTab });
-        });
+        // --- Logic for long press to add/remove favorite ---
+        let pressTimer = null;
+        const startPress = (e) => {
+            if (e.type === 'contextmenu') e.preventDefault(); // Prevent default right-click menu
+            pressTimer = setTimeout(() => {
+                showThemeContextMenu(e, button.dataset.themeId);
+            }, 500); // 500ms for long press
+        };
+        const cancelPress = () => {
+            clearTimeout(pressTimer);
+        };
+        button.addEventListener("mousedown", startPress);
+        button.addEventListener("touchstart", startPress);
+        button.addEventListener("mouseup", cancelPress);
+        button.addEventListener("mouseleave", cancelPress);
+        button.addEventListener("touchend", cancelPress);
+        button.addEventListener("contextmenu", startPress);
     });
 }
-    function showAboutModal() { const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';modal.innerHTML=`<div class="modal-content glass-modal-content rounded-2xl p-6 w-full max-w-md shadow-2xl"><div class="flex flex-col items-center text-center"><div class="w-24 h-24 bg-app-card rounded-3xl flex items-center justify-center mb-5 border border-app-border shadow-md"><img src="https://i.postimg.cc/vmBKfx6T/rooza-app-logo.png" alt="Rooza Logo" class="w-16 h-16"/></div><h2 class="text-2xl font-bold mb-2 text-app-text">روزا (Rooza)</h2><p class="text-base text-app-text-muted mb-6">اپلیکیشن مدیریت عادت و هدف شخصی</p><div class="text-sm text-app-text-muted space-y-2"><p>نسخه 0.05-ltr</p><p>ساخته شده برای کمک به شما در ساختن عادات بهتر.</p><p>کپی رایت 1404 © کدنویسی شده توسط پیمان عابدین پور ${new Date().getFullYear()} - Rooza</p></div><button class="close-modal-btn w-full mt-8 p-3 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition-all">بستن</button></div></div>`;document.getElementById('modalArea').appendChild(modal);modal.onclick=e=>{if(e.target===modal||e.target.closest('.close-modal-btn'))closeModal();};}
+    function showAboutModal() { const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';modal.innerHTML=`<div class="modal-content glass-modal-content rounded-2xl p-6 w-full max-w-md shadow-2xl"><div class="flex flex-col items-center text-center"><div class="w-24 h-24 bg-app-card rounded-3xl flex items-center justify-center mb-5 border border-app-border shadow-md"><img src="https://i.postimg.cc/vmBKfx6T/rooza-app-logo.png" alt="Rooza Logo" class="w-16 h-16"/></div><h2 class="text-2xl font-bold mb-2 text-app-text">روزا (Rooza)</h2><p class="text-base text-app-text-muted mb-6">اپلیکیشن مدیریت عادت و هدف شخصی</p><div class="text-sm text-app-text-muted space-y-2"><p>نسخه 0.03-ltr</p><p>ساخته شده برای کمک به شما در ساختن عادات بهتر.</p><p>کپی رایت 1404 © کدنویسی شده توسط پیمان عابدین پور ${new Date().getFullYear()} - Rooza</p></div><button class="close-modal-btn w-full mt-8 p-3 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition-all">بستن</button></div></div>`;document.getElementById('modalArea').appendChild(modal);modal.onclick=e=>{if(e.target===modal||e.target.closest('.close-modal-btn'))closeModal();};}
     function showBackupModal() { const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';modal.innerHTML=`<div class="modal-content glass-modal-content rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar"><div class="flex justify-between items-center mb-5"><h2 class="text-2xl font-bold text-app-text">پشتیبان‌گیری و بازیابی</h2><button class="close-modal-btn text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">&times;</button></div><div class="space-y-6"><div class="bg-app-card/50 p-5 rounded-xl border border-app-border"><div class="flex items-start gap-4"><div class="flex-shrink-0 w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></div><div><h3 class="font-bold text-lg text-app-text">خروجی گرفتن اطلاعات</h3><p class="text-sm text-app-text-muted mt-1 mb-4">یک فایل JSON از تمام اهداف و تاریخچه خود دانلود کنید.</p><button id="exportBtn" class="w-full sm:w-auto px-5 py-2.5 rounded-lg font-bold bg-green-600 text-white hover:bg-green-700 transition-colors">دانلود فایل پشتیبان</button></div></div></div><div class="bg-app-card/50 p-5 rounded-xl border border-app-border"><div class="flex items-start gap-4"><div class="flex-shrink-0 w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg></div><div><h3 class="font-bold text-lg text-app-text">ورودی گرفتن اطلاعات</h3><p class="text-sm text-app-text-muted mt-1 mb-4">یک فایل پشتیبان JSON را برای بازیابی اطلاعات خود انتخاب کنید.</p><div class="p-3 mb-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-sm"><strong>هشدار:</strong> این عمل تمام اطلاعات فعلی شما را بازنویسی خواهد کرد.</div><button id="importBtn" class="w-full sm:w-auto px-5 py-2.5 rounded-lg font-bold bg-sky-600 text-white hover:bg-sky-700 transition-colors">انتخاب فایل و بازیابی</button></div></div></div></div><input type="file" id="importFile" class="hidden" accept=".json"></div>`;document.getElementById('modalArea').appendChild(modal);modal.onclick=e=>{if(e.target===modal||e.target.closest('.close-modal-btn'))closeModal();};modal.querySelector('#exportBtn').onclick=exportData;modal.querySelector('#importBtn').onclick=()=>document.getElementById('importFile').click();modal.querySelector('#importFile').onchange=importData;}
     function exportData(){try{const dataToExport={goals:appState.goals,order:appState.order,userLight:appState.userLight,userDark:appState.userDark};const dataStr=JSON.stringify(dataToExport,null,2);const dataBlob=new Blob([dataStr],{type:"application/json"});const url=URL.createObjectURL(dataBlob);const link=document.createElement('a');const today=new Date().toISOString().slice(0,10);link.download=`rooza-backup-${today}.json`;link.href=url;link.click();URL.revokeObjectURL(url);closeModal();}catch(error){console.error("Error exporting data:",error);alert("خطا در خروجی گرفتن اطلاعات.");}}
     function importData(event){const file=event.target.files[0];if(!file)return;if(!confirm("آیا مطمئن هستید؟ با وارد کردن اطلاعات جدید، تمام اطلاعات فعلی شما بازنویسی خواهد شد. این عمل غیرقابل بازگشت است.")){return;}const reader=new FileReader();reader.onload=(e)=>{try{const importedData=JSON.parse(e.target.result);if(importedData&&Array.isArray(importedData.goals)&&Array.isArray(importedData.order)){appState.goals=importedData.goals;appState.order=importedData.order;if(importedData.userLight) appState.userLight = importedData.userLight;if(importedData.userDark) appState.userDark = importedData.userDark;persistState();loadStateFromStorage();fullRender();closeModal();alert("اطلاعات با موفقیت وارد شد.");}else{throw new Error("Invalid file format.");}}catch(error){console.error("Error importing data:",error);alert("خطا در وارد کردن اطلاعات. فایل انتخاب شده معتبر نیست.");}};reader.readAsText(file);}
@@ -1225,7 +1262,6 @@ function setupGlobalListeners() {
             case 'todayBtn': appState.currentWeek = getStartOfWeek(new Date()); fullRender(); break;
             // This line is changed for RTL
             case 'hamburgerBtn': document.getElementById('mobileMenu').classList.remove('translate-x-full'); break;
-                        case 'mobileReportsBtn': showReportModal(); break; 
         }
     };
     document.getElementById('settingsMenu').addEventListener('click', e => {
@@ -1944,7 +1980,6 @@ function showGoalHeatmapModal(goalId) {
     }
 // ADD THIS NEW FUNCTION TO YOUR SCRIPT
 // REPLACE THIS FUNCTION
-// REPLACE THIS FUNCTION
 function renderSettingsMenu() {
     const menu = document.getElementById('settingsMenu');
     if (!menu) return;
@@ -2000,8 +2035,6 @@ function renderSettingsMenu() {
     `;
     const desktopToggle = menu.querySelector('#darkModeToggle');
     if (desktopToggle) desktopToggle.checked = isDark;
-    
-    // Correctly add the listener for the random theme toggle
     const randomThemeToggle = menu.querySelector('#randomThemeToggle');
     if (randomThemeToggle) {
         randomThemeToggle.checked = appState.randomThemeMode;
@@ -2011,6 +2044,7 @@ function renderSettingsMenu() {
         };
     }
 }
+
 // You should also add the "Random Theme" toggle to renderMobileMenu if you wish.
 function setupHeaderSwipe() {
     const navbar = document.getElementById('navbar');
