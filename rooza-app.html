@@ -798,43 +798,41 @@ function setupGlobalListeners() {
 function setupCellListeners() {
     document.querySelectorAll('.goal-day').forEach(cell => {
         let pressTimer = null;
-        let longPressTriggered = false;
-        let startY = 0,
-            startX = 0;
-        let isDragging = false;
-        let swipeTriggered = false;
-        let hasMoved = false;
+        let isHolding = false;
+        let startY = 0;
+        let startX = 0;
+        let touchMoved = false; // Tracks if a significant touch move occurred
+
+        const HOLD_DURATION = 400; // Reduced for quicker feedback (from 500ms)
+        const SWIPE_THRESHOLD = 20; // Reduced for easier swipe (from 30px)
+        const TAP_THRESHOLD = 10; // Max movement for a tap to be considered (new)
 
         const handlePressStart = (e) => {
             if (cell.classList.contains('!cursor-not-allowed')) return;
 
-            // Prevent default touch behavior for potential scrolling issues if needed,
-            // but keep it passive if not interfering with other elements.
-            // e.preventDefault(); 
+            // Immediately prevent default scroll/zoom on touch start
+            // This is crucial for a native feel and to avoid unwanted scrolling
+            e.preventDefault();
+
+            // Reset state
+            isHolding = false;
+            touchMoved = false;
+            clearTimeout(pressTimer);
 
             startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
             startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
 
-            isDragging = true;
-            swipeTriggered = false;
-            longPressTriggered = false;
-            hasMoved = false;
-
+            // Set a timer for the "hold"
             pressTimer = setTimeout(() => {
-                longPressTriggered = true;
-                isDragging = false; // Long press detected, no longer dragging for swipe
-                const {
-                    goalId,
-                    dayIndex
-                } = cell.dataset;
-                showDayDetailModal(goalId, parseInt(dayIndex));
-                cleanupListeners();
-            }, 500); // Hold duration for long press
+                isHolding = true; // Hold detected
+                // No visual change here, the hold allows subsequent swipe
+            }, HOLD_DURATION);
 
+            // Add move and end listeners
             document.addEventListener('mousemove', handlePressMove);
             document.addEventListener('touchmove', handlePressMove, {
                 passive: false
-            }); // Keep passive: false for touchmove to allow preventDefault
+            }); // Keep passive: false for touchmove
             document.addEventListener('mouseup', handlePressEnd, {
                 once: true
             });
@@ -844,75 +842,67 @@ function setupCellListeners() {
         };
 
         const handlePressMove = (e) => {
-            if (!isDragging || longPressTriggered || swipeTriggered) return;
-
             const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
             const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
             const deltaY = currentY - startY;
             const deltaX = currentX - startX;
 
-            const SWIPE_THRESHOLD = 30; // Minimum distance for a swipe
-
-            // Check for significant movement to cancel potential long press
-            if (Math.abs(deltaY) > 10 || Math.abs(deltaX) > 10) {
-                hasMoved = true;
-                clearTimeout(pressTimer); // Cancel long press if user moves
-                if (Math.abs(deltaY) > Math.abs(deltaX)) {
-                    e.preventDefault(); // Prevent scrolling if it's a vertical swipe
-                }
+            // Mark if the touch has moved significantly
+            if (Math.abs(deltaY) > TAP_THRESHOLD || Math.abs(deltaX) > TAP_THRESHOLD) {
+                touchMoved = true;
+                // If movement exceeds tap threshold, cancel potential long press
+                clearTimeout(pressTimer);
+                isHolding = false; // No longer holding if moved too much before hold
             }
 
-            // Detect swipe for emoji interaction only after a hold is considered
-            // and if it's primarily a vertical swipe
-            if (Math.abs(deltaY) > SWIPE_THRESHOLD && Math.abs(deltaY) > Math.abs(deltaX)) {
-                // If a long press was initiated (meaning pressTimer has run out or cleared for movement)
-                // and a vertical swipe occurs, trigger emoji action.
-                if (pressTimer === null || !hasMoved) { // Only trigger swipe if it's not just a quick tap/drag
-                    swipeTriggered = true;
-                    const {
-                        goalId,
-                        dayIndex
-                    } = cell.dataset;
+            // If currently holding AND a vertical swipe is detected
+            if (isHolding && Math.abs(deltaY) > SWIPE_THRESHOLD && Math.abs(deltaY) > Math.abs(deltaX)) {
+                e.preventDefault(); // Ensure no scrolling while swiping
+                
+                const { goalId, dayIndex } = cell.dataset;
 
-                    if (deltaY > 0) { // Swipe down
-                        addCheckmark(goalId, parseInt(dayIndex), cell);
-                    } else { // Swipe up
-                        removeLastEmoji(goalId, parseInt(dayIndex), cell);
-                    }
-                    cleanupListeners(); // Clean up listeners after action
+                if (deltaY > 0) { // Swipe down
+                    addCheckmark(goalId, parseInt(dayIndex), cell);
+                } else { // Swipe up
+                    removeLastEmoji(goalId, parseInt(dayIndex), cell);
                 }
+
+                // Action performed, clean up and reset
+                cleanupListeners();
             }
         };
 
         const handlePressEnd = () => {
-            clearTimeout(pressTimer);
-            if (isDragging && !longPressTriggered && !swipeTriggered && !hasMoved) {
-                // This means it was a quick tap, not a long press or swipe
-                const {
-                    goalId,
-                    dayIndex
-                } = cell.dataset;
+            clearTimeout(pressTimer); // Clear any pending hold timer
+
+            // If hold was NOT established AND touch hasn't moved significantly (it was a tap)
+            if (!isHolding && !touchMoved) {
+                const { goalId, dayIndex } = cell.dataset;
                 showLogModal(goalId, parseInt(dayIndex));
+            } else if (isHolding && touchMoved && Math.abs(startY - (e.changedTouches ? e.changedTouches[0].clientY : e.clientY)) <= SWIPE_THRESHOLD) {
+                // If held and moved a little but not enough for a swipe, show details (like the long press original behavior)
+                const { goalId, dayIndex } = cell.dataset;
+                showDayDetailModal(goalId, parseInt(dayIndex));
             }
-            cleanupListeners(); // Ensure cleanup happens
+            
+            cleanupListeners(); // Always clean up
         };
 
         const cleanupListeners = () => {
-            isDragging = false;
+            isHolding = false;
+            touchMoved = false; // Reset for next interaction
             clearTimeout(pressTimer);
             document.removeEventListener('mousemove', handlePressMove);
             document.removeEventListener('touchmove', handlePressMove);
             document.removeEventListener('mouseup', handlePressEnd);
             document.removeEventListener('touchend', handlePressEnd);
-        }
+        };
 
         // Ensure listeners are added correctly and not duplicated
         cell.removeEventListener('mousedown', handlePressStart);
         cell.removeEventListener('touchstart', handlePressStart);
         cell.addEventListener('mousedown', handlePressStart);
-        cell.addEventListener('touchstart', handlePressStart, {
-            passive: false
-        });
+        cell.addEventListener('touchstart', handlePressStart, { passive: false });
     });
 }
 
