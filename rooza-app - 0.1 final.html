@@ -64,6 +64,107 @@
   --tw-ring-opacity: 0.2 !important;
   --tw-ring-color: rgba(208, 208, 208, 0.32) !important
 }
+.emoji-in-cell-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.emoji-counter-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -4px;
+    background-color: var(--color-primary);
+    color: var(--color-primary-text);
+    border-radius: 9999px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-card);
+    transform-origin: bottom right;
+    animation: badge-pop-in 0.3s ease-out forwards;
+}
+@keyframes badge-pop-in {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- Mobile Menu Redesign --- */
+#mobileMenu {
+    background-color: var(--color-header);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid var(--color-border);
+    box-shadow: -10px 0px 30px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu-open #mainContent,
+.mobile-menu-open #navbar,
+.mobile-menu-open #fab {
+    filter: blur(4px) brightness(0.8);
+    transform: scale(0.98);
+    transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+body.mobile-menu-open {
+    overflow: hidden;
+}
+
+.menu-item-fade-in {
+    animation: menuItemFadeIn 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes menuItemFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.menu-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    padding: 0 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.mobile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: background-color 0.2s, color 0.2s;
+}
+.mobile-menu-item:hover {
+    background-color: var(--color-hover);
+}
+.mobile-menu-item.active {
+    background-color: var(--color-primary);
+    color: var(--color-primary-text);
+    box-shadow: 0 4px 14px 0 var(--color-primary-shadow);
+}
+.mobile-menu-item .icon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
 
     </style>
     <script>
@@ -91,15 +192,19 @@
 <body class="bg-app-bg text-app-text antialiased">
     <div class="min-h-screen pt-[env(safe-area-inset-top)]">
        <header id="navbar" class="sticky top-0 z-50 bg-app-header backdrop-blur-lg flex items-center justify-between p-4 border-b border-app-border">
-    <div class="md:hidden flex items-center justify-between w-full">
-        <div class="w-8"></div> 
-        
-        <div id="weekTitleMobile" class="text-base font-bold text-primary text-center truncate"></div>
+<div class="md:hidden flex items-center justify-between w-full">
 
-        <button id="hamburgerBtn" aria-label="Open menu" class="text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-    </div>
+    <button id="mobileReportsBtn" aria-label="گزارش‌ها" class="text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+    </button>
+
+    <div id="weekTitleMobile" class="text-base font-bold text-primary text-center truncate"></div>
+
+    <button id="hamburgerBtn" aria-label="Open menu" class="text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+
+</div>
 
     <div class="hidden md:flex flex-1">
         <button id="todayBtn" class="text-sm text-app-text-muted font-semibold hover:text-primary transition-colors"></button>
@@ -138,13 +243,8 @@
     
 </header>
 
-<div id="mobileMenu" dir="rtl" class="fixed inset-0 bg-app-bg z-[100] p-4 pt-[calc(env(safe-area-inset-top)+1rem)] transform translate-x-full transition-transform duration-300 ease-in-out">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-primary">منو</h2>
-        <button id="closeMobileMenuBtn" class="p-2 text-3xl hover:text-primary">&times;</button>
-    </div>
-    <div id="mobileMenuContent" class="space-y-4 overflow-y-auto h-[calc(100%-80px)] no-scrollbar">
-        </div>
+<div id="mobileMenu" dir="rtl" class="fixed inset-0 transform translate-x-full transition-transform duration-300 ease-in-out z-[100]">
+    <div id="mobileMenuContent" class="h-full flex flex-col"></div>
 </div>
 
 
@@ -589,15 +689,19 @@ const STORAGE_RANDOM_THEME = 'goal_tracker_random_theme_v1';
 
 const WEEKDAY_NAMES_SHORT = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];    const JALALI_MONTH_NAMES = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
         
-  let appState = {
+let appState = {
     currentWeek: getStartOfWeek(new Date()),
-    goals: [], order: [], activeThemeId: 'theme-synthwave-84', editing: null, showArchived: false,
+    goals: [], 
+    order: [], 
+    activeThemeId: 'theme-paper', // تغییر به تم کاغذی به عنوان تم اولیه
+    editing: null, 
+    showArchived: false,
     activeCategory: 'all',
     contextMenuGoalId: null,
-    userLight: 'theme-ios-light',
-    userDark: 'theme-ios-dark',
-    favoriteThemes: [], // <-- ADD THIS
-    randomThemeMode: false // <-- ADD THIS
+    userLight: 'theme-paper', // تم پیش‌فرض برای حالت روشن
+    userDark: 'theme-synthwave-84', // تم پیش‌فرض برای حالت تیره
+    favoriteThemes: [],
+    randomThemeMode: false
 };
     function toJalali(gy, gm, gd) { let g_d_m=[0,31,59,90,120,151,181,212,243,273,304,334];let jy=(gy<=1600)?0:979;gy-=(gy<=1600)?621:1600;let gy2=(gm>2)?(gy+1):gy;let days=(365*gy)+(parseInt((gy2+3)/4))-(parseInt((gy2+99)/100))+(parseInt((gy2+399)/400))-80+gd+g_d_m[gm-1];jy+=33*(parseInt(days/12053));days%=12053;jy+=4*(parseInt(days/1461));days%=1461;jy+=parseInt((days-1)/365);if(days>365)days=(days-1)%365;let jm=(days<186)?1+parseInt(days/31):7+parseInt((days-186)/30);let jd=1+((days<186)?(days%31):((days-186)%30));return[jy,jm,jd];}
     function toGregorian(jy, jm, jd) { let gy=(jy<=979)?621:1600;jy-=(jy<=979)?0:979;let days=(365*jy)+(parseInt(jy/33)*8)+(parseInt(((jy%33)+3)/4)) + 78 + jd + ((jm<7)?(jm-1)*31:((jm-7)*30)+186);gy+=400*(parseInt(days/146097));days%=146097;if(days>36524){gy+=100*(parseInt(--days/36524));days%=36524;if(days>=365)days++;}gy+=4*(parseInt(days/1461));days%=1461;gy+=parseInt((days-1)/365);if(days>365)days=(days-1)%365;let gd=days+1;let sal_a=[0,31,((gy%4===0&&gy%100!==0)||(gy%400===0))?29:28,31,30,31,30,31,31,30,31,30,31];let gm;for(gm=0;gm<13&&gd>sal_a[gm];gm++)gd-=sal_a[gm];return new Date(gy,gm-1,gd);}
@@ -616,6 +720,35 @@ const WEEKDAY_NAMES_SHORT = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];    const
     return `${d.getFullYear()}-${month}-${day}`;
 }
     function escapeHtml(txt) { return (''+txt).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g, '&quot;'); }
+
+    function generateDayCellContent(dayData) {
+    if (!dayData || !dayData.entries || dayData.entries.length === 0) {
+        return '';
+    }
+
+    // Count occurrences of each unique emoji
+    const emojiCounts = dayData.entries.reduce((acc, emoji) => {
+        acc[emoji] = (acc[emoji] || 0) + 1;
+        return acc;
+    }, {});
+
+    let content = '';
+    for (const emoji in emojiCounts) {
+        const count = emojiCounts[emoji];
+        const isSvg = emoji.startsWith('<svg');
+        const emojiDisplay = isSvg 
+            ? `<span class="inline-flex items-center justify-center w-8 h-8">${emoji}</span>` 
+            : `<span class="text-sm md:text-base">${escapeHtml(emoji)}</span>`;
+
+        // Create a wrapper for each emoji to position the badge correctly
+        content += `<div class="emoji-in-cell-wrapper">
+                        ${emojiDisplay}
+                        ${count > 1 ? `<span class="emoji-counter-badge">${toFa(count)}</span>` : ''}
+                    </div>`;
+    }
+    return `<div class="w-full h-full flex flex-wrap items-center justify-center gap-1.5 leading-none">${content}</div>`;
+}
+
 function getDefaultGoals() {
         const creationDate = "2025-07-03T17:13:33.798Z";
         const goals = [
@@ -632,7 +765,7 @@ function getDefaultGoals() {
 function loadStateFromStorage() {
     const data = localStorage.getItem(STORAGE_KEY);
     const order = localStorage.getItem(STORAGE_ORDER);
-    const activeThemeId = localStorage.getItem(STORAGE_ACTIVE_THEME) || 'theme-ios-dark';
+    const activeThemeId = localStorage.getItem(STORAGE_ACTIVE_THEME) || 'theme-paper'; // پیش‌فرض اولیه
     const favoriteThemes = localStorage.getItem(STORAGE_FAVORITE_THEMES);
     const randomThemeMode = localStorage.getItem(STORAGE_RANDOM_THEME);
 
@@ -671,23 +804,23 @@ function loadStateFromStorage() {
     appState.goals = goals;
     appState.order = orderArr.filter(id => goals.some(g => g.id === id));
     appState.activeThemeId = activeThemeId;
-    appState.userLight = localStorage.getItem('goal_tracker_user_light_theme') || 'theme-ios-light';
-    appState.userDark = localStorage.getItem('goal_tracker_user_dark_theme') || 'theme-ios-dark';
+    appState.userLight = localStorage.getItem('goal_tracker_user_light_theme') || 'theme-paper'; // پیش‌فرض حالت روشن
+    appState.userDark = localStorage.getItem('goal_tracker_user_dark_theme') || 'theme-synthwave-84'; // پیش‌فرض حالت تیره
+    
     if (favoriteThemes) {
         appState.favoriteThemes = JSON.parse(favoriteThemes);
     }
     if (randomThemeMode) {
         appState.randomThemeMode = JSON.parse(randomThemeMode);
     }
-    // ADD THIS BLOCK
-if (appState.randomThemeMode) {
-    const allThemes = [].concat(...Object.values(themesData));
-    if (allThemes.length > 0) {
-        const randomTheme = allThemes[Math.floor(Math.random() * allThemes.length)];
-        // Set theme but don't overwrite user's preferred light/dark choices
-        setActiveTheme(randomTheme.id, true);
+
+    if (appState.randomThemeMode) {
+        const allThemes = [].concat(...Object.values(themesData));
+        if (allThemes.length > 0) {
+            const randomTheme = allThemes[Math.floor(Math.random() * allThemes.length)];
+            setActiveTheme(randomTheme.id, true);
+        }
     }
-}
 }
 
 // ADD THESE NEW FUNCTIONS
@@ -701,54 +834,6 @@ function addFavoriteTheme(themeId) {
 function removeFavoriteTheme(themeId) {
     appState.favoriteThemes = appState.favoriteThemes.filter(id => id !== themeId);
     persistState();
-}
-
-function showThemeContextMenu(event, themeId) {
-    event.preventDefault();
-    event.stopPropagation();
-    closeContextMenu(); // Close any other open context menus
-
-    const menu = document.getElementById('contextMenu');
-    const isFavorite = appState.favoriteThemes.includes(themeId);
-    const activeTab = document.querySelector('#theme-modal-tabs .bg-primary')?.dataset.tab;
-
-    let menuAction;
-    if (isFavorite) {
-        menuAction = `<button id="remove-favorite-btn" class="w-full text-left flex items-center gap-3 p-3 text-red-500 hover:bg-red-500/10 rounded-lg">💔 <span>حذف از علاقه‌مندی‌ها</span></button>`;
-    } else {
-        menuAction = `<button id="add-favorite-btn" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg">❤️ <span>افزودن به علاقه‌مندی‌ها</span></button>`;
-    }
-
-    menu.innerHTML = menuAction;
-    menu.style.display = 'block';
-    
-    // Position menu
-    const rect = menu.getBoundingClientRect();
-    let left = event.clientX;
-    let top = event.clientY;
-    if (left + rect.width > window.innerWidth - 10) { left = window.innerWidth - rect.width - 10; }
-    if (top + rect.height > window.innerHeight - 10) { top = window.innerHeight - rect.height - 10; }
-    menu.style.left = `${left}px`;
-    menu.style.top = `${top}px`;
-
-    const handleAction = (action) => {
-        closeContextMenu();
-        const scrollContainer = document.getElementById('theme-scroll-container');
-        const scrollPosition = scrollContainer ? scrollContainer.scrollTop : 0;
-        
-        action(themeId);
-
-        // Refresh the modal to show the change in the favorites list
-        showThemeSelectorModal({ scrollPosition, activeTab });
-    };
-
-    const addBtn = document.getElementById('add-favorite-btn');
-    const removeBtn = document.getElementById('remove-favorite-btn');
-
-    if (addBtn) addBtn.onclick = () => handleAction(addFavoriteTheme);
-    if (removeBtn) removeBtn.onclick = () => handleAction(removeFavoriteTheme);
-
-    setTimeout(() => document.addEventListener('click', closeContextMenu, { once: true }), 10);
 }
 
 // REPLACE THIS FUNCTION
@@ -873,76 +958,127 @@ function fullRender() {
         }).join('');
         menu.innerHTML = html;
     }
-    function renderMobileMenu() {
-        const content = document.getElementById('mobileMenuContent');
-        const today = new Date();
-        const formattedDate = today.toLocaleDateString('fa-IR', { weekday: 'long', month: 'long', day: 'numeric' });
-        const weekTitleText = formatWeekRange(appState.currentWeek);
+  function renderMobileMenu() {
+    const content = document.getElementById('mobileMenuContent');
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('fa-IR', { weekday: 'long', month: 'long', day: 'numeric' });
+    const weekTitleText = formatWeekRange(appState.currentWeek);
 
-        const filters = ['all', ...Object.keys(CATEGORIES)];
-        const catHtml = filters.map(cat => {
-            const isActive = appState.activeCategory === cat;
-            const activeClass = 'bg-primary/20 text-primary font-bold';
-            return `<button data-category="${cat}" class="w-full text-right flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg transition-colors ${isActive ? activeClass : ''}">${cat === 'all' ? 'همه دسته‌بندی‌ها' : cat}</button>`;
-        }).join('');
+    const filters = ['all', ...Object.keys(CATEGORIES)];
+    const catHtml = filters.map(cat => {
+        const isActive = appState.activeCategory === cat;
+        return `<a href="#" data-category="${cat}" class="mobile-menu-item menu-item-fade-in ${isActive ? 'active' : ''}">
+                    <span class="w-2.5 h-2.5 rounded-full ${cat === 'all' ? 'bg-primary' : CATEGORIES[cat]?.split(' ')[0]}"></span>
+                    <span>${cat === 'all' ? 'همه دسته‌بندی‌ها' : cat}</span>
+                </a>`;
+    }).join('');
 
-        const showArchived = appState.showArchived;
-        const isDark = findThemeById(appState.activeThemeId).isDark;
+    const showArchived = appState.showArchived;
+    const isDark = findThemeById(appState.activeThemeId).isDark;
+    const isRandom = appState.randomThemeMode;
 
-        content.innerHTML = `
-            <button id="mobile-todayBtn" class="w-full text-center text-lg p-3 rounded-lg font-semibold hover:bg-app-hover transition-colors">${formattedDate}</button>
-            <div class="flex items-center justify-center gap-2 bg-app-card p-2 rounded-xl">
-                 <button id="mobile-prevWeekBtn" aria-label="Previous Week" class="flex-1 flex items-center justify-center gap-x-2 text-app-text-muted hover:bg-app-hover rounded-full px-3 py-2 transition-colors">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                    <span class="text-sm font-medium">قبلی</span>
-                </button>
-                 <div class="text-base font-bold text-primary w-40 text-center">${weekTitleText}</div>
-                <button id="mobile-nextWeekBtn" aria-label="Next Week" class="flex-1 flex items-center justify-center gap-x-2 text-app-text-muted hover:bg-app-hover rounded-full px-3 py-2 transition-colors">
-                    <span class="text-sm font-medium">بعدی</span>
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
+    content.innerHTML = `
+        <div class="flex-shrink-0 flex justify-between items-center p-4 border-b border-app-border/50">
+            <div class="flex items-center gap-3">
+                <img src="https://i.postimg.cc/vmBKfx6T/rooza-app-logo.png" alt="Rooza Logo" class="w-10 h-10 flex-shrink-0"/>
+                <div>
+                    <h2 class="text-xl font-bold text-primary">منو</h2>
+                    <p class="text-sm font-semibold text-app-text-muted mt-1">${formattedDate}</p>
+                </div>
             </div>
-            <div class="my-4 h-px bg-app-border"></div>
-            <h3 class="font-bold text-lg text-app-text-muted px-2">دسته‌بندی‌ها</h3>
+            <button id="closeMobileMenuBtn" class="p-2 hover:bg-app-hover rounded-full transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <div class="flex-grow overflow-y-auto p-4">
+            
+            <div class="menu-section-title menu-item-fade-in" style="margin-top: 0.5rem;">ناوبری</div>
+            <div class="bg-app-card/50 p-3 rounded-xl menu-item-fade-in">
+                <div class="text-center font-bold text-base text-primary mb-3">${weekTitleText}</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="mobile-nextWeekBtn" class="flex items-center justify-center gap-2 p-2 bg-app-hover rounded-lg transition-colors font-semibold text-sm">
+                        <span>هفته بعد</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                    <button id="mobile-prevWeekBtn" class="flex items-center justify-center gap-2 p-2 bg-app-hover rounded-lg transition-colors font-semibold text-sm">
+                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                         <span>هفته قبل</span>
+                    </button>
+                </div>
+            </div>
+            <a href="#" id="mobile-todayBtn" class="mobile-menu-item w-full mt-2 menu-item-fade-in">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span>رفتن به امروز</span>
+            </a>
+
+            <div class="my-4 h-px bg-app-border/30 menu-item-fade-in"></div>
+            
+            <div class="menu-section-title menu-item-fade-in">گزارش‌ها</div>
+            <div class="bg-app-card/50 rounded-xl divide-y divide-app-border/50">
+                <a href="#" id="mobile-report-day" class="mobile-menu-item menu-item-fade-in">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <span>گزارش روزانه</span>
+                </a>
+                <a href="#" id="mobile-report-week" class="mobile-menu-item menu-item-fade-in">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2m8-10v10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2z" /></svg>
+                    <span>گزارش هفتگی</span>
+                </a>
+                <a href="#" id="mobile-report-month" class="mobile-menu-item menu-item-fade-in">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" /></svg>
+                    <span>گزارش ماهانه</span>
+                </a>
+                <a href="#" id="mobile-report-year" class="mobile-menu-item menu-item-fade-in">
+                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    <span>گزارش سالانه</span>
+                </a>
+            </div>
+
+            <div class="my-4 h-px bg-app-border/30 menu-item-fade-in"></div>
+
+            <div class="menu-section-title menu-item-fade-in">دسته‌بندی‌ها</div>
             <div class="space-y-1">${catHtml}</div>
-            <div class="my-4 h-px bg-app-border"></div>
-            <h3 class="font-bold text-lg text-app-text-muted px-2">تنظیمات</h3>
-            <div class="space-y-1">
-                 <button id="mobile-reportBtn" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                    <span>گزارش‌ها</span>
-                </button>
-                <button id="mobile-archiveToggleBtn" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg transition-colors ${showArchived ? 'text-primary font-bold' : ''}">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+
+            <div class="my-4 h-px bg-app-border/30 menu-item-fade-in"></div>
+
+            <div class="menu-section-title menu-item-fade-in">تنظیمات و برنامه</div>
+            <div class="bg-app-card/50 rounded-xl divide-y divide-app-border/50">
+                <a href="#" id="mobile-archiveToggleBtn" class="mobile-menu-item menu-item-fade-in ${showArchived ? 'text-primary' : ''}">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
                     <span>نمایش آرشیو</span>
-                </button>
-                 <button id="mobile-themeSelectorBtn" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg transition-colors">
-                    <span class="text-xl w-5 text-center">🎨</span>
+                </a>
+                <a href="#" id="mobile-themeSelectorBtn" class="mobile-menu-item menu-item-fade-in">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
                     <span>انتخاب تم</span>
-                </button>
-                <div class="my-1 h-px bg-app-border"></div>
-                <div class="w-full text-left flex items-center justify-between gap-3 p-3">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xl w-5 text-center">🌗</span>
-                        <span>حالت تیره</span>
-                    </div>
-                    <label for="darkModeToggleMobile" class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" value="" id="darkModeToggleMobile" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                </a>
+                <div class="mobile-menu-item menu-item-fade-in">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                    <span>تم تصادفی</span>
+                    <label for="randomThemeToggleMobile" class="relative inline-flex items-center cursor-pointer mr-auto">
+                        <input type="checkbox" value="" id="randomThemeToggleMobile" class="sr-only peer" ${isRandom ? 'checked' : ''}>
+                        <div class="w-11 h-6 bg-app-cell-inactive rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
                     </label>
                 </div>
-                <div class="my-1 h-px bg-app-border"></div>
-                <button id="mobile-backupBtn" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 15l-3-3m0 0l3-3m-3 3h12" /> </svg>
-                    <span>پشتیبان‌گیری</span>
-                </button>
-                 <button id="mobile-aboutBtn" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> </svg>
+                <div class="mobile-menu-item menu-item-fade-in">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                    <span>حالت تیره</span>
+                    <label for="darkModeToggleMobile" class="relative inline-flex items-center cursor-pointer mr-auto">
+                        <input type="checkbox" value="" id="darkModeToggleMobile" class="sr-only peer" ${isDark ? 'checked' : ''}>
+                        <div class="w-11 h-6 bg-app-cell-inactive rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+                <a href="#" id="mobile-backupBtn" class="mobile-menu-item menu-item-fade-in">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                    <span>پشتیبان‌گیری و بازیابی</span>
+                </a>
+                <a href="#" id="mobile-aboutBtn" class="mobile-menu-item menu-item-fade-in">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <span>درباره</span>
-                </button>
+                </a>
             </div>
-        `;
-    }
+        </div>
+    `;
+}
     function renderGoals() {
         const filteredGoals = appState.order
             .map(id => appState.goals.find(g => g.id === id))
@@ -958,7 +1094,7 @@ function fullRender() {
             archivedContainer.classList.add('hidden');
         }
     }
-   function renderSingleGoalCard(goal) {
+  function renderSingleGoalCard(goal) {
     const weekDates = getWeekDates(appState.currentWeek);
     const currentWeekId = weekIdForDate(appState.currentWeek);
     const { weekly, allTime } = calculateScores(goal);
@@ -975,11 +1111,10 @@ function fullRender() {
         let classes = `${baseClasses} ${isActive ? activeClasses : disabledClasses}`;
         if(dayCompleted) classes += ' day-completed';
         if (isActive && isToday(date)) classes += ` ring-2 ring-sky-500 shadow-md shadow-sky-500/30`;
-        let cellContent = `<div class="w-full h-full flex flex-wrap items-center justify-center gap-px leading-none">${dayData.entries.map(em => {
-            if (!em) return '';
-            if (em.startsWith('<svg')) return `<span class="inline-flex items-center justify-center w-8 h-8">${em}</span>`;
-            return `<span class="text-sm md:text-base">${escapeHtml(em)}</span>`;
-        }).join('')}</div>`;
+        
+        // Use the new helper function to generate cell content
+        let cellContent = generateDayCellContent(dayData);
+
         return `<div class="${classes}" data-goal-id="${goal.id}" data-day-index="${weekDayIndexForData}" tabindex="0">${cellContent}${dayData.note ? `<div class="absolute top-0 right-0 w-2 h-2 bg-amber-400 rounded-full" title="${escapeHtml(dayData.note)}"></div>` : ''}</div>`;
     }).join('');
 
@@ -1104,6 +1239,7 @@ function calculateScores(goal) {
     function closeCategoryMenuOnClickOutside(e) { if (!e.target.closest('#categoryMenu') && !e.target.closest('#categoryMenuBtn')) { toggleCategoryMenu(false); } else { document.addEventListener('click', closeCategoryMenuOnClickOutside, { once: true }); } }
     
 // REPLACE THIS FUNCTION
+// REPLACE THIS FUNCTION
 function showThemeSelectorModal(options = {}) {
     const { scrollPosition = 0, activeTab: initialActiveTab } = options;
     closeModal();
@@ -1111,7 +1247,7 @@ function showThemeSelectorModal(options = {}) {
     modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';
 
     const themeCategories = [
-        { key: 'favorites', title: 'مورد علاقه ها' }, // New Favorites Tab
+        { key: 'favorites', title: 'مورد علاقه ها' },
         { key: 'modernDark', title: 'مدرن تیره' },
         { key: 'classicDark', title: 'کلاسیک تیره' },
         { key: 'modernLight', title: 'مدرن روشن' },
@@ -1119,11 +1255,12 @@ function showThemeSelectorModal(options = {}) {
     ];
     
     const activeTheme = findThemeById(appState.activeThemeId);
-    let activeTabKey = initialActiveTab || 'favorites'; // Default to favorites tab
+    const isCurrentThemeFavorite = appState.favoriteThemes.includes(appState.activeThemeId);
+    let activeTabKey = initialActiveTab || 'favorites';
 
     if (!initialActiveTab) {
         for (const cat of themeCategories) {
-            if (cat.key !== 'favorites' && themesData[cat.key].some(t => t.id === appState.activeThemeId)) {
+            if (cat.key !== 'favorites' && themesData[cat.key] && themesData[cat.key].some(t => t.id === appState.activeThemeId)) {
                 activeTabKey = cat.key;
                 break;
             }
@@ -1131,19 +1268,25 @@ function showThemeSelectorModal(options = {}) {
     }
     
     const renderThemes = (themes) => {
-        if (themes.length === 0) {
-            return `<div class="col-span-1 sm:col-span-2 text-center text-app-text-muted p-8">برای افزودن به این لیست، روی یک تم طولانی فشار دهید.</div>`;
+        if (!themes || themes.length === 0) {
+            return `<div class="col-span-1 sm:col-span-2 text-center text-app-text-muted p-8">برای افزودن، ستاره ⭐ کنار هر تم را لمس کنید.</div>`;
         }
         return themes.map(theme => {
             const isActive = theme.id === appState.activeThemeId;
+            const isFavorite = appState.favoriteThemes.includes(theme.id);
             return `
-                <button data-theme-id="${theme.id}" class="theme-btn w-full text-right p-3 rounded-lg flex items-center gap-4 transition-colors ${isActive ? 'bg-primary/20 ring-2 ring-primary' : 'hover:bg-app-hover'}">
-                    <div class="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center" style="background-color:${theme.bg}; border: 2px solid ${theme.primary};">
-                        <div class="w-4 h-4 rounded-full" style="background-color: ${theme.text}"></div>
-                    </div>
-                    <span class="font-semibold">${theme.name}</span>
-                    ${isActive ? '<span class="ml-auto text-primary font-bold">✓</span>' : ''}
-                </button>
+                <div class="theme-btn-wrapper flex items-center rounded-lg transition-colors ${isActive ? 'bg-primary/20 ring-2 ring-primary' : 'hover:bg-app-hover'}">
+                    <button data-theme-id="${theme.id}" class="theme-select-btn flex-grow text-right p-3 flex items-center gap-4">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center" style="background-color:${theme.bg}; border: 2px solid ${theme.primary};">
+                            <div class="w-4 h-4 rounded-full" style="background-color: ${theme.text}"></div>
+                        </div>
+                        <span class="font-semibold">${theme.name}</span>
+                        ${isActive ? '<span class="selected-checkmark ml-auto text-primary font-bold">✓</span>' : ''}
+                    </button>
+                    <button class="favorite-star-btn p-3 text-2xl text-amber-400 hover:opacity-75 transition-opacity" data-theme-id="${theme.id}">
+                        ${isFavorite ? '★' : '☆'}
+                    </button>
+                </div>
             `;
         }).join('');
     }
@@ -1151,7 +1294,7 @@ function showThemeSelectorModal(options = {}) {
     const favoriteThemesData = appState.favoriteThemes.map(id => findThemeById(id)).filter(Boolean);
 
     const tabContentsHtml = themeCategories.map((cat) => {
-        const themes = cat.key === 'favorites' ? favoriteThemesData : themesData[cat.key];
+        const themes = cat.key === 'favorites' ? favoriteThemesData : (themesData[cat.key] || []);
         return `<div id="tab-content-${cat.key}" class="tab-content grid grid-cols-1 sm:grid-cols-2 gap-2 ${cat.key !== activeTabKey ? 'hidden' : ''}">${renderThemes(themes)}</div>`;
     }).join('');
 
@@ -1161,12 +1304,19 @@ function showThemeSelectorModal(options = {}) {
                 <h2 class="text-xl sm:text-2xl font-bold text-app-text" id="theme-modal-title">
                     انتخاب تم: <span class="text-primary">${escapeHtml(activeTheme.name)}</span>
                 </h2>
+                
+                ${!isCurrentThemeFavorite ? `
+                  <button id="addCurrentThemeToFavoritesBtn" class="flex items-center gap-2 text-sm font-semibold text-amber-500 hover:text-amber-400 transition-colors ml-auto mr-4">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <span>افزودن به علاقه‌مندی</span>
+                  </button>
+                ` : ''}
                 <button class="close-modal-btn text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">&times;</button>
             </div>
             <div id="theme-modal-tabs" class="flex-shrink-0 flex flex-wrap items-center gap-2 p-1 mb-4 bg-app-card rounded-xl">
                 ${themeCategories.map(c => `<button data-tab="${c.key}" class="tab-btn flex-1 p-3 font-semibold text-sm rounded-lg transition-colors ${c.key === activeTabKey ? 'bg-primary text-primary-text' : 'text-app-text-muted hover:bg-app-hover'}">${c.title}</button>`).join('')}
             </div>
-            <div id="theme-scroll-container" class="flex-grow overflow-y-auto space-y-3 p-1 -ml-2 pl-2 no-scrollbar">
+            <div id="theme-scroll-container" class="flex-grow overflow-y-auto space-y-3 p-1 -ml-2 pl-2">
                 ${tabContentsHtml}
             </div>
         </div>`;
@@ -1181,50 +1331,62 @@ function showThemeSelectorModal(options = {}) {
     modal.querySelectorAll('.tab-btn').forEach(button => {
         button.addEventListener('click', (e) => {
             const tabId = e.currentTarget.dataset.tab;
-            modal.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('bg-primary', 'text-primary-text'));
+            modal.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-primary-text');
+                btn.classList.add('text-app-text-muted', 'hover:bg-app-hover');
+            });
             e.currentTarget.classList.add('bg-primary', 'text-primary-text');
+            e.currentTarget.classList.remove('text-app-text-muted', 'hover:bg-app-hover');
             modal.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
             modal.querySelector(`#tab-content-${tabId}`).classList.remove('hidden');
         });
     });
 
-    modal.querySelectorAll('.theme-btn').forEach(button => {
-        // --- Logic for single click to select theme ---
+    modal.querySelectorAll('.theme-select-btn').forEach(button => {
         button.addEventListener('click', () => {
             const newThemeId = button.dataset.themeId;
             if (newThemeId === appState.activeThemeId) return;
             setActiveTheme(newThemeId);
-            const newTheme = findThemeById(newThemeId);
-            const oldActiveButton = modal.querySelector('.theme-btn.bg-primary\\/20');
-            if (oldActiveButton) {
-                oldActiveButton.classList.remove('bg-primary/20', 'ring-2', 'ring-primary');
-                oldActiveButton.querySelector('.ml-auto')?.remove();
-            }
-            button.classList.add('bg-primary/20', 'ring-2', 'ring-primary');
-            button.insertAdjacentHTML('beforeend', '<span class="ml-auto text-primary font-bold">✓</span>');
-            modal.querySelector('#theme-modal-title').innerHTML = `انتخاب تم: <span class="text-primary">${escapeHtml(newTheme.name)}</span>`;
+            
+            // Re-render modal to reflect changes without closing it
+            const currentScroll = scrollContainer ? scrollContainer.scrollTop : 0;
+            const currentTab = modal.querySelector('.tab-btn.bg-primary')?.dataset.tab;
+            showThemeSelectorModal({ scrollPosition: currentScroll, activeTab: currentTab });
         });
-
-        // --- Logic for long press to add/remove favorite ---
-        let pressTimer = null;
-        const startPress = (e) => {
-            if (e.type === 'contextmenu') e.preventDefault(); // Prevent default right-click menu
-            pressTimer = setTimeout(() => {
-                showThemeContextMenu(e, button.dataset.themeId);
-            }, 500); // 500ms for long press
-        };
-        const cancelPress = () => {
-            clearTimeout(pressTimer);
-        };
-        button.addEventListener("mousedown", startPress);
-        button.addEventListener("touchstart", startPress);
-        button.addEventListener("mouseup", cancelPress);
-        button.addEventListener("mouseleave", cancelPress);
-        button.addEventListener("touchend", cancelPress);
-        button.addEventListener("contextmenu", startPress);
     });
+
+    modal.querySelectorAll('.favorite-star-btn').forEach(starButton => {
+        starButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const themeId = starButton.dataset.themeId;
+            const isFavorite = appState.favoriteThemes.includes(themeId);
+            
+            if (isFavorite) {
+                removeFavoriteTheme(themeId);
+            } else {
+                addFavoriteTheme(themeId);
+            }
+
+            const currentScroll = scrollContainer ? scrollContainer.scrollTop : 0;
+            const currentTab = modal.querySelector('.tab-btn.bg-primary')?.dataset.tab;
+            showThemeSelectorModal({ scrollPosition: currentScroll, activeTab: currentTab });
+        });
+    });
+
+    // Add listener for the new button
+    const addToFavoritesBtn = modal.querySelector('#addCurrentThemeToFavoritesBtn');
+    if (addToFavoritesBtn) {
+        addToFavoritesBtn.addEventListener('click', () => {
+            addFavoriteTheme(appState.activeThemeId);
+            
+            // Re-render the modal to show the change (button will disappear, star will be filled)
+            const currentScroll = scrollContainer ? scrollContainer.scrollTop : 0;
+            const currentTab = modal.querySelector('.tab-btn.bg-primary')?.dataset.tab;
+            showThemeSelectorModal({ scrollPosition: currentScroll, activeTab: currentTab });
+        });
+    }
 }
-    function showAboutModal() { const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';modal.innerHTML=`<div class="modal-content glass-modal-content rounded-2xl p-6 w-full max-w-md shadow-2xl"><div class="flex flex-col items-center text-center"><div class="w-24 h-24 bg-app-card rounded-3xl flex items-center justify-center mb-5 border border-app-border shadow-md"><img src="https://i.postimg.cc/vmBKfx6T/rooza-app-logo.png" alt="Rooza Logo" class="w-16 h-16"/></div><h2 class="text-2xl font-bold mb-2 text-app-text">روزا (Rooza)</h2><p class="text-base text-app-text-muted mb-6">اپلیکیشن مدیریت عادت و هدف شخصی</p><div class="text-sm text-app-text-muted space-y-2"><p>نسخه 0.03-ltr</p><p>ساخته شده برای کمک به شما در ساختن عادات بهتر.</p><p>کپی رایت 1404 © کدنویسی شده توسط پیمان عابدین پور ${new Date().getFullYear()} - Rooza</p></div><button class="close-modal-btn w-full mt-8 p-3 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition-all">بستن</button></div></div>`;document.getElementById('modalArea').appendChild(modal);modal.onclick=e=>{if(e.target===modal||e.target.closest('.close-modal-btn'))closeModal();};}
+    function showAboutModal() { const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';modal.innerHTML=`<div class="modal-content glass-modal-content rounded-2xl p-6 w-full max-w-md shadow-2xl"><div class="flex flex-col items-center text-center"><div class="w-24 h-24 bg-app-card rounded-3xl flex items-center justify-center mb-5 border border-app-border shadow-md"><img src="https://i.postimg.cc/vmBKfx6T/rooza-app-logo.png" alt="Rooza Logo" class="w-16 h-16"/></div><h2 class="text-2xl font-bold mb-2 text-app-text">روزا (Rooza)</h2><p class="text-base text-app-text-muted mb-6">اپلیکیشن مدیریت عادت و هدف شخصی</p><div class="text-sm text-app-text-muted space-y-2"><p>نسخه 0.1-ltr</p><p>ساخته شده برای کمک به شما در ساختن عادات بهتر.</p><p>کپی رایت 1404 © کدنویسی شده توسط پیمان عابدین پور ${new Date().getFullYear()} - Rooza</p></div><button class="close-modal-btn w-full mt-8 p-3 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition-all">بستن</button></div></div>`;document.getElementById('modalArea').appendChild(modal);modal.onclick=e=>{if(e.target===modal||e.target.closest('.close-modal-btn'))closeModal();};}
     function showBackupModal() { const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';modal.innerHTML=`<div class="modal-content glass-modal-content rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar"><div class="flex justify-between items-center mb-5"><h2 class="text-2xl font-bold text-app-text">پشتیبان‌گیری و بازیابی</h2><button class="close-modal-btn text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">&times;</button></div><div class="space-y-6"><div class="bg-app-card/50 p-5 rounded-xl border border-app-border"><div class="flex items-start gap-4"><div class="flex-shrink-0 w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></div><div><h3 class="font-bold text-lg text-app-text">خروجی گرفتن اطلاعات</h3><p class="text-sm text-app-text-muted mt-1 mb-4">یک فایل JSON از تمام اهداف و تاریخچه خود دانلود کنید.</p><button id="exportBtn" class="w-full sm:w-auto px-5 py-2.5 rounded-lg font-bold bg-green-600 text-white hover:bg-green-700 transition-colors">دانلود فایل پشتیبان</button></div></div></div><div class="bg-app-card/50 p-5 rounded-xl border border-app-border"><div class="flex items-start gap-4"><div class="flex-shrink-0 w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg></div><div><h3 class="font-bold text-lg text-app-text">ورودی گرفتن اطلاعات</h3><p class="text-sm text-app-text-muted mt-1 mb-4">یک فایل پشتیبان JSON را برای بازیابی اطلاعات خود انتخاب کنید.</p><div class="p-3 mb-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-sm"><strong>هشدار:</strong> این عمل تمام اطلاعات فعلی شما را بازنویسی خواهد کرد.</div><button id="importBtn" class="w-full sm:w-auto px-5 py-2.5 rounded-lg font-bold bg-sky-600 text-white hover:bg-sky-700 transition-colors">انتخاب فایل و بازیابی</button></div></div></div></div><input type="file" id="importFile" class="hidden" accept=".json"></div>`;document.getElementById('modalArea').appendChild(modal);modal.onclick=e=>{if(e.target===modal||e.target.closest('.close-modal-btn'))closeModal();};modal.querySelector('#exportBtn').onclick=exportData;modal.querySelector('#importBtn').onclick=()=>document.getElementById('importFile').click();modal.querySelector('#importFile').onchange=importData;}
     function exportData(){try{const dataToExport={goals:appState.goals,order:appState.order,userLight:appState.userLight,userDark:appState.userDark};const dataStr=JSON.stringify(dataToExport,null,2);const dataBlob=new Blob([dataStr],{type:"application/json"});const url=URL.createObjectURL(dataBlob);const link=document.createElement('a');const today=new Date().toISOString().slice(0,10);link.download=`rooza-backup-${today}.json`;link.href=url;link.click();URL.revokeObjectURL(url);closeModal();}catch(error){console.error("Error exporting data:",error);alert("خطا در خروجی گرفتن اطلاعات.");}}
     function importData(event){const file=event.target.files[0];if(!file)return;if(!confirm("آیا مطمئن هستید؟ با وارد کردن اطلاعات جدید، تمام اطلاعات فعلی شما بازنویسی خواهد شد. این عمل غیرقابل بازگشت است.")){return;}const reader=new FileReader();reader.onload=(e)=>{try{const importedData=JSON.parse(e.target.result);if(importedData&&Array.isArray(importedData.goals)&&Array.isArray(importedData.order)){appState.goals=importedData.goals;appState.order=importedData.order;if(importedData.userLight) appState.userLight = importedData.userLight;if(importedData.userDark) appState.userDark = importedData.userDark;persistState();loadStateFromStorage();fullRender();closeModal();alert("اطلاعات با موفقیت وارد شد.");}else{throw new Error("Invalid file format.");}}catch(error){console.error("Error importing data:",error);alert("خطا در وارد کردن اطلاعات. فایل انتخاب شده معتبر نیست.");}};reader.readAsText(file);}
@@ -1249,21 +1411,42 @@ function showThemeSelectorModal(options = {}) {
     }
    // REPLACE your existing setupGlobalListeners function
 function setupGlobalListeners() {
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    // --- Menu Opening/Closing Logic ---
+    const openMenu = () => {
+        document.body.classList.add('mobile-menu-open');
+        mobileMenu.classList.remove('translate-x-full');
+        
+        // Staggering animation for menu items
+        const items = mobileMenu.querySelectorAll('.menu-item-fade-in');
+        items.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.04}s`;
+        });
+    };
+
+    const closeMenu = () => {
+        document.body.classList.remove('mobile-menu-open');
+        mobileMenu.classList.add('translate-x-full');
+    };
+
+    document.getElementById('hamburgerBtn').onclick = openMenu;
+
+    // --- Listeners for Desktop Navbar ---
     document.getElementById('navbar').onclick = e => {
         const target = e.target.closest('button');
-        if(!target) return;
-        switch(target.id) {
+        if (!target) return;
+        switch (target.id) {
             case 'prevWeekBtn': appState.currentWeek.setDate(appState.currentWeek.getDate() - 7); fullRender(); break;
             case 'nextWeekBtn': appState.currentWeek.setDate(appState.currentWeek.getDate() + 7); fullRender(); break;
-            case 'settingsMenuBtn':
-            case 'settingsMenuBtnMobile':
-                 toggleSettingsMenu(!document.getElementById('settingsMenu').classList.contains('visible')); break;
+            case 'settingsMenuBtn': toggleSettingsMenu(!document.getElementById('settingsMenu').classList.contains('visible')); break;
             case 'categoryMenuBtn': toggleCategoryMenu(!document.getElementById('categoryMenu').classList.contains('visible')); break;
             case 'todayBtn': appState.currentWeek = getStartOfWeek(new Date()); fullRender(); break;
-            // This line is changed for RTL
-            case 'hamburgerBtn': document.getElementById('mobileMenu').classList.remove('translate-x-full'); break;
+            case 'mobileReportsBtn': showReportModal(); break;
         }
     };
+
+    // --- Listeners for Desktop Settings Dropdown ---
     document.getElementById('settingsMenu').addEventListener('click', e => {
         const button = e.target.closest('button');
         if (!button) return;
@@ -1274,9 +1457,13 @@ function setupGlobalListeners() {
             case 'aboutBtn': showAboutModal(); break;
             case 'backupBtn': showBackupModal(); break;
         }
-        if(button.id !== 'archiveToggleBtn') toggleSettingsMenu(false);
+        if (button.id !== 'archiveToggleBtn') toggleSettingsMenu(false);
     });
+    
+    // --- FAB Listener ---
     document.getElementById('fab').onclick = () => showGoalModal(null);
+
+    // --- Desktop Category Menu Listener ---
     document.getElementById('categoryMenu').addEventListener('click', e => {
         const button = e.target.closest('button[data-category]');
         if (button) {
@@ -1285,35 +1472,51 @@ function setupGlobalListeners() {
             fullRender();
         }
     });
-    document.getElementById('mobileMenu').addEventListener('click', e => {
-        const button = e.target.closest('button');
-        if(!button) return;
+
+    // --- Mobile Menu Click Handler ---
+    mobileMenu.addEventListener('click', e => {
+        const target = e.target.closest('a, button');
+        if (!target) return;
+        
+        e.preventDefault(); // Prevent default link behavior
         let shouldClose = true;
-        switch(button.id) {
+
+        switch (target.id) {
             case 'closeMobileMenuBtn': break;
             case 'mobile-todayBtn': appState.currentWeek = getStartOfWeek(new Date()); fullRender(); break;
             case 'mobile-prevWeekBtn': appState.currentWeek.setDate(appState.currentWeek.getDate() - 7); fullRender(); shouldClose = false; break;
             case 'mobile-nextWeekBtn': appState.currentWeek.setDate(appState.currentWeek.getDate() + 7); fullRender(); shouldClose = false; break;
-            case 'mobile-reportBtn': showReportModal(); break;
+            case 'mobile-report-day': showReportModal('day'); break;
+            case 'mobile-report-week': showReportModal('week'); break;
+            case 'mobile-report-month': showReportModal('month'); break;
+            case 'mobile-report-year': showReportModal('overall'); break;
             case 'mobile-archiveToggleBtn': appState.showArchived = !appState.showArchived; fullRender(); shouldClose = false; break;
             case 'mobile-themeSelectorBtn': showThemeSelectorModal(); break;
             case 'mobile-backupBtn': showBackupModal(); break;
             case 'mobile-aboutBtn': showAboutModal(); break;
-            default: shouldClose = false; break;
+            default: if (!target.dataset.category) shouldClose = false; break;
         }
-        if (button.dataset.category) {
-            appState.activeCategory = button.dataset.category;
+
+        if (target.dataset.category) {
+            appState.activeCategory = target.dataset.category;
             fullRender();
-            shouldClose = true;
         }
+
         if (shouldClose) {
-            // This line is changed for RTL
-            document.getElementById('mobileMenu').classList.add('translate-x-full');
+            closeMenu();
         }
     });
+
+    // --- Global Toggles Listener ---
     document.body.addEventListener('change', e => {
         if (e.target.id === 'darkModeToggle' || e.target.id === 'darkModeToggleMobile') {
             handleDarkModeToggle();
+        }
+        if (e.target.id === 'randomThemeToggle' || e.target.id === 'randomThemeToggleMobile') {
+            appState.randomThemeMode = e.target.checked;
+            persistState();
+            renderSettingsMenu();
+            renderMobileMenu();
         }
     });
 }
@@ -1327,8 +1530,75 @@ function setupGlobalListeners() {
     window.duplicateGoal=(goalId)=>{const originalGoal=appState.goals.find(g=>g.id===goalId);if(originalGoal){const newGoal=JSON.parse(JSON.stringify(originalGoal));newGoal.id=''+Date.now();newGoal.name=`${originalGoal.name} (کپی)`;newGoal.history={};newGoal.archived=false;appState.goals.push(newGoal);const originalIndex=appState.order.indexOf(goalId);appState.order.splice(originalIndex+1,0,newGoal.id);persistState();fullRender();}};
     window.toggleArchiveGoal=(goalId)=>{const goal=appState.goals.find(g=>g.id===goalId);if(goal){goal.archived=!goal.archived;persistState();fullRender();}};
     window.deleteGoal=(goalId)=>{const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';modal.innerHTML=`<div class="modal-content bg-app-card rounded-2xl p-5 w-full max-w-sm shadow-2xl text-center"><h3 class="font-bold text-lg mb-2">تایید حذف</h3><p class="text-sm text-app-text-muted mb-6">آیا از حذف این هدف مطمئن هستید؟ این عمل غیرقابل بازگشت است.</p><div class="grid grid-cols-2 gap-4"><button id="cancel-delete" class="p-3 rounded-lg font-bold bg-app-cell-inactive hover:opacity-80 transition">لغو</button><button id="confirm-delete" class="p-3 rounded-lg font-bold bg-red-500 text-white hover:bg-red-600 transition">حذف</button></div></div>`;document.getElementById('modalArea').appendChild(modal);modal.querySelector('#cancel-delete').onclick=closeModal;modal.querySelector('#confirm-delete').onclick=()=>{closeModal();const card=document.querySelector(`.goal-card[data-id="${goalId}"]`);if(card){card.classList.add('goal-anim-out');setTimeout(()=>{appState.goals=appState.goals.filter(g=>g.id!==goalId);appState.order=appState.order.filter(id=>id!==goalId);persistState();fullRender();},300);}else{appState.goals=appState.goals.filter(g=>g.id!==goalId);appState.order=appState.order.filter(id=>id!==goalId);persistState();fullRender();}};};
-    function addCheckmark(goalId,dayIndex,cellElement){const goal=appState.goals.find(g=>g.id===goalId);if(!goal||!goal.days[dayIndex])return;const weekId=weekIdForDate(appState.currentWeek);if(!goal.history)goal.history={};if(!goal.history[weekId])goal.history[weekId]=Array(7).fill(null).map(()=>({entries:[],note:''}));if(!goal.history[weekId][dayIndex])goal.history[weekId][dayIndex]={entries:[],note:''};goal.history[weekId][dayIndex].entries.push(checkmarkSVG);persistState();const dayData=goal.history[weekId][dayIndex];cellElement.querySelector('div').innerHTML=dayData.entries.map(em=>{if(!em)return'';if(em.startsWith('<svg')){return`<span class="inline-flex items-center justify-center w-8 h-8">${em}</span>`;}return`<span class="text-sm md:text-base">${escapeHtml(em)}</span>`;}).join('');cellElement.classList.add('day-completed');cellElement.classList.add('cell-swipe-up');cellElement.addEventListener('animationend',()=>cellElement.classList.remove('cell-swipe-up'),{once:true});updateGoalCardStats(goalId);}
-    function removeLastEmoji(goalId,dayIndex,cellElement){const goal=appState.goals.find(g=>g.id===goalId);if(!goal||!goal.days[dayIndex])return;const weekId=weekIdForDate(appState.currentWeek);if(!goal.history?.[weekId]?.[dayIndex]?.entries.length>0)return;goal.history[weekId][dayIndex].entries.pop();persistState();const dayData=goal.history[weekId][dayIndex];cellElement.querySelector('div').innerHTML=dayData.entries.map(em=>{if(!em)return'';if(em.startsWith('<svg')){return`<span class="inline-flex items-center justify-center w-8 h-8">${em}</span>`;}return`<span class="text-sm md:text-base">${escapeHtml(em)}</span>`;}).join('');if(dayData.entries.length===0){cellElement.classList.remove('day-completed');}cellElement.classList.add('cell-swipe-down');cellElement.addEventListener('animationend',()=>cellElement.classList.remove('cell-swipe-down'),{once:true});updateGoalCardStats(goalId);}
+    function addCheckmark(goalId, dayIndex, cellElement) {
+    const goal = appState.goals.find(g => g.id === goalId);
+    if (!goal || !goal.days[dayIndex]) return;
+    const weekId = weekIdForDate(appState.currentWeek);
+    if (!goal.history) goal.history = {};
+    if (!goal.history[weekId]) goal.history[weekId] = Array(7).fill(null).map(() => ({ entries: [], note: '' }));
+    if (!goal.history[weekId][dayIndex]) goal.history[weekId][dayIndex] = { entries: [], note: '' };
+    goal.history[weekId][dayIndex].entries.push(checkmarkSVG);
+    persistState();
+    const dayData = goal.history[weekId][dayIndex];
+    
+    // Re-render cell content using the new function
+    const noteIndicatorHtml = dayData.note ? `<div class="absolute top-0 right-0 w-2 h-2 bg-amber-400 rounded-full" title="${escapeHtml(dayData.note)}"></div>` : '';
+    cellElement.innerHTML = generateDayCellContent(dayData) + noteIndicatorHtml;
+
+    cellElement.classList.add('day-completed');
+    cellElement.classList.add('cell-swipe-up');
+    cellElement.addEventListener('animationend', () => cellElement.classList.remove('cell-swipe-up'), { once: true });
+    updateGoalCardStats(goalId);
+}
+
+function removeLastEmoji(goalId, dayIndex, cellElement) {
+    const goal = appState.goals.find(g => g.id === goalId);
+    if (!goal || !goal.days[dayIndex]) return;
+    const weekId = weekIdForDate(appState.currentWeek);
+    if (!goal.history?.[weekId]?.[dayIndex]?.entries.length > 0) return;
+    goal.history[weekId][dayIndex].entries.pop();
+    persistState();
+    const dayData = goal.history[weekId][dayIndex];
+
+    // Re-render cell content using the new function
+    const noteIndicatorHtml = dayData.note ? `<div class="absolute top-0 right-0 w-2 h-2 bg-amber-400 rounded-full" title="${escapeHtml(dayData.note)}"></div>` : '';
+    cellElement.innerHTML = generateDayCellContent(dayData) + noteIndicatorHtml;
+    
+    if (dayData.entries.length === 0) {
+        cellElement.classList.remove('day-completed');
+    }
+    cellElement.classList.add('cell-shrink');
+    cellElement.addEventListener('animationend', () => cellElement.classList.remove('cell-shrink'), { once: true });
+    updateGoalCardStats(goalId);
+}
+    function removeLastEmoji(goalId, dayIndex, cellElement) {
+    const goal = appState.goals.find(g => g.id === goalId);
+    if (!goal || !goal.days[dayIndex]) return;
+    const weekId = weekIdForDate(appState.currentWeek);
+    if (!goal.history?.[weekId]?.[dayIndex]?.entries.length > 0) return;
+
+    // Remove the last emoji from the data
+    goal.history[weekId][dayIndex].entries.pop();
+    persistState();
+
+    const dayData = goal.history[weekId][dayIndex];
+
+    // Re-render the cell's content using the NEW counting logic
+    const noteIndicatorHtml = dayData.note ? `<div class="absolute top-0 right-0 w-2 h-2 bg-amber-400 rounded-full" title="${escapeHtml(dayData.note)}"></div>` : '';
+    cellElement.innerHTML = generateDayCellContent(dayData) + noteIndicatorHtml;
+    
+    // If no entries are left, remove the completed background
+    if (dayData.entries.length === 0) {
+        cellElement.classList.remove('day-completed');
+    }
+    
+    // Trigger the "shrink" animation
+    cellElement.classList.add('cell-swipe-down');
+    cellElement.addEventListener('animationend', () => cellElement.classList.remove('cell-swipe-down'), { once: true });
+    
+    // Update the total scores in the header
+    updateGoalCardStats(goalId);
+}
 
 function setupCellListeners() {
     document.querySelectorAll('.goal-day').forEach(cell => {
@@ -1688,68 +1958,68 @@ function showGoalHeatmapModal(goalId) {
 
     //end
    //report
-    function showReportModal() {
-        let currentReportDate = new Date();
-        let currentReportView = 'month'; // 'day', 'week', 'month', 'overall'
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';
-        modal.innerHTML = `
-            <div class="modal-content glass-modal-content rounded-2xl p-4 sm:p-6 w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl">
-                <div class="flex-shrink-0 flex justify-between items-center mb-4">
-                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">گزارش پیشرفت</h2>
-                    <button class="close-modal-btn text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full p-2 transition-colors">&times;</button>
+ function showReportModal(initialView = 'month') {
+    let currentReportDate = new Date();
+    let currentReportView = initialView; // 'day', 'week', 'month', 'overall'
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="modal-content glass-modal-content rounded-2xl p-4 sm:p-6 w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl">
+            <div class="flex-shrink-0 flex justify-between items-center mb-4">
+                <h2 class="text-xl sm:text-2xl font-bold text-app-text">گزارش پیشرفت</h2>
+                <button class="close-modal-btn text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">&times;</button>
+            </div>
+            <div class="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                <div id="report-tabs" class="w-full sm:w-auto flex flex-wrap items-center justify-center gap-2 bg-app-card/50 p-1 rounded-xl">
+                    <button data-view="day" class="report-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">روزانه</button>
+                    <button data-view="week" class="report-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">هفتگی</button>
+                    <button data-view="month" class="report-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">ماهانه</button>
+                    <button data-view="overall" class="report-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">سالیانه</button>
                 </div>
-                <div class="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
-                     <div id="report-tabs" class="w-full sm:w-auto flex flex-wrap items-center justify-center gap-2">
-                         <button data-view="day" class="report-tab-btn">روزانه</button>
-                         <button data-view="week" class="report-tab-btn">هفتگی</button>
-                         <button data-view="month" class="report-tab-btn active">ماهانه</button>
-                         <button data-view="overall" class="report-tab-btn">سالانه</button>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button id="report-prev-btn" aria-label="Previous" class="p-2 rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
-                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </button>
-                        <div id="report-date-display" class="w-36 text-center font-bold text-indigo-600 dark:text-indigo-400"></div>
-                        <button id="report-next-btn" aria-label="Next" class="p-2 rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </button>
-                    </div>
+                <div class="flex items-center gap-2">
+                    <button id="report-prev-btn" aria-label="Previous" class="p-2 rounded-full hover:bg-app-hover transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <div id="report-date-display" class="w-36 text-center font-bold text-primary"></div>
+                    <button id="report-next-btn" aria-label="Next" class="p-2 rounded-full hover:bg-app-hover transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
                 </div>
-                <div id="report-content" class="flex-grow overflow-y-auto space-y-3 p-1 -ml-2 pl-2 no-scrollbar"></div>
-            </div>`;
-        document.getElementById('modalArea').appendChild(modal);
-        modal.onclick = e => { if (e.target === modal || e.target.closest('.close-modal-btn')) closeModal(); };
-        const tabs = modal.querySelector('#report-tabs');
-        const contentArea = modal.querySelector('#report-content');
-        const dateDisplay = modal.querySelector('#report-date-display');
-        const prevBtn = modal.querySelector('#report-prev-btn');
-        const nextBtn = modal.querySelector('#report-next-btn');
-        function updateReportView() {
-            renderReportContent(contentArea, dateDisplay, currentReportView, currentReportDate);
-            tabs.querySelectorAll('.report-tab-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.view === currentReportView);
-            });
-        }
-        tabs.addEventListener('click', e => {
-            const button = e.target.closest('.report-tab-btn');
-            if (button) {
-                currentReportView = button.dataset.view;
-                currentReportDate = new Date();
-                updateReportView();
-            }
+            </div>
+            <div id="report-content" class="flex-grow overflow-y-auto space-y-3 p-1 -ml-2 pl-2 no-scrollbar"></div>
+        </div>`;
+    document.getElementById('modalArea').appendChild(modal);
+    modal.onclick = e => { if (e.target === modal || e.target.closest('.close-modal-btn')) closeModal(); };
+    const tabs = modal.querySelector('#report-tabs');
+    const contentArea = modal.querySelector('#report-content');
+    const dateDisplay = modal.querySelector('#report-date-display');
+    const prevBtn = modal.querySelector('#report-prev-btn');
+    const nextBtn = modal.querySelector('#report-next-btn');
+    function updateReportView() {
+        renderReportContent(contentArea, dateDisplay, currentReportView, currentReportDate);
+        tabs.querySelectorAll('.report-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.view === currentReportView);
         });
-        const navigate = (direction) => {
-            if (currentReportView === 'day') currentReportDate.setDate(currentReportDate.getDate() + direction);
-            else if (currentReportView === 'week') currentReportDate.setDate(currentReportDate.getDate() + (7 * direction));
-            else if (currentReportView === 'month') currentReportDate.setMonth(currentReportDate.getMonth() + direction);
-            else if (currentReportView === 'overall') currentReportDate.setFullYear(currentReportDate.getFullYear() + direction);
-            updateReportView();
-        };
-        prevBtn.addEventListener('click', () => navigate(-1));
-        nextBtn.addEventListener('click', () => navigate(1));
-        updateReportView(); // Initial render
     }
+    tabs.addEventListener('click', e => {
+        const button = e.target.closest('.report-tab-btn');
+        if (button) {
+            currentReportView = button.dataset.view;
+            currentReportDate = new Date();
+            updateReportView();
+        }
+    });
+    const navigate = (direction) => {
+        if (currentReportView === 'day') currentReportDate.setDate(currentReportDate.getDate() + direction);
+        else if (currentReportView === 'week') currentReportDate.setDate(currentReportDate.getDate() + (7 * direction));
+        else if (currentReportView === 'month') currentReportDate.setMonth(currentReportDate.getMonth() + direction);
+        else if (currentReportView === 'overall') currentReportDate.setFullYear(currentReportDate.getFullYear() + direction);
+        updateReportView();
+    };
+    prevBtn.addEventListener('click', () => navigate(-1));
+    nextBtn.addEventListener('click', () => navigate(1));
+    updateReportView(); // Initial render
+}
     function renderReportContent(container, dateDisplay, view, date) {
         const goals = appState.goals.filter(g => !g.archived);
         if (goals.length === 0) {
@@ -1980,6 +2250,7 @@ function showGoalHeatmapModal(goalId) {
     }
 // ADD THIS NEW FUNCTION TO YOUR SCRIPT
 // REPLACE THIS FUNCTION
+// REPLACE THIS FUNCTION
 function renderSettingsMenu() {
     const menu = document.getElementById('settingsMenu');
     if (!menu) return;
@@ -2035,16 +2306,12 @@ function renderSettingsMenu() {
     `;
     const desktopToggle = menu.querySelector('#darkModeToggle');
     if (desktopToggle) desktopToggle.checked = isDark;
+    
     const randomThemeToggle = menu.querySelector('#randomThemeToggle');
     if (randomThemeToggle) {
         randomThemeToggle.checked = appState.randomThemeMode;
-        randomThemeToggle.onchange = () => {
-            appState.randomThemeMode = randomThemeToggle.checked;
-            persistState();
-        };
     }
 }
-
 // You should also add the "Random Theme" toggle to renderMobileMenu if you wish.
 function setupHeaderSwipe() {
     const navbar = document.getElementById('navbar');
@@ -2080,6 +2347,7 @@ function setupHeaderSwipe() {
         }
     }
 }
+
 </script>
 </body>
 </html>
