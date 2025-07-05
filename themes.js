@@ -1,6 +1,17 @@
    
 const themesData = {
   modernDark: [
+    {
+    id: 'theme-night-red',
+    name: 'حالت شب',
+    isDark: true,
+    primary: '#E53E3E', // یک قرمز واضح اما نه بیش از حد روشن برای المان‌های اصلی
+    bg: '#000000',      // پس‌زمینه کاملا سیاه برای حداقل انتشار نور
+    text: '#A0A0A0',    // متن اصلی، خاکستری بسیار کم‌نور برای جلوگیری از خستگی چشم
+    card: '#1A0B0B',    // رنگ کارت‌ها، یک قرمز بسیار تیره و نزدیک به سیاه
+    cellInactive: 'rgba(255, 69, 0, 0.1)', // سلول‌های غیرفعال، یک نارنجی-قرمز بسیار محو
+    completedBg: 'rgba(229, 62, 62, 0.2)' // پس‌زمینه سلول تکمیل شده، قرمز شفاف
+},
     { id: 'theme-cyberpunk', name: 'سایبرپانک', primary: '#f9f871', bg: '#0c0c27', text: '#a6fffa', isDark: true },
     { id: 'theme-vaporwave', name: 'ویپورویو', primary: '#ff77cc', bg: '#200c38', text: '#00e5e5', isDark: true },
     { id: 'theme-twilight', name: 'گرگ و میش', primary: '#ffc880', bg: '#1e1e3f', text: '#d4d4ff', isDark: true },
