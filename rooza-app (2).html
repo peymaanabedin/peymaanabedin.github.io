@@ -165,6 +165,15 @@ body.mobile-menu-open {
     width: 1.25rem;
     height: 1.25rem;
 }
+.suggestion-tab-btn {
+    color: var(--color-text-muted);
+}
+
+.suggestion-tab-btn.active {
+    background-color: var(--color-primary);
+    color: var(--color-primary-text);
+    box-shadow: 0 4px 14px 0 var(--color-primary-shadow);
+}
 
     </style>
     <script>
@@ -278,14 +287,13 @@ body.mobile-menu-open {
     const STORAGE_ACTIVE_THEME = 'goal_tracker_active_theme_v5';
     const STORAGE_FAVORITE_THEMES = 'goal_tracker_favorite_themes_v1';
 const STORAGE_RANDOM_THEME = 'goal_tracker_random_theme_v1';
-const STORAGE_CATEGORIES_KEY = 'goal_tracker_categories_v1';
+
 const WEEKDAY_NAMES_SHORT = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];    const JALALI_MONTH_NAMES = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
         
 let appState = {
     currentWeek: getStartOfWeek(new Date()),
     goals: [], 
     order: [], 
-    categories: {}, // این آبجکت جدید است
     activeThemeId: 'theme-paper', // تغییر به تم کاغذی به عنوان تم اولیه
     editing: null, 
     showArchived: false,
@@ -359,19 +367,6 @@ function loadStateFromStorage() {
     const data = localStorage.getItem(STORAGE_KEY);
     const order = localStorage.getItem(STORAGE_ORDER);
     const activeThemeId = localStorage.getItem(STORAGE_ACTIVE_THEME) || 'theme-paper'; // پیش‌فرض اولیه
-      const storedCategories = localStorage.getItem(STORAGE_CATEGORIES_KEY);
-    if (storedCategories) {
-        appState.categories = JSON.parse(storedCategories);
-    } else {
-        // اگر کاربر برای اولین بار برنامه را باز می‌کند، مقادیر پیش‌فرض را قرار بده
-        appState.categories = {
-            'ورزش': 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300',
-            'کار': 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
-            'شخصی': 'bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300',
-            'سلامتی': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-        };
-    }
-
     const favoriteThemes = localStorage.getItem(STORAGE_FAVORITE_THEMES);
     const randomThemeMode = localStorage.getItem(STORAGE_RANDOM_THEME);
 
@@ -448,7 +443,6 @@ function persistState() {
     localStorage.setItem(STORAGE_ORDER, JSON.stringify(appState.order));
     localStorage.setItem('goal_tracker_user_light_theme', appState.userLight);
     localStorage.setItem('goal_tracker_user_dark_theme', appState.userDark);
-    localStorage.setItem(STORAGE_CATEGORIES_KEY, JSON.stringify(appState.categories));
     localStorage.setItem(STORAGE_FAVORITE_THEMES, JSON.stringify(appState.favoriteThemes));
     localStorage.setItem(STORAGE_RANDOM_THEME, JSON.stringify(appState.randomThemeMode));
 }
@@ -1418,91 +1412,123 @@ function setupCellListeners() {
 
 
     function initSortable(){if(sortable)sortable.destroy();const list=document.getElementById('goalList');if(!list)return;sortable=Sortable.create(list,{handle:'.goal-handle',animation:200,ghostClass:'sortable-ghost',onEnd:(evt)=>{appState.order=Array.from(evt.to.children).map(card=>card.dataset.id);persistState();}});}
-
-    showGoalModal = (goal) => {
+showGoalModal = (goal) => {
     const isEdit = !!goal;
     const draft = isEdit ? JSON.parse(JSON.stringify(goal)) : { id: '' + Date.now(), name: '', emoji: '🎯', days: Array(7).fill(true), history: {}, type: 'binary', archived: false, category: 'شخصی', creationDate: new Date().toISOString() };
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-end justify-center';
-    // **** CHANGES MADE ON THE NEXT TWO LINES ****
-    modal.innerHTML = `<div class="modal-content bg-app-bg rounded-t-2xl p-4 w-full max-w-lg pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"><h2 class="text-xl font-bold text-center mb-6 text-primary">${isEdit?'ویرایش هدف':'هدف جدید'}</h2><div class="space-y-4"><div class="flex gap-4"><div class="flex-grow"><label for="goalName" class="font-semibold mb-2 block text-sm">نام هدف</label><input type="text" id="goalName" value="${escapeHtml(draft.name)}" placeholder="مثلا: ورزش روزانه" class="w-full p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition" autocomplete="one-time-code"></div><div><label for="goalEmoji" class="font-semibold mb-2 block text-sm">ایموجی</label><input type="text" id="goalEmoji" value="${draft.emoji}" maxlength="2" class="w-20 text-center p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition" autocomplete="one-time-code"></div></div>
-    
-<<div>
-    <label class="font-semibold mb-2 block text-sm">دسته‌بندی</label>
-    <div id="goalCategoryContainer" class="flex items-center gap-3 overflow-x-auto pb-2 -mb-2 no-scrollbar">
-        ${Object.keys(appState.categories).map(cat => `
-            <button 
-                data-category-value="${cat}" 
-                class="category-chip whitespace-nowrap text-sm font-semibold px-4 py-2 rounded-full transition-colors duration-200 ${draft.category === cat ? 'bg-primary text-primary-text' : 'bg-app-cell-inactive hover:bg-app-hover'}"
-            >
-                ${cat}
-            </button>
-        `).join('')}
+
+    // **** تغییرات در این بخش اعمال شده است ****
+    modal.innerHTML = `<div class="modal-content bg-app-bg rounded-t-2xl p-4 w-full max-w-lg pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl" dir="rtl">
+        <h2 class="text-xl font-bold text-center mb-6 text-primary">${isEdit ? 'ویرایش هدف' : 'هدف جدید'}</h2>
+        <div class="space-y-4">
+            <div class="flex gap-4 items-end">
+                <div class="flex-grow">
+                    <label for="goalName" class="font-semibold mb-2 block text-sm text-right">نام هدف</label>
+                    <div class="relative">
+                        <input type="text" id="goalName" value="${escapeHtml(draft.name)}" placeholder="مثلا: ورزش روزانه" class="w-full p-3 pl-24 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition text-right" autocomplete="one-time-code">
+                        <button id="suggestionBtn" class="absolute left-2 top-1/2 -translate-y-1/2 text-xs bg-primary/20 text-primary font-semibold px-2 py-1 rounded-md hover:bg-primary/30 transition-colors">انتخاب از لیست</button>
+                    </div>
+                </div>
+                <div class="w-20">
+                    <label for="goalEmoji" class="font-semibold mb-2 block text-sm text-center">ایموجی</label>
+                   <input type="text" id="goalEmoji" value="${draft.emoji}" onclick="showEmojiPickerModal()"
         
-        // این دکمه جدید است
-        <button id="addNewCategoryBtn" class="whitespace-nowrap text-sm font-bold px-4 py-2 rounded-full text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
-            افزودن جدید +
-        </button>
+                    maxlength="2" class="w-full text-center text-3xl p-0 h-12 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition" autocomplete="one-time-code">
+                </div>
+            </div>
+
+            <div>
+                <label class="font-semibold mb-2 block text-sm text-right">دسته‌بندی</label>
+                <div id="goalCategoryContainer" class="flex items-center gap-3 overflow-x-auto pb-2 -mb-2 no-scrollbar">
+                    ${Object.keys(CATEGORIES).map(cat => `
+                        <button
+                            data-category-value="${cat}"
+                            class="category-chip whitespace-nowrap text-sm font-semibold px-4 py-2 rounded-full transition-colors duration-200 ${draft.category === cat ? 'bg-primary text-primary-text' : 'bg-app-cell-inactive hover:bg-app-hover'}"
+                        >
+                            ${cat}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+
+  <div>
+    <label class="font-semibold mb-2 block text-sm text-right w-full" dir="rtl">روزهای فعال</label>
+    <div class="flex" dir="ltr">
+        <div class="grid grid-cols-7 gap-2 rounded-xl bg-app-card p-1.5 weekday-toggle-row">
+            ${WEEKDAY_NAMES_SHORT.map((d, i) => {
+                const dataIndex = (i + 6) % 7;
+                // استایل بهبود یافته برای دکمه‌ها
+                const activeClass = 'bg-primary text-primary-text font-bold shadow-lg';
+                const inactiveClass = 'bg-app-bg hover:bg-app-hover text-app-text-muted';
+                return `<div class="weekday-toggle h-10 w-10 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-200 ${draft.days[dataIndex] ? activeClass : inactiveClass}" data-day="${dataIndex}">${d}</div>`;
+            }).join('')}
+        </div>
     </div>
 </div>
-    
-    <div><label class="font-semibold mb-2 block text-sm">روزهای فعال</label><div class="grid grid-cols-7 gap-2 rounded-lg bg-app-cell-inactive p-1 weekday-toggle-row">${WEEKDAY_NAMES_SHORT.map((d, i) => {
-        const dataIndex = (i + 6) % 7; // Convert visual index (Sat=0) to data index (Sun=0)
-        return `<div class="weekday-toggle text-center font-bold p-2 rounded-md cursor-pointer transition-colors ${draft.days[dataIndex] ? 'bg-primary text-primary-text' : 'hover:bg-app-hover'}" data-day="${dataIndex}">${d}</div>`;
-    }).join('')}</div></div></div><div class="grid grid-cols-2 gap-4 mt-8"><button class="action-btn-cancel w-full p-4 rounded-lg font-bold bg-app-cell-inactive hover:opacity-80 transition">لغو</button><button id="saveGoalBtn" class="w-full p-4 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition">${isEdit ? 'ذخیره' : 'افزودن'}</button></div></div>`;
+        <div class="grid grid-cols-2 gap-4 mt-8">
+            <button class="action-btn-cancel w-full p-4 rounded-lg font-bold bg-app-cell-inactive hover:opacity-80 transition">لغو</button>
+            <button id="saveGoalBtn" class="w-full p-4 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition">${isEdit ? 'ذخیره' : 'افزودن'}</button>
+        </div>
+    </div>`;
+
     document.getElementById('modalArea').appendChild(modal);
     document.getElementById('goalName').focus();
+
+    // به‌روزرسانی مقدار ایموجی با هر تغییر در فیلد
+    const goalEmojiInput = modal.querySelector('#goalEmoji');
+    goalEmojiInput.addEventListener('input', (e) => {
+        // این کار باعث می‌شود تا ایموجی‌های جدید و ترکیبی نیز به‌درستی نمایش داده شوند
+        draft.emoji = e.target.value;
+    });
+    
+    // بقیه کد تابع بدون تغییر باقی می‌ماند...
+    modal.querySelector('#suggestionBtn').onclick = () => showSuggestionModal();
+    // دکمه انتخابگر ایموجی حذف شده و کاربر مستقیما در فیلد تایپ می‌کند
+
     modal.onclick = e => { if (e.target === modal) closeModal(); };
     modal.querySelector('.action-btn-cancel').onclick = closeModal;
+
     modal.querySelectorAll('.weekday-toggle').forEach(toggle => {
         toggle.onclick = () => {
-            const day = parseInt(toggle.dataset.day); // This is already the correct data index (Sun=0)
+            const day = parseInt(toggle.dataset.day);
             draft.days[day] = !draft.days[day];
             toggle.classList.toggle('bg-primary');
             toggle.classList.toggle('text-primary-text');
         };
     });
-    modal.querySelectorAll('.category-chip').forEach(chip => {
-    chip.onclick = () => {
-        // Update the draft object with the new category
-        draft.category = chip.dataset.categoryValue;
-        
-        // Visually update all chips
-        modal.querySelectorAll('.category-chip').forEach(c => {
-            c.classList.remove('bg-primary', 'text-primary-text');
-            c.classList.add('bg-app-cell-inactive', 'hover:bg-app-hover');
-        });
-        chip.classList.add('bg-primary', 'text-primary-text');
-        chip.classList.remove('bg-app-cell-inactive', 'hover:bg-app-hover');
-    };
-});
-modal.querySelector('#addNewCategoryBtn').onclick = () => {
-    // مدال فعلی را می‌بندیم و مدال مدیریت را باز می‌کنیم
-    // پس از بسته شدن مدال مدیریت، مدال هدف دوباره با اطلاعات فعلی باز می‌شود
-    closeModal();
-    showCategoryManagerModal({ onClosing: () => showGoalModal(draft) });
-};
-modal.querySelector('#saveGoalBtn').onclick = () => {
-    draft.name = modal.querySelector('#goalName').value.trim();
-    draft.emoji = modal.querySelector('#goalEmoji').value;
-    // خط اشتباه حذف شد. مقدار draft.category قبلاً با کلیک روی دکمه‌ها ثبت شده است.
-    draft.type = 'binary';
-    
-    if (isEdit) {
-        const index = appState.goals.findIndex(g => g.id === goal.id);
-        if (index > -1) appState.goals[index] = draft;
-    } else {
-        appState.goals.push(draft);
-        if (!appState.order.includes(draft.id)) {
-             appState.order.push(draft.id);
-        }
-    }
-    persistState();
-    closeModal();
-    fullRender();
-};
-};
 
+    modal.querySelectorAll('.category-chip').forEach(chip => {
+        chip.onclick = () => {
+            draft.category = chip.dataset.categoryValue;
+            modal.querySelectorAll('.category-chip').forEach(c => {
+                c.classList.remove('bg-primary', 'text-primary-text');
+                c.classList.add('bg-app-cell-inactive', 'hover:bg-app-hover');
+            });
+            chip.classList.add('bg-primary', 'text-primary-text');
+            chip.classList.remove('bg-app-cell-inactive', 'hover:bg-app-hover');
+        };
+    });
+
+    modal.querySelector('#saveGoalBtn').onclick = () => {
+        draft.name = modal.querySelector('#goalName').value.trim();
+        draft.emoji = modal.querySelector('#goalEmoji').value; // مقدار نهایی از فیلد خوانده می‌شود
+        draft.type = 'binary';
+
+        if (isEdit) {
+            const index = appState.goals.findIndex(g => g.id === goal.id);
+            if (index > -1) appState.goals[index] = draft;
+        } else {
+            appState.goals.push(draft);
+            if (!appState.order.includes(draft.id)) {
+                appState.order.push(draft.id);
+            }
+        }
+        persistState();
+        closeModal();
+        fullRender();
+    };
+};
     showLogModal = (goalId,dayIndex)=>{const goal=appState.goals.find(g=>g.id===goalId);if(!goal||!goal.days[dayIndex])return;const weekId=weekIdForDate(appState.currentWeek);if(!goal.history)goal.history={};if(!goal.history[weekId])goal.history[weekId]=Array(7).fill(null).map(()=>({entries:[],note:''}));if(!goal.history[weekId][dayIndex])goal.history[weekId][dayIndex]={entries:[],note:''};const dayData=goal.history[weekId][dayIndex];const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-end justify-center';const renderEntriesInModal=(container)=>{const listHtml=dayData.entries.map((entry,i)=>{const content=entry.startsWith('<svg')?`<span class="w-6 h-6 inline-block">${entry}</span>`:escapeHtml(entry);return`<div class="flex items-center justify-between gap-1 bg-app-cell-inactive rounded-lg px-2 py-1 text-sm"><span>${content}</span><button data-index="${i}" class="delete-entry-btn text-red-500 hover:text-red-700 font-bold text-lg">&times;</button></div>`;}).join('');container.innerHTML=listHtml||`<span class="text-app-text-muted text-sm p-2">موردی ثبت نشده</span>`;};modal.innerHTML=`<div class="modal-content bg-app-bg rounded-t-2xl p-4 w-full max-w-lg pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"><h2 class="text-xl font-bold text-center mb-4 truncate">${goal.name}</h2><div class="space-y-4"><div><label class="font-semibold mb-2 block text-sm">موارد ثبت شده امروز</label><div id="entries-list" class="flex flex-wrap gap-2 min-h-[40px] bg-app-card p-2 rounded-lg border border-app-border"></div></div><div><label class="font-semibold mb-2 block text-sm">ثبت ایموجی</label><div class="emoji-grid grid grid-cols-7 gap-2 text-3xl">${EMOJIS.map(em=>{const content=em.startsWith('<svg')?`<span class="w-8 h-8 inline-block">${em}</span>`:escapeHtml(em);return`<button class="emoji-btn text-center rounded-lg p-2 hover:bg-app-hover transition-transform active:scale-125 focus:outline-none focus:ring-2 focus:ring-primary">${content}</button>`;}).join('')}</div></div><div><label for="note-input" class="font-semibold mb-2 block text-sm">یادداشت</label><textarea id="note-input" class="w-full p-3 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition" rows="2" placeholder="یادداشت امروز...">${escapeHtml(dayData.note)}</textarea></div></div><div class="mt-8"><button class="action-btn-done w-full p-4 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition">انجام شد</button></div></div>`;document.getElementById('modalArea').appendChild(modal);const entriesList=modal.querySelector('#entries-list');renderEntriesInModal(entriesList);const saveAndClose=()=>{goal.history[weekId][dayIndex].note=modal.querySelector('#note-input').value;persistState();fullRender();closeModal();};modal.onclick=e=>{if(e.target===modal)saveAndClose();};modal.querySelector('.action-btn-done').onclick=saveAndClose;const updateData=()=>{persistState();renderEntriesInModal(entriesList);updateGoalCardStats(goalId);};entriesList.addEventListener('click',e=>{if(e.target.classList.contains('delete-entry-btn')){const index=parseInt(e.target.dataset.index);dayData.entries.splice(index,1);updateData();}});modal.querySelectorAll('.emoji-btn').forEach((btn,index)=>{btn.onclick=()=>{dayData.entries.push(EMOJIS[index]);updateData();};});}
     showDayDetailModal = (goalId,dayIndex)=>{const goal=appState.goals.find(g=>g.id===goalId);if(!goal)return;const weekDates=getWeekDates(appState.currentWeek);const date=weekDates[dayIndex];const weekId=weekIdForDate(appState.currentWeek);const dayData=goal.history?.[weekId]?.[dayIndex]||{entries:[],note:''};const modal=document.createElement('div');modal.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';const formattedDate=date.toLocaleDateString('fa-IR',{weekday:'long',month:'long',day:'numeric'});const entriesHtml=dayData.entries.length>0?dayData.entries.map(entry=>{if(entry.startsWith('<svg')){return`<span class="inline-block align-middle w-8 h-8">${entry}</span>`;}return`<span class="text-2xl">${escapeHtml(entry)}</span>`;}).join(''):'<span class="text-sm text-app-text-muted">موردی ثبت نشده</span>';const noteHtml=dayData.note?`<p class="text-sm bg-amber-500/10 p-3 rounded-lg">${escapeHtml(dayData.note)}</p>`:'<span class="text-sm text-app-text-muted">یادداشتی وجود ندارد</span>';modal.innerHTML=`<div class="modal-content bg-app-card rounded-2xl p-5 w-full max-w-sm shadow-2xl"><h3 class="font-bold text-lg text-primary mb-2">${escapeHtml(goal.name)}</h3><p class="text-sm text-app-text-muted font-semibold mb-4">${formattedDate}</p><div class="space-y-4"><div><h4 class="font-semibold text-sm mb-2">موارد ثبت شده</h4><div class="flex flex-wrap gap-3 items-center min-h-[40px] bg-app-bg p-3 rounded-lg">${entriesHtml}</div></div><div><h4 class="font-semibold text-sm mb-2">یادداشت</h4><div class="min-h-[40px]">${noteHtml}</div></div></div><button class="close-modal-btn w-full mt-6 p-3 rounded-lg font-bold bg-app-cell-inactive hover:opacity-80 transition">بستن</button></div>`;document.getElementById('modalArea').appendChild(modal);modal.onclick=e=>{if(e.target===modal||e.target.classList.contains('close-modal-btn'))closeModal();};}
     showContextMenu=(e,goalId)=>{e.preventDefault();e.stopPropagation();if(appState.contextMenuGoalId===goalId){closeContextMenu();return;}closeContextMenu();const goal=appState.goals.find(g=>g.id===goalId);if(!goal)return;const menu=document.getElementById('contextMenu');menu.innerHTML=`<button onclick="editGoal('${goalId}')" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg">✏️ <span>ویرایش</span></button><button onclick="duplicateGoal('${goalId}')" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg">🗂️ <span>کپی</span></button><button onclick="toggleArchiveGoal('${goalId}')" class="w-full text-left flex items-center gap-3 p-3 hover:bg-app-hover rounded-lg">${goal.archived?'📂 <span>لغو آرشیو</span>':'🗄️ <span>آرشیو</span>'}</button><div class="my-1 h-px bg-app-border"></div><button onclick="deleteGoal('${goalId}')" class="w-full text-left flex items-center gap-3 p-3 text-red-500 hover:bg-red-500/10 rounded-lg">🗑️ <span>حذف</span></button>`;menu.style.display='block';const rect=menu.getBoundingClientRect();let left=e.clientX;let top=e.clientY;if(left+rect.width>window.innerWidth-10){left=window.innerWidth-rect.width-10;}if(top+rect.height>window.innerHeight-10){top=window.innerHeight-rect.height-10;}menu.style.left=`${left}px`;menu.style.top=`${top}px`;appState.contextMenuGoalId=goalId;setTimeout(()=>document.addEventListener('click',closeContextMenu,{once:true}),10);};
@@ -2103,154 +2129,209 @@ function setupHeaderSwipe() {
         }
     }
 }
-function showCategoryManagerModal(options = {}) {
-    const { onClosing } = options;
-    closeModal(); // بستن مدال‌های دیگر
+const SUGGESTED_GOALS = {
+    'ورزشی': [
+        { name: 'رفتن به باشگاه', emoji: '🏋️‍♀️' }, { name: 'پیاده‌روی روزانه', emoji: '🚶‍♀️' },
+        { name: 'دویدن', emoji: '🏃‍♂️' }, { name: 'نوشیدن آب کافی', emoji: '💧' },
+        { name: 'یوگا و مدیتیشن', emoji: '🧘‍♀️' }, { name: 'حرکات کششی صبحگاهی', emoji: '🤸‍♂️' },
+        { name: 'دوچرخه‌سواری', emoji: '🚴‍♀️' }, { name: 'شنا', emoji: '🏊‍♀️' },
+        { name: 'کوهنوردی', emoji: '🧗‍♀️' }, { name: 'فوتبال', emoji: '⚽' },
+        { name: 'والیبال', emoji: '🏐' }, { name: 'بسکتبال', emoji: '🏀' },
+        { name: 'تنیس', emoji: '🎾' }, { name: 'پیلاتس', emoji: '🧘‍♂️' },
+        { name: 'طناب زدن', emoji: '🪢' }, { name: 'ورزش‌های رزمی', emoji: '🥋' },
+        { name: 'رقص', emoji: '💃' }, { name: 'بارفیکس', emoji: '💪' },
+        { name: 'استفاده از پله به جای آسانسور', emoji: '🚶‍♂️' }, { name: 'پیاده‌روی در طبیعت', emoji: '🏞️' }
+    ],
+    'سلامتی': [
+        { name: 'خواب کافی و به‌موقع', emoji: '😴' }, { name: 'خوردن صبحانه سالم', emoji: '🍳' },
+        { name: 'مصرف میوه و سبزیجات', emoji: '🥗' }, { name: 'کاهش مصرف قند و شکر', emoji: '🚫' },
+        { name: 'کاهش مصرف فست‌فود', emoji: '🍔' }, { name: 'مصرف ویتامین‌ها و مکمل‌ها', emoji: '💊' },
+        { name: 'نخ دندان کشیدن', emoji: '🦷' }, { name: 'مراقبت از پوست', emoji: '🧴' },
+        { name: 'چکاپ پزشکی دوره‌ای', emoji: '🩺' }, { name: 'کنترل وزن', emoji: '⚖️' },
+        { name: 'کاهش استرس', emoji: '😌' }, { name: 'وقت گذراندن در آفتاب', emoji: '☀️' },
+        { name: 'آشپزی در خانه', emoji: '🧑‍🍳' }, { name: 'ترک سیگار', emoji: '🚭' },
+        { name: 'کاهش مصرف نمک', emoji: '🧂' }, { name: 'خوردن آجیل و دانه‌ها', emoji: '🥜' },
+        { name: 'نوشیدن چای سبز', emoji: '🍵' }, { name: 'حفظ وضعیت بدنی صحیح', emoji: '🧍‍♂️' },
+        { name: 'دیجیتال دیتاکس (فاصله از موبایل)', emoji: '📵' }, { name: 'انجام آزمایش خون سالانه', emoji: '🩸' }
+    ],
+    'شخصی': [
+        { name: 'مطالعه کتاب (حداقل ۱۰ صفحه)', emoji: '📖' }, { name: 'یادگیری زبان جدید', emoji: '🗣️' },
+        { name: 'نوشتن خاطرات روزانه', emoji: '📝' }, { name: 'شکرگزاری روزانه', emoji: '🙏' },
+        { name: 'گوش دادن به پادکست آموزشی', emoji: '🎧' }, { name: 'تماشای فیلم یا سریال', emoji: '🎬' },
+        { name: 'مرتب کردن اتاق و تخت', emoji: '🛏️' }, { name: 'یادگیری یک مهارت جدید آنلاین', emoji: '💡' },
+        { name: 'تمرین ساز موسیقی', emoji: '🎸' }, { name: 'وقت گذراندن با خانواده', emoji: '👨‍👩‍👧‍👦' },
+        { name: 'تماس با دوستان', emoji: '📞' }, { name: 'برنامه‌ریزی برای آخر هفته', emoji: '🗺️' },
+        { name: 'نقاشی یا طراحی', emoji: '🎨' }, { name: 'عکاسی', emoji: '📸' },
+        { name: 'رسیدگی به گیاهان', emoji: '🪴' }, { name: 'بازی‌های فکری (شطرنج، سودوکو)', emoji: '🧠' },
+        { name: 'کمک به دیگران', emoji: '❤️' }, { name: 'دنبال کردن اخبار', emoji: '📰' },
+        { name: 'خلاقیت و کاردستی', emoji: '✂️' }, { name: 'گوش دادن به کتاب صوتی', emoji: '📚' },
+        { name: 'باغبانی', emoji: '🌷' }, { name: 'خیاطی', emoji: '🧵' },
+        { name: 'تعمیر وسایل خانه', emoji: '🛠️' }, { name: 'یادگیری کدنویسی', emoji: '🧑‍💻' },
+        { name: 'سرمایه‌گذاری و پس‌انداز', emoji: '💰' }
+    ],
+    'کاری و تحصیلی': [
+        { name: 'برنامه‌ریزی کارهای روزانه', emoji: '🗓️' }, { name: 'اتمام مهم‌ترین کار روز', emoji: '✅' },
+        { name: 'یادگیری مهارت‌های شغلی', emoji: '📈' }, { name: 'مرور درس‌های روز', emoji: '📚' },
+        { name: 'آماده شدن برای امتحان', emoji: '✍️' }, { name: 'شرکت در کلاس یا دوره آموزشی', emoji: '🏫' },
+        { name: 'تمرکز بدون حواس‌پرتی (تکنیک پومودورو)', emoji: '🎯' }, { name: 'بررسی و پاسخ به ایمیل‌ها', emoji: '📧' },
+        { name: 'شبکه‌سازی حرفه‌ای', emoji: '🤝' }, { name: 'به‌روزرسانی رزومه و لینکدین', emoji: '📄' },
+        { name: 'آماده شدن برای جلسه کاری', emoji: '💼' }, { name: 'مرتب کردن میز کار', emoji: '🗂️' },
+        { name: 'انجام پروژه دانشگاهی', emoji: '🎓' }, { name: 'خواندن مقالات علمی/تخصصی', emoji: '📑' },
+        { name: 'یادگیری نرم‌افزار جدید', emoji: '💻' }, { name: 'استراحت‌های کوتاه بین کار', emoji: '☕' },
+        { name: 'تعیین اهداف هفتگی', emoji: '🏁' }, { name: 'جستجوی فرصت‌های شغلی جدید', emoji: '🔍' },
+        { name: 'مدیریت هزینه‌های کاری', emoji: '💸' }, { name: 'ارائه گزارش کار', emoji: '📊' }
+    ]
+};
+const SUGGESTED_EMOJIS = {
+    'ورزشی': ['💪', '🏃‍♂️', '🏋️‍♀️', '🧘‍♀️', '🚴‍♀️', '🏊‍♀️', '🤸‍♂️', '🏀', '⚽', '🥊'],
+    'شخصی': ['📖', '🎨', '🎸', '🎧', '📝', '🧠', '💡', '✨', '🌱', '🧑‍💻'],
+    'کاری': ['💼', '📈', '✅', '🗓️', '🎯', '👨‍🏫', '💰', '🏗️', '📮', '📞'],
+    'سلامتی': ['🥗', '💧', '😴', '💊', '❤️', '🚶‍♀️', '🌿', '🍎', '🥕', '🩺']
+};
 
+// تابع showEmojiPickerModal قبلی را حذف و این را جایگزین کنید.
+function showEmojiPickerModal() {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4';
+    modal.id = 'emojiPickerModal';
+    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[101] flex items-center justify-center p-4';
     
-    // پالت رنگ‌های موجود برای دسته‌بندی‌ها
-    const COLOR_PALETTE = {
-        'Sky': 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300',
-        'Amber': 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
-        'Violet': 'bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300',
-        'Green': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-        'Rose': 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
-        'Teal': 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300',
-        'Indigo': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300',
-    };
+    // مقدار فعلی ایموجی از فیلد اصلی خوانده می‌شود
+    const currentEmoji = document.getElementById('goalEmoji').value;
 
-    let editingCategoryName = null;
-
-    const render = () => {
-        const categoriesHtml = Object.entries(appState.categories).map(([name, classes]) => {
-            const isUsed = appState.goals.some(g => g.category === name);
-            const deleteBtnClasses = isUsed 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'text-red-500 hover:bg-red-500/10';
-            const deleteTooltip = isUsed ? 'title="این دسته‌بندی در حال استفاده است و قابل حذف نیست."' : '';
-
-            return `
-                <div class="flex items-center justify-between p-3 bg-app-card rounded-lg">
-                    <span class="font-semibold px-3 py-1 rounded-md text-sm ${classes}">${name}</span>
-                    <div class="flex items-center gap-2">
-                        <button data-edit-name="${name}" class="p-2 rounded-full hover:bg-app-hover">✏️</button>
-                        <button data-delete-name="${name}" class="p-2 rounded-full ${deleteBtnClasses}" ${deleteTooltip}>🗑️</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        const formTitle = editingCategoryName ? `ویرایش "${editingCategoryName}"` : "افزودن دسته‌بندی جدید";
-        const buttonText = editingCategoryName ? "ذخیره تغییرات" : "افزودن";
-        const currentCategoryValue = editingCategoryName ? editingCategoryName : "";
-
-        modal.innerHTML = `
-            <div class="modal-content glass-modal-content rounded-2xl p-5 w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col" dir="rtl">
-                <div class="flex-shrink-0 flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold">مدیریت دسته‌بندی‌ها</h2>
-                    <button class="close-modal-btn text-app-text-muted hover:bg-app-hover rounded-full p-2">&times;</button>
-                </div>
-
-                <div class="flex-shrink-0 bg-app-card/50 p-4 rounded-xl border border-app-border mb-4">
-                    <h3 class="font-bold mb-3 text-primary" id="category-form-title">${formTitle}</h3>
-                    <div class="space-y-3">
-                        <input type="text" id="categoryNameInput" placeholder="نام دسته‌بندی" value="${currentCategoryValue}" class="w-full p-3 bg-app-bg rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition">
-                        <div class="grid grid-cols-4 gap-2">
-                            ${Object.entries(COLOR_PALETTE).map(([colorName, classes]) => `
-                                <button data-color-classes="${classes}" class="color-palette-btn h-10 rounded-lg ${classes} ring-offset-2 ring-offset-app-card ring-app-border focus:ring-2 focus:ring-primary"></button>
-                            `).join('')}
-                        </div>
-                        <button id="saveCategoryBtn" class="w-full p-3 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition">${buttonText}</button>
-                    </div>
-                </div>
-
-                <div class="flex-grow overflow-y-auto space-y-2 no-scrollbar">
-                    ${categoriesHtml}
-                </div>
+    let emojiHtml = '';
+    for (const category in SUGGESTED_EMOJIS) {
+        emojiHtml += `<div class="mb-4">
+            <h4 class="font-bold text-app-text-muted text-sm mb-2">${category}</h4>
+            <div class="grid grid-cols-6 sm:grid-cols-8 gap-2">
+                ${SUGGESTED_EMOJIS[category].map(emoji => `<button class="emoji-select-btn text-3xl p-2 rounded-lg hover:bg-app-hover transition-transform active:scale-125">${emoji}</button>`).join('')}
             </div>
-        `;
-    };
+        </div>`;
+    }
 
-    render();
+    modal.innerHTML = `
+        <div class="modal-content glass-modal-content rounded-2xl p-4 w-full max-w-md max-h-[80vh] flex flex-col shadow-2xl" dir="rtl">
+            <div class="flex-shrink-0 flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-primary">انتخاب ایموجی</h3>
+                <button class="close-emoji-picker-btn text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">&times;</button>
+            </div>
+            
+            <div class="flex-grow overflow-y-auto no-scrollbar pr-2 -mr-2">
+                ${emojiHtml}
+            </div>
+
+            <div class="flex-shrink-0 mt-4 pt-4 border-t border-app-border flex items-center gap-3">
+                <input type="text" id="customEmojiInput" value="${currentEmoji}" placeholder="ایموجی دلخواه" class="w-full text-center text-3xl p-0 h-12 bg-app-card rounded-lg border border-app-border focus:ring-2 focus:ring-primary outline-none transition" maxlength="2">
+                <button id="confirmEmojiBtn" class="w-full p-3 h-12 rounded-lg font-bold bg-primary text-primary-text hover:opacity-90 transition">تایید</button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modalArea').appendChild(modal);
+    const customEmojiInput = document.getElementById('customEmojiInput');
+
+    // با انتخاب هر ایموجی از لیست، فیلد ورودی هم به‌روز می‌شود
+    modal.querySelectorAll('.emoji-select-btn').forEach(btn => {
+        btn.onclick = () => {
+            customEmojiInput.value = btn.innerText;
+        };
+    });
+
+    const closeAndConfirm = () => {
+        // مقدار نهایی از فیلد ورودی خوانده و در فرم اصلی قرار می‌گیرد
+        document.getElementById('goalEmoji').value = customEmojiInput.value;
+        const picker = document.getElementById('emojiPickerModal');
+        if (picker) picker.remove();
+    };
+    
+    document.getElementById('confirmEmojiBtn').onclick = closeAndConfirm;
+
+    modal.onclick = e => {
+        if (e.target.closest('.close-emoji-picker-btn')) {
+           const picker = document.getElementById('emojiPickerModal');
+           if (picker) picker.remove();
+        }
+        // بستن با کلیک روی پس‌زمینه، تغییرات را ذخیره نمی‌کند
+        else if (e.target === modal) {
+           const picker = document.getElementById('emojiPickerModal');
+           if (picker) picker.remove();
+        }
+    };
+}
+
+function showSuggestionModal() {
+    const modal = document.createElement('div');
+    modal.id = 'suggestionModal';
+    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[101] flex items-center justify-center p-4';
+    const categoriesInOrder = ['ورزشی', 'سلامتی', 'شخصی', 'کاری و تحصیلی'];
+
+    // ساخت HTML برای تب‌ها و محتوای آن‌ها
+    const tabsHtml = categoriesInOrder.map((category, index) => `
+        <button role="tab"
+                class="suggestion-tab-btn flex-shrink-0 px-4 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 ${index === 0 ? 'active' : ''}"
+                data-tab-target="#tab-${index}">
+            ${category}
+        </button>
+    `).join('');
+
+    const tabContentsHtml = categoriesInOrder.map((category, index) => `
+        <div id="tab-${index}" role="tabpanel" class="suggestion-tab-content ${index !== 0 ? 'hidden' : ''}">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                ${SUGGESTED_GOALS[category].map(goal => `
+                    <button class="suggestion-item text-right p-3 bg-app-card/80 hover:bg-app-hover rounded-lg transition-colors flex items-center gap-3">
+                        <span class="text-2xl">${goal.emoji}</span>
+                        <span class="font-semibold flex-grow">${goal.name}</span>
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+
+    modal.innerHTML = `
+        <div class="modal-content glass-modal-content rounded-2xl p-4 sm:p-5 w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl" dir="rtl">
+            <div class="flex-shrink-0 flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">انتخاب از اهداف متداول</h2>
+                <button class="close-suggestion-modal-btn text-app-text-muted hover:bg-app-hover rounded-full p-2 transition-colors">&times;</button>
+            </div>
+            <div class="flex-shrink-0 flex items-center gap-2 p-1 mb-4 bg-app-card rounded-xl overflow-x-auto no-scrollbar" role="tablist">
+                ${tabsHtml}
+            </div>
+            <div class="flex-grow overflow-y-auto no-scrollbar pr-1 -mr-1">
+                ${tabContentsHtml}
+            </div>
+        </div>
+    `;
     document.getElementById('modalArea').appendChild(modal);
 
-    let selectedColorClasses = Object.values(COLOR_PALETTE)[0]; // Default color
-
-    modal.addEventListener('click', e => {
-        // Handle closing
-        if (e.target === modal || e.target.closest('.close-modal-btn')) {
-            if (onClosing) {
-                onClosing();
-            } else {
-                closeModal();
-            }
-        }
-
-        // Handle color selection
-        const colorBtn = e.target.closest('.color-palette-btn');
-        if (colorBtn) {
-            selectedColorClasses = colorBtn.dataset.colorClasses;
-            modal.querySelectorAll('.color-palette-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-primary'));
-            colorBtn.classList.add('ring-2', 'ring-primary');
-        }
-
-        // Handle Save/Add
-        if (e.target.closest('#saveCategoryBtn')) {
-            const nameInput = modal.querySelector('#categoryNameInput');
-            const newName = nameInput.value.trim();
-            if (!newName) {
-                alert('نام دسته‌بندی نمی‌تواند خالی باشد.');
-                return;
-            }
-            if (editingCategoryName) { // Editing existing
-                // Update goals using this category
-                appState.goals.forEach(goal => {
-                    if (goal.category === editingCategoryName) {
-                        goal.category = newName;
-                    }
-                });
-                delete appState.categories[editingCategoryName];
-                appState.categories[newName] = selectedColorClasses;
-            } else { // Adding new
-                 if(appState.categories[newName]) {
-                    alert('این دسته‌بندی از قبل وجود دارد.');
-                    return;
-                 }
-                appState.categories[newName] = selectedColorClasses;
-            }
-            editingCategoryName = null;
-            persistState();
-            fullRender();
-            render();
-        }
-
-        // Handle Edit button click
-        const editBtn = e.target.closest('[data-edit-name]');
-        if (editBtn) {
-            editingCategoryName = editBtn.dataset.editName;
-            selectedColorClasses = appState.categories[editingCategoryName];
-            render(); // Re-render the form in edit mode
-        }
-
-        // Handle Delete button click
-        const deleteBtn = e.target.closest('[data-delete-name]');
-        if (deleteBtn) {
-            const nameToDelete = deleteBtn.dataset.deleteName;
-            const isUsed = appState.goals.some(g => g.category === nameToDelete);
-            if (isUsed) {
-                alert('این دسته‌بندی توسط یک یا چند هدف استفاده می‌شود و قابل حذف نیست.');
-                return;
-            }
-            if (confirm(`آیا از حذف دسته‌بندی «${nameToDelete}» مطمئن هستید؟`)) {
-                delete appState.categories[nameToDelete];
-                persistState();
-                fullRender();
-                render();
-            }
-        }
+    // منطق جاوااسکریپت برای مدیریت تب‌ها
+    const tabs = modal.querySelectorAll('.suggestion-tab-btn');
+    const tabContents = modal.querySelectorAll('.suggestion-tab-content');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const target = document.querySelector(tab.dataset.tabTarget);
+            tabContents.forEach(tc => tc.classList.add('hidden'));
+            target.classList.remove('hidden');
+        });
     });
+    
+    const closeSuggestionModal = () => {
+        const suggestionM = document.getElementById('suggestionModal');
+        if (suggestionM) suggestionM.remove();
+    }
+
+    modal.onclick = (e) => {
+        if (e.target.closest('.suggestion-item')) {
+            const btn = e.target.closest('.suggestion-item');
+            const name = btn.querySelector('.font-semibold').innerText;
+            const emoji = btn.querySelector('.text-2xl').innerText;
+            document.getElementById('goalName').value = name;
+            document.getElementById('goalEmoji').value = emoji;
+            closeSuggestionModal();
+        } else if (e.target === modal || e.target.closest('.close-suggestion-modal-btn')) {
+            closeSuggestionModal();
+        }
+    };
 }
 </script>
 </body>
