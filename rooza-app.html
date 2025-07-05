@@ -400,7 +400,7 @@ function loadStateFromStorage() {
                         else if (day && !day.entries) { week[i] = { entries: [], note: ''}; }
                     });
                 }
-            });ب
+            });
         }
     });
     appState.goals = goals;
@@ -460,7 +460,7 @@ function persistState() {
             } else {
                 appState.userLight = themeId;
             }
-                      
+                              persistState();    
         }
         
         applyActiveTheme();
@@ -976,104 +976,104 @@ function showThemeSelectorModal(options = {}) {
     });
 
    const searchInput = document.getElementById('themeSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            const keywords = searchTerm.split(' ').filter(k => k);
-            const scrollContainer = document.getElementById('theme-scroll-container');
-            const allTabContents = scrollContainer.querySelectorAll('.tab-content');
-            const activeTabButton = document.querySelector('#theme-modal-tabs .tab-btn.bg-primary');
-            
-            // If there is a search term, perform a global search
-            if (searchTerm) {
-                allTabContents.forEach(tab => tab.classList.add('hidden'));
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const keywords = searchTerm.split(' ').filter(k => k);
+            const scrollContainer = document.getElementById('theme-scroll-container');
+            const allTabContents = scrollContainer.querySelectorAll('.tab-content');
+            const activeTabButton = document.querySelector('#theme-modal-tabs .tab-btn.bg-primary');
+            
+            // If there is a search term, perform a global search
+            if (searchTerm) {
+                allTabContents.forEach(tab => tab.classList.add('hidden'));
 
-                // Get all themes from all categories, excluding favorites as it's a derived list
-                const allThemes = Object.keys(themesData)
-                    .filter(key => key !== 'favorites') // Avoid duplication
-                    .flatMap(key => themesData[key]);
-                
-                const filteredThemes = allThemes.filter(theme => {
-                    const categoryInfo = findThemeCategoryInfo(theme.id);
-                    const searchableString = `
-                        ${theme.name.toLowerCase()} 
-                        ${theme.isDark ? 'تیره' : 'روشن'} 
-                        ${categoryInfo ? categoryInfo.title.toLowerCase() : ''}
-                    `.replace(/\s+/g, ' ');
-                    return keywords.every(keyword => searchableString.includes(keyword));
-                });
-                
-                let searchResultsContainer = document.getElementById('search-results-content');
-                if (!searchResultsContainer) {
-                    searchResultsContainer = document.createElement('div');
-                    searchResultsContainer.id = 'search-results-content';
-                    searchResultsContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2';
-                    scrollContainer.appendChild(searchResultsContainer);
-                }
-                
-                searchResultsContainer.innerHTML = renderThemes(filteredThemes);
-                if (filteredThemes.length === 0) {
-                    searchResultsContainer.innerHTML = `<div class="col-span-1 sm:col-span-2 text-center text-app-text-muted p-8">هیچ تمی با عبارت «${escapeHtml(searchTerm)}» یافت نشد.</div>`;
-                }
-                searchResultsContainer.classList.remove('hidden');
+                // Get all themes from all categories, excluding favorites as it's a derived list
+                const allThemes = Object.keys(themesData)
+                    .filter(key => key !== 'favorites') // Avoid duplication
+                    .flatMap(key => themesData[key]);
+                
+                const filteredThemes = allThemes.filter(theme => {
+                    const categoryInfo = findThemeCategoryInfo(theme.id);
+                    const searchableString = `
+                        ${theme.name.toLowerCase()} 
+                        ${theme.isDark ? 'تیره' : 'روشن'} 
+                        ${categoryInfo ? categoryInfo.title.toLowerCase() : ''}
+                    `.replace(/\s+/g, ' ');
+                    return keywords.every(keyword => searchableString.includes(keyword));
+                });
+                
+                let searchResultsContainer = document.getElementById('search-results-content');
+                if (!searchResultsContainer) {
+                    searchResultsContainer = document.createElement('div');
+                    searchResultsContainer.id = 'search-results-content';
+                    searchResultsContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2';
+                    scrollContainer.appendChild(searchResultsContainer);
+                }
+                
+                searchResultsContainer.innerHTML = renderThemes(filteredThemes);
+                if (filteredThemes.length === 0) {
+                    searchResultsContainer.innerHTML = `<div class="col-span-1 sm:col-span-2 text-center text-app-text-muted p-8">هیچ تمی با عبارت «${escapeHtml(searchTerm)}» یافت نشد.</div>`;
+                }
+                searchResultsContainer.classList.remove('hidden');
 
-            } else {
-                // If search is cleared, hide search results and show the active tab
-                let searchResultsContainer = document.getElementById('search-results-content');
-                if (searchResultsContainer) {
-                    searchResultsContainer.classList.add('hidden');
-                }
-                const activeTabKey = activeTabButton ? activeTabButton.dataset.tab : 'favorites';
-                const activeTabContent = document.getElementById(`tab-content-${activeTabKey}`);
-                if (activeTabContent) {
-                    activeTabContent.classList.remove('hidden');
-                }
-            }
-        });
-    }
+            } else {
+                // If search is cleared, hide search results and show the active tab
+                let searchResultsContainer = document.getElementById('search-results-content');
+                if (searchResultsContainer) {
+                    searchResultsContainer.classList.add('hidden');
+                }
+                const activeTabKey = activeTabButton ? activeTabButton.dataset.tab : 'favorites';
+                const activeTabContent = document.getElementById(`tab-content-${activeTabKey}`);
+                if (activeTabContent) {
+                    activeTabContent.classList.remove('hidden');
+                }
+            }
+        });
+    }
 
  // =================== PASTE THIS NEW CODE BLOCK ===================
-    // Add a single delegated event listener to the modal
-    modal.addEventListener('click', (e) => {
-        const scrollContainer = document.getElementById('theme-scroll-container');
-        const currentScroll = scrollContainer ? scrollContainer.scrollTop : 0;
-        const currentTab = modal.querySelector('.tab-btn.bg-primary')?.dataset.tab;
+    // Add a single delegated event listener to the modal
+    modal.addEventListener('click', (e) => {
+        const scrollContainer = document.getElementById('theme-scroll-container');
+        const currentScroll = scrollContainer ? scrollContainer.scrollTop : 0;
+        const currentTab = modal.querySelector('.tab-btn.bg-primary')?.dataset.tab;
 
-        // 1. Handle Theme Selection (checks if a theme button was clicked)
-        const themeSelectBtn = e.target.closest('.theme-select-btn');
-        if (themeSelectBtn) {
-            const newThemeId = themeSelectBtn.dataset.themeId;
-            if (newThemeId !== appState.activeThemeId) {
-                setActiveTheme(newThemeId);
-                // Re-open the modal to reflect the change everywhere
-                showThemeSelectorModal({ scrollPosition: currentScroll, activeTab: currentTab });
-            }
-            return; // Action handled, no need to continue
-        }
+        // 1. Handle Theme Selection (checks if a theme button was clicked)
+        const themeSelectBtn = e.target.closest('.theme-select-btn');
+        if (themeSelectBtn) {
+            const newThemeId = themeSelectBtn.dataset.themeId;
+            if (newThemeId !== appState.activeThemeId) {
+                setActiveTheme(newThemeId);
+                // Re-open the modal to reflect the change everywhere
+                showThemeSelectorModal({ scrollPosition: currentScroll, activeTab: currentTab });
+            }
+            return; // Action handled, no need to continue
+        }
 
-        // 2. Handle Favorite Toggling (checks if a star button was clicked)
-        const favoriteStarBtn = e.target.closest('.favorite-star-btn');
-        if (favoriteStarBtn) {
-            e.stopPropagation(); // Prevents the theme selection from also firing
-            const themeId = favoriteStarBtn.dataset.themeId;
-            const isFavorite = appState.favoriteThemes.includes(themeId);
+        // 2. Handle Favorite Toggling (checks if a star button was clicked)
+        const favoriteStarBtn = e.target.closest('.favorite-star-btn');
+        if (favoriteStarBtn) {
+            e.stopPropagation(); // Prevents the theme selection from also firing
+            const themeId = favoriteStarBtn.dataset.themeId;
+            const isFavorite = appState.favoriteThemes.includes(themeId);
 
-            if (isFavorite) {
-                removeFavoriteTheme(themeId);
-            } else {
-                addFavoriteTheme(themeId);
-            }
-            
-            // Re-open the modal to show the star's change and update favorites tab
-            showThemeSelectorModal({ scrollPosition: currentScroll, activeTab: currentTab });
-            return; // Action handled, no need to continue
-        }
-        
-        // 3. Handle Modal Close (checks if the background or close button was clicked)
-        if (e.target === modal || e.target.closest('.close-modal-btn')) {
-            closeModal();
-        }
-    });
+            if (isFavorite) {
+                removeFavoriteTheme(themeId);
+            } else {
+                addFavoriteTheme(themeId);
+            }
+            
+            // Re-open the modal to show the star's change and update favorites tab
+            showThemeSelectorModal({ scrollPosition: currentScroll, activeTab: currentTab });
+            return; // Action handled, no need to continue
+        }
+        
+        // 3. Handle Modal Close (checks if the background or close button was clicked)
+        if (e.target === modal || e.target.closest('.close-modal-btn')) {
+            closeModal();
+        }
+    });
 // =================== END OF NEW CODE BLOCK ===================
 
   
@@ -1262,29 +1262,16 @@ function setupGlobalListeners() {
     updateGoalCardStats(goalId);
 }
 
+/**
+ * Removes the most recently added emoji/entry for a specific day from a goal's history.
+ * @param {string} goalId - The ID of the goal to modify.
+ * @param {number} dayIndex - The index of the day within the week (0 for Sunday).
+ * @param {HTMLElement} cellElement - The table cell element to update visually.
+ */
 function removeLastEmoji(goalId, dayIndex, cellElement) {
     const goal = appState.goals.find(g => g.id === goalId);
     if (!goal || !goal.days[dayIndex]) return;
-    const weekId = weekIdForDate(appState.currentWeek);
-    if (!goal.history?.[weekId]?.[dayIndex]?.entries.length > 0) return;
-    goal.history[weekId][dayIndex].entries.pop();
-    persistState();
-    const dayData = goal.history[weekId][dayIndex];
 
-    // Re-render cell content using the new function
-    const noteIndicatorHtml = dayData.note ? `<div class="absolute top-0 right-0 w-2 h-2 bg-amber-400 rounded-full" title="${escapeHtml(dayData.note)}"></div>` : '';
-    cellElement.innerHTML = generateDayCellContent(dayData) + noteIndicatorHtml;
-    
-    if (dayData.entries.length === 0) {
-        cellElement.classList.remove('day-completed');
-    }
-    cellElement.classList.add('cell-shrink');
-    cellElement.addEventListener('animationend', () => cellElement.classList.remove('cell-shrink'), { once: true });
-    updateGoalCardStats(goalId);
-}
-    function removeLastEmoji(goalId, dayIndex, cellElement) {
-    const goal = appState.goals.find(g => g.id === goalId);
-    if (!goal || !goal.days[dayIndex]) return;
     const weekId = weekIdForDate(appState.currentWeek);
     if (!goal.history?.[weekId]?.[dayIndex]?.entries.length > 0) return;
 
@@ -1294,20 +1281,20 @@ function removeLastEmoji(goalId, dayIndex, cellElement) {
 
     const dayData = goal.history[weekId][dayIndex];
 
-    // Re-render the cell's content using the NEW counting logic
+    // Re-render the cell's content using the centralized counting logic
     const noteIndicatorHtml = dayData.note ? `<div class="absolute top-0 right-0 w-2 h-2 bg-amber-400 rounded-full" title="${escapeHtml(dayData.note)}"></div>` : '';
     cellElement.innerHTML = generateDayCellContent(dayData) + noteIndicatorHtml;
-    
+
     // If no entries are left, remove the completed background
     if (dayData.entries.length === 0) {
         cellElement.classList.remove('day-completed');
     }
-    
+
     // Trigger the "shrink" animation
     cellElement.classList.add('cell-swipe-down');
     cellElement.addEventListener('animationend', () => cellElement.classList.remove('cell-swipe-down'), { once: true });
-    
-    // Update the total scores in the header
+
+    // Update the total scores in the header of the goal card
     updateGoalCardStats(goalId);
 }
 
