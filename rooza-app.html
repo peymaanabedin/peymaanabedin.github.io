@@ -400,7 +400,7 @@ function loadStateFromStorage() {
                         else if (day && !day.entries) { week[i] = { entries: [], note: ''}; }
                     });
                 }
-            });
+            });ب
         }
     });
     appState.goals = goals;
@@ -460,6 +460,7 @@ function persistState() {
             } else {
                 appState.userLight = themeId;
             }
+                        persistState();
         }
         
         applyActiveTheme();
