@@ -90,8 +90,8 @@
         .app-container {
             max-width: 520px;
             margin: 0 auto;
-            /* Adjust padding for fixed header and nav */
-            padding: 70px 15px 90px;
+            /* [FIXED] Increased top padding to prevent content from going under the header */
+            padding: 85px 15px 90px;
             min-height: 100vh;
         }
 
@@ -109,7 +109,8 @@
             padding: 15px;
             background-color: var(--bg-main);
             border-bottom: 1px solid var(--border-color);
-            z-index: 1000;
+            /* [FIXED] Z-index hierarchy */
+            z-index: 100;
             transition: background-color 0.4s, border-color 0.4s;
             padding-top: env(safe-area-inset-top); /* iOS notch support */
         }
@@ -134,7 +135,8 @@
             background: var(--card-bg);
             box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
             border-top: 1px solid var(--border-color);
-            z-index: 1000;
+            /* [FIXED] Z-index hierarchy */
+            z-index: 100;
             padding-bottom: env(safe-area-inset-bottom); /* iOS home bar support */
         }
         html.dark-mode .bottom-nav { box-shadow: 0 -5px 20px rgba(0,0,0,0.2); }
@@ -215,7 +217,8 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 999;
+            /* [FIXED] Z-index hierarchy */
+            z-index: 200;
             transition: transform 0.3s, opacity 0.3s;
             bottom: calc(80px + env(safe-area-inset-bottom));
             right: 20px;
@@ -258,7 +261,21 @@
         .form-group { margin-bottom: 15px; }
 
         /* --- Modal Styles --- */
-        .modal-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; z-index: 1001; padding: 15px; backdrop-filter: blur(5px); }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .3s, visibility .3s;
+            /* [FIXED] Z-index hierarchy */
+            z-index: 1001;
+            padding: 15px;
+            backdrop-filter: blur(5px);
+        }
         .modal-overlay.visible { opacity: 1; visibility: visible; }
         .modal-content { background-color: var(--card-bg); color: var(--text-main); border-radius: 20px; width: 100%; max-width: 480px; box-shadow: var(--shadow-dark); transform: translateY(20px) scale(0.95); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); max-height: 90vh; display: flex; flex-direction: column; }
         .modal-overlay.visible .modal-content { transform: translateY(0) scale(1); }
