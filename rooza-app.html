@@ -188,14 +188,7 @@ body.mobile-menu-open {
     color: var(--color-primary-text);
     box-shadow: 0 4px 14px 0 var(--color-primary-shadow);
 }
-/* Add this new block to enable Glassmorphism on all cards and menus */
-.goal-card, 
-#contextMenu,
-.glass-modal-content {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px); /* For Safari */
-    border: 1px solid var(--color-border);
-}
+
     </style>
     <script>
         tailwind.config = {
@@ -496,18 +489,8 @@ function persistState() {
  // REPLACE the old applyActiveTheme function with this one:
 function applyActiveTheme() {
     const theme = findThemeById(appState.activeThemeId);
-    if (!theme) return; // Added a check to prevent errors if theme isn't found
-
     const styleEl = document.getElementById('dynamic-theme-style');
     document.documentElement.classList.toggle('dark', theme.isDark);
-
-    // --- START: Glassmorphism Color Logic ---
-    // Define the semi-transparent "glass" colors for light and dark modes
-    const glassColor = theme.isDark ? 'rgba(28, 28, 30, 0.75)' : 'rgba(242, 242, 247, 0.8)';
-    const headerGlassColor = theme.isDark ? 'rgba(28, 28, 30, 0.85)' : 'rgba(249, 249, 252, 0.85)';
-    // --- END: Glassmorphism Color Logic ---
-
-    // Determine text color for primary buttons
     const primaryColor = theme.primary.replace('#', '');
     const r = parseInt(primaryColor.substr(0, 2), 16);
     const g = parseInt(primaryColor.substr(2, 2), 16);
@@ -515,13 +498,20 @@ function applyActiveTheme() {
     const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
     const primaryTextColor = (yiq >= 128) ? '#000000' : '#ffffff';
 
+    const cardColor = theme.card || (theme.isDark ? `rgba(255, 255, 255, 0.07)` : `#ffffff`);
+    const headerColor = theme.header || (theme.isDark ? `${theme.bg}cc` : `#ffffffcc`);
     const cellInactiveColor = theme.cellInactive || (theme.isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb');
-    const completedColor = theme.completedBg || `${theme.primary}${theme.isDark ? '30' : '20'}`;
     
-    // Get background properties
+    // Logic to handle custom completed cell color
+    const completedColor = theme.completedBg ? theme.completedBg : `${theme.primary}20`;
+    const darkCompletedColor = theme.completedBg ? theme.completedBg : `${theme.primary}30`;
+
+    // --- NEW LINES START ---
+    // Get background properties from the theme, with defaults for themes that don't have them.
     const backgroundImage = theme.backgroundImage || 'none';
     const backgroundSize = theme.backgroundSize || 'auto';
     const backgroundPosition = theme.backgroundPosition || '0% 0%';
+    // --- NEW LINES END ---
 
     styleEl.innerHTML = `
       :root {
@@ -530,20 +520,21 @@ function applyActiveTheme() {
         --color-primary-shadow: ${theme.primary}50;
         --color-bg: ${theme.bg};
         --color-text: ${theme.text};
-        --color-text-muted: ${theme.isDark ? '#8E8E93' : '#6B7280'};
-        
-        /* --- UPDATED FOR GLASS --- */
-        --color-card: ${glassColor};
-        --color-header: ${headerGlassColor};
+        --color-text-muted: ${theme.isDark ? '#a0a0a0' : '#6b7280'};
+        --color-card: ${cardColor};
+        --color-header: ${headerColor};
         --color-border: ${theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
         --color-hover: ${theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
         --color-cell-inactive: ${cellInactiveColor};
 
+        /* --- NEW VARIABLES START --- */
         --bg-image: ${backgroundImage};
         --bg-size: ${backgroundSize};
         --bg-position: ${backgroundPosition};
+        /* --- NEW VARIABLES END --- */
       }
       .day-completed { background-color: ${completedColor} !important; }
+      .dark .day-completed { background-color: ${darkCompletedColor} !important; }
     `;
 }
     // --- RENDER FUNCTIONS ---
