@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>برنامه ورزشی | My Workout</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#5D5FEF">
+    <link rel="icon" href="https://i.postimg.cc/bNDdRfpL/myworkout.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/bNDdRfpL/myworkout.png">
+
+    <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        :root {
+            --font-family: 'Vazirmatn', sans-serif;
+            
+            /* Base Colors */
+            --c-theme-main: #5D5FEF;
+            --c-theme-accent: #7C7EFF;
+            --c-success: #45D09E;
+            --c-success-light: rgba(69, 208, 158, 0.1);
+            --c-danger: #ef4444;
+            --c-warning: #f59e0b;
+            --c-text-on-theme: #FFFFFF;
+
+            /* Push Day Theme */
+            --c-push: #ef5350;
+            --c-push-light: rgba(239, 83, 80, 0.1);
+
+            /* Pull Day Theme */
+            --c-pull: #42a5f5;
+            --c-pull-light: rgba(66, 165, 245, 0.1);
+
+            /* Legs Day Theme */
+            --c-legs: #66bb6a;
+            --c-legs-light: rgba(102, 187, 106, 0.1);
+
+            /* Light Mode UI */
+            --bg-main-light: #F4F7FC;
+            --card-bg-light: #FFFFFF;
+            --text-main-light: #1D2335;
+            --text-subtle-light: #6E788C;
+            --border-color-light: #E8EAF3;
+            --shadow-light: 0 10px 40px rgba(0, 0, 0, 0.08);
+            --input-bg-light: #F8F9FE;
+
+            /* Dark Mode UI */
+            --bg-main-dark: #1A1C25;
+            --card-bg-dark: #252836;
+            --text-main-dark: #F0F2FF;
+            --text-subtle-dark: #A0A7C0;
+            --border-color-dark: #3A3D52;
+            --shadow-dark: 0 10px 40px rgba(0, 0, 0, 0.25);
+            --input-bg-dark: #20222e;
+        }
+        html {
+            --bg-main: var(--bg-main-light);
+            --card-bg: var(--card-bg-light);
+            --text-main: var(--text-main-light);
+            --text-subtle: var(--text-subtle-light);
+            --border-color: var(--border-color-light);
+            --shadow: var(--shadow-light);
+            --input-bg: var(--input-bg-light);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: background-color 0.4s, color 0.4s;
+        }
+        html.dark-mode {
+            --bg-main: var(--bg-main-dark);
+            --card-bg: var(--card-bg-dark);
+            --text-main: var(--text-main-dark);
+            --text-subtle: var(--text-subtle-dark);
+            --border-color: var(--border-color-dark);
+            --shadow: var(--shadow-dark);
+            --input-bg: var(--input-bg-dark);
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: var(--font-family); margin: 0; font-size: 16px; overflow-x: hidden; }
+        .app-container { max-width: 520px; margin: 0 auto; padding: 15px; min-height: 100vh; }
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; }
+        .app-title { font-size: 1.8rem; font-weight: 800; color: var(--c-theme-main); }
+        .header-actions { display: flex; align-items: center; gap: 20px; }
+        .theme-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .theme-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--border-color); transition: .4s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--c-theme-accent); }
+        input:checked + .slider:before { transform: translateX(22px); }
+        .card-base { background: var(--card-bg); padding: 25px; border-radius: 24px; box-shadow: var(--shadow); transition: all 0.4s; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .view-toggle-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 10px 15px; }
+        .main-btn { width: 100%; padding: 16px; font-size: 1.05rem; font-weight: 700; color: var(--c-text-on-theme); border: none; border-radius: 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); font-family: var(--font-family); background-image: linear-gradient(to right, var(--c-theme-main) 0%, var(--c-theme-accent) 100%); box-shadow: 0 4px 15px rgba(93, 95, 239, 0.3); }
+        .main-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(93, 95, 239, 0.4); }
+        .main-btn.secondary { background: var(--input-bg); color: var(--c-theme-main); border: 1px solid var(--border-color); box-shadow: none; background-image: none; }
+        
+        .day-navigation { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px; padding: 20px; }
+        .day-nav-buttons { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .nav-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-subtle); cursor: pointer; padding: 10px; transition: color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .nav-btn:hover { color: var(--c-theme-main); }
+        .secondary-nav-btn { font-size: 0.9rem; font-weight: 600; border-radius: 12px; padding: 8px 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-subtle); font-family: var(--font-family); }
+        #todayBtn { background-color: var(--c-theme-main); color: var(--c-text-on-theme); border: none; box-shadow: 0 4px 15px rgba(93, 95, 239, 0.2); }
+        html.dark-mode #todayBtn { color: #fff; }
+        .displayed-date { font-weight: 500; color: var(--text-subtle); font-size: 0.9rem; margin-top: 15px; }
+        
+        .workout-day-card { border-top: 5px solid; transition: border-color 0.4s; }
+        .workout-day-card.push-theme { border-color: var(--c-push); }
+        .workout-day-card.pull-theme { border-color: var(--c-pull); }
+        .workout-day-card.legs-theme { border-color: var(--c-legs); }
+        .workout-day-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .workout-day-card-header h2 { font-size: 1.5rem; margin: 0; color: var(--text-main); }
+        .workout-day-card-header .type-icon { font-size: 1.8rem; }
+        .push-theme .type-icon { color: var(--c-push); }
+        .pull-theme .type-icon { color: var(--c-pull); }
+        .legs-theme .type-icon { color: var(--c-legs); }
+
+        .session-controls { background: var(--input-bg); border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border-color); }
+        .session-tick { display: flex; align-items: center; font-weight: 600; font-size: 1.1rem; }
+        .session-tick input[type="checkbox"] { width: 22px; height: 22px; margin-left: 12px; accent-color: var(--c-success); }
+        .session-notes { width: 100%; padding: 12px; font-size: 1rem; border-radius: 10px; font-family: var(--font-family); background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); margin-top: 15px; resize: vertical; min-height: 80px; }
+        
+        .exercise-list { display: flex; flex-direction: column; gap: 15px; }
+        .exercise-item { background: var(--input-bg); border-radius: 16px; padding: 15px; border: 1px solid var(--border-color); transition: all 0.4s; overflow: hidden; }
+        .exercise-item:hover { transform: translateY(-2px); border-color: var(--c-theme-accent); }
+        .exercise-item.fade-out { animation: fadeOut 0.4s ease-in forwards; }
+        @keyframes fadeOut { from { opacity: 1; max-height: 200px; padding: 15px; margin-bottom: 15px; } to { opacity: 0; max-height: 0; padding: 0; margin-bottom: 0; border: none; } }
+        .exercise-item.completed { border-color: var(--c-success); background: var(--c-success-light); }
+        .exercise-item.completed .exercise-name { text-decoration: line-through; }
+        .exercise-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        .exercise-icon { font-size: 1.2rem; width: 25px; text-align: center;}
+        .push-theme .exercise-icon { color: var(--c-push); }
+        .pull-theme .exercise-icon { color: var(--c-pull); }
+        .legs-theme .exercise-icon { color: var(--c-legs); }
+        .exercise-header input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--c-theme-main); }
+        .exercise-info { flex-grow: 1; }
+        .exercise-name { font-weight: 600; font-size: 1.1rem; }
+        .exercise-details { font-size: 0.9rem; color: var(--text-subtle); }
+        .exercise-log { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .log-input { width: 100%; padding: 12px; font-size: 0.95rem; border-radius: 10px; font-family: var(--font-family); background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); -webkit-appearance: none; appearance: none; }
+        
+        .delete-custom-exercise-btn { background: none; border: none; color: var(--text-subtle); cursor: pointer; font-size: 1.1rem; padding: 5px; }
+        .delete-custom-exercise-btn:hover { color: var(--c-danger); }
+
+        #addExerciseBtn { margin-top: 20px; background-image: none; background-color: var(--c-success-light); color: var(--c-success); font-weight: bold; border: 1px dashed var(--c-success); }
+        #addExerciseBtn i { margin-left: 8px; }
+
+        .rest-day-content { text-align: center; padding: 40px 20px; }
+        .rest-day-content .icon { font-size: 4rem; color: var(--c-success); margin-bottom: 20px; }
+        .rest-day-content p { font-size: 1.1rem; color: var(--text-subtle); line-height: 1.8; }
+        
+        /* Calendar Styles */
+        #calendarView { display: none; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .calendar-header h3 { margin: 0; font-size: 1.3rem; color: var(--c-theme-main);}
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .calendar-day-name { text-align: center; font-weight: 600; color: var(--text-subtle); font-size: 0.8rem; padding-bottom: 10px; }
+        .calendar-day { display: flex; justify-content: center; align-items: center; height: 40px; border-radius: 12px; cursor: pointer; transition: all 0.2s; user-select: none; }
+        .calendar-day.has-log { background-color: var(--c-success-light); color: var(--c-success); font-weight: bold; }
+        .calendar-day.has-log:hover { background-color: var(--c-success); color: #FFF; }
+        .calendar-day.is-today { border: 2px solid var(--c-theme-main); }
+        .calendar-day:not(.empty-day):hover { background-color: var(--input-bg); }
+        .calendar-day.empty-day { cursor: default; pointer-events: none; }
+
+
+        /* --- REDESIGNED STATS VIEW --- */
+        #statsView { display: none; padding: 15px; background: transparent; box-shadow: none; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .stat-card-mini { background: var(--card-bg); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow); }
+        .stat-card-mini .header { display: flex; align-items: center; gap: 10px; color: var(--text-subtle); font-weight: 600; font-size: 0.95rem; }
+        .stat-card-mini .icon { font-size: 1.2rem; }
+        .stat-card-mini .icon.total { color: var(--c-theme-main); }
+        .stat-card-mini .icon.streak { color: var(--c-warning); }
+        .stat-card-mini .value { font-size: 2rem; font-weight: 800; margin-top: 10px; }
+        .stat-card-large { background: var(--card-bg); border-radius: 20px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 15px; }
+        .stat-card-large h4 { margin-top: 0; margin-bottom: 20px; font-size: 1.2rem; }
+        
+        .type-chart-container { position: relative; height: 150px; margin-bottom: 20px; }
+        .type-breakdown { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .type-item { background: var(--input-bg); border-radius: 16px; padding: 15px; text-align: center; border-bottom: 4px solid; }
+        .type-item .count { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
+        .type-item .label { font-size: 0.9rem; font-weight: 600; }
+        .type-item.push { border-color: var(--c-push); color: var(--c-push); }
+        .type-item.pull { border-color: var(--c-pull); color: var(--c-pull); }
+        .type-item.legs { border-color: var(--c-legs); color: var(--c-legs); }
+
+        .progress-select-wrapper { position: relative; }
+        #progressExerciseSelect { font-family: var(--font-family); padding-right: 35px; }
+        .progress-select-wrapper::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-subtle); }
+        .chart-container { position: relative; height: 250px; }
+        
+        /* Modal Styles */
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; z-index: 1001; padding: 15px; backdrop-filter: blur(5px); }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-content { background-color: var(--card-bg); color: var(--text-main); border-radius: 20px; width: 100%; max-width: 480px; box-shadow: var(--shadow-dark); transform: translateY(20px) scale(0.95); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-overlay.visible .modal-content { transform: translateY(0) scale(1); }
+        .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { margin: 0; font-size: 1.2rem; color: var(--c-theme-main); }
+        .modal-body { padding: 20px; overflow-y: auto; }
+        .modal-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; }
+        .modal-body::-webkit-scrollbar { width: 8px; }
+        .modal-body::-webkit-scrollbar-track { background: var(--input-bg); }
+        .modal-body::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 20px; }
+        .modal-body::-webkit-scrollbar-thumb:hover { background-color: var(--c-theme-accent); }
+
+        /* Log Detail Modal Specific Styles */
+        .log-detail-notes { background-color: var(--input-bg); padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid var(--c-theme-accent); }
+        .log-detail-notes p { margin: 5px 0 0; white-space: pre-wrap; line-height: 1.7; }
+        .log-detail-list { list-style: none; padding: 0; margin: 0; }
+        .log-detail-list li { padding: 12px 0; border-bottom: 1px solid var(--border-color); font-size: 1rem; display: flex; align-items: center; gap: 10px; }
+        .log-detail-list li:last-child { border-bottom: none; }
+        .log-detail-list .log-detail-entry { font-size: 0.9rem; color: var(--text-subtle); margin-right: auto; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="app-title">برنامه ورزشی</h1>
+            <div class="header-actions">
+                <label class="theme-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label>
+            </div>
+        </header>
+
+        <main id="mainContent">
+            <div class="view-toggle-container">
+                <button id="showWorkoutBtn" class="main-btn">تمرین</button>
+                <button id="showCalendarBtn" class="main-btn secondary">تقویم</button>
+                <button id="showStatsBtn" class="main-btn secondary">آمار</button>
+            </div>
+
+            <div id="workoutView">
+                <div class="day-navigation card-base">
+                    <div class="day-nav-buttons">
+                        <button class="nav-btn" id="nextDayBtn" title="روز بعد"><i class="fa-solid fa-chevron-right"></i></button>
+                        <div class="center-nav-group"><button id="todayBtn" class="secondary-nav-btn">امروز</button></div>
+                        <button class="nav-btn" id="prevDayBtn" title="روز قبل"><i class="fa-solid fa-chevron-left"></i></button>
+                    </div>
+                    <div id="displayedJalaliDate" class="displayed-date"></div>
+                </div>
+                <div id="workout-container"></div>
+            </div>
+
+            <div id="calendarView" class="card-base">
+                <div class="calendar-header">
+                    <button class="nav-btn" id="prevMonthBtn" title="ماه قبل"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3 id="calendarMonthTitle"></h3>
+                    <button class="nav-btn" id="nextMonthBtn" title="ماه بعد"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+
+            <div id="statsView">
+                <div class="stats-grid">
+                    <div class="stat-card-mini">
+                        <div class="header"><i class="icon total fa-solid fa-calendar-check"></i><span>کل جلسات</span></div>
+                        <div id="totalSessionsStat" class="value">۰</div>
+                    </div>
+                    <div class="stat-card-mini">
+                        <div class="header"><i class="icon streak fa-solid fa-trophy"></i><span>بهترین استریک</span></div>
+                        <div id="longestStreakStat" class="value">۰</div>
+                    </div>
+                </div>
+                <div class="stat-card-large">
+                    <h4>تفکیک نوع تمرین</h4>
+                    <div class="type-chart-container"><canvas id="typeDistributionChart"></canvas></div>
+                    <div class="type-breakdown">
+                        <div class="type-item push"><div id="pushCount" class="count">۰</div><div class="label">Push</div></div>
+                        <div class="type-item pull"><div id="pullCount" class="count">۰</div><div class="label">Pull</div></div>
+                        <div class="type-item legs"><div id="legsCount" class="count">۰</div><div class="label">Legs</div></div>
+                    </div>
+                </div>
+                <div class="stat-card-large">
+                    <h4>روند پیشرفت وزنه</h4>
+                    <div class="form-group progress-select-wrapper"><select id="progressExerciseSelect" class="log-input"></select></div>
+                    <div class="chart-container"><canvas id="progressChart"></canvas></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="addExerciseModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h3>افزودن تمرین جدید</h3><button class="nav-btn close-modal-btn"><i class="fa-solid fa-times"></i></button></div>
+            <form id="addExerciseForm">
+                <div class="modal-body">
+                    <div class="form-group"><label for="newExName">نام تمرین</label><input type="text" id="newExName" class="log-input" required></div>
+                    <div class="form-group"><label for="newExSets">ست</label><input type="tel" inputmode="numeric" id="newExSets" class="log-input" required></div>
+                    <div class="form-group"><label for="newExReps">تکرار</label><input type="text" id="newExReps" class="log-input" required></div>
+                    <div class="form-group"><label for="newExWeight">وزنه (اختیاری)</label><input type="tel" inputmode="decimal" id="newExWeight" class="log-input" placeholder="مثلا: 40"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="main-btn secondary close-modal-btn">لغو</button><button type="submit" class="main-btn">ذخیره</button></div>
+            </form>
+        </div>
+    </div>
+    <div id="logDetailModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h3 id="logDetailDate"></h3><button class="nav-btn close-modal-btn"><i class="fa-solid fa-times"></i></button></div>
+            <div class="modal-body" id="logDetailBody"></div>
+            <div class="modal-footer"><button type="button" class="main-btn secondary close-modal-btn">بستن</button></div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        document.addEventListener('DOMContentLoaded', () => {
+            const dom = {
+                html: document.documentElement,
+                themeToggle: document.getElementById('themeToggle'),
+                showWorkoutBtn: document.getElementById('showWorkoutBtn'),
+                showCalendarBtn: document.getElementById('showCalendarBtn'),
+                showStatsBtn: document.getElementById('showStatsBtn'),
+                workoutView: document.getElementById('workoutView'),
+                calendarView: document.getElementById('calendarView'),
+                statsView: document.getElementById('statsView'),
+                workoutContainer: document.getElementById('workout-container'),
+                prevDayBtn: document.getElementById('prevDayBtn'),
+                nextDayBtn: document.getElementById('nextDayBtn'),
+                todayBtn: document.getElementById('todayBtn'),
+                dateDisplay: document.getElementById('displayedJalaliDate'),
+                calendarGrid: document.getElementById('calendarGrid'),
+                calendarMonthTitle: document.getElementById('calendarMonthTitle'),
+                prevMonthBtn: document.getElementById('prevMonthBtn'),
+                nextMonthBtn: document.getElementById('nextMonthBtn'),
+                addExerciseModal: document.getElementById('addExerciseModal'),
+                addExerciseForm: document.getElementById('addExerciseForm'),
+                logDetailModal: document.getElementById('logDetailModal'),
+                logDetailDate: document.getElementById('logDetailDate'),
+                logDetailBody: document.getElementById('logDetailBody'),
+            };
+
+            const workoutSchedule = [
+                { dayName: "شنبه", type: "Push", title: "روز فشار (Push) - الف", exercises: [ { name: "پرس سرشانه ایستاده", sets: 4, reps: "6-8" }, { name: "پرس سینه با هالتر", sets: 3, reps: "6-8" }, { name: "پرس بالاسینه با دمبل", sets: 3, reps: "8-12" }, { name: "نشر از جانب با دمبل", sets: 4, reps: "12-15" }, { name: "نشر از جانب با سیم‌کش", sets: 3, reps: "12-15" }, { name: "فیس پول", sets: 3, reps: "12-15" }, { name: "دیپ پشت بازو", sets: 3, reps: "10-12" } ] },
+                { dayName: "یکشنبه", type: "Pull", title: "روز کشش (Pull) - الف", exercises: [ { name: "بارفیکس دست باز", sets: 4, reps: "6-8" }, { name: "تی-بار رو", sets: 4, reps: "8-10" }, { name: "پلاور با سیم‌کش", sets: 3, reps: "10-12" }, { name: "هالتر خم", sets: 3, reps: "8-10" }, { name: "لت دست برعکس", sets: 3, reps: "10-12" }, { name: "شراگ با هالتر یا دمبل", sets: 3, reps: "10-12" }, { name: "جلو بازو چکشی", sets: 3, reps: "8-12" }, { name: "فلای برعکس", sets: 3, reps: "12-15" } ] },
+                { dayName: "دوشنبه", type: "Legs", title: "روز پا - الف", exercises: [ { name: "اسکات با هالتر", sets: 4, reps: "6-8" }, { name: "ددلیفت رومانیایی", sets: 3, reps: "8-10" }, { name: "لانگز قدم‌رو", sets: 3, reps: "۱۰ برای هر پا" }, { name: "پرس پا", sets: 3, reps: "10-12" }, { name: "ساق پا ایستاده", sets: 4, reps: "12-15" }, { name: "کرانچ با دستگاه", sets: 3, reps: "12-15" } ] },
+                { dayName: "سه‌شنبه", type: "Push", title: "روز فشار (Push) - ب", exercises: [ { name: "پرس سرشانه با دمبل", sets: 4, reps: "6-8" }, { name: "پرس بالاسینه با هالتر", sets: 3, reps: "6-8" }, { name: "نشر از جلو با دمبل", sets: 3, reps: "10-12" }, { name: "کول با سیم‌کش", sets: 3, reps: "8-12" }, { name: "نشر از جانب سیم‌کش از پشت", sets: 3, reps: "12-15" }, { name: "پشت بازو خوابیده", sets: 3, reps: "10-12" }, { name: "پرس سینه دست جمع", sets: 3, reps: "8-10" } ] },
+                { dayName: "چهارشنبه", type: "Pull", title: "روز کشش (Pull) - ب", exercises: [ { name: "ددلیفت", sets: 4, reps: "5" }, { name: "روئینگ با لندماین", sets: 4, reps: "8-10" }, { name: "قایقی دست جمع", sets: 3, reps: "8-10" }, { name: "لت از جلو دست باز", sets: 3, reps: "8-10" }, { name: "پلاور با سیم‌کش", sets: 3, reps: "10-12" }, { name: "فیس پول", sets: 3, reps: "12-15" }, { name: "جلو بازو با هالتر", sets: 3, reps: "8-12" }, { name: "جلو بازو تمرکزی", sets: 2, reps: "12-15" } ] },
+                { dayName: "پنج‌شنبه", type: "Legs", title: "روز پا - ب", exercises: [ { name: "اسکات از جلو", sets: 4, reps: "6-8" }, { name: "پشت پا دستگاه", sets: 3, reps: "10-12" }, { name: "اسپلیت اسکات بلغاری", sets: 3, reps: "۸-۱۰ برای هر پا" }, { name: "جلو پا دستگاه", sets: 3, reps: "12-15" }, { name: "ساق پا نشسته", sets: 4, reps: "12-15" }, { name: "زیرشکم خلبانی", sets: 3, reps: "12-15" } ] },
+                { dayName: "جمعه", title: "روز استراحت", isRest: true }
+            ];
+            const workoutTypeInfo = { 
+                Push: { icon: 'fa-arrow-up-from-bracket', theme: 'push-theme' }, 
+                Pull: { icon: 'fa-angles-down', theme: 'pull-theme' }, 
+                Legs: { icon: 'fa-person-walking', theme: 'legs-theme' } 
+            };
+            const JALALI_MONTH_NAMES = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
+            let progressChartInstance = null;
+            let typeDistributionChartInstance = null;
+            const today = new Date();
+            const initialJalali = toJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
+            
+            // --- STATE ---
+            let appState = { 
+                displayDate: getTodayUTC(), 
+                calendarJalaliYear: initialJalali.jy, 
+                calendarJalaliMonth: initialJalali.jm 
+            };
+
+            // --- DATE & HELPER FUNCTIONS ---
+            function toFa(str) { return str != null ? str.toString().replace(/[0-9]/g, w => '۰۱۲۳۴۵۶۷۸۹'[w]) : ''; }
+            function toJalali(gy, gm, gd) { let g_d_m=[0,31,59,90,120,151,181,212,243,273,304,334];let jy=(gy<=1600)?0:979;gy-=(gy<=1600)?621:1600;let gy2=(gm>2)?(gy+1):gy;let days=(365*gy)+(parseInt((gy2+3)/4))-(parseInt((gy2+99)/100))+(parseInt((gy2+399)/400))-80+gd+g_d_m[gm-1];jy+=33*(parseInt(days/12053));days%=12053;jy+=4*(parseInt(days/1461));days%=1461;if(days>365){jy+=parseInt((days-1)/365);days=(days-1)%365;}let jm=(days<186)?1+parseInt(days/31):7+parseInt((days-186)/30);let jd=1+((days<186)?(days%31):((days-186)%30));return{jy:jy,jm:jm,jd:jd};}
+            function toGregorian(jy, jm, jd) { let gy = (jy <= 979) ? 621 : 1600; jy -= (jy <= 979) ? 0 : 979; let days = (365 * jy) + (parseInt(jy / 33) * 8) + (parseInt(((jy % 33) + 3) / 4)) + 78 + jd + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186); gy += 400 * (parseInt(days / 146097)); days %= 146097; if (days > 36524) { gy += 100 * (parseInt(--days / 36524)); days %= 36524; if (days >= 365) days++; } gy += 4 * (parseInt(days / 1461)); days %= 1461; if (days > 365) { gy += parseInt((days - 1) / 365); days = (days - 1) % 365; } let gd = days + 1; let sal_a = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; let gm; for (gm = 0; gm < 13 && gd > sal_a[gm]; gm++) gd -= sal_a[gm]; return new Date(Date.UTC(gy, gm - 1, gd)); }
+            function jalaliMonthLength(year, month) { if (month <= 6) return 31; if (month <= 11) return 30; const leapYears = [1, 5, 9, 13, 17, 22, 26, 30]; return leapYears.includes(year % 33) ? 30 : 29; }
+            
+            // [FIXED] Correctly create a UTC date for today.
+            function getTodayUTC() {
+                const t = new Date();
+                return new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate()));
+            };
+
+            // [FIXED] Use UTC methods to create a consistent key.
+            const getLogKey = (date) => `workout-log-${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`;
+
+            function getDayLog(date) { 
+                const key = getLogKey(date);
+                const data = localStorage.getItem(key);
+                const defaultLog = { sessionCompleted: false, sessionNotes: '', exercises: {}, customExercises: [] };
+                try { 
+                    return data ? { ...defaultLog, ...JSON.parse(data) } : defaultLog; 
+                } catch (e) { 
+                    console.error("Could not parse log data for key:", key); return defaultLog; 
+                } 
+            }
+            
+            function saveDayLog(date, logData) { 
+                localStorage.setItem(getLogKey(date), JSON.stringify(logData)); 
+            }
+            
+            // --- RENDER FUNCTIONS ---
+            function renderWorkout() {
+                // [FIXED] Use UTC day and set timezone for formatter.
+                const dayOfWeek = appState.displayDate.getUTCDay();
+                const persianDayIndex = (dayOfWeek + 1) % 7;
+                const workout = workoutSchedule[persianDayIndex];
+                const dayLog = getDayLog(appState.displayDate);
+                const formatter = new Intl.DateTimeFormat('fa-IR', { 
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' 
+                });
+                dom.dateDisplay.textContent = formatter.format(appState.displayDate);
+                
+                let html = '';
+                if (workout.isRest) {
+                    html = `<div class="card-base workout-day-card is-rest"><div class="rest-day-content"><div class="icon"><i class="fa-solid fa-couch"></i></div><h2>${workout.title}</h2><p>استراحت، تغذیه و ریکاوری.</p></div></div>`;
+                } else {
+                    const typeInfo = workoutTypeInfo[workout.type] || { icon: 'fa-question', theme: '' };
+                    const defaultExercisesHTML = workout.exercises.map(ex => renderExerciseItem(ex, dayLog.exercises[ex.name])).join('');
+                    const customExercisesHTML = dayLog.customExercises.map(ex => renderExerciseItem(ex, ex, true)).join('');
+                    html = `<div class="card-base workout-day-card ${typeInfo.theme}"> <div class="workout-day-card-header"> <h2>${workout.title}</h2> <i class="type-icon fa-solid ${typeInfo.icon}"></i> </div> <div class="session-controls"> <label class="session-tick"><input type="checkbox" id="sessionCompletedCheck" ${dayLog.sessionCompleted ? 'checked' : ''}> جلسه امروز انجام شد</label> <textarea id="sessionNotes" class="session-notes" placeholder="یادداشت‌های کلی جلسه...">${dayLog.sessionNotes}</textarea> </div> <div class="exercise-list" id="exerciseList">${defaultExercisesHTML}${customExercisesHTML}</div> <button id="addExerciseBtn" class="main-btn"><i class="fa-solid fa-plus"></i> افزودن تمرین جدید</button> </div>`;
+                }
+                dom.workoutContainer.innerHTML = html;
+            };
+
+            function renderExerciseItem(exerciseData, logData, isCustom = false) {
+                logData = logData || { checked: false, weight: '', notes: '' };
+                const id = isCustom ? `data-custom-id="${exerciseData.id}"` : `data-exercise-name="${exerciseData.name}"`;
+                const deleteBtn = isCustom ? `<button class="delete-custom-exercise-btn" title="حذف تمرین"><i class="fa-solid fa-trash"></i></button>` : '';
+                const notes = ` <div class="exercise-details">${toFa(exerciseData.sets)} ست × ${toFa(exerciseData.reps)} تکرار</div>`;
+                return `<div class="exercise-item ${logData.checked ? 'completed' : ''}" ${id}> <div class="exercise-header"> <i class="exercise-icon fa-solid ${getIconForExercise(exerciseData.name)}"></i> <input type="checkbox" class="ex-check" ${logData.checked ? 'checked' : ''}> <div class="exercise-info"> <div class="exercise-name">${exerciseData.name}</div> ${notes} </div> ${deleteBtn} </div> <div class="exercise-log"> <input type="tel" inputmode="decimal" class="log-input ex-weight" placeholder="وزنه (کیلوگرم)" value="${logData.weight || ''}"> <input type="text" class="log-input ex-notes" placeholder="یادداشت..." value="${logData.notes || ''}"> </div> </div>`;
+            };
+
+            function getIconForExercise(name) {
+                const iconMap = { 'پرس': 'fa-dumbbell', 'اسکات': 'fa-person-hiking', 'ددلیفت': 'fa-weight-hanging', 'بارفیکس': 'fa-person-running', 'لت': 'fa-person-running', 'نشر': 'fa-ghost', 'رو': 'fa-weight-hanging', 'پلاور': 'fa-lungs', 'شراگ': 'fa-universal-access', 'جلو بازو': 'fa-hand-fist', 'پشت بازو': 'fa-hand-fist', 'ساق': 'fa-person-walking', 'لانگز': 'fa-person-walking', 'دیپ': 'fa-hands-praying', 'فیس پول': 'fa-face-grin-beam', 'کرانچ': 'fa-person-praying', 'خلبانی': 'fa-plane-up', default: 'fa-star' };
+                for (const key in iconMap) { if (name.includes(key)) return iconMap[key]; } return iconMap.default;
+            }
+
+            function renderCalendar() {
+                dom.calendarGrid.innerHTML = '';
+                const { calendarJalaliYear: jYear, calendarJalaliMonth: jMonth } = appState;
+                dom.calendarMonthTitle.textContent = `${JALALI_MONTH_NAMES[jMonth - 1]} ${toFa(jYear)}`;
+                const dayNames = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+                dayNames.forEach(name => dom.calendarGrid.innerHTML += `<div class="calendar-day-name">${name}</div>`);
+                
+                const firstGregorianDate = toGregorian(jYear, jMonth, 1);
+                // [FIXED] Use getUTCDay for correct week start calculation.
+                const startOffset = (firstGregorianDate.getUTCDay() + 1) % 7;
+                for (let i = 0; i < startOffset; i++) dom.calendarGrid.innerHTML += '<div class="calendar-day empty-day"></div>';
+                
+                const monthLength = jalaliMonthLength(jYear, jMonth);
+                const todayG = getTodayUTC();
+
+                for (let jd = 1; jd <= monthLength; jd++) {
+                    const dayG = toGregorian(jYear, jMonth, jd);
+                    const dayEl = document.createElement('div');
+                    dayEl.classList.add('calendar-day');
+                    dayEl.textContent = toFa(jd);
+                    dayEl.dataset.gregorianDate = dayG.toISOString().split('T')[0];
+                    if (dayG.getTime() === todayG.getTime()) dayEl.classList.add('is-today');
+                    if (getDayLog(dayG).sessionCompleted) dayEl.classList.add('has-log');
+                    dom.calendarGrid.appendChild(dayEl);
+                }
+            };
+            
+            function renderStats() {
+                const allLogs = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    // [FIXED] Robustly parse date from key as UTC.
+                    if (key.startsWith('workout-log-')) {
+                        const dateParts = key.replace('workout-log-', '').split('-').map(Number);
+                        const date = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
+                        const log = getDayLog(date);
+                        if (log) {
+                           allLogs[date] = log;
+                        }
+                    }
+                }
+                const completedDates = Object.keys(allLogs).map(d => new Date(d)).filter(d => allLogs[d].sessionCompleted).sort((a, b) => a - b);
+                document.getElementById('totalSessionsStat').textContent = toFa(completedDates.length);
+                
+                let longestStreak = 0;
+                if (completedDates.length > 0) {
+                    let currentStreak = 1;
+                    longestStreak = 1;
+                    for (let i = 1; i < completedDates.length; i++) {
+                        const diffDays = (completedDates[i] - completedDates[i-1]) / (1000 * 60 * 60 * 24);
+                        // [FIXED] Use getUTCDay for streak calculation.
+                        if (diffDays === 1 || (diffDays > 1 && diffDays < 2.1 && completedDates[i].getUTCDay() !== 5) || (diffDays > 1 && diffDays < 3.1 && completedDates[i].getUTCDay() === 6)) {
+                            currentStreak++;
+                        } else {
+                            longestStreak = Math.max(longestStreak, currentStreak);
+                            currentStreak = 1;
+                        }
+                    }
+                    longestStreak = Math.max(longestStreak, currentStreak);
+                } else {
+                    longestStreak = 0;
+                }
+                document.getElementById('longestStreakStat').textContent = toFa(longestStreak);
+
+                const typeCounts = { Push: 0, Pull: 0, Legs: 0 };
+                completedDates.forEach(date => {
+                    // [FIXED] Use getUTCDay for type calculation.
+                    const dayOfWeek = (date.getUTCDay() + 1) % 7;
+                    const workoutType = workoutSchedule[dayOfWeek].type;
+                    if (typeCounts.hasOwnProperty(workoutType)) typeCounts[workoutType]++;
+                });
+                document.getElementById('pushCount').textContent = toFa(typeCounts.Push);
+                document.getElementById('pullCount').textContent = toFa(typeCounts.Pull);
+                document.getElementById('legsCount').textContent = toFa(typeCounts.Legs);
+
+                const typeCtx = document.getElementById('typeDistributionChart').getContext('2d');
+                if (typeDistributionChartInstance) typeDistributionChartInstance.destroy();
+                typeDistributionChartInstance = new Chart(typeCtx, { type: 'doughnut', data: { labels: ['Push', 'Pull', 'Legs'], datasets: [{ data: [typeCounts.Push, typeCounts.Pull, typeCounts.Legs], backgroundColor: ['#ef5350', '#42a5f5', '#66bb6a'], borderColor: 'var(--card-bg)', borderWidth: 4, hoverBorderWidth: 6 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false }, tooltip: {titleFont: {family: 'Vazirmatn'}, bodyFont: {family: 'Vazirmatn'}}} } });
+                
+                const progressSelect = document.getElementById('progressExerciseSelect');
+                const allExerciseNames = [...new Set(workoutSchedule.flatMap(day => day.exercises ? day.exercises.map(ex => ex.name) : []))];
+                const currentSelection = progressSelect.value;
+                progressSelect.innerHTML = allExerciseNames.map(name => `<option value="${name}" ${name === currentSelection ? 'selected' : ''}>${name}</option>`).join('');
+                
+                const updateProgressChart = () => {
+                    const selectedExercise = progressSelect.value;
+                    const progressData = completedDates.map(date => { const log = allLogs[date]; const exLog = log.exercises[selectedExercise]; if (exLog && exLog.weight && !isNaN(parseFloat(exLog.weight))) { return { x: date, y: parseFloat(exLog.weight) }; } return null; }).filter(Boolean);
+                    const progressCtx = document.getElementById('progressChart').getContext('2d');
+                    if (progressChartInstance) progressChartInstance.destroy();
+                    const gradient = progressCtx.createLinearGradient(0, 0, 0, 250);
+                    gradient.addColorStop(0, 'rgba(93, 95, 239, 0.5)');
+                    gradient.addColorStop(1, 'rgba(93, 95, 239, 0)');
+                    progressChartInstance = new Chart(progressCtx, { type: 'line', data: { datasets: [{ data: progressData, borderColor: 'var(--c-theme-main)', backgroundColor: gradient, fill: true, tension: 0.4, pointBackgroundColor: 'var(--c-theme-main)', pointBorderColor: 'var(--card-bg)', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'var(--c-theme-main)', pointRadius: 4, pointBorderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'day', tooltipFormat: 'MMM dd' }, ticks: { color: 'var(--text-subtle)', font: { family: 'Vazirmatn' } }, grid: { display: false } }, y: { beginAtZero: false, ticks: { color: 'var(--text-subtle)', font: { family: 'Vazirmatn' }, padding: 10 }, grid: { color: 'var(--border-color)', borderDash: [5, 5] } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#252836', titleFont: { family: 'Vazirmatn', size: 14 }, bodyFont: { family: 'Vazirmatn', size: 12 }, padding: 10, cornerRadius: 8, displayColors: false, callbacks: { label: (c) => `وزنه: ${toFa(c.parsed.y)} کیلوگرم` } } } } });
+                };
+                progressSelect.removeEventListener('change', updateProgressChart);
+                progressSelect.addEventListener('change', updateProgressChart);
+                if(allExerciseNames.length > 0) {
+                    if (!currentSelection && allExerciseNames[0]) {
+                        progressSelect.value = allExerciseNames[0];
+                    }
+                    updateProgressChart();
+                }
+            };
+            
+            function switchView(viewName) {
+                ['workoutView', 'calendarView', 'statsView'].forEach(v => dom[v.replace('View', '') + 'View'].style.display = 'none');
+                ['showWorkoutBtn', 'showCalendarBtn', 'showStatsBtn'].forEach(b => dom[b].classList.add('secondary'));
+                dom[viewName + 'View'].style.display = 'block';
+                dom['show' + viewName.charAt(0).toUpperCase() + viewName.slice(1) + 'Btn'].classList.remove('secondary');
+                
+                if (viewName === 'workout') renderWorkout();
+                else if (viewName === 'calendar') renderCalendar();
+                else if (viewName === 'stats') renderStats();
+            };
+            
+            function handleAddExerciseSubmit(e) {
+                e.preventDefault();
+                const dayLog = getDayLog(appState.displayDate);
+                const newExercise = { id: Date.now(), name: dom.addExerciseForm.newExName.value, sets: dom.addExerciseForm.newExSets.value, reps: dom.addExerciseForm.newExReps.value, weight: dom.addExerciseForm.newExWeight.value || '', notes: '', checked: false };
+                dayLog.customExercises.push(newExercise);
+                saveDayLog(appState.displayDate, dayLog);
+                dom.addExerciseForm.reset();
+                closeModal(dom.addExerciseModal);
+                renderWorkout();
+            };
+
+            function openModal(modal) { modal && modal.classList.add('visible'); }
+            function closeModal(modal) { modal && modal.classList.remove('visible'); }
+
+            function setupEventListeners() {
+                dom.themeToggle.addEventListener('change', (e) => {
+                    dom.html.classList.toggle('dark-mode', e.target.checked);
+                    localStorage.setItem('workoutTheme', e.target.checked ? 'dark' : 'light');
+                    if (dom.statsView.style.display === 'block') renderStats();
+                });
+
+                dom.showWorkoutBtn.addEventListener('click', () => switchView('workout'));
+                dom.showCalendarBtn.addEventListener('click', () => switchView('calendar'));
+                dom.showStatsBtn.addEventListener('click', () => switchView('stats'));
+                
+                // [FIXED] Use UTC date manipulation for day navigation.
+                dom.prevDayBtn.addEventListener('click', () => { appState.displayDate.setUTCDate(appState.displayDate.getUTCDate() - 1); renderWorkout(); });
+                dom.nextDayBtn.addEventListener('click', () => { appState.displayDate.setUTCDate(appState.displayDate.getUTCDate() + 1); renderWorkout(); });
+                dom.todayBtn.addEventListener('click', () => { appState.displayDate = getTodayUTC(); renderWorkout(); });
+
+                dom.prevMonthBtn.addEventListener('click', () => { appState.calendarJalaliMonth--; if (appState.calendarJalaliMonth < 1) { appState.calendarJalaliMonth = 12; appState.calendarJalaliYear--; } renderCalendar(); });
+                dom.nextMonthBtn.addEventListener('click', () => { appState.calendarJalaliMonth++; if (appState.calendarJalaliMonth > 12) { appState.calendarJalaliMonth = 1; appState.calendarJalaliYear++; } renderCalendar(); });
+
+                dom.addExerciseForm.addEventListener('submit', handleAddExerciseSubmit);
+                document.querySelectorAll('.close-modal-btn').forEach(btn => btn.addEventListener('click', () => closeModal(btn.closest('.modal-overlay'))));
+
+                dom.workoutContainer.addEventListener('click', e => {
+                    if (e.target.closest('#addExerciseBtn')) openModal(dom.addExerciseModal);
+                    const deleteBtn = e.target.closest('.delete-custom-exercise-btn');
+                    if (deleteBtn) {
+                        const exerciseItem = deleteBtn.closest('.exercise-item');
+                        const customId = exerciseItem.dataset.customId;
+                        if (customId) {
+                            const dayLog = getDayLog(appState.displayDate);
+                            dayLog.customExercises = dayLog.customExercises.filter(ex => ex.id != customId);
+                            saveDayLog(appState.displayDate, dayLog);
+                            exerciseItem.classList.add('fade-out');
+                            setTimeout(() => exerciseItem.remove(), 400);
+                        }
+                    }
+                });
+
+                dom.workoutContainer.addEventListener('input', e => {
+                    const dayLog = getDayLog(appState.displayDate); let logChanged = false; const exerciseItem = e.target.closest('.exercise-item');
+                    if (exerciseItem) {
+                        const exerciseName = exerciseItem.dataset.exerciseName; if (exerciseName) { if (!dayLog.exercises[exerciseName]) dayLog.exercises[exerciseName] = { checked: false, weight: '', notes: '' }; if (e.target.classList.contains('ex-weight')) dayLog.exercises[exerciseName].weight = e.target.value; else if (e.target.classList.contains('ex-notes')) dayLog.exercises[exerciseName].notes = e.target.value; logChanged = true; }
+                        const customId = exerciseItem.dataset.customId; if (customId) { const customEx = dayLog.customExercises.find(ex => ex.id == customId); if (customEx) { if (e.target.classList.contains('ex-weight')) customEx.weight = e.target.value; else if (e.target.classList.contains('ex-notes')) customEx.notes = e.target.value; logChanged = true; } }
+                    }
+                    if (e.target.id === 'sessionNotes') { dayLog.sessionNotes = e.target.value; logChanged = true; } if (logChanged) saveDayLog(appState.displayDate, dayLog);
+                });
+                
+                dom.workoutContainer.addEventListener('change', e => {
+                    if (!e.target.matches('input[type="checkbox"]')) return; const dayLog = getDayLog(appState.displayDate); let logChanged = false; const exerciseItem = e.target.closest('.exercise-item');
+                    if (exerciseItem && e.target.classList.contains('ex-check')) {
+                        const isChecked = e.target.checked; exerciseItem.classList.toggle('completed', isChecked); const exerciseName = exerciseItem.dataset.exerciseName;
+                        if (exerciseName) { if (!dayLog.exercises[exerciseName]) dayLog.exercises[exerciseName] = { weight: '', notes: '' }; dayLog.exercises[exerciseName].checked = isChecked; logChanged = true; }
+                        const customId = exerciseItem.dataset.customId; if (customId) { const customEx = dayLog.customExercises.find(ex => ex.id == customId); if (customEx) { customEx.checked = isChecked; logChanged = true; } }
+                    }
+                    if (e.target.id === 'sessionCompletedCheck') { dayLog.sessionCompleted = e.target.checked; logChanged = true; } if (logChanged) saveDayLog(appState.displayDate, dayLog);
+                });
+
+                // --- CALENDAR EVENT LISTENERS (CLICK & LONG PRESS) ---
+                let pressTimer = null;
+                let isLongPress = false;
+                
+                // [FIXED] Click handler now reliably creates a UTC date.
+                const handleCalendarClick = (dayEl) => {
+                    const dateStr = dayEl.dataset.gregorianDate;
+                    if (!dateStr) return;
+                    const parts = dateStr.split('-').map(Number);
+                    appState.displayDate = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+                    switchView('workout');
+                };
+
+                const handleCalendarLongPress = (dayEl) => {
+                    const dateStr = dayEl.dataset.gregorianDate;
+                    if (!dateStr) return;
+                    const date = new Date(dateStr + 'T00:00:00Z');
+                    const dayLog = getDayLog(date);
+                    if (!dayLog.sessionCompleted) return;
+
+                    // [FIXED] Use getUTCDay and set timezone for formatter.
+                    const dayOfWeek = (date.getUTCDay() + 1) % 7;
+                    const workout = workoutSchedule[dayOfWeek];
+                    const formatter = new Intl.DateTimeFormat('fa-IR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+                    dom.logDetailDate.textContent = formatter.format(date);
+
+                    let modalHtml = `<h4 style="color: var(--c-theme-main);">${workout.title || 'تمرین سفارشی'}</h4>`;
+                    if (dayLog.sessionNotes) {
+                        modalHtml += `<div class="log-detail-notes"><strong>یادداشت جلسه:</strong><p>${dayLog.sessionNotes.replace(/\n/g, '<br>')}</p></div>`;
+                    }
+                    modalHtml += '<h5>تمرینات ثبت شده:</h5><ul class="log-detail-list">';
+                    
+                    const allExercises = workout.exercises ? [...workout.exercises] : [];
+                    if(dayLog.customExercises) allExercises.push(...dayLog.customExercises);
+                    
+                    let loggedExercisesCount = 0;
+                    allExercises.forEach(ex => {
+                        const exLog = ex.id ? ex : dayLog.exercises[ex.name];
+                        if (exLog && exLog.checked) {
+                            loggedExercisesCount++;
+                            let details = [];
+                            if (exLog.weight) details.push(`وزنه: ${toFa(exLog.weight)}kg`);
+                            if (exLog.notes) details.push(`یادداشت: ${exLog.notes}`);
+                            modalHtml += `<li><i class="fa-solid fa-check" style="color: var(--c-success);"></i> <strong>${ex.name}</strong>`;
+                            if (details.length > 0) {
+                                modalHtml += `<span class="log-detail-entry">${details.join(' / ')}</span>`;
+                            }
+                            modalHtml += '</li>';
+                        }
+                    });
+                    if (loggedExercisesCount === 0) modalHtml += '<li>هیچ تمرین تیک‌خورده‌ای برای این روز ثبت نشده.</li>';
+                    modalHtml += '</ul>';
+                    dom.logDetailBody.innerHTML = modalHtml;
+                    openModal(dom.logDetailModal);
+                };
+
+                const setupPressEvents = (element) => {
+                    element.addEventListener('mousedown', e => {
+                        const dayEl = e.target.closest('.calendar-day:not(.empty-day)');
+                        if (!dayEl) return;
+                        isLongPress = false;
+                        pressTimer = setTimeout(() => { isLongPress = true; handleCalendarLongPress(dayEl); }, 500);
+                    });
+                    element.addEventListener('mouseup', e => {
+                        clearTimeout(pressTimer);
+                        if (isLongPress) e.preventDefault();
+                    });
+                    element.addEventListener('click', e => {
+                        if (isLongPress) return;
+                        const dayEl = e.target.closest('.calendar-day:not(.empty-day)');
+                        if (dayEl) handleCalendarClick(dayEl);
+                    });
+                    element.addEventListener('touchstart', e => {
+                        const dayEl = e.target.closest('.calendar-day:not(.empty-day)');
+                        if (!dayEl) return;
+                        isLongPress = false;
+                        pressTimer = setTimeout(() => { isLongPress = true; handleCalendarLongPress(dayEl); }, 500);
+                    }, { passive: true });
+                    element.addEventListener('touchend', e => {
+                        clearTimeout(pressTimer);
+                        if (isLongPress) e.preventDefault();
+                    });
+                };
+
+                setupPressEvents(dom.calendarGrid);
+            };
+
+            function initializeApp() {
+                const savedTheme = localStorage.getItem('workoutTheme') || 'light';
+                dom.html.classList.toggle('dark-mode', savedTheme === 'dark');
+                dom.themeToggle.checked = savedTheme === 'dark';
+                setupEventListeners();
+                switchView('workout');
+            };
+            
+            initializeApp();
+        });
+    })();
+    </script>
+</body>
+</html>
