@@ -23,22 +23,9 @@
            html, body {
             overscroll-behavior-y: contain;
         }
-body {
-    font-family: 'Vazirmatn', sans-serif;
-    overscroll-behavior-y: contain;
-    
-    /* --- Theme variables --- */
-    color: var(--color-text);
-    background-color: var(--color-bg);
-    background-image: var(--bg-image);
-    background-size: var(--bg-size);
-    background-position: var(--bg-position);
-}
-
-.sortable-ghost { 
-    opacity: 0.4; 
-    background-color: #cce7ff; 
-}
+        body { font-family: 'Vazirmatn', sans-serif; background-color: var(--color-bg); color: var(--color-text);
+     .sortable-ghost { opacity: 0.4; background-color: #cce7ff; }
+    }
 
         .sortable-ghost { opacity: 0.4; background-color: #cce7ff; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -506,13 +493,6 @@ function applyActiveTheme() {
     const completedColor = theme.completedBg ? theme.completedBg : `${theme.primary}20`;
     const darkCompletedColor = theme.completedBg ? theme.completedBg : `${theme.primary}30`;
 
-    // --- NEW LINES START ---
-    // Get background properties from the theme, with defaults for themes that don't have them.
-    const backgroundImage = theme.backgroundImage || 'none';
-    const backgroundSize = theme.backgroundSize || 'auto';
-    const backgroundPosition = theme.backgroundPosition || '0% 0%';
-    // --- NEW LINES END ---
-
     styleEl.innerHTML = `
       :root {
         --color-primary: ${theme.primary};
@@ -526,12 +506,6 @@ function applyActiveTheme() {
         --color-border: ${theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
         --color-hover: ${theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
         --color-cell-inactive: ${cellInactiveColor};
-
-        /* --- NEW VARIABLES START --- */
-        --bg-image: ${backgroundImage};
-        --bg-size: ${backgroundSize};
-        --bg-position: ${backgroundPosition};
-        /* --- NEW VARIABLES END --- */
       }
       .day-completed { background-color: ${completedColor} !important; }
       .dark .day-completed { background-color: ${darkCompletedColor} !important; }
