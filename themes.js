@@ -421,6 +421,71 @@ const themesData = {
     { id: 'theme-celadon-glaze', name: 'لعاب سلادون', primary: '#b3d1b3', bg: '#f8fbf8', text: '#505f50', isDark: false } ],
   new: [
 
+    {
+      "id": "theme-ios-daylight",
+      "name": "نور روز iOS",
+      "isDark": false,
+      "primary": "#007AFF",
+      "bg": "#F2F2F7",
+      "text": "#1D1D1F",
+      "backgroundImage": "radial-gradient(circle at top left, #A8C0FF, transparent 60%), radial-gradient(circle at bottom right, #D6C6E1, transparent 50%)",
+      "cellInactive": "rgba(120, 120, 128, 0.12)",
+      "completedBg": "rgba(0, 122, 255, 0.15)"
+    },
+    {
+      "id": "theme-ios-iridescent",
+      "name": "رنگین‌تاب",
+      "isDark": false,
+      "primary": "#FF2D55",
+      "bg": "linear-gradient(135deg, #FAD0C4 0%, #FFD1FF 100%)",
+      "text": "#2C2C2E",
+      "cellInactive": "rgba(255, 45, 85, 0.08)",
+      "completedBg": "rgba(255, 45, 85, 0.16)"
+    },
+    {
+      "id": "theme-ios-aloe",
+      "name": "آلوئه‌ورا",
+      "isDark": false,
+      "primary": "#34C759",
+      "bg": "linear-gradient(120deg, #F0FFF4 0%, #E6F8F0 100%)",
+      "text": "#002D11",
+      "cellInactive": "rgba(52, 199, 89, 0.1)",
+      "completedBg": "rgba(52, 199, 89, 0.2)"
+    }
+  ,
+ 
+    {
+      "id": "theme-ios-graphite",
+      "name": "گرافیت iOS",
+      "isDark": true,
+      "primary": "#0A84FF",
+      "bg": "#000000",
+      "text": "#F2F2F7",
+      "backgroundImage": "radial-gradient(circle at top right, #003D7A, transparent 50%), radial-gradient(circle at bottom left, #4A003E, transparent 60%)",
+      "cellInactive": "rgba(120, 120, 128, 0.24)",
+      "completedBg": "rgba(10, 132, 255, 0.2)"
+    },
+    {
+      "id": "theme-ios-pacific-blue",
+      "name": "آبی اقیانوس آرام",
+      "isDark": true,
+      "primary": "#64D2FF",
+      "bg": "linear-gradient(180deg, #051937 0%, #1d3557 50%, #457b9d 100%)",
+      "text": "#F0F8FF",
+      "cellInactive": "rgba(100, 210, 255, 0.15)",
+      "completedBg": "rgba(100, 210, 255, 0.25)"
+    },
+    {
+      "id": "theme-ios-sunset",
+      "name": "غروب آفتاب",
+      "isDark": true,
+      "primary": "#FF9F0A",
+      "bg": "radial-gradient(ellipse at top, #583C87, #2C1D44)",
+      "text": "#FFF0E0",
+      "cellInactive": "rgba(255, 159, 10, 0.15)",
+      "completedBg": "rgba(255, 159, 10, 0.25)"
+    },
+
 
   {
     id: 'theme-neon-reef',
