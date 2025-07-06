@@ -969,72 +969,7 @@ const themesData = {
     }
   ,
 
-    {
-      id: 'theme-dark-horizon-glow',
-      name: 'درخشش افق تاریک',
-      isDark: true,
-      primary: '#5a7fdd',
-      bg: 'radial-gradient(125% 125% at 50% 90%, #000000 40%, #0d1a36 100%)',
-      text: '#A0AEC0',
-      card: '#060d1f',
-      cellInactive: 'rgba(90, 127, 221, 0.1)',
-      completedBg: 'rgba(90, 127, 221, 0.2)'
-    },
-    {
-      id: 'theme-crimson-depth',
-      name: 'عمق زرشکی',
-      isDark: true,
-      primary: '#E53E3E',
-      bg: 'radial-gradient(125% 125% at 50% 100%, #000000 40%, #2b0707 100%)',
-      text: '#A0A0A0',
-      card: '#1A0B0B',
-      cellInactive: 'rgba(229, 62, 62, 0.1)',
-      completedBg: 'rgba(229, 62, 62, 0.2)'
-    },
-    {
-      id: 'theme-emerald-void',
-      name: 'خلأ زمردی',
-      isDark: true,
-      primary: '#38A169',
-      bg: 'radial-gradient(125% 125% at 50% 90%, #000000 40%, #072607 100%)',
-      text: '#9AE6B4',
-      card: '#0A1A0A',
-      cellInactive: 'rgba(56, 161, 105, 0.1)',
-      completedBg: 'rgba(56, 161, 105, 0.2)'
-    },
-    {
-      id: 'theme-violet-abyss',
-      name: 'مغاک بنفش',
-      isDark: true,
-      primary: '#805AD5',
-      bg: 'radial-gradient(125% 125% at 50% 90%, #000000 40%, #2b092b 100%)',
-      text: '#D6BCFA',
-      card: '#1A0F1A',
-      cellInactive: 'rgba(128, 90, 213, 0.1)',
-      completedBg: 'rgba(128, 90, 213, 0.2)'
-    },
-    {
-      id: 'theme-azure-depths-top',
-      name: 'اعماق لاجوردی بالا',
-      isDark: true,
-      primary: '#3182CE',
-      bg: 'radial-gradient(125% 125% at 50% 10%, #000000 40%, #010133 100%)',
-      text: '#BEE3F8',
-      card: '#0E1A3D',
-      cellInactive: 'rgba(49, 130, 206, 0.1)',
-      completedBg: 'rgba(49, 130, 206, 0.2)'
-    },
-    {
-      id: 'theme-orchid-depths-top',
-      name: 'اعماق ارغوانی بالا',
-      isDark: true,
-      primary: '#D53F8C',
-      bg: 'radial-gradient(125% 125% at 50% 10%, #000000 40%, #350136 100%)',
-      text: '#FBB6CE',
-      card: '#2A0C2A',
-      cellInactive: 'rgba(213, 63, 140, 0.1)',
-      completedBg: 'rgba(213, 63, 140, 0.2)'
-    },
+ 
      {
       id: 'theme-blue-radial-glow',
       name: 'درخشش شعاعی آبی',
@@ -1083,50 +1018,7 @@ const themesData = {
       cellInactive: 'rgba(139, 92, 246, 0.1)',
       completedBg: 'rgba(139, 92, 246, 0.2)'
     },
-    {
-      id: 'theme-ocean-abyss-top-glow',
-      name: 'مغاک اقیانوس با درخشش بالا',
-      isDark: true,
-      primary: '#06B6D4',
-      bg: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(6, 182, 212, 0.25), transparent 70%), #000000',
-      text: '#A5F3FC',
-      card: '#0A2024',
-      cellInactive: 'rgba(6, 182, 212, 0.1)',
-      completedBg: 'rgba(6, 182, 212, 0.2)'
-    },
-    {
-      id: 'theme-indigo-cosmos-top-glow',
-      name: 'کیهان نیلی با درخشش بالا',
-      isDark: true,
-      primary: '#6366F1',
-      bg: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, 0.25), transparent 70%), #000000',
-      text: '#C7D2FE',
-      card: '#121326',
-      cellInactive: 'rgba(99, 102, 241, 0.1)',
-      completedBg: 'rgba(99, 102, 241, 0.2)'
-    },
-    {
-      id: 'theme-pearl-mist-top-glow',
-      name: 'مه مرواریدی با درخشش بالا',
-      isDark: true,
-      primary: '#E2E8F0',
-      bg: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(226, 232, 240, 0.15), transparent 70%), #000000',
-      text: '#F1F5F9',
-      card: '#1E293B',
-      cellInactive: 'rgba(226, 232, 240, 0.1)',
-      completedBg: 'rgba(226, 232, 240, 0.2)'
-    },
-     {
-      id: 'theme-magenta-nebula-top-glow',
-      name: 'سحابی سرخابی با درخشش بالا',
-      isDark: true,
-      primary: '#EC4899',
-      bg: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(236, 72, 153, 0.25), transparent 70%), #000000',
-      text: '#F9A8D4',
-      card: '#260C1A',
-      cellInactive: 'rgba(236, 72, 153, 0.1)',
-      completedBg: 'rgba(236, 72, 153, 0.2)'
-    },
+   
     {
       id: 'theme-dark-noise-colored',
       name: 'نویز رنگی تیره',
