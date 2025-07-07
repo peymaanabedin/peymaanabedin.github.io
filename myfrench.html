@@ -213,353 +213,383 @@
     
     <script src="./french.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- DOM Elements ---
-            const card = document.getElementById('card');
-            const cardContainer = document.getElementById('card-container');
-            const noWordsMessage = document.getElementById('no-words-message');
+      document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
+    const card = document.getElementById('card');
+    const cardContainer = document.getElementById('card-container');
+    const noWordsMessage = document.getElementById('no-words-message');
+    
+    // Card Front
+    const wordEl = document.getElementById('word');
+    const cardCounterEl = document.getElementById('card-counter');
+    const bookmarkBtn = document.getElementById('bookmark-btn');
+    const learnedBtn = document.getElementById('learned-btn');
+    const revealBtn = document.getElementById('reveal-btn');
+    const speakWordFrontBtn = document.getElementById('speak-word-front-btn');
+
+    // Card Back
+    const unrevealBtn = document.getElementById('unreveal-btn');
+    const pronunciationIpaEl = document.getElementById('pronunciation-ipa');
+    const pronunciationEnglishEl = document.getElementById('pronunciation-english');
+    const pronunciationPersianEl = document.getElementById('pronunciation-persian');
+    const translationEnglishEl = document.getElementById('translation-english');
+    const persianEl = document.getElementById('persian');
+    const sampleSentenceEl = document.getElementById('sample-sentence');
+    const sentenceTranslationEnglishEl = document.getElementById('sentence-translation-english');
+    const sentencePersianEl = document.getElementById('sentence-persian');
+    const sentencePronunciationIpaEl = document.getElementById('sentence_pronunciation_ipa');
+    const sentencePronunciationEnglishEl = document.getElementById('sentence_pronunciation_english');
+    const sentencePronunciationPersianEl = document.getElementById('sentence_pronunciation_persian');
+    const speakBtn = document.getElementById('speak-btn');
+    const speakSentenceBtn = document.getElementById('speak-sentence-btn');
+    
+    // Header & Progress
+    const totalCounterEl = document.getElementById('total-counter');
+    const bookmarkedCounterEl = document.getElementById('bookmarked-counter');
+    const learnedCounterEl = document.getElementById('learned-counter');
+    const progressBar = document.getElementById('progress-bar');
+    const showAllBtn = document.getElementById('show-all-btn');
+    const showBookmarkedBtn = document.getElementById('show-bookmarked-btn');
+    const showLearnedBtn = document.getElementById('show-learned-btn');
+
+    // Navigation
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const navCounterEl = document.getElementById('nav-counter');
+
+    // Dark Mode
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+    // Modal
+    const aboutModal = document.getElementById('about-modal');
+    const modalContent = document.getElementById('modal-content');
+    const infoBtn = document.getElementById('info-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    // --- State ---
+    let allWords = [];
+    let displayedWords = [];
+    let currentIndex = 0;
+    let bookmarkedWords = new Set(JSON.parse(localStorage.getItem('bookmarkedWords')) || []);
+    let learnedWords = new Set(JSON.parse(localStorage.getItem('learnedWords')) || []);
+    let currentFilter = 'all';
+    const synth = window.speechSynthesis;
+    let frenchVoice = null;
+    let voices = [];
+
+    // --- Functions ---
+    
+    const toPersianNumber = (n) => {
+        if (n === undefined || n === null) return '';
+        const persian = { 0: '۰', 1: '۱', 2: '۲', 3: '۳', 4: '۴', 5: '۵', 6: '۶', 7: '۷', 8: '۸', 9: '۹' };
+        return String(n).split('').map(char => persian[char] || char).join('');
+    }
+
+    function loadVoices() {
+        voices = synth.getVoices();
+        frenchVoice = voices.find(voice => voice.lang === 'fr-FR' && voice.name.includes('Enhanced')) ||
+                      voices.find(voice => voice.lang === 'fr-FR' && voice.localService) || 
+                      voices.find(voice => voice.lang === 'fr-FR') || 
+                      voices.find(voice => voice.lang.startsWith('fr'));
+        
+        if (!frenchVoice) {
+            console.warn("No French voice found. Speech synthesis will use the default voice.");
+        }
+    }
+    
+    function getPhoneticCorrection(text) {
+        return text.replace(/ça/g, 'sa');
+    }
+    
+    function speak(text) {
+        if (synth.speaking) {
+            synth.cancel();
+        }
+        if (text) {
+            const correctedText = getPhoneticCorrection(text);
+            const utterThis = new SpeechSynthesisUtterance(correctedText);
             
-            // Card Front
-            const wordEl = document.getElementById('word');
-            const cardCounterEl = document.getElementById('card-counter');
-            const bookmarkBtn = document.getElementById('bookmark-btn');
-            const learnedBtn = document.getElementById('learned-btn');
-            const revealBtn = document.getElementById('reveal-btn');
-            const speakWordFrontBtn = document.getElementById('speak-word-front-btn');
-
-            // Card Back
-            const unrevealBtn = document.getElementById('unreveal-btn');
-            const pronunciationIpaEl = document.getElementById('pronunciation-ipa');
-            const pronunciationEnglishEl = document.getElementById('pronunciation-english');
-            const pronunciationPersianEl = document.getElementById('pronunciation-persian');
-            const translationEnglishEl = document.getElementById('translation-english');
-            const persianEl = document.getElementById('persian');
-            const sampleSentenceEl = document.getElementById('sample-sentence');
-            const sentenceTranslationEnglishEl = document.getElementById('sentence-translation-english');
-            const sentencePersianEl = document.getElementById('sentence-persian');
-            const sentencePronunciationIpaEl = document.getElementById('sentence_pronunciation_ipa');
-            const sentencePronunciationEnglishEl = document.getElementById('sentence_pronunciation_english');
-            const sentencePronunciationPersianEl = document.getElementById('sentence_pronunciation_persian');
-            const speakBtn = document.getElementById('speak-btn');
-            const speakSentenceBtn = document.getElementById('speak-sentence-btn');
-            
-            // Header & Progress
-            const totalCounterEl = document.getElementById('total-counter');
-            const bookmarkedCounterEl = document.getElementById('bookmarked-counter');
-            const learnedCounterEl = document.getElementById('learned-counter');
-            const progressBar = document.getElementById('progress-bar');
-            const showAllBtn = document.getElementById('show-all-btn');
-            const showBookmarkedBtn = document.getElementById('show-bookmarked-btn');
-            const showLearnedBtn = document.getElementById('show-learned-btn');
-
-            // Navigation
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const navCounterEl = document.getElementById('nav-counter');
-
-            // Dark Mode
-            const darkModeToggle = document.getElementById('dark-mode-toggle');
-
-            // Modal
-            const aboutModal = document.getElementById('about-modal');
-            const modalContent = document.getElementById('modal-content');
-            const infoBtn = document.getElementById('info-btn');
-            const closeModalBtn = document.getElementById('close-modal-btn');
-
-            // --- State ---
-            let allWords = [];
-            let displayedWords = [];
-            let currentIndex = 0;
-            let bookmarkedWords = new Set(JSON.parse(localStorage.getItem('bookmarkedWords')) || []);
-            let learnedWords = new Set(JSON.parse(localStorage.getItem('learnedWords')) || []);
-            let currentFilter = 'all';
-            const synth = window.speechSynthesis;
-            let frenchVoice = null;
-            let voices = [];
-
-            // --- Functions ---
-            
-            const toPersianNumber = (n) => {
-                if (n === undefined || n === null) return '';
-                const persian = { 0: '۰', 1: '۱', 2: '۲', 3: '۳', 4: '۴', 5: '۵', 6: '۶', 7: '۷', 8: '۸', 9: '۹' };
-                return String(n).split('').map(char => persian[char] || char).join('');
-            }
-
-            /**
-             * 💡 UPDATED: Robustly loads the French voice with a preference for high-quality iOS voices.
-             */
-            function loadVoices() {
-                voices = synth.getVoices();
-                // Prioritize "Enhanced" quality voices on iOS, then standard French voices.
-                frenchVoice = voices.find(voice => voice.lang === 'fr-FR' && voice.name.includes('Enhanced')) ||
-                              voices.find(voice => voice.lang === 'fr-FR' && voice.localService) || 
-                              voices.find(voice => voice.lang === 'fr-FR') || 
-                              voices.find(voice => voice.lang.startsWith('fr'));
-                
-                if (!frenchVoice) {
-                    console.warn("No French voice found. Speech synthesis will use the default voice.");
-                }
-            }
-            
-            /**
-             * 💡 FIX: Applies phonetic corrections for common TTS errors.
-             */
-            function getPhoneticCorrection(text) {
-                return text.replace(/ça/g, 'sa');
-            }
-            
-            /**
-             * 💡 UPDATED: Ensures the selected voice is used for pronunciation.
-             */
-            function speak(text) {
-                if (synth.speaking) {
-                    synth.cancel();
-                }
-                if (text) {
-                    const correctedText = getPhoneticCorrection(text);
-                    const utterThis = new SpeechSynthesisUtterance(correctedText);
-                    
-                    if (!frenchVoice) {
-                        loadVoices();
-                    }
-                    
-                    utterThis.voice = frenchVoice;
-                    utterThis.lang = 'fr-FR';
-                    utterThis.pitch = 1.0;
-                    utterThis.rate = 0.95;
-                    
-                    utterThis.onerror = function (event) {
-                        console.error('SpeechSynthesisUtterance.onerror', event);
-                    };
-
-                    synth.speak(utterThis);
-                }
-            }
-
-            function updateCounters() {
-                totalCounterEl.textContent = `همه (${toPersianNumber(allWords.length)})`;
-                bookmarkedCounterEl.textContent = `نشان شده (${toPersianNumber(bookmarkedWords.size)})`;
-                learnedCounterEl.textContent = `یادگرفته (${toPersianNumber(learnedWords.size)})`;
-                
-                const learnedPercentage = allWords.length > 0 ? (learnedWords.size / allWords.length) * 100 : 0;
-                progressBar.style.width = `${learnedPercentage}%`;
-            }
-
-            function renderCard(index) {
-                card.classList.remove('flipped');
-                
-                if (displayedWords.length === 0) {
-                    cardContainer.classList.add('hidden');
-                    noWordsMessage.classList.remove('hidden');
-                    navCounterEl.textContent = `${toPersianNumber(0)} / ${toPersianNumber(0)}`;
-                    prevBtn.disabled = true;
-                    nextBtn.disabled = true;
-                    return;
-                }
-                
-                cardContainer.classList.remove('hidden');
-                noWordsMessage.classList.add('hidden');
-
-                const currentWord = displayedWords[index];
-                
-                // Front
-                wordEl.textContent = currentWord.word;
-                cardCounterEl.textContent = `${toPersianNumber(index + 1)} / ${toPersianNumber(displayedWords.length)}`;
-
-                // Back
-                translationEnglishEl.textContent = currentWord.translation_english;
-                persianEl.textContent = currentWord.persian;
-                pronunciationIpaEl.textContent = currentWord.pronunciation_ipa;
-                pronunciationEnglishEl.textContent = currentWord.pronunciation_english;
-                pronunciationPersianEl.textContent = currentWord.pronunciation_persian;
-                sampleSentenceEl.textContent = currentWord.sample_sentence;
-                sentenceTranslationEnglishEl.textContent = currentWord.sentence_translation_english;
-                sentencePersianEl.textContent = currentWord.sentence_persian;
-                sentencePronunciationIpaEl.textContent = currentWord.sentence_pronunciation_ipa || '';
-                sentencePronunciationEnglishEl.textContent = currentWord.sentence_pronunciation_english || '';
-                sentencePronunciationPersianEl.textContent = currentWord.sentence_pronunciation_persian || '';
-
-                // Update button states
-                updateBookmarkButton(currentWord);
-                updateLearnedButton(currentWord);
-                updateNavButtons();
-                navCounterEl.textContent = `${toPersianNumber(index + 1)} / ${toPersianNumber(displayedWords.length)}`;
-            }
-            
-            function goToNextCard() {
-                if (currentIndex < displayedWords.length - 1) {
-                    currentIndex++;
-                    renderCard(currentIndex);
-                }
-            }
-            
-            function goToPrevCard() {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    renderCard(currentIndex);
-                }
-            }
-
-            function updateBookmarkButton(word) {
-                const icon = bookmarkBtn.querySelector('i');
-                if (bookmarkedWords.has(word.word)) {
-                    bookmarkBtn.classList.add('text-indigo-500');
-                    icon.setAttribute('fill', 'currentColor');
-                } else {
-                    bookmarkBtn.classList.remove('text-indigo-500');
-                    icon.setAttribute('fill', 'none');
-                }
-            }
-
-            function updateLearnedButton(word) {
-                const icon = learnedBtn.querySelector('i');
-                if (learnedWords.has(word.word)) {
-                    learnedBtn.classList.add('text-green-500');
-                    icon.setAttribute('fill', 'currentColor');
-                } else {
-                    learnedBtn.classList.remove('text-green-500');
-                    icon.setAttribute('fill', 'none');
-                }
-            }
-
-            function updateNavButtons() {
-                prevBtn.disabled = currentIndex === 0;
-                nextBtn.disabled = currentIndex === displayedWords.length - 1;
-            }
-            
-            function applyFilter() {
-                switch(currentFilter) {
-                    case 'bookmarked':
-                        displayedWords = allWords.filter(w => bookmarkedWords.has(w.word));
-                        break;
-                    case 'learned':
-                        displayedWords = allWords.filter(w => learnedWords.has(w.word));
-                        break;
-                    default:
-                        displayedWords = [...allWords];
-                        break;
-                }
-                currentIndex = 0;
-                renderCard(currentIndex);
-            }
-            
-            function updateActiveNavButton() {
-                [showAllBtn, showBookmarkedBtn, showLearnedBtn].forEach(btn => {
-                    btn.classList.remove('nav-btn-active', 'text-white');
-                    btn.classList.add('hover:bg-gray-200', 'dark:hover:bg-gray-700');
-                });
-                const activeBtn = {
-                    'all': showAllBtn,
-                    'bookmarked': showBookmarkedBtn,
-                    'learned': showLearnedBtn
-                }[currentFilter];
-                activeBtn.classList.add('nav-btn-active', 'text-white');
-                activeBtn.classList.remove('hover:bg-gray-200', 'dark:hover:bg-gray-700');
-            }
-            
-            function saveState() {
-                localStorage.setItem('bookmarkedWords', JSON.stringify(Array.from(bookmarkedWords)));
-                localStorage.setItem('learnedWords', JSON.stringify(Array.from(learnedWords)));
-            }
-
-            // --- Event Listeners ---
-            
-            revealBtn.addEventListener('click', () => card.classList.add('flipped'));
-            unrevealBtn.addEventListener('click', () => card.classList.remove('flipped'));
-
-            nextBtn.addEventListener('click', goToNextCard);
-            prevBtn.addEventListener('click', goToPrevCard);
-
-            bookmarkBtn.addEventListener('click', () => {
-                const word = displayedWords[currentIndex].word;
-                if (bookmarkedWords.has(word)) bookmarkedWords.delete(word);
-                else bookmarkedWords.add(word);
-                updateBookmarkButton(displayedWords[currentIndex]);
-                updateCounters();
-                saveState();
-                if (currentFilter === 'bookmarked') applyFilter();
-            });
-
-            learnedBtn.addEventListener('click', () => {
-                const word = displayedWords[currentIndex].word;
-                if (learnedWords.has(word)) learnedWords.delete(word);
-                else learnedWords.add(word);
-                updateLearnedButton(displayedWords[currentIndex]);
-                updateCounters();
-                saveState();
-                if (currentFilter === 'learned') applyFilter();
-            });
-            
-            const speakCurrentWord = () => speak(displayedWords[currentIndex]?.word);
-            speakBtn.addEventListener('click', speakCurrentWord);
-            speakWordFrontBtn.addEventListener('click', speakCurrentWord);
-            speakSentenceBtn.addEventListener('click', () => speak(displayedWords[currentIndex]?.sample_sentence));
-            
-            showAllBtn.addEventListener('click', () => { currentFilter = 'all'; updateActiveNavButton(); applyFilter(); });
-            showBookmarkedBtn.addEventListener('click', () => { currentFilter = 'bookmarked'; updateActiveNavButton(); applyFilter(); });
-            showLearnedBtn.addEventListener('click', () => { currentFilter = 'learned'; updateActiveNavButton(); applyFilter(); });
-
-            darkModeToggle.addEventListener('click', () => {
-                document.documentElement.classList.toggle('dark');
-                localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-            });
-
-            const openModal = () => {
-                aboutModal.classList.remove('opacity-0', 'pointer-events-none');
-                modalContent.classList.remove('scale-95');
-            };
-            const closeModal = () => {
-                aboutModal.classList.add('opacity-0');
-                modalContent.classList.add('scale-95');
-                setTimeout(() => aboutModal.classList.add('pointer-events-none'), 250);
-            };
-
-            infoBtn.addEventListener('click', openModal);
-            closeModalBtn.addEventListener('click', closeModal);
-            aboutModal.addEventListener('click', (e) => {
-                if (e.target === aboutModal) closeModal();
-            });
-
-            // --- Initialization ---
-            function initializeApp() {
-                if (typeof words !== 'undefined' && Array.isArray(words)) {
-                    allWords = words;
-                } else {
-                    console.error("The 'words' variable is not defined or not an array. Please check your french.js file.");
-                    cardContainer.innerHTML = `<div class="persian-ui text-center text-red-500 p-4 bg-red-100 dark:bg-red-900/50 rounded-lg">خطا: بارگذاری کلمات از french.js ممکن نیست.</div>`;
-                    return;
-                }
-                
-                // Robustly load voices, especially for iOS
-                if (synth.onvoiceschanged !== undefined) {
-                    synth.onvoiceschanged = loadVoices;
-                }
-                // Initial attempt to load voices
+            if (!frenchVoice) {
                 loadVoices();
-                // Poll for voices as a fallback for browsers that don't fire onvoiceschanged consistently
-                if (voices.length === 0) {
-                    const voiceInterval = setInterval(() => {
-                        loadVoices();
-                        if (voices.length > 0) {
-                            clearInterval(voiceInterval);
-                        }
-                    }, 250);
-                }
-
-                feather.replace();
-                updateCounters();
-                updateActiveNavButton();
-                applyFilter();
-
-                if ('serviceWorker' in navigator) {
-                    window.addEventListener('load', () => {
-                        navigator.serviceWorker.register('/sw.js').catch(err => console.log('ServiceWorker registration failed: ', err));
-                    });
-                }
             }
+            
+            utterThis.voice = frenchVoice;
+            utterThis.lang = 'fr-FR';
+            utterThis.pitch = 1.0;
+            utterThis.rate = 0.95;
+            
+            utterThis.onerror = function (event) {
+                console.error('SpeechSynthesisUtterance.onerror', event);
+            };
 
-            initializeApp();
+            synth.speak(utterThis);
+        }
+    }
+
+    function updateCounters() {
+        totalCounterEl.textContent = `همه (${toPersianNumber(allWords.length)})`;
+        bookmarkedCounterEl.textContent = `نشان شده (${toPersianNumber(bookmarkedWords.size)})`;
+        learnedCounterEl.textContent = `یادگرفته (${toPersianNumber(learnedWords.size)})`;
+        
+        const learnedPercentage = allWords.length > 0 ? (learnedWords.size / allWords.length) * 100 : 0;
+        progressBar.style.width = `${learnedPercentage}%`;
+    }
+
+    function renderCard(index) {
+        card.classList.remove('flipped');
+        
+        if (displayedWords.length === 0 || index < 0) {
+            cardContainer.classList.add('hidden');
+            noWordsMessage.classList.remove('hidden');
+            navCounterEl.textContent = `${toPersianNumber(0)} / ${toPersianNumber(0)}`;
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            return;
+        }
+        
+        cardContainer.classList.remove('hidden');
+        noWordsMessage.classList.add('hidden');
+
+        const currentWord = displayedWords[index];
+        
+        if (!currentWord) {
+             console.error("No word to display at index:", index);
+             return;
+        }
+        
+        // Front
+        wordEl.textContent = currentWord.word;
+        cardCounterEl.textContent = `${toPersianNumber(index + 1)} / ${toPersianNumber(displayedWords.length)}`;
+
+        // Back
+        translationEnglishEl.textContent = currentWord.translation_english;
+        persianEl.textContent = currentWord.persian;
+        pronunciationIpaEl.textContent = currentWord.pronunciation_ipa;
+        pronunciationEnglishEl.textContent = currentWord.pronunciation_english;
+        pronunciationPersianEl.textContent = currentWord.pronunciation_persian;
+        sampleSentenceEl.textContent = currentWord.sample_sentence;
+        sentenceTranslationEnglishEl.textContent = currentWord.sentence_translation_english;
+        sentencePersianEl.textContent = currentWord.sentence_persian;
+        sentencePronunciationIpaEl.textContent = currentWord.sentence_pronunciation_ipa || '';
+        sentencePronunciationEnglishEl.textContent = currentWord.sentence_pronunciation_english || '';
+        sentencePronunciationPersianEl.textContent = currentWord.sentence_pronunciation_persian || '';
+
+        // Update button states
+        updateBookmarkButton(currentWord);
+        updateLearnedButton(currentWord);
+        updateNavButtons();
+        navCounterEl.textContent = `${toPersianNumber(index + 1)} / ${toPersianNumber(displayedWords.length)}`;
+    }
+    
+    function goToNextCard() {
+        if (currentIndex < displayedWords.length - 1) {
+            currentIndex++;
+            renderCard(currentIndex);
+        }
+    }
+    
+    function goToPrevCard() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            renderCard(currentIndex);
+        }
+    }
+
+    function updateBookmarkButton(word) {
+        const icon = bookmarkBtn.querySelector('i');
+        if (word && bookmarkedWords.has(word.word)) {
+            bookmarkBtn.classList.add('text-indigo-500');
+            icon.setAttribute('fill', 'currentColor');
+        } else {
+            bookmarkBtn.classList.remove('text-indigo-500');
+            icon.setAttribute('fill', 'none');
+        }
+    }
+
+    function updateLearnedButton(word) {
+        const icon = learnedBtn.querySelector('i');
+        if (word && learnedWords.has(word.word)) {
+            learnedBtn.classList.add('text-green-500');
+            icon.setAttribute('fill', 'currentColor');
+        } else {
+            learnedBtn.classList.remove('text-green-500');
+            icon.setAttribute('fill', 'none');
+        }
+    }
+
+    function updateNavButtons() {
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex >= displayedWords.length - 1;
+    }
+    
+    function applyFilter() {
+        switch(currentFilter) {
+            case 'bookmarked':
+                displayedWords = allWords.filter(w => bookmarkedWords.has(w.word));
+                break;
+            case 'learned':
+                displayedWords = allWords.filter(w => learnedWords.has(w.word));
+                break;
+            default:
+                displayedWords = [...allWords];
+                break;
+        }
+        // **FIX:** If the current index is out of bounds after filtering, reset it.
+        if (currentIndex >= displayedWords.length) {
+            currentIndex = Math.max(0, displayedWords.length - 1);
+        }
+        renderCard(currentIndex);
+    }
+    
+    function updateActiveNavButton() {
+        [showAllBtn, showBookmarkedBtn, showLearnedBtn].forEach(btn => {
+            btn.classList.remove('nav-btn-active', 'text-white');
+            btn.classList.add('hover:bg-gray-200', 'dark:hover:bg-gray-700');
         });
+        const activeBtn = {
+            'all': showAllBtn,
+            'bookmarked': showBookmarkedBtn,
+            'learned': showLearnedBtn
+        }[currentFilter];
+        activeBtn.classList.add('nav-btn-active', 'text-white');
+        activeBtn.classList.remove('hover:bg-gray-200', 'dark:hover:bg-gray-700');
+    }
+    
+    function saveState() {
+        localStorage.setItem('bookmarkedWords', JSON.stringify(Array.from(bookmarkedWords)));
+        localStorage.setItem('learnedWords', JSON.stringify(Array.from(learnedWords)));
+    }
+
+    // --- Event Listeners ---
+    
+    revealBtn.addEventListener('click', () => card.classList.add('flipped'));
+    unrevealBtn.addEventListener('click', () => card.classList.remove('flipped'));
+
+    nextBtn.addEventListener('click', goToNextCard);
+    prevBtn.addEventListener('click', goToPrevCard);
+
+    // **FIXED LOGIC for bookmark button**
+    bookmarkBtn.addEventListener('click', () => {
+        const currentWordObject = displayedWords[currentIndex];
+        if (!currentWordObject) return;
+        
+        const word = currentWordObject.word;
+        
+        if (bookmarkedWords.has(word)) {
+            bookmarkedWords.delete(word);
+        } else {
+            bookmarkedWords.add(word);
+        }
+        
+        // Save state immediately
+        saveState();
+        // Update the top counters
+        updateCounters();
+        
+        // If we are in the "bookmarked" filter, we need to re-apply the filter
+        // to remove the card from the view.
+        if (currentFilter === 'bookmarked') {
+            applyFilter();
+        } else {
+            // Otherwise, just update the button on the current card
+            updateBookmarkButton(currentWordObject);
+        }
+    });
+
+    // **FIXED LOGIC for learned button**
+    learnedBtn.addEventListener('click', () => {
+        const currentWordObject = displayedWords[currentIndex];
+        if (!currentWordObject) return;
+        
+        const word = currentWordObject.word;
+        
+        if (learnedWords.has(word)) {
+            learnedWords.delete(word);
+        } else {
+            learnedWords.add(word);
+        }
+
+        // Save state immediately
+        saveState();
+        // Update the top counters and progress bar
+        updateCounters();
+
+        // If we are in the "learned" filter, re-apply it.
+        if (currentFilter === 'learned') {
+            applyFilter();
+        } else {
+            // Otherwise, just update the button on the current card.
+            updateLearnedButton(currentWordObject);
+        }
+    });
+    
+    const speakCurrentWord = () => speak(displayedWords[currentIndex]?.word);
+    speakBtn.addEventListener('click', speakCurrentWord);
+    speakWordFrontBtn.addEventListener('click', speakCurrentWord);
+    speakSentenceBtn.addEventListener('click', () => speak(displayedWords[currentIndex]?.sample_sentence));
+    
+    showAllBtn.addEventListener('click', () => { currentFilter = 'all'; currentIndex = 0; updateActiveNavButton(); applyFilter(); });
+    showBookmarkedBtn.addEventListener('click', () => { currentFilter = 'bookmarked'; currentIndex = 0; updateActiveNavButton(); applyFilter(); });
+    showLearnedBtn.addEventListener('click', () => { currentFilter = 'learned'; currentIndex = 0; updateActiveNavButton(); applyFilter(); });
+
+    darkModeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    });
+
+    const openModal = () => {
+        aboutModal.classList.remove('opacity-0', 'pointer-events-none');
+        modalContent.classList.remove('scale-95');
+    };
+    const closeModal = () => {
+        aboutModal.classList.add('opacity-0');
+        modalContent.classList.add('scale-95');
+        setTimeout(() => aboutModal.classList.add('pointer-events-none'), 250);
+    };
+
+    infoBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    aboutModal.addEventListener('click', (e) => {
+        if (e.target === aboutModal) closeModal();
+    });
+
+    // --- Initialization ---
+    function initializeApp() {
+        if (typeof words !== 'undefined' && Array.isArray(words)) {
+            allWords = words;
+        } else {
+            console.error("The 'words' variable is not defined or not an array. Please check your french.js file.");
+            cardContainer.innerHTML = `<div class="persian-ui text-center text-red-500 p-4 bg-red-100 dark:bg-red-900/50 rounded-lg">خطا: بارگذاری کلمات از french.js ممکن نیست.</div>`;
+            return;
+        }
+        
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+        if (voices.length === 0) {
+            const voiceInterval = setInterval(() => {
+                loadVoices();
+                if (voices.length > 0) {
+                    clearInterval(voiceInterval);
+                }
+            }, 250);
+        }
+
+        feather.replace();
+        updateCounters();
+        updateActiveNavButton();
+        applyFilter();
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+    }
+
+    initializeApp();
+});
     </script>
 </body>
 </html>
