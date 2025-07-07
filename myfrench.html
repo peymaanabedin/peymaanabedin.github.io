@@ -275,6 +275,7 @@
             let currentFilter = 'all';
             const synth = window.speechSynthesis;
             let frenchVoice = null;
+            let voices = [];
 
             // --- Functions ---
             
@@ -285,23 +286,25 @@
             }
 
             /**
-             * 💡 UPDATED: Robustly loads the French voice.
-             * This function now actively seeks out the best available 'fr-FR' or 'fr' voice.
+             * 💡 UPDATED: Robustly loads the French voice with a preference for high-quality iOS voices.
              */
             function loadVoices() {
-                const voices = synth.getVoices();
-                // Prefer a native, high-quality voice if available
-                frenchVoice = voices.find(voice => voice.lang === 'fr-FR' && voice.localService) || 
+                voices = synth.getVoices();
+                // Prioritize "Enhanced" quality voices on iOS, then standard French voices.
+                frenchVoice = voices.find(voice => voice.lang === 'fr-FR' && voice.name.includes('Enhanced')) ||
+                              voices.find(voice => voice.lang === 'fr-FR' && voice.localService) || 
                               voices.find(voice => voice.lang === 'fr-FR') || 
                               voices.find(voice => voice.lang.startsWith('fr'));
+                
+                if (!frenchVoice) {
+                    console.warn("No French voice found. Speech synthesis will use the default voice.");
+                }
             }
-
+            
             /**
              * 💡 FIX: Applies phonetic corrections for common TTS errors.
-             * The replacement of "ça" with "sa" correctly guides the TTS engine.
              */
             function getPhoneticCorrection(text) {
-                // The 'g' flag ensures all occurrences are replaced, not just the first one.
                 return text.replace(/ça/g, 'sa');
             }
             
@@ -316,16 +319,19 @@
                     const correctedText = getPhoneticCorrection(text);
                     const utterThis = new SpeechSynthesisUtterance(correctedText);
                     
-                    // Ensure the French voice is loaded and assigned
                     if (!frenchVoice) {
                         loadVoices();
                     }
                     
                     utterThis.voice = frenchVoice;
                     utterThis.lang = 'fr-FR';
-                    utterThis.pitch = 1;
-                    utterThis.rate = 0.9;
+                    utterThis.pitch = 1.0;
+                    utterThis.rate = 0.95;
                     
+                    utterThis.onerror = function (event) {
+                        console.error('SpeechSynthesisUtterance.onerror', event);
+                    };
+
                     synth.speak(utterThis);
                 }
             }
@@ -377,7 +383,6 @@
                 updateBookmarkButton(currentWord);
                 updateLearnedButton(currentWord);
                 updateNavButtons();
-                // Update navigation counter
                 navCounterEl.textContent = `${toPersianNumber(index + 1)} / ${toPersianNumber(displayedWords.length)}`;
             }
             
@@ -525,10 +530,21 @@
                     return;
                 }
                 
+                // Robustly load voices, especially for iOS
                 if (synth.onvoiceschanged !== undefined) {
                     synth.onvoiceschanged = loadVoices;
                 }
+                // Initial attempt to load voices
                 loadVoices();
+                // Poll for voices as a fallback for browsers that don't fire onvoiceschanged consistently
+                if (voices.length === 0) {
+                    const voiceInterval = setInterval(() => {
+                        loadVoices();
+                        if (voices.length > 0) {
+                            clearInterval(voiceInterval);
+                        }
+                    }, 250);
+                }
 
                 feather.replace();
                 updateCounters();
