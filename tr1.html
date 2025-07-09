@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Trading Hours Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media (min-width: 768px) {
+      .market-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1280px) {
+      .market-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    /* Custom progress bar effect */
+    .volume-bar::-webkit-progress-bar { background: #f3f4f6; border-radius: 0.75rem; }
+    .volume-bar::-webkit-progress-value { border-radius: 0.75rem; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-orange-50 min-h-screen">
+  <div class="max-w-5xl mx-auto px-2 py-5">
+    <div class="flex flex-col md:flex-row md:justify-between items-center mb-4 gap-3">
+      <h1 class="text-2xl md:text-3xl font-extrabold text-orange-600 drop-shadow-sm text-center">Trading Hours & Countdown Dashboard</h1>
+      <div class="flex items-center gap-2">
+        <button id="gregorianBtn" class="px-3 py-1.5 rounded-md border font-semibold text-gray-700 border-orange-400 bg-white shadow active:scale-95 transition-all focus:ring-2 focus:ring-orange-400 ring-inset">Gregorian</button>
+        <button id="jalaliBtn" class="px-3 py-1.5 rounded-md border font-semibold text-gray-700 border-orange-400 bg-white shadow active:scale-95 transition-all focus:ring-2 focus:ring-orange-400 ring-inset">Jalali</button>
+      </div>
+    </div>
+    <div id="marketGrid" class="market-grid grid gap-6"></div>
+    <div class="mt-10 text-center text-sm text-gray-400">
+      <span>Made with ❤️ for global markets. Times auto-sync every second.</span>
+    </div>
+  </div>
+  <script>
+    // --- Jalali calendar converter ---
+    function toJalali(g_y, g_m, g_d) {
+      var gy = g_y-1600, gm = g_m-1, gd = g_d-1;
+      var g_day_no = 365*gy + Math.floor((gy+3)/4) - Math.floor((gy+99)/100) + Math.floor((gy+399)/400);
+      for(var i=0;i<gm;++i) g_day_no += [31,28,31,30,31,30,31,31,30,31,30,31][i];
+      if(gm>1&&((g_y%4==0&&g_y%100!=0)||g_y%400==0))g_day_no++;
+      g_day_no += gd;
+      var j_day_no = g_day_no-79, j_np = Math.floor(j_day_no/12053);
+      j_day_no %= 12053;
+      var jy = 979+33*j_np+4*Math.floor(j_day_no/1461);
+      j_day_no %= 1461;
+      if(j_day_no >= 366)jy+=Math.floor((j_day_no-1)/365),j_day_no=(j_day_no-1)%365;
+      for(var i=0;i<11&&j_day_no>=[31,31,31,31,31,31,30,30,30,30,29,30][i];++i)j_day_no-=[31,31,31,31,31,31,30,30,30,30,29,30][i];
+      return [jy, i+1, j_day_no+1];
+    }
+    function pad(n){return n<10?"0"+n:n;}
+    // --- Market Definitions ---
+    const MARKETS = [
+      {
+        code: 'nyse',
+        name: 'NYSE (New York)',
+        timezone: 'America/New_York',
+        open: '09:30', close: '16:00',
+        days: [1,2,3,4,5],
+        holidays: ['2025-01-01','2025-07-04','2025-12-25'],
+        color: 'bg-blue-700',
+        emoji: '🇺🇸',
+        volumeCurve: t => Math.max(0.6, 1.7 - 1.2*Math.pow(2*(t-0.5),2)), // "U curve" (busy at open/close)
+      },
+      {
+        code: 'lse',
+        name: 'LSE (London)',
+        timezone: 'Europe/London',
+        open: '08:00', close: '16:30',
+        days: [1,2,3,4,5],
+        holidays: ['2025-01-01','2025-12-25','2025-12-26'],
+        color: 'bg-blue-400',
+        emoji: '🇬🇧',
+        volumeCurve: t => Math.max(0.7, 1.6 - 1.1*Math.pow(2*(t-0.5),2)), // similar
+      },
+      {
+        code: 'jpx',
+        name: 'JPX (Tokyo)',
+        timezone: 'Asia/Tokyo',
+        open: '09:00', close: '15:00',
+        days: [1,2,3,4,5],
+        holidays: ['2025-01-01','2025-01-13','2025-02-11'],
+        color: 'bg-red-500',
+        emoji: '🇯🇵',
+        volumeCurve: t => 1, // relatively flat
+      },
+      {
+        code: 'asx',
+        name: 'ASX (Sydney)',
+        timezone: 'Australia/Sydney',
+        open: '10:00', close: '16:00',
+        days: [1,2,3,4,5],
+        holidays: ['2025-01-01','2025-12-25','2025-12-26'],
+        color: 'bg-cyan-700',
+        emoji: '🇦🇺',
+        volumeCurve: t => 1,
+      },
+      {
+        code: 'gold',
+        name: 'Gold Spot',
+        timezone: 'Etc/UTC',
+        open: '00:00', close: '23:59',
+        days: [1,2,3,4,5], // M-F
+        holidays: [],
+        color: 'bg-yellow-500',
+        emoji: '🥇',
+        volumeCurve: t => 1.05-0.1*Math.cos(4*Math.PI*t), // mild waves
+      },
+      {
+        code: 'gold-futures',
+        name: 'Gold Futures (COMEX)',
+        timezone: 'America/New_York',
+        open: '08:20', close: '13:30', // Main session
+        days: [1,2,3,4,5],
+        holidays: ['2025-01-01','2025-12-25','2025-07-04'],
+        color: 'bg-yellow-400',
+        emoji: '📈',
+        volumeCurve: t => 1.12-0.18*Math.cos(2*Math.PI*t),
+      },
+      {
+        code: 'crypto',
+        name: 'Crypto (24/7)',
+        timezone: 'Etc/UTC',
+        open: '00:00', close: '23:59',
+        days: [0,1,2,3,4,5,6],
+        holidays: [],
+        color: 'bg-green-500',
+        emoji: '🪙',
+        volumeCurve: t => 1-0.13*Math.cos(6*Math.PI*t), // for fun
+      }
+    ];
+    // --- Utilities ---
+    function getTimeInZone(tz) {
+      let now = new Date();
+      let z = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz, hour12: false,
+        hour:'2-digit', minute:'2-digit', second:'2-digit',
+        year:'numeric', month:'2-digit', day:'2-digit'
+      }).formatToParts(now);
+      let map = {};
+      z.forEach(p=>map[p.type]=p.value);
+      return {
+        year: +map.year, month: +map.month, day: +map.day,
+        hour: +map.hour, minute: +map.minute, second: +map.second,
+        dateObj: new Date(`${map.year}-${map.month}-${map.day}T${map.hour}:${map.minute}:${map.second}Z`)
+      };
+    }
+    function fmtDur(sec) {
+      sec = Math.round(sec);
+      if(sec<60) return sec+"s";
+      let m = Math.floor(sec/60), s=sec%60;
+      if(m<60) return m+"m "+s+"s";
+      let h = Math.floor(m/60), mm=m%60;
+      return h+"h "+mm+"m";
+    }
+    function pad(n){return n<10?'0'+n:n;}
+    function tConvert(str, fromTz, toTz, gDate) {
+      let [h,m]=str.split(':').map(Number);
+      let dateStr=`${gDate[0]}-${pad(gDate[1])}-${pad(gDate[2])}T${pad(h)}:${pad(m)}:00`;
+      let d = new Date(dateStr+"Z");
+      let t = new Intl.DateTimeFormat('en-US',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:fromTz}).format(d);
+      let [_,hour,minute] = t.match(/(\d+):(\d+)/)||[];
+      d.setUTCHours(hour,minute,0,0);
+      let local = new Intl.DateTimeFormat('en-US',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:toTz}).format(d);
+      return local;
+    }
+    function nextOpenCount(market, nowMarket, gDate) {
+      let maxTry=7, dt=new Date(nowMarket.dateObj), tryN=0;
+      while(tryN++<maxTry) {
+        dt.setDate(dt.getDate()+1);
+        let w = dt.getDay();
+        let dateStr = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+        if(market.days.includes(w) && !market.holidays.includes(dateStr)) {
+          let [oh,om]=market.open.split(':').map(Number);
+          let openT=new Date(dt); openT.setHours(oh,om,0,0);
+          let diff = (openT-nowMarket.dateObj)/1000;
+          return `Opens in <span class="font-bold">${fmtDur(diff)}</span>`;
+        }
+      }
+      return 'Closed (holiday)';
+    }
+    // --- Main Card UI Builder ---
+    let useJalali = false;
+    function updateMarkets() {
+      const tehranTZ = 'Asia/Tehran';
+      const marketCards = MARKETS.map(market => {
+        let mTZ = market.timezone;
+        let nowMarket = getTimeInZone(mTZ), nowTehran = getTimeInZone(tehranTZ);
+        let gDate = [nowMarket.year, nowMarket.month, nowMarket.day];
+        let jDate = toJalali(...gDate);
+
+        let [oh,om]=market.open.split(':').map(Number),
+            [ch,cm]=market.close.split(':').map(Number);
+        let openDT = new Date(nowMarket.dateObj);
+        openDT.setHours(oh,om,0,0);
+        let closeDT = new Date(nowMarket.dateObj);
+        closeDT.setHours(ch,cm,0,0);
+
+        let weekDay = openDT.getDay();
+        let dayOk = market.days.includes(weekDay);
+        let dstr = `${nowMarket.year}-${pad(nowMarket.month)}-${pad(nowMarket.day)}`;
+        let isHoliday = market.holidays.includes(dstr);
+
+        let alwaysOpen = market.open=='00:00' && market.close=='23:59' && market.days.length===7;
+
+        let open, statusMsg, untilStr, progress=0, volumeVal=0;
+        if(!dayOk || isHoliday) {
+          open = false;
+          statusMsg = `<span class="text-red-500 font-bold">Closed</span> <span class="ml-1 text-gray-400 text-xs">${isHoliday?"Holiday":"Weekend/Off"}</span>`;
+          untilStr = nextOpenCount(market, nowMarket, gDate);
+          progress=0;
+          volumeVal=0;
+        } else {
+          if(nowMarket.dateObj >= openDT && nowMarket.dateObj < closeDT) {
+            open = true;
+            statusMsg = `<span class="text-green-600 font-bold">Open</span>`;
+            let toClose = (closeDT-nowMarket.dateObj)/1000;
+            untilStr = `Closes in <span class="font-bold">${fmtDur(toClose)}</span>`;
+            progress = ((nowMarket.dateObj-openDT)/(closeDT-openDT));
+            // Volume pattern
+            volumeVal = market.volumeCurve(progress);
+          } else if(nowMarket.dateObj < openDT) {
+            open = false;
+            statusMsg = `<span class="text-red-500 font-bold">Closed</span> <span class="ml-1 text-gray-400 text-xs">(Pre-open)</span>`;
+            let toOpen = (openDT-nowMarket.dateObj)/1000;
+            untilStr = `Opens in <span class="font-bold">${fmtDur(toOpen)}</span>`;
+            progress=0;
+            volumeVal=0;
+          } else {
+            open = false;
+            statusMsg = `<span class="text-red-500 font-bold">Closed</span>`;
+            untilStr = nextOpenCount(market, nowMarket, gDate);
+            progress=1;
+            volumeVal=0;
+          }
+        }
+        if(alwaysOpen) {
+          open=true;
+          statusMsg='<span class="text-green-600 font-bold">Open</span> <span class="ml-1 text-gray-400 text-xs">(24/7)</span>';
+          let t=(nowMarket.hour*3600+nowMarket.minute*60+nowMarket.second)/86400;
+          untilStr = `Day progress: <span class="font-bold">${(t*100).toFixed(1)}%</span>`;
+          progress = t;
+          volumeVal = market.volumeCurve(progress);
+        }
+        // Dates
+        let gregorian = `${pad(nowMarket.year)}-${pad(nowMarket.month)}-${pad(nowMarket.day)}`;
+        let jalali = `${jDate[0]}-${pad(jDate[1])}-${pad(jDate[2])}`;
+        let calDate = useJalali ? jalali : gregorian;
+        let tehranDate = useJalali ? toJalali(...[nowTehran.year,nowTehran.month,nowTehran.day]).join('-') : `${pad(nowTehran.year)}-${pad(nowTehran.month)}-${pad(nowTehran.day)}`;
+
+        // Progress bar: bright in session, muted otherwise; volume: colored highlight within progress bar
+        let barBG = open ? 'bg-gradient-to-r from-orange-100 via-yellow-50 to-green-100' : 'bg-gray-100';
+        let barHighlight = open ? 'bg-gradient-to-r from-amber-400 via-amber-300 to-orange-400 shadow-md' : 'bg-gray-200';
+
+        let volumeColor = open
+          ? (volumeVal > 1.35 ? 'bg-orange-600' : volumeVal > 1.1 ? 'bg-orange-400' : 'bg-lime-400')
+          : 'bg-gray-300';
+
+        let progressBarHTML = `
+          <div class="relative w-full h-4 mt-2 mb-3 rounded-lg overflow-hidden ${barBG}">
+            <div class="absolute top-0 left-0 h-4 transition-all duration-700 ${barHighlight}" style="width:${(progress*100).toFixed(1)}%"></div>
+            <div class="absolute top-0 left-0 h-4 ${volumeColor} transition-all duration-700 opacity-70" style="width:${open ? (progress*100*volumeVal/1.7).toFixed(1) : 0}%"></div>
+          </div>
+        `;
+        // Card UI
+        return `
+        <div class="bg-white/95 shadow-lg rounded-2xl p-4 flex flex-col justify-between min-h-[260px] hover:scale-[1.02] transition-transform duration-300">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${market.emoji}</span>
+              <span class="font-bold text-base md:text-lg ${market.color}">${market.name}</span>
+            </div>
+            <div class="text-xs text-gray-400 font-bold tracking-widest">${market.code.toUpperCase()}</div>
+          </div>
+          <div class="flex items-center gap-2 mb-1">
+            <div class="market-status text-sm md:text-base" >${statusMsg}</div>
+            <span class="ml-2 text-xs text-gray-400">${calDate}</span>
+          </div>
+          ${progressBarHTML}
+          <div class="text-sm text-gray-700 mb-1">${untilStr}</div>
+          <table class="w-full text-xs mt-1 mb-1">
+            <tr>
+              <td class="text-gray-500">Now</td>
+              <td class="text-right">${pad(nowMarket.hour)}:${pad(nowMarket.minute)}:${pad(nowMarket.second)}<span class="ml-2 text-gray-400">(${market.name.split(' ')[0]})</span></td>
+              <td class="text-right">${pad(nowTehran.hour)}:${pad(nowTehran.minute)}:${pad(nowTehran.second)}<span class="ml-1 text-gray-400">(Tehran)</span></td>
+            </tr>
+            <tr>
+              <td class="text-gray-500">Open</td>
+              <td class="text-right">${market.open}</td>
+              <td class="text-right">${tConvert(market.open,mTZ,tehranTZ,gDate)}</td>
+            </tr>
+            <tr>
+              <td class="text-gray-500">Close</td>
+              <td class="text-right">${market.close}</td>
+              <td class="text-right">${tConvert(market.close,mTZ,tehranTZ,gDate)}</td>
+            </tr>
+          </table>
+          <div class="flex items-center justify-between text-xs mt-2">
+            <span class="font-semibold text-gray-400">Session Volume:</span>
+            <span class="font-bold ${volumeColor.replace('bg-','text-')}">${open ? Math.round(100*volumeVal) + '%' : '--'}</span>
+          </div>
+        </div>
+        `;
+      }).join('');
+      document.getElementById('marketGrid').innerHTML = marketCards;
+    }
+    // --- Calendar Toggle Events ---
+    function setupCalendarBtns() {
+      const gBtn = document.getElementById('gregorianBtn');
+      const jBtn = document.getElementById('jalaliBtn');
+      function setActive(gActive) {
+        gBtn.classList.toggle('bg-orange-400', gActive);
+        gBtn.classList.toggle('text-white', gActive);
+        jBtn.classList.toggle('bg-orange-400', !gActive);
+        jBtn.classList.toggle('text-white', !gActive);
+        gBtn.classList.toggle('font-bold', gActive);
+        jBtn.classList.toggle('font-bold', !gActive);
+      }
+      gBtn.onclick = ()=>{ useJalali = false; setActive(true); updateMarkets(); }
+      jBtn.onclick = ()=>{ useJalali = true; setActive(false); updateMarkets(); }
+      setActive(true);
+    }
+    // --- Main ---
+    setupCalendarBtns();
+    updateMarkets();
+    setInterval(updateMarkets, 1000);
+  </script>
+</body>
+</html>

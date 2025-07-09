@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Clock Elite</title>
+    
+    <meta name="theme-color" content="#0a0a0a">
+    <link id="manifest-link" rel="manifest">
+    
+    <link rel="icon" href="https://i.postimg.cc/RV4NLPS4/App-Icon-2x.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/RV4NLPS4/App-Icon-2x.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        persian: ['Vazirmatn', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand-dark': '#0a0a0a',
+                        'brand-surface': '#1a1a1a',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            @apply bg-gray-100 dark:bg-brand-dark text-gray-900 dark:text-gray-200 transition-colors duration-300;
+        }
+        .font-persian { font-family: 'Vazirmatn', sans-serif; }
+        .btn-focus-visible:focus-visible { @apply ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-brand-dark; }
+        .modal-backdrop { @apply fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50; visibility: hidden; opacity: 0; transition: opacity 0.3s, visibility 0.3s; }
+        .modal-backdrop.visible { visibility: visible; opacity: 1; }
+        .modal-content { @apply bg-white dark:bg-brand-surface rounded-2xl shadow-2xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300; }
+        .modal-backdrop.visible .modal-content { transform: scale(1); }
+        .inactive-card { @apply opacity-50; }
+        
+        @keyframes blink {
+            50% { opacity: 0.3; }
+        }
+        .blinking-dot {
+            animation: blink 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 font-sans">
+
+    <div class="max-w-screen-2xl mx-auto">
+        <header class="flex flex-wrap gap-4 justify-between items-center mb-8">
+            <div>
+                <h1 id="main-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Market Clock</h1>
+                <p id="local-time-display" class="text-sm text-gray-500 dark:text-gray-400 mt-1">Loading time...</p>
+                <div id="date-container" class="text-xs text-gray-400 dark:text-gray-500 mt-1 space-y-0.5">
+                    <p id="gregorian-date-display"></p>
+                    <p id="jalali-date-display"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center rounded-lg p-1 bg-gray-200 dark:bg-brand-surface">
+                    <button id="lang-toggle" class="p-1.5 px-3 rounded-md text-gray-600 dark:text-gray-300 btn-focus-visible text-sm font-semibold"></button>
+                </div>
+                <div class="flex items-center rounded-lg p-1 bg-gray-200 dark:bg-brand-surface">
+                    <button id="theme-toggle" class="p-1.5 rounded-full text-gray-600 dark:text-gray-300 btn-focus-visible">
+                        <svg id="theme-icon-light" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v.518a.75.75 0 01-1.5 0V2.75A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v.518a.75.75 0 01-1.5 0V15.75A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 4.343a.75.75 0 010 1.06l-.364.364a.75.75 0 01-1.06-1.06l.364-.364a.75.75 0 011.06 0zM5.404 14.596a.75.75 0 010-1.06l.364-.364a.75.75 0 011.06 1.06l-.364.364a.75.75 0 01-1.06 0zM17.25 10a.75.75 0 01-.75.75h-.518a.75.75 0 010-1.5h.518a.75.75 0 01.75.75zM3.75 10a.75.75 0 01-.75.75H2.75a.75.75 0 010-1.5h.518a.75.75 0 01.75.75zM14.596 5.404a.75.75 0 011.06 0l.364.364a.75.75 0 01-1.06 1.06l-.364-.364a.75.75 0 010-1.06zM6.464 13.536a.75.75 0 011.06 0l.364.364a.75.75 0 01-1.06 1.06l-.364-.364a.75.75 0 010-1.06z" clip-rule="evenodd"></path></svg>
+                        <svg id="theme-icon-dark" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor"><path d="M7.455 2.104a.75.75 0 00-.814.058l-.001.001a.75.75 0 00.058.814l.001.001A7.003 7.003 0 0110 17a7.003 7.003 0 01-2.545-13.987l-.001-.001a.75.75 0 00-.814-.058z"></path></svg>
+                    </button>
+                </div>
+                <button id="about-btn" class="p-2 rounded-full bg-gray-200 dark:bg-brand-surface text-gray-600 dark:text-gray-300 btn-focus-visible">
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.44a.75.75 0 00-1.38-.58l-.002.001a.75.75 0 00.58 1.38l.001-.002.002-.001.002-.002a1 1 0 011.41-.03l.002.002a.75.75 0 001.06-1.06l-.002-.002a2.5 2.5 0 00-3.52-.08zM10 12.5a.75.75 0 01.75.75v.008a.75.75 0 01-1.5 0V13.25a.75.75 0 01.75-.75z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+        </header>
+
+        <main id="market-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-5">
+            </main>
+    </div>
+
+    <div id="about-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="about-title" class="text-xl font-bold text-gray-900 dark:text-white">About Market Clock Elite</h2>
+                <button id="close-modal-btn" class="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 btn-focus-visible">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="about-content" class="text-gray-600 dark:text-gray-300 text-sm space-y-4"></div>
+            <div id="version-text" class="text-xs text-center mt-6 text-gray-400 dark:text-gray-500">Version 4.8</div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+    // --- JALALI & PERSIAN DIGITS LOGIC ---
+    function toJalali(g_y, g_m, g_d) {
+        var g_days_in_month=[31,28,31,30,31,30,31,31,30,31,30,31],j_days_in_month=[31,31,31,31,31,31,30,30,30,30,30,29];
+        var gy=g_y-1600,gm=g_m-1,gd=g_d-1,g_day_no=365*gy+Math.floor((gy+3)/4)-Math.floor((gy+99)/100)+Math.floor((gy+399)/400);
+        for(var i=0;i<gm;++i)g_day_no+=g_days_in_month[i];
+        if(gm>1&&((g_y%4==0&&g_y%100!=0)||(g_y%400==0)))g_day_no++;
+        g_day_no+=gd;var j_day_no=g_day_no-79,j_np=Math.floor(j_day_no/12053);j_day_no=j_day_no%12053;
+        var jy=979+33*j_np+4*Math.floor(j_day_no/1461);j_day_no%=1461;
+        if(j_day_no>=366){jy+=Math.floor((j_day_no-1)/365);j_day_no=(j_day_no-1)%365;}
+        for(var i=0;i<11&&j_day_no>=j_days_in_month[i];++i)j_day_no-=j_days_in_month[i];
+        var jm=i+1,jd=j_day_no+1;return[jy,jm,jd];
+    }
+    function toPersianDigits(str) {
+        if (currentLanguage !== 'fa' || !str) return str;
+        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        return String(str).replace(/[0-9]/g, (w) => persianDigits[+w]);
+    }
+
+    // --- TRANSLATION & CONFIGURATION ---
+    const TEHRAN_TIMEZONE = 'Asia/Tehran'; // Iran does NOT observe DST in 2025 (UTC+3:30 year-round)
+
+    const translations = {
+        en: {
+            marketClock: "Market Clock", yourTime: "Your Time", aboutTitle: "About Market Clock Elite",
+            aboutP1: "This application provides real-time status and countdowns for major global financial markets. All times are dynamically adjusted to your local timezone.",
+            aboutLi1: "Data is for informational purposes only. Verify with official sources.",
+            aboutLi2: "Holidays and trading hours are based on 2025 data.",
+            aboutLi3: "Commodity and Forex hours represent typical retail trading availability.",
+            version: "Version", open: "Open", openEarly: "Open (Early Close)", closed: "Closed", holiday: "Holiday", weekend: "Weekend",
+            preMarket: "Pre-Market", afterHours: "After Hours", sessionBreak: "Session Break", marketOpen: "Market Open", marketClosed: "Market Closed",
+            closesIn: "Closes in", opensIn: "Opens in", opens: "Opens", resumesIn: "Resumes in", weeklyCloseIn: "Weekly close in",
+            continuousTrading: "Continuous Trading", tomorrow: "Tomorrow", on: "on", today: "Today",
+            sessionsUTC: "SESSIONS (UTC)", tradingVolume: "Trading Volume",
+            vol_low: "Low", vol_medium: "Medium", vol_high: "High", vol_very_high: "Very High",
+            hours: "Hours", sessionProgress: "Session Progress",
+            tehranTime: "Tehran Time",
+        },
+        fa: {
+            marketClock: "ساعت بازارها", yourTime: "ساعت شما", aboutTitle: "درباره Market Clock Elite",
+            aboutP1: "این برنامه وضعیت لحظه‌ای و شمارش معکوس برای بازارهای مالی بزرگ جهانی را ارائه می‌دهد. تمام زمان‌ها به صورت پویا با منطقه زمانی محلی شما تنظیم می‌شوند.",
+            aboutLi1: "داده‌ها فقط برای اطلاع‌رسانی است. با منابع رسمی بررسی کنید.",
+            aboutLi2: "تعطیلات و ساعات معاملات بر اساس داده‌های سال ۲۰۲۵ است.",
+            aboutLi3: "ساعات معاملات کالا و فارکس نشان‌دهنده زمان‌های معمول در دسترس برای معامله‌گران خرد است.",
+            version: "نسخه", open: "باز", openEarly: "باز (زودتر)", closed: "بسته", holiday: "تعطیل", weekend: "آخر هفته",
+            preMarket: "پیش‌گشایش", afterHours: "پس از بازار", sessionBreak: "زمان استراحت", marketOpen: "بازار باز", marketClosed: "بازار بسته",
+            closesIn: "بسته می‌شود تا", opensIn: "باز می‌شود تا", opens: "باز می‌شود", resumesIn: "ادامه می‌یابد تا", weeklyCloseIn: "بسته‌شدن هفتگی تا",
+            continuousTrading: "معاملات پیوسته", tomorrow: "فردا", on: "در روز", today: "امروز",
+            sessionsUTC: "جلسات معاملاتی (UTC)", tradingVolume: "حجم معاملات",
+            vol_low: "کم", vol_medium: "متوسط", vol_high: "زیاد", vol_very_high: "بسیار زیاد",
+            hours: "ساعت", sessionProgress: "پیشرفت جلسه",
+            tehranTime: "وقت تهران",
+        }
+    };
+    let currentLanguage = localStorage.getItem('market_clock_lang') || 'en';
+    const t = (key) => translations[currentLanguage][key] || key;
+
+    const ICONS = {
+        nyse: `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.5 4.5a.5.5 0 000 1h15a.5.5 0 000-1h-15zM8.5 8.5a.5.5 0 000 1h3a.5.5 0 000-1h-3zM2.5 12.5a.5.5 0 000 1h15a.5.5 0 000-1h-15z"/></svg>`,
+        lse: `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M1 5.25A2.25 2.25 0 013.25 3h13.5A2.25 2.25 0 0119 5.25v9.5A2.25 2.25 0 0116.75 17H3.25A2.25 2.25 0 011 14.75v-9.5zm1.5 0v9.5c0 .414.336.75.75.75h13.5a.75.75 0 00.75-.75v-9.5a.75.75 0 00-.75-.75H3.25a.75.75 0 00-.75.75z"/></svg>`,
+        jpx: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.5 6.5a.5.5 0 00-1 0v7a.5.5 0 001 0v-7zm3.5.5a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5zm0 3a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5zm0 3a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5z" clip-rule="evenodd"/></svg>`,
+        asx: `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M9.01 5.393a.75.75 0 011.054.22l5.013 7.52a.75.75 0 01-1.288.858L10 7.627 6.225 14a.75.75 0 01-1.288-.858l4.073-6.11a.75.75 0 010-.418L4.938 5.613a.75.75 0 011.288-.858L10 11.373l2.785-4.177a.75.75 0 011.054-.22z"/></svg>`,
+        forex: `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 10.042a.75.75 0 00-1.5 0V15.5a.75.75 0 001.5 0v-5.458zM8.5 7.75a.75.75 0 00-1.5 0V15.5a.75.75 0 001.5 0V7.75zM13 5.5a.75.75 0 00-1.5 0v10a.75.75 0 001.5 0v-10zM5.5 10a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v5.5a.75.75 0 01-1.5 0v-5.5z"/></svg>`,
+        spot_gold: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2.5a5.5 5.5 0 100-11 5.5 5.5 0 000 11z" clip-rule="evenodd"/></svg>`,
+        gold_futures: `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M3.5 6A2.5 2.5 0 016 3.5h8A2.5 2.5 0 0116.5 6v1.5a.5.5 0 01-1 0V6a1.5 1.5 0 00-1.5-1.5H6A1.5 1.5 0 004.5 6v8A1.5 1.5 0 006 15.5h8a1.5 1.5 0 001.5-1.5V10a.5.5 0 011 0v4.5A2.5 2.5 0 0114 17.5H6A2.5 2.5 0 013.5 15V6z"/><path d="M10 12.5a.5.5 0 01-.5-.5v-4a.5.5 0 011 0v4a.5.5 0 01-.5.5z"/><path d="M12.5 10a.5.5 0 01-.5-.5V7a.5.5 0 011 0v2.5a.5.5 0 01-.5.5z"/><path d="M7.5 10a.5.5 0 01-.5-.5V7a.5.5 0 011 0v2.5a.5.5 0 01-.5.5z"/></svg>`,
+        crypto: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1.474-5.262a.75.75 0 001.05-.018l2.5-2.75a.75.75 0 10-1.078-1.04l-1.942 2.13L10.5 9.073a.75.75 0 00-1 0l-1.427 1.427a.75.75 0 001.06 1.06l.97-.97 1.473 1.619a.75.75 0 001.068.02z" clip-rule="evenodd"/></svg>`,
+    };
+
+    const MARKETS = [
+        { code: 'nyse', name: 'NYSE', type:'exchange', location: 'New York', timezone: 'America/New_York', open: '09:30', close: '16:00', days: [1,2,3,4,5], holidays: ['2025-01-01','2025-01-20','2025-02-17','2025-04-18','2025-05-26','2025-06-19','2025-07-04','2025-09-01','2025-11-27','2025-12-25'], earlyClose: [{date:'2025-07-03',time:'13:00'},{date:'2025-11-28',time:'13:00'},{date:'2025-12-24',time:'13:00'}] },
+        { code: 'lse', name: 'LSE', type:'exchange', location: 'London', timezone: 'Europe/London', open: '08:00', close: '16:30', days: [1,2,3,4,5], holidays: ['2025-01-01','2025-04-18','2025-04-21','2025-05-05','2025-05-26','2025-08-25','2025-12-25','2025-12-26'], earlyClose: [{date:'2025-12-24',time:'12:30'},{date:'2025-12-31',time:'12:30'}] },
+        { code: 'jpx', name: 'JPX', type:'exchange', location: 'Tokyo', timezone: 'Asia/Tokyo', open: '09:00', close: '15:00', days: [1,2,3,4,5], holidays: ['2025-01-01','2025-01-02','2025-01-03','2025-01-13','2025-02-11','2025-02-24','2025-03-20','2025-04-29','2025-05-05','2025-05-06','2025-07-21','2025-08-11','2025-09-15','2025-09-23','2025-10-13','2025-11-03','2025-11-24','2025-12-31'], earlyClose: [] },
+        { code: 'asx', name: 'ASX', type:'exchange', location: 'Sydney', timezone: 'Australia/Sydney', open: '10:00', close: '16:00', days: [1,2,3,4,5], holidays: ['2025-01-01','2025-01-27','2025-04-18','2025-04-21','2025-04-25','2025-06-09','2025-12-25','2025-12-26'], earlyClose: [{date:'2025-12-24',time:'14:10'},{date:'2025-12-31',time:'14:10'}] },
+        { code: 'spot_gold', name: 'Spot Gold', type: 'commodity', location: 'XAU/USD', timezone: 'Etc/UTC', days: [0,1,2,3,4,5], open: '22:00', close: '21:00', breakStart: '21:00', breakEnd: '22:00' },
+        { code: 'gold_futures', name: 'Gold Futures', type: 'commodity', location: 'GC=F', timezone: 'America/New_York', days: [0,1,2,3,4,5], open: '18:00', close: '17:00', breakStart: '17:00', breakEnd: '18:00' },
+        { code: 'forex', name: 'Forex', type: 'forex', location: 'Global', sessions: [{name:'Sydney',open:'21:00',close:'06:00',color:'bg-pink-500'},{name:'Tokyo',open:'00:00',close:'09:00',color:'bg-red-500'},{name:'London',open:'07:00',close:'16:00',color:'bg-blue-500'},{name:'New York',open:'13:00',close:'22:00',color:'bg-green-500'}], weeklyOpen: {day:0,hour:17,minute:0, tz: 'America/New_York'}, weeklyClose: {day:5,hour:17,minute:0, tz: 'America/New_York'} },
+        { code: 'crypto', name: 'Crypto', type:'exchange', location: '24/7', timezone: 'Etc/UTC', open: '00:00', close: '23:59', days: [0,1,2,3,4,5,6], holidays: [], earlyClose: [] }
+    ];
+
+    const $ = (selector) => document.querySelector(selector);
+
+    // getTimeInZone now takes an optional forReference parameter
+    // If forReference is true, it returns the time in the specified timezone
+    // If forReference is false, it returns the time in Tehran timezone for display/countdown purposes
+    function getTimeInZone(timeZone, forReference = true) {
+        const now = new Date();
+        const targetTimeZone = forReference ? timeZone : TEHRAN_TIMEZONE;
+        try {
+            const parts = new Intl.DateTimeFormat('en-CA',{timeZone: targetTimeZone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(now);
+            const map = parts.reduce((acc,part)=>{if(part.type!=='literal')acc[part.type]=part.value;return acc;},{});
+            const hour = map.hour === '24' ? '00' : map.hour; // Adjust '24' to '00' for consistency
+            return {year:+map.year,month:+map.month,day:+map.day,hour:+hour,minute:+map.minute,second:+map.second,dateObj:new Date(now.toLocaleString('en-US',{timeZone: targetTimeZone}))};
+        } catch (e) {
+            console.error(`Error getting time in zone ${targetTimeZone}:`, e);
+            return getTimeInZone('Etc/UTC', forReference); // Fallback to UTC
+        }
+    }
+
+    // Helper to create a Date object in a specific timezone from string time
+    function createDateInTimezone(dateObj, timeStr, timeZone) {
+        const [h, m] = timeStr.split(':').map(Number);
+        const newDate = new Date(dateObj.toLocaleString('en-US', { timeZone: timeZone }));
+        newDate.setHours(h, m, 0, 0);
+        return newDate;
+    }
+
+    function formatDuration(totalSeconds) {
+        if (totalSeconds < 0) totalSeconds = 0;
+        const d = Math.floor(totalSeconds / 86400);
+        const h = Math.floor((totalSeconds % 86400) / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = Math.floor(totalSeconds % 60);
+        if (d > 0) return toPersianDigits(`${d}d ${h}h ${m}m`);
+        return toPersianDigits([h > 0 ? `${h}h` : null, m > 0 ? `${m}m` : null, `${s}s`].filter(Boolean).join(' '));
+    }
+    
+    function getMarketStatus(market) {
+        const nowInMarketZone = getTimeInZone(market.timezone, true); // Current time in market's own timezone (for logic)
+        const nowInTehran = getTimeInZone(TEHRAN_TIMEZONE, false); // Current time in Tehran timezone (for countdown base)
+
+        if (market.type === 'exchange') {
+            const dateStrInMarketZone = `${nowInMarketZone.year}-${String(nowInMarketZone.month).padStart(2,'0')}-${String(nowInMarketZone.day).padStart(2,'0')}`;
+            const isOffDay = !market.days.includes(nowInMarketZone.dateObj.getDay()) || market.holidays?.includes(dateStrInMarketZone);
+            
+            if (market.days.length === 7) { // Crypto 24/7
+                return { isOffDay: false, statusKey: 'open', countdownText: t('continuousTrading'), progress: (nowInTehran.hour * 3600 + nowInTehran.minute * 60 + nowInTehran.second) / 864, statusColor: 'green' };
+            }
+
+            const earlyCloseInfo = market.earlyClose?.find(ec => ec.date === dateStrInMarketZone);
+            const marketCloseTimeStr = earlyCloseInfo ? earlyCloseInfo.time : market.close;
+
+            // Define today's open and close in market's timezone
+            let marketOpenTodayInMarketZone = createDateInTimezone(nowInMarketZone.dateObj, market.open, market.timezone);
+            let marketCloseTodayInMarketZone = createDateInTimezone(nowInMarketZone.dateObj, marketCloseTimeStr, market.timezone);
+
+            // If it's a holiday or weekend in the market's timezone
+            if (isOffDay) {
+                // Find next open day and time in market's timezone, then convert to Tehran for display
+                const nextOpenInfo = findNextOpenDateTime(market, nowInMarketZone.dateObj);
+                return { isOffDay: true, statusKey: market.holidays?.includes(dateStrInMarketZone) ? 'holiday' : 'weekend', countdownText: `${t('opens')} ${nextOpenInfo.displayTime}`, progress: 0, statusColor: 'red' };
+            }
+
+            // Market is on a trading day
+            // Calculate actual timestamps for comparisons in market's timezone
+            const nowMsInMarketZone = nowInMarketZone.dateObj.getTime();
+            const openMsInMarketZone = marketOpenTodayInMarketZone.getTime();
+            const closeMsInMarketZone = marketCloseTodayInMarketZone.getTime();
+
+            // Calculate countdowns based on Tehran time difference from Tehran-converted market times
+            const marketOpenTodayInTehran = new Date(marketOpenTodayInMarketZone.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+            const marketCloseTodayInTehran = new Date(marketCloseTodayInMarketZone.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+            const nowMsInTehran = nowInTehran.dateObj.getTime();
+
+            if (nowMsInMarketZone >= openMsInMarketZone && nowMsInMarketZone < closeMsInMarketZone) {
+                // Market is OPEN
+                return {
+                    isOffDay: false,
+                    statusKey: earlyCloseInfo ? 'openEarly' : 'open',
+                    countdownText: `${t('closesIn')} ${formatDuration((marketCloseTodayInTehran.getTime() - nowMsInTehran) / 1000)}`,
+                    progress: ((nowMsInMarketZone - openMsInMarketZone) / (closeMsInMarketZone - openMsInMarketZone)) * 100,
+                    statusColor: 'green'
+                };
+            } else if (nowMsInMarketZone < openMsInMarketZone) {
+                // Pre-market
+                return {
+                    isOffDay: false,
+                    statusKey: 'preMarket',
+                    countdownText: `${t('opensIn')} ${formatDuration((marketOpenTodayInTehran.getTime() - nowMsInTehran) / 1000)}`,
+                    progress: 0,
+                    statusColor: 'yellow'
+                };
+            } else {
+                // After hours
+                const nextOpenInfo = findNextOpenDateTime(market, nowInMarketZone.dateObj); // Find next open in market's own time
+                return {
+                    isOffDay: false,
+                    statusKey: 'afterHours',
+                    countdownText: `${t('opens')} ${nextOpenInfo.displayTime}`,
+                    progress: 100,
+                    statusColor: 'red'
+                };
+            }
+        }
+
+        if (market.type === 'commodity') {
+            // All calculations for market status remain in market's own timezone (UTC for Spot Gold, NY for Gold Futures)
+            // But the countdown will be relative to Tehran time
+            const todayInMarketZone = nowInMarketZone.dateObj;
+            const yesterdayInMarketZone = new Date(todayInMarketZone); yesterdayInMarketZone.setDate(todayInMarketZone.getDate() - 1);
+
+            const breakStartH = parseInt(market.breakStart.split(':')[0]);
+            const breakEndH = parseInt(market.breakEnd.split(':')[0]);
+
+            let breakStartTodayInMarketZone = createDateInTimezone(todayInMarketZone, market.breakStart, market.timezone);
+            let breakEndTodayInMarketZone = createDateInTimezone(todayInMarketZone, market.breakEnd, market.timezone);
+            if (breakEndH < breakStartH) breakEndTodayInMarketZone.setDate(breakEndTodayInMarketZone.getDate() + 1); // Break crosses midnight
+
+            let breakStartYesterdayInMarketZone = createDateInTimezone(yesterdayInMarketZone, market.breakStart, market.timezone);
+            let breakEndYesterdayInMarketZone = createDateInTimezone(yesterdayInMarketZone, market.breakEnd, market.timezone);
+            if (breakEndH < breakStartH) breakEndYesterdayInMarketZone.setDate(breakEndYesterdayInMarketZone.getDate() + 1); // Break crosses midnight
+
+            const nowMsInMarketZone = nowInMarketZone.dateObj.getTime();
+            const nowMsInTehran = nowInTehran.dateObj.getTime();
+
+            // Convert break times to Tehran time for accurate countdown differences
+            const breakStartTodayInTehran = new Date(breakStartTodayInMarketZone.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+            const breakEndTodayInTehran = new Date(breakEndTodayInMarketZone.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+            const breakStartYesterdayInTehran = new Date(breakStartYesterdayInMarketZone.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+            const breakEndYesterdayInTehran = new Date(breakEndYesterdayInMarketZone.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+
+
+            // Check if currently in a break period (based on market's own timezone)
+            if ((nowMsInMarketZone >= breakStartTodayInMarketZone.getTime() && nowMsInMarketZone < breakEndTodayInMarketZone.getTime()) ||
+                (nowMsInMarketZone >= breakStartYesterdayInMarketZone.getTime() && nowMsInMarketZone < breakEndYesterdayInMarketZone.getTime() && (breakEndH < breakStartH)))
+            {
+                const relevantBreakEndInTehran = nowMsInMarketZone >= breakStartTodayInMarketZone.getTime() ? breakEndTodayInTehran : breakEndYesterdayInTehran;
+                return {
+                    isOffDay: false,
+                    statusKey: 'sessionBreak',
+                    countdownText: `${t('resumesIn')} ${formatDuration((relevantBreakEndInTehran.getTime() - nowMsInTehran) / 1000)}`,
+                    progress: 100, // During break, progress is conceptually 100% of previous session
+                    statusColor: 'yellow'
+                };
+            }
+            
+            // Calculate next break start time in market's own timezone
+            let nextBreakStartInMarketZone;
+            if (nowMsInMarketZone < breakStartTodayInMarketZone.getTime()) {
+                nextBreakStartInMarketZone = breakStartTodayInMarketZone;
+            } else {
+                nextBreakStartInMarketZone = new Date(breakStartTodayInMarketZone);
+                nextBreakStartInMarketZone.setDate(nextBreakStartInMarketZone.getDate() + 1);
+            }
+            const nextBreakStartInTehran = new Date(nextBreakStartInMarketZone.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+
+            // Calculate progress based on market's own timezone
+            const totalSessionMs = (24 * 3600 * 1000) - (breakEndTodayInMarketZone.getTime() - breakStartTodayInMarketZone.getTime());
+            let sessionStartForProgress = breakEndYesterdayInMarketZone.getTime(); // Default for if we are "after" yesterday's break
+            if (nowMsInMarketZone < breakStartTodayInMarketZone.getTime()) { // If we're before today's break
+                sessionStartForProgress = breakEndYesterdayInMarketZone.getTime();
+                if (sessionStartForProgress > nowMsInMarketZone) { // If yesterday's break end is in the future relative to now in market's time (due to being early today)
+                    sessionStartForProgress = new Date(sessionStartForProgress);
+                    sessionStartForProgress.setDate(sessionStartForProgress.getDate() - 1);
+                    sessionStartForProgress = sessionStartForProgress.getTime();
+                }
+            } else if (nowMsInMarketZone >= breakEndTodayInMarketZone.getTime()) { // If we're after today's break
+                 sessionStartForProgress = breakEndTodayInMarketZone.getTime();
+            }
+
+            const elapsedSinceOpen = nowMsInMarketZone - sessionStartForProgress;
+            const progress = (elapsedSinceOpen / totalSessionMs) * 100;
+
+            return {
+                isOffDay: false,
+                statusKey: 'open',
+                countdownText: `${t('sessionBreak')} in ${formatDuration((nextBreakStartInTehran.getTime() - nowMsInTehran) / 1000)}`,
+                progress: Math.min(100, progress),
+                statusColor: 'green'
+            };
+        }
+        
+        if (market.type === 'forex') {
+            const nowInET = getTimeInZone(market.weeklyOpen.tz, true); // For internal calculations against weekly open/close
+            const nowMsInET = nowInET.dateObj.getTime();
+            const nowMsInTehran = nowInTehran.dateObj.getTime();
+
+            const getWeeklyMarketTimeInET = (day, hour, minute, baseDate) => {
+                const d = new Date(baseDate);
+                const currentDayOfWeek = d.getDay(); // 0 = Sunday, 6 = Saturday
+                let daysToAdd = day - currentDayOfWeek;
+                d.setDate(d.getDate() + daysToAdd);
+                d.setHours(hour, minute, 0, 0);
+                return d;
+            };
+
+            let weeklyOpenInET = getWeeklyMarketTimeInET(market.weeklyOpen.day, market.weeklyOpen.hour, market.weeklyOpen.minute, nowInET.dateObj);
+            let weeklyCloseInET = getWeeklyMarketTimeInET(market.weeklyClose.day, market.weeklyClose.hour, market.weeklyClose.minute, nowInET.dateObj);
+
+            // Adjust weeklyOpen/Close for the current week or next week based on current time
+            if (nowMsInET < weeklyOpenInET.getTime() && nowInET.dateObj.getDay() > weeklyOpenInET.getDay()) {
+                // If current day is after Sunday but before Sunday open (e.g., Monday early morning), it means open is next Sunday
+                weeklyOpenInET.setDate(weeklyOpenInET.getDate() + 7);
+                weeklyCloseInET.setDate(weeklyCloseInET.getDate() + 7);
+            } else if (nowMsInET >= weeklyCloseInET.getTime()) {
+                // If it's already past weekly close, next open is next week
+                weeklyOpenInET.setDate(weeklyOpenInET.getDate() + 7);
+                weeklyCloseInET.setDate(weeklyCloseInET.getDate() + 7);
+            }
+
+
+            const isOpen = nowMsInET >= weeklyOpenInET.getTime() && nowMsInET < weeklyCloseInET.getTime();
+
+            // Convert to Tehran time for countdown display
+            const weeklyOpenInTehran = new Date(weeklyOpenInET.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+            const weeklyCloseInTehran = new Date(weeklyCloseInET.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+            
+            const progress = isOpen ? ((nowMsInET - weeklyOpenInET.getTime()) / (weeklyCloseInET.getTime() - weeklyOpenInET.getTime())) * 100 : 0;
+
+            return {
+                isOffDay: !isOpen,
+                statusKey: isOpen ? 'marketOpen' : 'marketClosed',
+                countdownText: isOpen ? `${t('weeklyCloseIn')} ${formatDuration((weeklyCloseInTehran.getTime() - nowMsInTehran) / 1000)}` : `${t('opensIn')} ${formatDuration((weeklyOpenInTehran.getTime() - nowMsInTehran) / 1000)}`,
+                progress,
+                statusColor: isOpen ? 'green' : 'red'
+            };
+        }
+        return {};
+    }
+
+    function getVolumeIndicator(market, status) {
+        if (status.isOffDay || status.statusKey === 'sessionBreak' || status.statusColor === 'red' || status.statusColor === 'yellow') {
+            return { key: 'vol_low', color: 'bg-gray-500' };
+        }
+        
+        const nowUTC = getTimeInZone('Etc/UTC', true); // Use for UTC-based volume calculation
+        const hourUTC = nowUTC.hour;
+
+        if (market.type === 'exchange' && market.code !== 'crypto') {
+            const nowInZone = getTimeInZone(market.timezone, true); // Market's own local time
+            const openH = parseInt(market.open.split(':')[0]);
+            const closeH = parseInt(market.close.split(':')[0]);
+            const currentH = nowInZone.hour;
+
+            // More nuanced volume for exchanges
+            if (currentH === openH || currentH === closeH -1 ) return { key: 'vol_very_high', color: 'bg-red-500' }; // First hour or last hour
+            if (currentH === openH + 1 || currentH === closeH - 2) return { key: 'vol_high', color: 'bg-orange-500' }; // Second hour or second to last hour
+            return { key: 'vol_medium', color: 'bg-blue-500' }; // Rest of the session
+        }
+
+        if (market.type === 'forex' || market.type === 'commodity' || market.code === 'crypto') {
+            // Forex/Commodity/Crypto volume based on UTC overlaps
+            if (hourUTC >= 13 && hourUTC < 17) return { key: 'vol_very_high', color: 'bg-red-500' }; // London/NY Overlap (7 AM - 11 AM NY / 12 PM - 4 PM London)
+            if (hourUTC >= 8 && hourUTC < 13) return { key: 'vol_high', color: 'bg-orange-500' }; // London Session (3 AM - 8 AM NY / 8 AM - 1 PM London)
+            if (hourUTC >= 1 && hourUTC < 8) return { key: 'vol_medium', color: 'bg-yellow-500' }; // Tokyo Session (8 PM - 3 AM NY / 1 AM - 8 AM London)
+            return { key: 'vol_low', color: 'bg-blue-500' }; // Sydney / Off-peak (4 PM - 1 AM NY / 9 PM - 6 AM London)
+        }
+        return { key: 'vol_low', color: 'bg-gray-500' };
+    }
+
+    // This function finds the next OPEN date AND time in the market's OWN timezone,
+    // then formats it for display in Tehran time.
+    function findNextOpenDateTime(market, baseDateInMarketZone) {
+        let nextPotentialOpenDateInMarketZone = new Date(baseDateInMarketZone);
+        // Start checking from tomorrow (or today if it's past market close)
+        nextPotentialOpenDateInMarketZone.setDate(nextPotentialOpenDateInMarketZone.getDate() + 1); 
+
+        for (let i = 0; i < 10; i++) { // Check up to next 10 days to be safe
+            const currentCheckDateInMarketZone = new Date(nextPotentialOpenDateInMarketZone);
+            const dateStrInMarketZone = `${currentCheckDateInMarketZone.getFullYear()}-${String(currentCheckDateInMarketZone.getMonth() + 1).padStart(2, '0')}-${String(currentCheckDateInMarketZone.getDate()).padStart(2, '0')}`;
+            
+            // Check if this potential date is a trading day for the market
+            if (market.days.includes(currentCheckDateInMarketZone.getDay()) && !market.holidays?.includes(dateStrInMarketZone)) {
+                // Found the next valid trading day in market's timezone
+                const [openH, openM] = market.open.split(':').map(Number);
+                const marketOpenTimeOnNextDayInMarketZone = new Date(currentCheckDateInMarketZone);
+                marketOpenTimeOnNextDayInMarketZone.setHours(openH, openM, 0, 0);
+
+                // Convert this specific open time to Tehran timezone for display
+                const marketOpenTimeInTehran = new Date(marketOpenTimeOnNextDayInMarketZone.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+                
+                const formattedTime = toPersianDigits(marketOpenTimeInTehran.toLocaleTimeString(currentLanguage === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false }));
+                const dayName = marketOpenTimeInTehran.toLocaleDateString(currentLanguage === 'fa' ? 'fa-IR' : 'en-US', { weekday: 'long' });
+
+                // Compare the day difference with the *original* baseDate (nowInMarketZone.dateObj)
+                const todayInMarketZoneForComparison = new Date(baseDateInMarketZone);
+                todayInMarketZoneForComparison.setHours(0,0,0,0); // Normalize to start of day
+                const nextOpenDateOnlyInMarketZone = new Date(marketOpenTimeOnNextDayInMarketZone);
+                nextOpenDateOnlyInMarketZone.setHours(0,0,0,0);
+
+                const dayDiff = Math.round((nextOpenDateOnlyInMarketZone.getTime() - todayInMarketZoneForComparison.getTime()) / (1000 * 60 * 60 * 24));
+
+                if (dayDiff === 0) return { displayTime: `${t('today')} ${formattedTime}`, ms: marketOpenTimeInTehran.getTime() }; // Should not happen if called after close
+                if (dayDiff === 1) return { displayTime: `${t('tomorrow')} ${formattedTime}`, ms: marketOpenTimeInTehran.getTime() };
+                return { displayTime: `${t('on')} ${dayName} ${formattedTime}`, ms: marketOpenTimeInTehran.getTime() };
+            }
+            nextPotentialOpenDateInMarketZone.setDate(nextPotentialOpenDateInMarketZone.getDate() + 1);
+        }
+        return { displayTime: 'a future date', ms: 0 }; // Fallback
+    }
+
+    function getTzAbbreviation(timeZone) {
+        const tzMap = {
+            'America/New_York': 'ET', 'Europe/London': 'GMT', 'Asia/Tokyo': 'JST',
+            'Australia/Sydney': 'AEST', 'Etc/UTC': 'UTC'
+        };
+        // Use Intl.DateTimeFormat to get the actual current timezone abbreviation
+        try {
+            const options = { timeZoneName: 'shortOffset' };
+            const date = new Date();
+            const formatter = new Intl.DateTimeFormat('en-US', { timeZone, ...options });
+            const parts = formatter.formatToParts(date);
+            const tzPart = parts.find(p => p.type === 'timeZoneName');
+            return tzPart ? tzPart.value : timeZone.split('/').pop().replace('_', ' ');
+        } catch (e) {
+            return tzMap[timeZone] || timeZone.split('/').pop().replace('_', ' ');
+        }
+    }
+
+    function buildMarketCards() { $('#market-grid').innerHTML = MARKETS.map(m => `<div id="market-${m.code}" class="bg-white dark:bg-brand-surface rounded-2xl shadow-lg dark:shadow-black/20 p-4 sm:p-5 flex flex-col min-h-[250px] transition-all duration-300"></div>`).join(''); }
+
+    function updateAllCards() {
+        MARKETS.forEach(market => {
+            const card = $(`#market-${market.code}`);
+            if (!card) return;
+            const statusInfo = getMarketStatus(market);
+            card.innerHTML = renderCardHTML(market, statusInfo);
+            card.classList.toggle('inactive-card', !!statusInfo.isOffDay);
+        });
+    }
+
+    function renderForexSessions(market) {
+        const nowUTC = getTimeInZone('Etc/UTC', true);
+        const hourUTC = nowUTC.hour + nowUTC.minute / 60;
+        let sessionsHTML = `<div class="space-y-2.5 mt-2"><div class="text-xs font-semibold text-gray-500 dark:text-gray-400">${t('sessionsUTC')}</div>`;
+
+        market.sessions.forEach(session => {
+            const openH = parseInt(session.open.split(':')[0]);
+            const closeH = parseInt(session.close.split(':')[0]);
+            let isActive = openH > closeH ? (hourUTC >= openH || hourUTC < closeH) : (hourUTC >= openH && hourUTC < closeH);
+            const activeClass = isActive ? 'opacity-100' : 'opacity-40';
+            const dotColor = isActive ? session.color : 'bg-gray-500';
+
+            sessionsHTML += `
+                <div class="flex items-center justify-between text-sm ${activeClass}">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full ${dotColor}"></div>
+                        <span class="font-medium text-gray-800 dark:text-gray-200">${session.name}</span>
+                    </div>
+                    <span class="font-mono text-xs text-gray-500 dark:text-gray-400">${session.open} - ${session.close}</span>
+                </div>`;
+        });
+        return sessionsHTML + '</div>';
+    }
+
+    function renderCardHTML(market, statusInfo) {
+        const { statusKey, countdownText, progress, statusColor } = statusInfo;
+        const colors = { green: { text: 'text-green-400', bg: 'bg-green-500', gradient: 'from-green-400 to-teal-400' }, red: { text: 'text-red-400', bg: 'bg-red-500', gradient: 'from-red-500 to-red-600' }, yellow: { text: 'text-yellow-400', bg: 'bg-yellow-500', gradient: 'from-yellow-400 to-orange-400' } };
+        const volumeInfo = getVolumeIndicator(market, statusInfo);
+        const blinkingClass = statusColor === 'green' ? 'blinking-dot' : '';
+
+        const header = `<div class="flex justify-between items-start mb-3"><div class="flex items-center gap-3"><div class="w-10 h-10 p-1.5 rounded-full bg-gray-100 dark:bg-black/20 text-gray-500 dark:text-gray-400">${ICONS[market.code]}</div><div><h2 class="text-lg font-bold text-gray-900 dark:text-white">${market.name}</h2><p class="text-xs text-gray-500 dark:text-gray-400">${market.location}</p></div></div><div class="flex items-center gap-2 ${colors[statusColor].text}"><span class="font-semibold text-sm">${t(statusKey)}</span><div class="w-2.5 h-2.5 rounded-full ${colors[statusColor].bg} ${blinkingClass}"></div></div></div>`;
+        const countdown = `<div class="text-xl font-semibold my-2 text-gray-900 dark:text-white min-h-[56px] flex items-center">${countdownText}</div>`;
+        
+        let footerContent = '';
+        if (market.type === 'forex') {
+            footerContent = renderForexSessions(market);
+        } else {
+            let openCloseTimes = '';
+            if (market.open && market.close) {
+                // Get current date in market's timezone (to correctly apply open/close hours)
+                const nowInMarketZone = getTimeInZone(market.timezone, true).dateObj;
+                
+                // Create Date objects representing the market's open/close times for *today* in its own timezone
+                let marketOpenDateTimeToday = createDateInTimezone(nowInMarketZone, market.open, market.timezone);
+                let marketCloseDateTimeToday = createDateInTimezone(nowInMarketZone, market.close, market.timezone);
+
+                // Handle cases where market close might be on the next day (e.g., commodity markets)
+                if (market.type === 'commodity' && parseInt(market.close.split(':')[0]) < parseInt(market.open.split(':')[0])) {
+                    marketCloseDateTimeToday.setDate(marketCloseDateTimeToday.getDate() + 1);
+                }
+
+                // Convert these specific market open/close Date objects to Tehran timezone for display
+                const openTimeInTehran = new Date(marketOpenDateTimeToday.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+                const closeTimeInTehran = new Date(marketCloseDateTimeToday.toLocaleString('en-US', { timeZone: TEHRAN_TIMEZONE }));
+
+                const formattedOpen = toPersianDigits(openTimeInTehran.toLocaleTimeString(currentLanguage === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false }));
+                const formattedClose = toPersianDigits(closeTimeInTehran.toLocaleTimeString(currentLanguage === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false }));
+
+                const marketTzAbbr = getTzAbbreviation(market.timezone);
+
+                openCloseTimes = `<div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400"><span>${t('hours')} (${marketTzAbbr})</span><span class="font-mono">${formattedOpen} - ${formattedClose} (${t('tehranTime')})</span></div>`;
+            }
+            const volumeIndicator = `<div class="flex justify-between items-center text-xs mt-3"><span class="text-gray-500 dark:text-gray-400 font-semibold">${t('tradingVolume')}</span><div class="flex items-center gap-2"><span class="font-medium text-gray-700 dark:text-gray-300">${t(volumeInfo.key)}</span><div class="w-2.5 h-2.5 rounded-full ${volumeInfo.color}"></div></div></div>`;
+            const progressBarTitle = `<div class="flex justify-between items-center text-xs mt-3 mb-1"><span class="text-gray-500 dark:text-gray-400 font-semibold">${t('sessionProgress')}</span><span class="font-mono text-gray-600 dark:text-gray-300">${toPersianDigits(Math.round(progress))}%</span></div>`;
+            const progressBar = `<div class="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2"><div class="h-2 rounded-full transition-all duration-500 bg-gradient-to-r ${colors[statusColor].gradient}" style="width: ${progress}%"></div></div>`;
+            footerContent = `${openCloseTimes}${volumeIndicator}${progressBarTitle}${progressBar}`;
+        }
+
+        const footer = `<div class="mt-auto pt-3 border-t border-gray-200 dark:border-gray-700/50">${footerContent}</div>`;
+        return header + countdown + footer;
+    }
+
+    function updateUIText() {
+        const isFa = currentLanguage === 'fa';
+        document.documentElement.lang = isFa ? 'fa' : 'en';
+        document.documentElement.dir = isFa ? 'rtl' : 'ltr';
+        document.body.classList.toggle('font-persian', isFa);
+        $('#main-title').textContent = t('marketClock');
+        $('#lang-toggle').textContent = isFa ? 'EN' : 'FA';
+        $('#about-title').textContent = t('aboutTitle');
+        $('#about-content').innerHTML = `<p>${t('aboutP1')}</p><ul class="list-disc list-inside space-y-2 mt-3"><li>${t('aboutLi1')}</li><li>${t('aboutLi2')}</li><li>${t('aboutLi3')}</li></ul>`;
+        $('#version-text').textContent = `${t('version')} 4.8`;
+        updateAllCards();
+    }
+
+    function updateHeaderDateTime() {
+        const locale = currentLanguage === 'fa' ? 'fa-IR' : 'en-GB';
+        const now = new Date();
+        $('#local-time-display').textContent = `${t('yourTime')}: ${toPersianDigits(now.toLocaleString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }))}`;
+        
+        // Use 'en-US' locale for Gregorian date parsing to avoid potential issues with 'fa-IR' for Gregorian
+        $('#gregorian-date-display').textContent = now.toLocaleDateString(currentLanguage === 'fa' ? 'en-GB' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        $('#jalali-date-display').textContent = toPersianDigits(new Date().toLocaleDateString('fa-IR-u-nu-latn', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+    }
+
+    function setupEventListeners() {
+        const aboutModal = $('#about-modal');
+        $('#about-btn').addEventListener('click', () => aboutModal.classList.add('visible'));
+        $('#close-modal-btn').addEventListener('click', () => aboutModal.classList.remove('visible'));
+        aboutModal.addEventListener('click', (e) => { if (e.target === aboutModal) aboutModal.classList.remove('visible'); });
+
+        $('#theme-toggle').addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcons(isDark);
+        });
+
+        $('#lang-toggle').addEventListener('click', () => {
+            currentLanguage = currentLanguage === 'en' ? 'fa' : 'en';
+            localStorage.setItem('market_clock_lang', currentLanguage);
+            updateUIText();
+        });
+    }
+    
+    function updateThemeIcons(isDark) { $('#theme-icon-light').classList.toggle('hidden', isDark); $('#theme-icon-dark').classList.toggle('hidden', !isDark); }
+    function loadTheme() { 
+        const theme = localStorage.getItem('theme');
+        const useDark = theme === 'dark' || theme === null; // Default to dark
+        document.documentElement.classList.toggle('dark', useDark); 
+        updateThemeIcons(useDark); 
+    }
+
+    function setupPWA() {
+        const manifest = {
+            "name": "Market Clock Elite", "short_name": "MarketClock", "start_url": ".",
+            "display": "fullscreen", "background_color": "#0a0a0a", "theme_color": "#0a0a0a",
+            "icons": [{"src": "https://i.postimg.cc/RV4NLPS4/App-Icon-2x.png", "sizes": "512x512", "type": "image/png"}]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        $('#manifest-link').setAttribute('href', URL.createObjectURL(manifestBlob));
+
+        if ('serviceWorker' in navigator) {
+            const swContent = `self.addEventListener('fetch', event => { event.respondWith(fetch(event.request)); });`;
+            const swBlob = new Blob([swContent], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => {
+                console.error('Service worker registration failed:', err);
+            });
+        }
+    }
+
+    // --- Main Execution ---
+    function main() {
+        loadTheme();
+        setupPWA();
+        buildMarketCards();
+        setupEventListeners();
+        updateUIText();
+        updateHeaderDateTime();
+        setInterval(() => { 
+            updateAllCards(); 
+            updateHeaderDateTime();
+        }, 1000);
+    }
+
+    main();
+});
+</script>
+</body>
+</html>
