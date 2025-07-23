@@ -14,10 +14,6 @@
     .message { max-width: 92%; padding: .82rem 1.08rem; border-radius: 1rem; line-height: 1.8; font-size: 1.1rem; }
     .message.user { background: #e0e7ff; align-self: flex-end; color: #3730a3; border-bottom-right-radius: .2rem; }
     .message.bot { background: #f0fdf4; align-self: flex-start; color: #047857; border-bottom-left-radius: .2rem; }
-    .product-card { border: 1px solid #e5e7eb; background: #f9fafb; border-radius: 1rem; padding: 1.1rem 1.3rem; margin-bottom: .8rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
-    .product-title { font-size: 1.15rem; font-weight: bold; color: #4338ca; margin-bottom: .38rem;}
-    .product-desc { margin-bottom: .25rem;}
-    .buy-btn { display:inline-block;background:linear-gradient(90deg,#6366f1 70%,#818cf8 100%);color:#fff;border:none;padding:.55rem 1.15rem;border-radius:.8rem;margin:6px 0 0 7px;font-weight:600;font-size:1rem;transition:.15s;box-shadow:0 2px 6px #c7d2fe44;cursor:pointer;}
     .chat-input-container { display: flex; padding: 1.2rem; border-top: 1px solid #e5e7eb; background: #fff; border-bottom-left-radius: 1.5rem; border-bottom-right-radius: 1.5rem; }
     .chat-input { flex: 1; padding: 0.8rem 1rem; border: 1px solid #d1d5db; border-radius: 0.8rem; font-size: 1.1rem; outline: none; text-align: right; }
     .send-button { background: #6366f1; color: #fff; border: none; padding: 0.8rem 1.2rem; border-radius: 0.8rem; margin-right: 1rem; cursor: pointer; font-size: 1.15rem; }
@@ -26,10 +22,6 @@
     .loading-indicator .dot:nth-child(2) { animation-delay: .22s; }
     .loading-indicator .dot:nth-child(3) { animation-delay: .44s; }
     @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-6px); } }
-    .fade-in { animation: fadeIn .6s;}
-    @keyframes fadeIn { from{ opacity:.2; transform:translateY(12px);} to{ opacity:1; transform:translateY(0);} }
-    .typing { border-left:2.5px solid #4338ca; animation:blink .8s infinite alternate;}
-    @keyframes blink {0%{border-color:transparent;} 100%{border-color:#4338ca;}}
   </style>
 </head>
 <body>
@@ -42,7 +34,9 @@
   </div>
 </div>
 <script type="module">
-// محصولات
+// آدرس Worker اختصاصی (Cloudflare Worker)
+const API_URL = "https://iranpowder.peymaancrafts.workers.dev/";
+
 const azarpowderProducts = [
   { name: "پروتئین وی ایزوله آذرپودر", price: "۳,۴۰۰,۰۰۰ تومان", url: "whey-isolate", howToUse: "یک پیمانه بعد تمرین و یک پیمانه صبح", sideEffects: "برای افراد حساس به لاکتوز مناسب‌تر است.", description: "پروتئین وی ایزوله با جذب بسیار سریع، مناسب ریکاوری و عضله‌سازی ویژه ورزشکاران حرفه‌ای و افرادی با حساسیت به لاکتوز." },
   { name: "پروتئین وی کنسانتره آذرپودر", price: "۲,۹۰۰,۰۰۰ تومان", url: "protein-whey", howToUse: "یک پیمانه بعد تمرین و یک پیمانه صبح ناشتا", sideEffects: "در افراد حساس به لاکتوز ممکن است موجب نفخ شود.", description: "وی کنسانتره انتخابی عالی برای افزایش توده عضلانی و ریکاوری بعد تمرین." },
@@ -58,21 +52,12 @@ const azarpowderProducts = [
   { name: "کپسول ویتامین D3 آذرپودر (۵۰۰۰ واحد)", price: "۶۰۰,۰۰۰ تومان", url: "vitamin-d3", howToUse: "هفته‌ای دو تا سه بار یک عدد بعد غذا", sideEffects: "مصرف بیش از حد باعث مسمومیت می‌شود.", description: "ویتامین D3 برای سلامت استخوان و سیستم ایمنی ورزشکاران ضروری است." }
 ];
 
+// مراحل گفتگو، هر مرحله یک سوال و تشویق و تکرار با لحن دکتر متخصص
 const FIELDS = [
-  {
-    key: "phone",
-    ask: [
-      "برای شروع مشاوره تخصصی، لطفاً شماره موبایل خود را وارد کنید تا بتوانید از کد تخفیف ویژه و اطلاع‌رسانی جشنواره‌های جدید بهره‌مند شوید."
-    ],
-    retry: [
-      "شماره موبایل را جهت دریافت کد تخفیف و پشتیبانی وارد کنید. اگر مایل نیستید بنویسید رد."
-    ],
-    validate: v => /^(\+98|0)?9\d{9}$/.test((v||"").trim())
-  },
   {
     key: "gender",
     ask: [
-      "لطفاً بفرمایید خانم هستید یا آقا؟ (برای تنظیم دقیق برنامه ضروری است.)"
+      "در ابتدا خوشحال می‌شم بدونم خانم هستید یا آقا؟ این فقط برای تنظیم بهتر برنامه‌تون پرسیده میشه."
     ],
     retry: [
       "لطفاً فقط مشخص کنید خانم هستید یا آقا (اگر دوست ندارید بنویسید رد)."
@@ -89,10 +74,11 @@ const FIELDS = [
     ],
     validate: v => v && v.trim().split(" ").length > 1 && v.trim().length > 4
   },
+
   {
     key: "age",
     ask: [
-      n => `سن شما چند سال است؟ (فقط عدد کافیست)`
+      n => `عالی! ${n ? n + " جان" : ""} سن رو هم لطف می‌کنید بگید؟ فقط عدد کافیست.`
     ],
     retry: [
       "لطفاً سن خود را فقط به عدد بنویسید (مثلاً ۲۹). اگر مایل نیستید بنویسید رد."
@@ -102,153 +88,100 @@ const FIELDS = [
   {
     key: "height",
     ask: [
-      "قدتان را چند سانتی‌متر بنویسید (مثلاً ۱۷۵)."
+      "قدتون رو چند سانتی‌متر بنویسید (مثلاً ۱۸۱)."
     ],
     retry: [
-      "لطفاً قد را فقط با عدد وارد کنید. اگر نمی‌خواهید بنویسید رد."
+      "لطفاً قد رو فقط با عدد وارد کنید. اگر نمی‌خواهید بنویسید رد."
     ],
     validate: v => /^\d+$/.test(v) && +v > 100 && +v < 250
   },
   {
     key: "weight",
     ask: [
-      "وزن فعلی شما چند کیلوگرم است؟"
+      "وزن فعلی‌تون رو چند کیلوگرم هست؟"
     ],
     retry: [
-      "وزن را فقط به عدد (کیلوگرم) بنویسید یا رد کنید."
+      "وزن برای تعیین مقدار و نوع مکمل مهمه. فقط عدد رو بنویسید یا رد کنید."
     ],
     validate: v => /^\d+$/.test(v) && +v > 20 && +v < 300
   },
   {
     key: "goal",
     ask: [
-      "هدف اصلی شما از این مشاوره چیست؟ (مثلاً افزایش عضله، کاهش وزن، تناسب اندام یا سلامت عمومی؟)"
+      "هدف شما از این مشاوره چیه؟ مثلاً افزایش عضله، کاهش وزن، تناسب اندام، یا سلامت عمومی؟ با هر جمله‌ای که دوست دارید توضیح بدید."
     ],
     retry: [
-      "هدف دقیق‌تر خود را بنویسید؛ مثلاً کاهش وزن، عضله‌سازی یا ... "
+      "هدف دقیق‌تون رو بنویسید؛ مثلاً کاهش وزن، عضله‌سازی، انرژی بیشتر یا هر موضوعی که مدنظرتونه."
     ],
     validate: v => v && v.trim().length > 2
   },
   {
     key: "trainingHistory",
     ask: [
-      "سابقه ورزشی شما چطور بوده؟ (مثلاً چند سال و چه رشته‌هایی؟)"
+      "در مورد ورزش و فعالیت بدنی: چند وقت هست ورزش می‌کنید و چه رشته‌هایی رو جدی‌تر دنبال کردید؟"
     ],
     retry: [
-      "سابقه ورزشی یا رشته‌هایی که تمرین داشتید را نام ببرید یا رد کنید."
+      "سابقه ورزشی و رشته‌هایی که تمرین داشتید رو فقط نام ببرید یا اگر مایل نیستید رد کنید."
     ],
     validate: v => v && v.trim().length > 2
   },
   {
     key: "dietActivity",
     ask: [
-      "در حال حاضر از چه رژیم یا سبک تغذیه‌ای پیروی می‌کنید؟ میزان فعالیت بدنی هفتگی شما چقدر است؟"
+      "الان رژیم یا سبک تغذیه خاصی دارید؟ تعداد جلسات ورزشی هفته‌ای شما چند تاست؟"
     ],
     retry: [
-      "یک جمله درباره تغذیه و فعالیت بدنی بنویسید یا رد کنید."
+      "لطفاً یک جمله کوتاه درباره تغذیه و فعالیت هفتگی خودتون بنویسید یا رد کنید."
     ],
     validate: v => v && v.trim().length > 2
   },
   {
     key: "healthAllergies",
     ask: [
-      "آیا به دارو یا غذایی حساسیت دارید یا تاکنون واکنش آلرژیک جدی داشته‌اید؟"
+      "آیا حساسیت یا آلرژی به ماده غذایی یا داروی خاصی دارید؟ لطفاً با جزئیات بنویسید."
     ],
     retry: [
-      "هرگونه آلرژی یا حساسیت غذایی/دارویی را بنویسید یا رد کنید."
+      "هرگونه آلرژی یا حساسیت غذایی/دارویی رو حتی اگر کم‌اهمیت باشه بنویسید یا رد کنید."
     ],
     validate: v => true
   },
   {
     key: "illnessHistory",
     ask: [
-      "آیا سابقه بیماری یا مصرف داروی خاصی دارید؟"
+      "آیا سابقه بیماری یا مصرف داروی خاصی دارید؟ حتی کوتاه مدت هم اگر بوده مهمه بدونم."
     ],
     retry: [
-      "در صورت وجود بیماری یا داروی خاص بنویسید. اگر ندارید فقط بنویسید ندارم یا رد."
+      "در صورت وجود بیماری یا داروی خاص، بنویسید. اگر ندارید فقط بنویسید ندارم یا رد."
     ],
     validate: v => true
+  },
+  {
+    key: "phone",
+    ask: [
+      "و یک امتیاز ویژه: اگر مایل باشید، شماره موبایل‌تون رو برای دریافت کد تخفیف اختصاصی و اطلاع از جشنواره‌های جدید آذرپودر وارد کنید! (اختیاری و فقط برای شما ارسال میشه)"
+    ],
+    retry: [
+      "برای دریافت پیامک کد تخفیف و جشنواره‌های اختصاصی، شماره موبایل رو وارد کنید یا رد کنید."
+    ],
+    validate: v => !v || /^(\+98|0)?9\d{9}$/.test((v||"").trim())
   }
 ];
 
-// حالت و داده‌ها
 const USER = {};
-let STEP = 0, repeatCount = 0, stage = "collecting_info", recommendedProducts = [];
+let STEP = 0, repeatCount = 0;
 const chatMessages = document.getElementById("chat-messages");
 const userInput = document.getElementById("user-input");
 const sendButton = document.getElementById("send-button");
 
-// افکت تایپینگ چت‌بات
-function typeMessage(text, sender, delay = 22) {
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message", sender, "fade-in");
-  chatMessages.appendChild(messageDiv);
-  let i = 0, typingInterval;
-  messageDiv.innerHTML = '';
-  let typingCursor = document.createElement('span');
-  typingCursor.className = 'typing';
-  typingCursor.innerHTML = '&nbsp;';
-  messageDiv.appendChild(typingCursor);
-
-  typingInterval = setInterval(() => {
-    if (i < text.length) {
-      typingCursor.insertAdjacentHTML('beforebegin', text[i]);
-      i++;
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    } else {
-      typingCursor.remove();
-      clearInterval(typingInterval);
-    }
-  }, delay);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
 function appendMessage(text, sender) {
-  // برای پیام‌هایی که نیاز به افکت تایپ ندارند
   const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message", sender, "fade-in");
-  messageDiv.innerHTML = text;
+  messageDiv.classList.add("message", sender);
+  messageDiv.innerHTML = sender === "bot"
+    ? text.replace(/آذرپودر/g, "<strong>آذرپودر</strong>")
+    : text;
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-
-function showProducts(products) {
-  recommendedProducts = products; // ذخیره برای مراحل بعدی
-  products.forEach((p, idx) => {
-    let productHTML = `
-      <div class="product-card">
-        <div class="product-title">${p.name}</div>
-        <div class="product-desc">${p.description}</div>
-        <div><span style="color:#047857;">قیمت: </span>${p.price}</div>
-        <button class="buy-btn" onclick="window.open('https://azar-powder.com/product/${p.url}', '_blank')">خرید آنلاین</button>
-      </div>`;
-    appendMessage(productHTML, "bot");
-  });
-}
-
-function showHowToUse(products) {
-  products.forEach((p) => {
-    let usageHTML = `
-      <div class="product-card">
-        <div class="product-title">${p.name}</div>
-        <div><b>نحوه مصرف:</b> ${p.howToUse}</div>
-        <div><b>عوارض و هشدارها:</b> ${p.sideEffects}</div>
-      </div>`;
-    appendMessage(usageHTML, "bot");
-  });
-}
-
-function showFinalBuyLinks(products) {
-  let html = `<div style="margin-top:18px"><b>لینک خرید مکمل‌های پیشنهادی:</b><ul style="margin:8px 0 0 0; padding:0; list-style:none">`;
-  products.forEach(p => {
-    html += `<li style="margin:4px 0;">
-      <a class="buy-btn" style="font-size:.95rem;padding:.4rem 1.1rem" href="https://azar-powder.com/product/${p.url}" target="_blank">${p.name}</a>
-    </li>`;
-  });
-  html += "</ul></div>";
-  appendMessage(html, "bot");
-}
-
 function showLoadingIndicator(text = "") {
   const loadingDiv = document.createElement("div");
   loadingDiv.classList.add("loading-indicator");
@@ -276,51 +209,66 @@ function personalize(question, prevAnswers) {
 }
 
 function nextQuestion(isRetry = false) {
-  if (STEP >= FIELDS.length) {
-    stage = "recommend";
-    showRecommendation();
+  if (STEP >= FIELDS.length || (FIELDS[STEP].key === "phone" && Object.keys(USER).length >= FIELDS.length - 1)) {
+    appendMessage("بسیار عالی! ممنون از اعتماد و زمانی که گذاشتید. الان بر اساس اطلاعات شما یک تحلیل تخصصی و پیشنهاد مکمل مناسب با توضیح کامل ارسال می‌شود:", "bot");
+    handleRecommendation();
     return;
   }
   let qObj = FIELDS[STEP];
   let prevs = { ...USER };
   let qText = isRetry && qObj.retry ? qObj.retry[0] : personalize(qObj.ask[0], prevs);
-  typeMessage(qText, "bot");
+  appendMessage(qText, "bot");
   toggleInput(true);
 }
 
-function showRecommendation() {
+async function handleRecommendation() {
   toggleInput(false);
-  const loading = showLoadingIndicator("در حال تحلیل شرایط شما...");
-  setTimeout(() => {
+  const loading = showLoadingIndicator("در حال تحلیل دقیق توسط دکتر مشاور تخصصی...");
+  const productsText = azarpowderProducts.map(p =>
+    `- ${p.name}: ${p.description} | <b>قیمت:</b> ${p.price} | <b>نحوه مصرف:</b> ${p.howToUse} | <b>عوارض:</b> ${p.sideEffects} | <a href="https://azar-powder.com/product/${p.url}" target="_blank">خرید آنلاین</a>`
+  ).join('\n');
+
+  const prompt = `
+شما نقش یک پزشک و مشاور تغذیه و ورزش حرفه‌ای را برای برند آذرپودر بازی می‌کنید.
+حتی اگر اطلاعات کاربر ناقص یا مبهم بود، حتماً با توجه به داده‌های موجود و سن و جنسیت و هدف احتمالی، بهترین مکمل‌ها و برنامه را توصیه کن و هیچ‌وقت نگویید اطلاعات کافی نیست یا پاسخی داده نشد.
+حتی اگر اطلاعات خیلی ناقص باشد، بر اساس فرض عمومی شرایط بدنی و هدف، حداقل ۲ مکمل را مفصل تحلیل و معرفی کن (مثلاً برای عضله‌سازی، پروتئین وی و کراتین).
+در تحلیل هر مکمل، توضیح بده چرا با شرایط فعلی فرد انتخاب شد، قیمت، نحوه مصرف و لینک خرید را ذکر کن. 
+پاسخ فقط باید فارسی، تحلیلی، با لحن دکترانه و دست‌کم ۲۵۰ کلمه باشد. 
+حتماً در پایان جمله انگیزشی و توصیه به سبک زندگی سالم بنویس.
+اگر کاربر بیماری/آلرژی ندارد، این مورد را هم به‌صورت یک اطمینان تخصصی یادآوری کن.
+اطلاعات کاربر:
+${Object.entries(USER).map(([k,v])=>`${k}: ${v}`).join('\n')}
+لیست محصولات آذرپودر:
+${productsText}
+متن مشاوره آماده برای نمایش به کاربر ارسال شود. از هیچ بهانه‌ای برای پاسخ ندادن یا معرفی نکردن مکمل استفاده نکن!
+  `;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+    });
     removeElement(loading);
-    // الگوریتم ساده: همیشه 2 تا 4 مکمل مناسب (مثلاً عضله سازی=وی ایزوله+کراتین+کازئین)
-    let top = [];
-    const goal = (USER.goal||"").replace(/[آا]/g, 'ا').toLowerCase();
-    if (goal.includes("عضله") || goal.includes("حجم")) {
-      top = ["پروتئین وی ایزوله آذرپودر", "کراتین مونوهیدرات آذرپودر", "پروتئین کازئین آذرپودر"];
-    } else if (goal.includes("کاهش") || goal.includes("چربی") || goal.includes("تناسب")) {
-      top = ["پروتئین وی ایزوله آذرپودر", "کلاژن هیدرولیز شده آذرپودر"];
-    } else if (goal.includes("انرژی") || goal.includes("توان") || goal.includes("استقامت")) {
-      top = ["آمینواسید شاخه‌دار (BCAA) آذرپودر", "پمپ (Pre-workout) آذرپودر"];
-    } else if (goal.includes("سلامت") || goal.includes("عمومی") || goal.includes("تقویت")) {
-      top = ["کپسول ویتامین D3 آذرپودر (۵۰۰۰ واحد)", "اُمگا۳ آذرپودر", "مولتی‌ویتامین ورزشی آذرپودر"];
-    } else {
-      top = ["پروتئین وی ایزوله آذرپودر", "کراتین مونوهیدرات آذرپودر"];
+    const data = await res.json();
+    let answer = (data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "").trim();
+    if (!answer || answer.length < 30) {
+      answer = `
+با توجه به شرایطی که وارد کردید، دو مکمل کلیدی آذرپودر را به شما پیشنهاد می‌کنم:
+<br><b>۱. پروتئین وی ایزوله آذرپودر</b> - مناسب عضله‌سازی، مخصوصاً برای افراد با وزن پایین و رژیم کم‌کالری. قیمت: ۳,۴۰۰,۰۰۰ تومان. 
+<a href="https://azar-powder.com/product/whey-isolate" target="_blank">خرید آنلاین</a>
+<br><b>۲. کراتین مونوهیدرات آذرپودر</b> - افزایش قدرت و ریکاوری، ویژه تمرینات مقاومتی و بدنسازی. قیمت: ۱,۲۰۰,۰۰۰ تومان. 
+<a href="https://azar-powder.com/product/creatine-monohydrate" target="_blank">خرید آنلاین</a>
+<br>برای جزییات دقیق‌تر یا دریافت برنامه تمرینی اختصاصی، لطفاً مجدداً با من در ارتباط باشید یا شماره موبایل وارد کنید تا از جشنواره‌ها مطلع شوید. 
+<br><b>با آرزوی موفقیت و سلامتی!</b>
+`;
     }
-    // همیشه پیشنهاد ویژه برای سابقه یا محدودیت خاص:
-    if ((USER.healthAllergies||"").length>2 && !top.includes("کلاژن هیدرولیز شده آذرپودر")) top.push("کلاژن هیدرولیز شده آذرپودر");
-    if ((USER.illnessHistory||"").includes("قلب") && !top.includes("اُمگا۳ آذرپودر")) top.push("اُمگا۳ آذرپودر");
-    // پیدا کردن جزئیات محصولات منتخب
-    let selected = azarpowderProducts.filter(p=>top.includes(p.name)).slice(0,4);
-    appendMessage(`<b>بر اساس شرایط و هدف شما، این مکمل‌ها توصیه می‌شود:</b>`, "bot");
-    showProducts(selected);
-    setTimeout(()=>{
-      appendMessage(`<b>مایل هستید نحوه مصرف این مکمل‌ها را هم بدانید؟ اگر دوست دارید بنویسید <span style="color:#4338ca">نحوه مصرف</span> تا توضیح بدهم.</b>`, "bot");
-      stage = "wait_usage";
-      recommendedProducts = selected;
-      toggleInput(true);
-    },1100);
-  }, 1400);
+    appendMessage(answer, "bot");
+    toggleInput(true);
+  } catch (e) {
+    removeElement(loading);
+    appendMessage("متاسفانه سیستم مشاوره فعلا پاسخگو نیست. لطفاً چند دقیقه دیگر دوباره تلاش کنید.", "bot");
+  }
 }
 
 async function handleUserInput() {
@@ -330,74 +278,37 @@ async function handleUserInput() {
   userInput.value = "";
   toggleInput(false);
 
-  if (stage === "collecting_info") {
-    let field = FIELDS[STEP];
-    if (/^(رد|هیچ)$/i.test(msg)) {
-      appendMessage("پذیرفته شد. می‌رویم سراغ سؤال بعدی.", "bot");
-      STEP++; repeatCount = 0;
-      setTimeout(() => nextQuestion(false), 800);
-      return;
-    }
-    if (field.validate(msg)) {
-      USER[field.key] = msg;
-      STEP++; repeatCount = 0;
-      setTimeout(() => nextQuestion(false), 800);
-    } else {
-      repeatCount++;
-      if (repeatCount < 3) {
-        setTimeout(() => nextQuestion(true), 600);
-      } else {
-        appendMessage("اگر مایل نیستید، کافیست بنویسید رد.", "bot");
-        toggleInput(true);
-        repeatCount = 0;
-      }
-    }
+  let field = FIELDS[STEP];
+  // اگر کاربر نوشت رد یا هیچ، رد کن
+  if (/^(رد|هیچ)$/i.test(msg)) {
+    appendMessage("کاملاً قابل احترام. می‌ریم سراغ سؤال بعدی.", "bot");
+    STEP++; repeatCount = 0;
+    setTimeout(() => nextQuestion(false), 800);
+    return;
   }
-  else if (stage === "wait_usage") {
-    if (msg.match(/نحوه مصرف|طریقه|چطور|چگونه|مصرف/i)) {
-      showHowToUse(recommendedProducts);
-      setTimeout(() => {
-        appendMessage(`<b>در مورد مکمل‌های معرفی شده سوالی داری؟ (در مورد همین مکمل‌ها بپرس، اگر سوال نامرتبط بود پاسخ داده نمی‌شود)</b>`, "bot");
-        stage = "wait_questions";
-        toggleInput(true);
-      },900);
+  if (field.validate(msg)) {
+    USER[field.key] = msg;
+    STEP++; repeatCount = 0;
+    setTimeout(() => nextQuestion(false), 800);
+  } else {
+    repeatCount++;
+    if (repeatCount < 3) {
+      setTimeout(() => nextQuestion(true), 600);
     } else {
-      appendMessage("اگر مایل بودید نحوه مصرف را بدانید فقط بنویسید 'نحوه مصرف'.", "bot");
+      appendMessage("اگر تمایلی به پاسخ ندارید، کافیست بنویسید رد.", "bot");
       toggleInput(true);
-    }
-  }
-  else if (stage === "wait_questions") {
-    let related = false;
-    if (recommendedProducts.some(p=>msg.includes(p.name.split(" ")[2]) || msg.includes(p.name.split(" ")[0]))) {
-      related = true;
-    }
-    if (related) {
-      appendMessage(`پاسخ به سؤال شما: [در این نسخه دمویی، این بخش قابل توسعه است و به طور خودکار به سوالات مرتبط پاسخ می‌دهد]`, "bot");
-      setTimeout(() => {
-        appendMessage(`سوال دیگری درباره همین مکمل‌ها دارید؟ اگر ندارید بنویسید «خیر» تا مشاوره پایان یابد.`, "bot");
-        toggleInput(true);
-      },500);
-    } else if (msg.match(/خیر|ندارم|تمام/i)) {
-      appendMessage(`ممنون بابت همراهی شما. امیدوارم بهترین نتیجه را بگیرید. برای خرید هر مکمل روی دکمه زیر کلیک کنید. 
-      <br><b>آرزوی سلامتی و موفقیت برای شما 🌱</b>`, "bot");
-      showFinalBuyLinks(recommendedProducts);
-      toggleInput(false);
-    } else {
-      appendMessage(`سؤال شما مربوط به مکمل‌های معرفی شده نبود. فقط درباره همین مکمل‌ها پاسخگو هستم.`, "bot");
-      toggleInput(true);
+      repeatCount = 0;
     }
   }
 }
 
+// شروع گفتگو
 function startConversation() {
-  typeMessage(
-    "سلام و خوش آمدید! 👨‍⚕️ به مشاوره تخصصی مکمل‌های ورزشی <b>آذرپودر</b>. جهت شروع، شماره موبایل خود را برای دریافت تخفیف و پشتیبانی وارد کنید.",
+  appendMessage(
+    "سلام و ارادت! 👨‍⚕️ من دکتر مشاور تخصصی تغذیه و ورزش <strong>آذرپودر</strong> هستم. خیلی خوشحال میشم با هم صحبت کنیم و بر اساس شرایط شما، برنامه و مکمل مناسب رو پیشنهاد بدم. لطفاً با حوصله به سوالات ساده من جواب بدید تا بهترین نتیجه رو بگیرید. هر زمان دوست داشتید می‌تونید سؤال بپرسید یا حتی جواب ندید. بریم سراغ اولین سؤال:",
     "bot"
   );
-  stage = "collecting_info";
-  STEP = 0;
-  recommendedProducts = [];
-  setTimeout(() => nextQuestion(false), 1800);
+  setTimeout(() => nextQuestion(false), 1300);
   toggleInput(true);
 }
 
