@@ -42,184 +42,84 @@
   </div>
 </div>
 <script type="module">
-// --------- دیتابیس مکمل‌ها ---------
+// --------- دیتابیس مکمل‌های حرفه‌ای و جامع ---------
 const azarpowderProducts = [
-  { name: "پروتئین وی ایزوله آذرپودر", price: "۳,۴۰۰,۰۰۰ تومان", url: "whey-isolate", howToUse: "یک پیمانه بعد تمرین و یک پیمانه صبح", sideEffects: "برای افراد حساس به لاکتوز مناسب‌تر است.", description: "پروتئین وی ایزوله با جذب بسیار سریع، مناسب ریکاوری و عضله‌سازی ویژه ورزشکاران حرفه‌ای و افرادی با حساسیت به لاکتوز.", duration: "مصرف دوره‌ای حداقل ۸ هفته توصیه می‌شود. بدون مشکل می‌توانید مداوم مصرف کنید.", interactions: "با اکثر مکمل‌ها قابل مصرف همزمان است.", mainEffects: "افزایش حجم و ریکاوری عضلانی سریع." },
-  { name: "کراتین مونوهیدرات آذرپودر", price: "۱,۲۰۰,۰۰۰ تومان", url: "creatine-monohydrate", howToUse: "۵ گرم روزانه همراه آب، بعد تمرین", sideEffects: "مصرف آب کافی ضروری است؛ ممکن است احتباس آب داشته باشد.", description: "کراتین باعث افزایش قدرت، حجم عضلانی و ریکاوری سریع می‌شود.", duration: "دوره پیشنهادی ۸ تا ۱۲ هفته؛ سپس ۱ تا ۲ هفته قطع و مجدداً شروع شود.", interactions: "می‌توانید با پروتئین، آمینواسید، گلوتامین و BCAA مصرف کنید. با داروهای کلیوی و ضد التهاب بدون نظر پزشک مصرف نشود.", mainEffects: "افزایش قدرت انفجاری و سرعت ریکاوری عضلات." },
+  { name: "پروتئین وی ایزوله آذرپودر", price: "۳,۴۰۰,۰۰۰ تومان", url: "whey-isolate", howToUse: "یک پیمانه بعد تمرین و یک پیمانه صبح", sideEffects: "برای افراد حساس به لاکتوز مناسب‌تر است.", description: "پروتئین وی ایزوله با جذب بسیار سریع، مناسب ریکاوری و عضله‌سازی ویژه ورزشکاران حرفه‌ای و افرادی با حساسیت به لاکتوز.", duration: "۸ هفته یا بیشتر. در صورت نیاز مصرف مداوم بلامانع است.", interactions: "قابل مصرف با سایر مکمل‌ها. با داروهای خاص فقط با مشورت پزشک.", mainEffects: "افزایش حجم و ریکاوری عضلانی سریع." },
+  { name: "کراتین مونوهیدرات آذرپودر", price: "۱,۲۰۰,۰۰۰ تومان", url: "creatine-monohydrate", howToUse: "۵ گرم روزانه همراه آب، بعد تمرین", sideEffects: "مصرف آب کافی ضروری است؛ ممکن است احتباس آب داشته باشد.", description: "کراتین باعث افزایش قدرت، حجم عضلانی و ریکاوری سریع می‌شود.", duration: "۸ تا ۱۲ هفته؛ سپس ۱-۲ هفته قطع و مجدداً شروع شود.", interactions: "می‌توانید با پروتئین، آمینواسید، گلوتامین و BCAA مصرف کنید.", mainEffects: "افزایش قدرت انفجاری و سرعت ریکاوری عضلات." },
   { name: "پروتئین کازئین آذرپودر", price: "۳,۱۵۰,۰۰۰ تومان", url: "casein", howToUse: "یک پیمانه قبل خواب یا به عنوان میان‌وعده", sideEffects: "در مصرف بالا ممکن است موجب احساس سنگینی شود.", description: "کازئین با جذب آهسته، گزینه ایده‌آل برای محافظت از عضلات هنگام خواب یا روزهای استراحت.", duration: "قابل مصرف مداوم به‌عنوان مکمل شبانه.", interactions: "با مکمل‌های پروتئینی دیگر و کراتین و BCAA تداخل ندارد.", mainEffects: "جلوگیری از تخریب عضله و تأمین پروتئین در طول شب." },
   { name: "کلاژن هیدرولیز شده آذرپودر", price: "۲,۰۰۰,۰۰۰ تومان", url: "collagen", howToUse: "یک پیمانه صبح یا قبل خواب", sideEffects: "تقریباً بی‌عارضه، فقط در افراد خاص طعم ناخوشایند دارد.", description: "کلاژن برای سلامت پوست، مو، مفاصل و همچنین بهبود ریکاوری آسیب‌های ورزشی مناسب است.", duration: "مصرف مداوم توصیه می‌شود.", interactions: "با سایر مکمل‌ها و داروها تداخلی ندارد.", mainEffects: "تقویت مفاصل و بهبود سلامت پوست و مو." },
-  // ... محصولات دیگر را اضافه کن ...
+  { name: "گینر حرفه‌ای آذرپودر", price: "۴,۱۰۰,۰۰۰ تومان", url: "mass-gainer", howToUse: "دو پیمانه در روز، میان‌وعده و بعد تمرین", sideEffects: "مصرف بیش از حد می‌تواند موجب افزایش چربی شود.", description: "گینر برای افراد با نیاز به افزایش وزن و انرژی، حاوی پروتئین و کربوهیدرات بالا.", duration: "تا رسیدن به وزن هدف.", interactions: "با اکثر مکمل‌ها قابل مصرف است.", mainEffects: "افزایش وزن و انرژی روزانه." },
+  { name: "آمینو اسید BCAA آذرپودر", price: "۱,۸۰۰,۰۰۰ تومان", url: "bcaa", howToUse: "۱۰ گرم قبل و بعد تمرین", sideEffects: "در دوز مناسب بی‌عارضه است.", description: "BCAA ترکیبی از آمینواسیدهای شاخه‌دار برای محافظت از عضله و جلوگیری از خستگی.", duration: "مداوم با تمرین سنگین.", interactions: "همراه پروتئین یا کراتین عالی است.", mainEffects: "کاهش تحلیل عضلانی و ریکاوری سریع." },
+  { name: "ال-گلوتامین آذرپودر", price: "۱,۶۰۰,۰۰۰ تومان", url: "glutamine", howToUse: "۵ گرم بعد تمرین و قبل خواب", sideEffects: "عارضه خاصی ندارد.", description: "گلوتامین نقش مهمی در ریکاوری و سلامت دستگاه گوارش دارد.", duration: "مصرف مداوم توصیه می‌شود.", interactions: "با اکثر مکمل‌ها قابل مصرف است.", mainEffects: "بهبود ریکاوری و تقویت سیستم ایمنی." },
+  { name: "پمپ پرفورمنس آذرپودر (Pre-workout)", price: "۲,۷۰۰,۰۰۰ تومان", url: "preworkout", howToUse: "یک پیمانه ۳۰ دقیقه قبل تمرین", sideEffects: "حاوی کافئین؛ برای افراد حساس مناسب نیست.", description: "پمپ باعث افزایش انرژی و تمرکز قبل تمرین می‌شود.", duration: "در روزهای تمرین مصرف شود.", interactions: "با سایر مکمل‌ها قابل مصرف است.", mainEffects: "افزایش انرژی و تمرکز." },
+  { name: "مولتی‌ویتامین ورزشی آذرپودر", price: "۱,۳۰۰,۰۰۰ تومان", url: "multivitamin", howToUse: "روزانه یک قرص بعد صبحانه", sideEffects: "در دوز توصیه‌شده بی‌عارضه.", description: "مولتی ویتامین کامل جهت تامین ویتامین‌های مورد نیاز ورزشکاران.", duration: "مصرف روزانه و مداوم.", interactions: "با همه مکمل‌ها تداخلی ندارد.", mainEffects: "تقویت سیستم ایمنی و سطح انرژی." },
+  { name: "امگا ۳ آذرپودر", price: "۹۰۰,۰۰۰ تومان", url: "omega3", howToUse: "یک سافت‌ژل بعد ناهار", sideEffects: "در موارد خاص ممکن است موجب رقیق شدن خون شود.", description: "امگا ۳ برای سلامت قلب، عروق و مفاصل ضروری است.", duration: "مصرف مداوم توصیه می‌شود.", interactions: "در صورت مصرف داروهای ضدانعقاد با پزشک مشورت شود.", mainEffects: "سلامت قلب، مغز و مفاصل." },
+  { name: "ال-کارنیتین آذرپودر", price: "۱,۲۵۰,۰۰۰ تومان", url: "l-carnitine", howToUse: "یک قرص نیم ساعت قبل تمرین", sideEffects: "در افراد خاص ممکن است تهوع ایجاد کند.", description: "ال‌کارنیتین به سوخت چربی و افزایش انرژی کمک می‌کند.", duration: "دوره‌های ۴ تا ۸ هفته‌ای.", interactions: "با سایر مکمل‌ها و چربی‌سوزها قابل مصرف.", mainEffects: "افزایش چربی‌سوزی و انرژی." },
+  { name: "سیترولین مالات آذرپودر", price: "۱,۹۰۰,۰۰۰ تومان", url: "citrulline-malate", howToUse: "۵ تا ۱۰ گرم ۴۵ دقیقه قبل تمرین", sideEffects: "در دوز مناسب عارضه خاصی ندارد.", description: "سیترولین مالات جریان خون و پمپاژ عضلانی را بالا می‌برد.", duration: "در دوره تمرینات سنگین.", interactions: "همراه پمپ و BCAA مصرف می‌شود.", mainEffects: "افزایش خون‌رسانی و تاخیر خستگی." }
 ];
 
-// --------- دیتابیس سؤالات متداول و پاسخ‌ها ---------
+// --------- دیتابیس FAQ پیشرفته و هوشمند (پاسخ دهی حرفه‌ای) ---------
 const faqList = [
-  {
-    keywords: ["تداخل", "همزمان", "مصرف با"],
-    answer: (name, prods) => `تقریباً تمام مکمل‌های معرفی‌شده آذرپودر (مثل پروتئین‌ها، کراتین، BCAA، گلوتامین و ...) را می‌توان همزمان و بدون مشکل مصرف کرد، مگر در صورت بیماری خاص یا مصرف داروی ویژه. اگر درباره تداخل دو مکمل خاص سوال داری، نام هر دو را بنویس!`
-  },
-  {
-    keywords: ["تا چه مدت", "مدت", "چقدر", "چند وقت", "دوره"],
-    answer: (name, prods) => {
-      if (name) {
-        const prod = prods.find(p => name && (name.includes(p.name.split(" ")[2]) || name.includes(p.name.split(" ")[0])));
-        return prod && prod.duration
-          ? `${prod.name} را معمولاً می‌توانید ${prod.duration} مصرف کنید.`
-          : `مدت زمان مصرف بسته به نوع مکمل و هدف شما متغیر است، اما اغلب مکمل‌ها را می‌توان در دوره‌های ۲ تا ۳ ماهه مصرف و سپس ارزیابی کرد.`;
-      }
-      return "مدت زمان مصرف بسته به نوع مکمل و هدف شما متغیر است، اما اغلب مکمل‌ها را می‌توان در دوره‌های ۲ تا ۳ ماهه مصرف و سپس ارزیابی کرد.";
+  // هر پاسخ به چند کلمه کلیدی وابسته است.
+  { keywords: ["تداخل", "مصرف با", "همزمان"], answer: (name, prods) => `تقریباً تمام مکمل‌های آذرپودر (مثل پروتئین‌ها، کراتین، گلوتامین، BCAA و ...) را می‌توانید همزمان مصرف کنید. اگر داروی خاصی مصرف می‌کنید یا بیماری دارید، قبل مصرف مشورت نمایید.` },
+  { keywords: ["تا چه مدت", "مدت", "چقدر", "چند وقت", "دوره"], answer: (name, prods) => {
+    let prod = name ? prods.find(p=>name.includes(p.name.split(" ")[2])||name.includes(p.name.split(" ")[0])):null;
+    return prod && prod.duration ? `${prod.name}: ${prod.duration}` : "مدت زمان مصرف مکمل به نوع مکمل و هدف شما بستگی دارد؛ معمولاً ۸ تا ۱۲ هفته برای بسیاری از مکمل‌ها توصیه می‌شود."
+  }},
+  { keywords: ["عوارض", "خطر", "ضرر", "بدی", "مشکل"], answer: (name, prods) => {
+    let prod = name ? prods.find(p=>name.includes(p.name.split(" ")[2])||name.includes(p.name.split(" ")[0])):null;
+    return prod && prod.sideEffects ? `عوارض ${prod.name}: ${prod.sideEffects}` : "مصرف مکمل‌ها در دوز توصیه‌شده معمولاً بی‌عارضه است."
+  }},
+  { keywords: ["فواید", "برای چی", "چه فایده", "اثر", "کاربرد", "چه تاثیری", "چه مزایا", "به چه دردی"], answer: (name, prods) => {
+    let prod = name ? prods.find(p=>name.includes(p.name.split(" ")[2])||name.includes(p.name.split(" ")[0])):null;
+    return prod && prod.mainEffects ? `${prod.name}: ${prod.mainEffects}` : "هر مکمل مزایای خاص خود را دارد."
+  }},
+  { keywords: ["نحوه مصرف", "مصرف کنم", "چطور مصرف", "چه موقع", "کی مصرف", "چگونه مصرف"], answer: (name, prods) => {
+    let prod = name ? prods.find(p=>name.includes(p.name.split(" ")[2])||name.includes(p.name.split(" ")[0])):null;
+    return prod && prod.howToUse ? `نحوه مصرف ${prod.name}: ${prod.howToUse}` : "مصرف هر مکمل بسته به هدف و شرایط بدنی متفاوت است."
+  }},
+  { keywords: ["مقایسه", "فرق", "تفاوت", "بهتر", "VS", "در مقابل", "کدوم"], answer: (name, prods, msg) => {
+    let found = [];
+    prods.forEach(p => {
+      if (msg.includes(p.name.split(" ")[2]) || msg.includes(p.name.split(" ")[0]) || msg.includes(p.url)) found.push(p);
+    });
+    if (found.length >= 2) {
+      let a = found[0], b = found[1];
+      return `<b>مقایسه تخصصی ${a.name} و ${b.name}:</b><br>
+      <b>${a.name}:</b> ${a.description}<br><b>فواید:</b> ${a.mainEffects}<br><b>عوارض:</b> ${a.sideEffects}<br>
+      <hr style="margin:8px 0;">
+      <b>${b.name}:</b> ${b.description}<br><b>فواید:</b> ${b.mainEffects}<br><b>عوارض:</b> ${b.sideEffects}<br>
+      <a class="buy-btn" href="https://azar-powder.com/product/${a.url}" target="_blank">خرید ${a.name}</a>
+      <a class="buy-btn" href="https://azar-powder.com/product/${b.url}" target="_blank">خرید ${b.name}</a>`;
     }
-  },
-  {
-    keywords: ["برای چی خوبه", "چه فایده", "اثر", "فواید", "کاربرد", "چه تاثیری", "به چه دردی"],
-    answer: (name, prods) => {
-      if (name) {
-        const prod = prods.find(p => name && (name.includes(p.name.split(" ")[2]) || name.includes(p.name.split(" ")[0])));
-        return prod && prod.mainEffects
-          ? `${prod.name}: ${prod.mainEffects}`
-          : "هر مکمل اثر خاص خود را دارد. هدف، نوع تمرین و شرایط بدنی تعیین‌کننده است."
-      }
-      return "هر مکمل اثر خاص خود را دارد. هدف، نوع تمرین و شرایط بدنی تعیین‌کننده است.";
-    }
-  },
-  {
-    keywords: ["عوارض", "خطر", "ضرر", "مشکل", "بدی"],
-    answer: (name, prods) => {
-      if (name) {
-        const prod = prods.find(p => name && (name.includes(p.name.split(" ")[2]) || name.includes(p.name.split(" ")[0])));
-        return prod && prod.sideEffects
-          ? `عوارض ${prod.name}: ${prod.sideEffects}`
-          : "اغلب مکمل‌های آذرپودر در دوز توصیه‌شده بی‌عارضه‌اند. افراد با بیماری زمینه‌ای یا حساسیت باید احتیاط کنند."
-      }
-      return "اغلب مکمل‌های آذرپودر در دوز توصیه‌شده بی‌عارضه‌اند. افراد با بیماری زمینه‌ای یا حساسیت باید احتیاط کنند.";
-    }
-  },
-  {
-    keywords: ["مصرف کنم", "چه موقع", "کی مصرف", "چطور مصرف", "نحوه مصرف", "چگونه مصرف"],
-    answer: (name, prods) => {
-      if (name) {
-        const prod = prods.find(p => name && (name.includes(p.name.split(" ")[2]) || name.includes(p.name.split(" ")[0])));
-        return prod && prod.howToUse
-          ? `نحوه مصرف ${prod.name}: ${prod.howToUse}`
-          : "هر مکمل دستور مصرف خاص خود را دارد. معمولاً بعد تمرین یا همراه وعده غذایی."
-      }
-      return "هر مکمل دستور مصرف خاص خود را دارد. معمولاً بعد تمرین یا همراه وعده غذایی."
-    }
-  },
-  // ... هر سوال متداول دیگری خواستی می‌توانی مشابه این‌ها اضافه کنی ...
+    return "لطفاً نام دو مکمل مورد نظر خود را ذکر کنید تا مقایسه تخصصی انجام شود.";
+  }},
+  { keywords: ["چیست", "چیه", "چی میشه", "توضیح بده", "تعریف"], answer: (name, prods) => {
+    let prod = name ? prods.find(p=>name.includes(p.name.split(" ")[2])||name.includes(p.name.split(" ")[0])):null;
+    return prod ? `<b>${prod.name}:</b> ${prod.description}` : "لطفاً نام مکمل مورد نظر خود را دقیق بنویسید.";
+  }},
+  // ... می‌توانی هر پرسش متداول بیشتری اضافه کنی ...
 ];
 
-// --------- بخش جمع‌آوری اطلاعات و گفتگوی هوشمند ---------
+// --------- باقی کد (جمع‌آوری اطلاعات، پرسش و پاسخ) مثل نسخه قبلی ---------
+
 const FIELDS = [
   {
     key: "phone",
-    ask: [
-      "سلام! به مشاوره تخصصی مکمل‌های ورزشی آذرپودر خوش آمدید.\n\nلطفاً شماره موبایل خود را وارد کنید (مثلاً 09123456789 یا 9123456789):"
-    ],
-    retry: [
-      "شماره وارد شده صحیح نیست! شماره موبایل باید ۱۰ رقم (بدون صفر) یا ۱۱ رقم (با صفر) باشد. لطفاً دقیق وارد کنید."
-    ],
+    ask: ["سلام! به مشاوره تخصصی مکمل‌های ورزشی آذرپودر خوش آمدید.\n\nلطفاً شماره موبایل خود را وارد کنید (مثلاً 09123456789 یا 9123456789):"],
+    retry: ["شماره وارد شده صحیح نیست! شماره موبایل باید ۱۰ رقم (بدون صفر) یا ۱۱ رقم (با صفر) باشد. لطفاً دقیق وارد کنید."],
     validate: v => /^09\d{9}$/.test(v) || /^9\d{9}$/.test(v) || /^\+989\d{9}$/.test(v)
   },
-  {
-    key: "gender",
-    ask: [
-      n => `ممنون از ثبت شماره تماس ${n ? n+" عزیز" : ""}! لطفاً بفرمایید خانم هستید یا آقا؟ (برای تنظیم دقیق برنامه ضروری است.)`
-    ],
-    retry: [
-      "لطفاً فقط مشخص کنید خانم هستید یا آقا."
-    ],
-    validate: v => /خانم|آقا|مرد|زن/i.test((v||"").replace(/ /g,''))
-  },
-  {
-    key: "name",
-    ask: [
-      "لطفاً نام و نام خانوادگی خود را برای ثبت مشاوره وارد بفرمایید."
-    ],
-    retry: [
-      "جهت تکمیل پرونده مشاوره، نام و نام خانوادگی کامل خود را بنویسید."
-    ],
-    validate: v => v && v.trim().split(" ").length > 1 && v.trim().length > 4
-  },
-  {
-    key: "age",
-    ask: [
-      n => `${n ? n+" عزیز! " : ""}سن خود را فقط با عدد وارد کنید (مثلاً ۲۷).`
-    ],
-    retry: [
-      "لطفاً سن خود را فقط به عدد بنویسید (مثلاً ۲۹)."
-    ],
-    validate: v => /^\d+$/.test(v) && +v > 10 && +v < 100
-  },
-  {
-    key: "height",
-    ask: [
-      n => `قد خود را به سانتی‌متر وارد کنید، مثلا ۱۷۵.`
-    ],
-    retry: [
-      "لطفاً قد را فقط با عدد وارد کنید."
-    ],
-    validate: v => /^\d+$/.test(v) && +v > 100 && +v < 250
-  },
-  {
-    key: "weight",
-    ask: [
-      n => `وزن فعلی خود را چند کیلوگرم وارد کنید.`
-    ],
-    retry: [
-      "وزن را فقط به عدد (کیلوگرم) بنویسید."
-    ],
-    validate: v => /^\d+$/.test(v) && +v > 20 && +v < 300
-  },
-  {
-    key: "goal",
-    ask: [
-      n => `هدف اصلی شما از این مشاوره چیست؟ (مثلاً افزایش عضله، کاهش وزن یا فقط سلامت عمومی؟)`
-    ],
-    retry: [
-      "هدف دقیق‌تر خود را بنویسید؛ مثلاً کاهش وزن، عضله‌سازی یا ... "
-    ],
-    validate: v => v && v.trim().length > 2
-  },
-  {
-    key: "trainingHistory",
-    ask: [
-      n => `${n ? n+" عزیز، " : ""}سابقه ورزشی خود را لطفاً بنویسید (مثلاً چند سال، چه رشته‌هایی).`
-    ],
-    retry: [
-      "سابقه ورزشی یا رشته‌هایی که تمرین داشتید را نام ببرید."
-    ],
-    validate: v => v && v.trim().length > 2
-  },
-  {
-    key: "dietActivity",
-    ask: [
-      n => `آیا رژیم یا سبک تغذیه خاصی دارید؟ میزان فعالیت بدنی هفتگی چقدر است؟`
-    ],
-    retry: [
-      "یک جمله درباره تغذیه و فعالیت بدنی بنویسید."
-    ],
-    validate: v => v && v.trim().length > 2
-  },
-  {
-    key: "healthAllergies",
-    ask: [
-      n => `آیا به دارو یا غذایی حساسیت دارید یا واکنش آلرژیک داشته‌اید؟`
-    ],
-    retry: [
-      "هرگونه آلرژی یا حساسیت غذایی/دارویی را بنویسید."
-    ],
-    validate: v => true
-  },
-  {
-    key: "illnessHistory",
-    ask: [
-      n => `آیا سابقه بیماری یا مصرف داروی خاصی دارید؟`
-    ],
-    retry: [
-      "در صورت وجود بیماری یا داروی خاص بنویسید."
-    ],
-    validate: v => true
-  }
+  { key: "gender", ask: [n => `ممنون از ثبت شماره تماس ${n ? n+" عزیز" : ""}! لطفاً بفرمایید خانم هستید یا آقا؟`], retry: ["لطفاً فقط مشخص کنید خانم هستید یا آقا."], validate: v => /خانم|آقا|مرد|زن/i.test((v||"").replace(/ /g,'')) },
+  { key: "name", ask: ["لطفاً نام و نام خانوادگی خود را برای ثبت مشاوره وارد بفرمایید."], retry: ["جهت تکمیل پرونده مشاوره، نام و نام خانوادگی کامل خود را بنویسید."], validate: v => v && v.trim().split(" ").length > 1 && v.trim().length > 4 },
+  { key: "age", ask: [n => `${n ? n+" عزیز! " : ""}سن خود را فقط با عدد وارد کنید (مثلاً ۲۷).`], retry: ["لطفاً سن خود را فقط به عدد بنویسید (مثلاً ۲۹)."], validate: v => /^\d+$/.test(v) && +v > 10 && +v < 100 },
+  { key: "height", ask: [n => `قد خود را به سانتی‌متر وارد کنید، مثلا ۱۷۵.`], retry: ["لطفاً قد را فقط با عدد وارد کنید."], validate: v => /^\d+$/.test(v) && +v > 100 && +v < 250 },
+  { key: "weight", ask: [n => `وزن فعلی خود را چند کیلوگرم وارد کنید.`], retry: ["وزن را فقط به عدد (کیلوگرم) بنویسید."], validate: v => /^\d+$/.test(v) && +v > 20 && +v < 300 },
+  { key: "goal", ask: [n => `هدف اصلی شما از این مشاوره چیست؟ (مثلاً افزایش عضله، کاهش وزن یا فقط سلامت عمومی؟)`], retry: ["هدف دقیق‌تر خود را بنویسید؛ مثلاً کاهش وزن، عضله‌سازی یا ... "], validate: v => v && v.trim().length > 2 },
+  { key: "trainingHistory", ask: [n => `${n ? n+" عزیز، " : ""}سابقه ورزشی خود را لطفاً بنویسید (مثلاً چند سال، چه رشته‌هایی).`], retry: ["سابقه ورزشی یا رشته‌هایی که تمرین داشتید را نام ببرید."], validate: v => v && v.trim().length > 2 },
+  { key: "dietActivity", ask: [n => `آیا رژیم یا سبک تغذیه خاصی دارید؟ میزان فعالیت بدنی هفتگی چقدر است؟`], retry: ["یک جمله درباره تغذیه و فعالیت بدنی بنویسید."], validate: v => v && v.trim().length > 2 },
+  { key: "healthAllergies", ask: [n => `آیا به دارو یا غذایی حساسیت دارید یا واکنش آلرژیک داشته‌اید؟`], retry: ["هرگونه آلرژی یا حساسیت غذایی/دارویی را بنویسید."], validate: v => true },
+  { key: "illnessHistory", ask: [n => `آیا سابقه بیماری یا مصرف داروی خاصی دارید؟`], retry: ["در صورت وجود بیماری یا داروی خاص بنویسید."], validate: v => true }
 ];
 
 const USER = {};
@@ -229,7 +129,7 @@ const userInput = document.getElementById("user-input");
 const sendButton = document.getElementById("send-button");
 
 // افکت تایپ
-function typeMessage(text, sender, delay = 18) {
+function typeMessage(text, sender, delay = 17) {
   const messageDiv = document.createElement("div");
   messageDiv.classList.add("message", sender, "fade-in");
   chatMessages.appendChild(messageDiv);
@@ -272,18 +172,6 @@ function showProducts(products, userName) {
         <button class="buy-btn" onclick="window.open('https://azar-powder.com/product/${p.url}', '_blank')">خرید آنلاین</button>
       </div>`;
     appendMessage(productHTML, "bot");
-  });
-}
-
-function showHowToUse(products) {
-  products.forEach((p) => {
-    let usageHTML = `
-      <div class="product-card">
-        <div class="product-title">${p.name}</div>
-        <div><b>نحوه مصرف:</b> ${p.howToUse}</div>
-        <div><b>عوارض و هشدارها:</b> ${p.sideEffects}</div>
-      </div>`;
-    appendMessage(usageHTML, "bot");
   });
 }
 
@@ -347,9 +235,9 @@ function showRecommendation() {
     } else if (goal.includes("کاهش") || goal.includes("چربی") || goal.includes("تناسب")) {
       top = ["پروتئین وی ایزوله آذرپودر", "کلاژن هیدرولیز شده آذرپودر"];
     } else if (goal.includes("انرژی") || goal.includes("توان") || goal.includes("استقامت")) {
-      top = ["کراتین مونوهیدرات آذرپودر", "پروتئین وی ایزوله آذرپودر"];
+      top = ["کراتین مونوهیدرات آذرپودر", "پمپ پرفورمنس آذرپودر (Pre-workout)", "پروتئین وی ایزوله آذرپودر"];
     } else if (goal.includes("سلامت") || goal.includes("عمومی") || goal.includes("تقویت")) {
-      top = ["کلاژن هیدرولیز شده آذرپودر", "پروتئین وی ایزوله آذرپودر"];
+      top = ["کلاژن هیدرولیز شده آذرپودر", "مولتی‌ویتامین ورزشی آذرپودر"];
     } else {
       top = ["پروتئین وی ایزوله آذرپودر", "کراتین مونوهیدرات آذرپودر"];
     }
@@ -358,7 +246,7 @@ function showRecommendation() {
     appendMessage(`<b>بر اساس شرایط و هدف شما، این مکمل‌ها توصیه می‌شود:</b>`, "bot");
     showProducts(selected, USER.name ? USER.name.split(" ")[0] : "");
     setTimeout(()=>{
-      appendMessage(`<b>${USER.name ? USER.name.split(" ")[0]+" عزیز! " : ""}هر سوالی درباره مکمل‌های معرفی‌شده داری بپرس (مثل مدت مصرف، عوارض، فواید و...).</b>`, "bot");
+      appendMessage(`<b>${USER.name ? USER.name.split(" ")[0]+" عزیز! " : ""}هر سوالی درباره مکمل‌های معرفی‌شده یا سایر مکمل‌های آذرپودر داری بپرس (مدت مصرف، عوارض، تفاوت و...).</b>`, "bot");
       stage = "wait_questions";
       recommendedProducts = selected;
       toggleInput(true);
@@ -366,7 +254,7 @@ function showRecommendation() {
   }, 1400);
 }
 
-// ---------------------- پاسخ هوشمند به سوالات متداول ----------------------
+// پاسخ هوشمند به همه مکمل‌ها و مقایسه و FAQ
 function answerFAQ(msg, products, userName) {
   let prodName = null;
   products.forEach(p => {
@@ -377,16 +265,16 @@ function answerFAQ(msg, products, userName) {
   for (const faq of faqList) {
     for (const key of faq.keywords) {
       if (msg.includes(key)) {
-        let ans = faq.answer(prodName, products);
-        if (prodName && products.some(p => p.name === prodName)) {
-          ans += `<br><a class="buy-btn" href="https://azar-powder.com/product/${products.find(p => p.name === prodName).url}" target="_blank">خرید ${prodName}</a>`;
+        let ans = faq.answer(prodName, azarpowderProducts, msg);
+        if (prodName && azarpowderProducts.some(p => p.name === prodName)) {
+          ans += `<br><a class="buy-btn" href="https://azar-powder.com/product/${azarpowderProducts.find(p => p.name === prodName).url}" target="_blank">خرید ${prodName}</a>`;
         }
         return `<b>${userName ? userName+" عزیز! " : ""}</b>${ans}`;
       }
     }
   }
-  // اگر سوال درباره خود مکمل بود (مثلاً "کراتین چیه" یا "وی ایزوله چیست")
-  for (const p of products) {
+  // اگر فقط اسم مکمل اومد (توضیح تخصصی)
+  for (const p of azarpowderProducts) {
     if (
       msg.includes(p.name.split(" ")[2]) ||
       msg.includes(p.name.split(" ")[0]) ||
@@ -405,7 +293,7 @@ function answerFAQ(msg, products, userName) {
   return null;
 }
 
-// ---------------------- هندلینگ ورودی ----------------------
+// هندلینگ ورودی
 async function handleUserInput() {
   const msg = userInput.value.trim();
   if (!msg) return;
@@ -437,19 +325,64 @@ async function handleUserInput() {
     }
   }
   else if (stage === "wait_questions") {
-    let ans = answerFAQ(msg, recommendedProducts, USER.name ? USER.name.split(" ")[0] : "");
-    if (ans) {
-      appendMessage(ans, "bot");
+    // اول مقایسه: اگر دو مکمل در متن باشد
+    let compareMatch = msg.match(/فرق|مقایسه|تفاوت|کدوم|بهتر|VS|در مقابل/i);
+    let allProducts = azarpowderProducts;
+    if (compareMatch) {
+      let found = [];
+      allProducts.forEach(p => {
+        if (msg.includes(p.name.split(" ")[2]) || msg.includes(p.name.split(" ")[0]) || msg.includes(p.url))
+          found.push(p);
+      });
+      if (found.length >= 2) {
+        let a = found[0], b = found[1];
+        appendMessage(faqList.find(f=>f.keywords.includes("فرق")).answer(null, [a,b], msg), "bot");
+        setTimeout(() => {
+          appendMessage("آیا سؤال دیگری درباره مکمل‌ها داری؟ اگر نه، بنویس «خیر» تا مشاوره پایان یابد.", "bot");
+          toggleInput(true);
+        }, 600);
+        return;
+      }
+    }
+    // بعد توضیح هر مکمل (در کل دیتابیس)
+    let prod = allProducts.find(
+      p =>
+        msg.includes(p.name.split(" ")[2]) ||
+        msg.includes(p.name.split(" ")[0]) ||
+        msg.includes(p.url)
+    );
+    if (prod) {
+      let faq = answerFAQ(msg, [prod], USER.name ? USER.name.split(" ")[0] : "");
+      if (faq) {
+        appendMessage(faq, "bot");
+      } else {
+        appendMessage(
+          `<div class="product-card">
+            <div class="product-title">${prod.name}</div>
+            <div><b>توضیحات:</b> ${prod.description}</div>
+            <div><b>قیمت:</b> ${prod.price}</div>
+            <div><b>نحوه مصرف:</b> ${prod.howToUse}</div>
+            <div><b>عوارض و هشدارها:</b> ${prod.sideEffects}</div>
+            <a class="buy-btn" href="https://azar-powder.com/product/${prod.url}" target="_blank">خرید آنلاین</a>
+          </div>`, "bot"
+        );
+      }
       setTimeout(() => {
-        appendMessage(`آیا سوال دیگری درباره همین مکمل‌ها داری؟ اگر نه، بنویس «خیر» تا مشاوره پایان یابد.`, "bot");
+        appendMessage("آیا سؤال دیگری درباره مکمل‌ها داری؟ اگر نه، بنویس «خیر» تا مشاوره پایان یابد.", "bot");
         toggleInput(true);
       }, 600);
-    } else if (msg.match(/خیر|ندارم|تمام/i)) {
-      appendMessage(`ممنون از اعتمادت ${USER.name ? USER.name.split(" ")[0]+" عزیز! " : ""}امیدوارم بهترین نتیجه رو بگیری. برای خرید مکمل‌ها روی دکمه‌های زیر کلیک کن. <br><b>سلامت و موفقیتت آرزوی من هست.</b>`, "bot");
-      showFinalBuyLinks(recommendedProducts);
+      return;
+    }
+    // پایان یا سوال غیرمرتبط
+    if (msg.match(/خیر|ندارم|تمام/i)) {
+      appendMessage(
+        `ممنون از اعتمادت ${USER.name ? USER.name.split(" ")[0]+" عزیز! " : ""}امیدوارم بهترین نتیجه رو بگیری. برای خرید مکمل‌ها روی دکمه‌های زیر کلیک کن.<br><b>سلامت و موفقیتت آرزوی من هست.</b>`,
+        "bot"
+      );
+      showFinalBuyLinks(recommendedProducts.length?recommendedProducts:azarpowderProducts);
       toggleInput(false);
     } else {
-      appendMessage("سوال شما مرتبط با مکمل‌های معرفی شده نیست و فقط به سوالات مرتبط پاسخ داده می‌شود.", "bot");
+      appendMessage("سؤال شما مرتبط با مکمل‌های آذرپودر نیست و فقط به سوالات مکمل‌های آذرپودر پاسخ داده می‌شود.", "bot");
       toggleInput(true);
     }
   }
