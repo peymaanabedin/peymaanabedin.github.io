@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مشاور تخصصی ایران پودر</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+    body { font-family: 'Vazirmatn', sans-serif; background: #f3f4f6; }
+    .chat-container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,.09); display: flex; flex-direction: column; min-height: 85vh; max-height: 820px; }
+    .chat-header { background: linear-gradient(90deg, #6366f1 70%, #818cf8 100%); color: #fff; padding: 1.6rem; text-align: center; font-size: 1.3rem; font-weight: bold; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; }
+    .chat-messages { flex: 1; padding: 1.3rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.1rem; background: #f9fafb; }
+    .message { max-width: 92%; padding: .82rem 1.08rem; border-radius: 1rem; line-height: 1.8; font-size: 1.1rem; }
+    .message.user { background: #e0e7ff; align-self: flex-end; color: #3730a3; border-bottom-right-radius: .2rem; }
+    .message.bot { background: #f0fdf4; align-self: flex-start; color: #047857; border-bottom-left-radius: .2rem; }
+    .chat-input-container { display: flex; padding: 1.2rem; border-top: 1px solid #e5e7eb; background: #fff; border-bottom-left-radius: 1.5rem; border-bottom-right-radius: 1.5rem; }
+    .chat-input { flex: 1; padding: 0.8rem 1rem; border: 1px solid #d1d5db; border-radius: 0.8rem; font-size: 1.1rem; outline: none; text-align: right; }
+    .send-button { background: #6366f1; color: #fff; border: none; padding: 0.8rem 1.2rem; border-radius: 0.8rem; margin-right: 1rem; cursor: pointer; font-size: 1.15rem; }
+    .loading-indicator { display: flex; align-items: center; justify-content: flex-start; padding: 0.7rem 1rem; border-radius: 1rem; background: #e0f2fe; align-self: flex-start; color: #2563eb; }
+    .loading-indicator .dot { width: 8px; height: 8px; background: #2563eb; border-radius: 50%; margin: 0 2px; animation: bounce 0.65s infinite alternate; }
+    .loading-indicator .dot:nth-child(2) { animation-delay: .22s; }
+    .loading-indicator .dot:nth-child(3) { animation-delay: .44s; }
+    @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+  </style>
+</head>
+<body>
+<div class="chat-container">
+  <div class="chat-header">مشاور تخصصی ایران پودر</div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-container">
+    <input type="text" id="user-input" class="chat-input" placeholder="پیام خود را بنویسید..." autocomplete="off" />
+    <button id="send-button" class="send-button"><span>&#x1F680;</span></button>
+  </div>
+</div>
+<script type="module">
+// ======== آدرس Cloudflare Worker شما ========
+const API_URL = "https://iranpowder.peymaancrafts.workers.dev/";
+
+// ======== فیلدهای کاربر و سوالات ========
+const userFields = [
+  "gender", "name", "age", "height", "weight",
+  "goal", "trainingHistory", "dietActivity", "healthAllergies", "illnessHistory", "phone"
+];
+
+const questions = {
+  gender: [
+    "در ابتدا بفرمایید خانم هستید یا آقا؟ (جنسیت برای تنظیم برنامه دقیق مهم است.)",
+    "لطفا مشخص کنید جنسیت شما چیست؟ (خانم یا آقا)"
+  ],
+  name: [
+    "لطفاً نام و نام خانوادگی خود را بفرمایید تا با هم راحت‌تر صحبت کنیم.",
+    "می‌تونم اسمتون رو بدونم؟ این کمک می‌کنه برنامه کاملاً شخصی براتون طراحی کنم."
+  ],
+  age: [
+    "سن شما چند سال است؟ (فقط عدد را بنویسید)",
+    "چند سال دارید؟"
+  ],
+  height: [
+    "قد شما چند سانتی‌متر است؟ (مثلاً ۱۸۰)",
+    "لطفا عدد قد خود را وارد کنید."
+  ],
+  weight: [
+    "وزن فعلی شما چند کیلوگرم است؟",
+    "وزنتان را لطفاً به عدد بنویسید."
+  ],
+  goal: [
+    "هدف شما از مشاوره چیست؟ مثلا افزایش عضله، کاهش وزن، یا فقط سلامت و نشاط؟",
+    "چه هدف بدنی یا ورزشی را دنبال می‌کنید؟"
+  ],
+  trainingHistory: [
+    "سابقه تمرینی خود را توضیح دهید. مثلا چند سال ورزش می‌کنید و چه ورزشی انجام داده‌اید؟",
+    "چند وقت است ورزش می‌کنید؟ سطح خود را مبتدی، متوسط یا حرفه‌ای می‌دانید؟"
+  ],
+  dietActivity: [
+    "رژیم غذایی فعلی و میزان فعالیت بدنی خود را بفرمایید.",
+    "چند روز در هفته ورزش می‌کنید و رژیم خاصی دارید؟"
+  ],
+  healthAllergies: [
+    "آیا به ماده غذایی یا داروی خاصی حساسیت دارید؟",
+    "حساسیت یا آلرژی غذایی دارید؟"
+  ],
+  illnessHistory: [
+    "آیا بیماری خاصی دارید یا داروی خاصی مصرف می‌کنید؟",
+    "سوابق بیماری یا مشکلات پزشکی خاصی دارید؟"
+  ],
+  phone: [
+    "در صورت تمایل، شماره تماس خود را ثبت کنید تا در صورت نیاز پشتیبانی تماس بگیرد. (اختیاری)",
+    "اگر دوست داشتید، شماره موبایل خود را برای پشتیبانی وارد کنید (اختیاری)."
+  ]
+};
+
+let userInfo = Object.fromEntries(userFields.map(f => [f, null]));
+let conversationState = "collecting_info";
+let currentField = null;
+let repeatCount = 0;
+
+const iranPowderProducts = [
+  { name: "پروتئین وی ایران پودر", price: "۲,۵۰۰,۰۰۰ تومان", howToUse: "یک پیمانه بعد از تمرین", sideEffects: "در صورت حساسیت به لاکتوز با احتیاط مصرف شود." },
+  { name: "گینر ایران پودر", price: "۱,۸۰۰,۰۰۰ تومان", howToUse: "دو پیمانه در روز، بعد از تمرین و به عنوان میان‌وعده", sideEffects: "ممکن است باعث نفخ موقت شود." },
+  { name: "کراتین مونوهیدرات ایران پودر", price: "۹۵۰,۰۰۰ تومان", howToUse: "۵ گرم در روز همراه با آب یا آبمیوه", sideEffects: "نیاز به مصرف آب فراوان دارد." },
+];
+
+// ======== UI ========
+const chatMessages = document.getElementById("chat-messages");
+const userInput = document.getElementById("user-input");
+const sendButton = document.getElementById("send-button");
+
+function appendMessage(text, sender) {
+  const messageDiv = document.createElement("div");
+  messageDiv.classList.add("message", sender);
+  messageDiv.innerHTML = sender === "bot" ? text.replace(/ایران پودر/g, "<strong>ایران پودر</strong>") : text;
+  chatMessages.appendChild(messageDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showLoadingIndicator(text = "") {
+  const loadingDiv = document.createElement("div");
+  loadingDiv.classList.add("loading-indicator");
+  loadingDiv.innerHTML = text
+    ? `<span>${text}</span>`
+    : `<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
+  chatMessages.appendChild(loadingDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return loadingDiv;
+}
+function removeElement(element) {
+  if (element && element.parentNode) element.parentNode.removeChild(element);
+}
+function toggleInput(enabled) {
+  userInput.disabled = !enabled;
+  sendButton.disabled = !enabled;
+  if (enabled) userInput.focus();
+}
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// ======== منطق سوالات ========
+function getNextField() {
+  return userFields.find(f => userInfo[f] === null);
+}
+
+function askNextQuestion(isRepeat = false) {
+  currentField = getNextField();
+  if (!currentField || (currentField === "phone" && Object.values(userInfo).filter(v => v === null).length === 1)) {
+    appendMessage("خیلی ممنون بابت پاسخ‌ها! حالا مناسب‌ترین مکمل‌ها و برنامه را بر اساس شرایط شما معرفی می‌کنم. لطفاً چند لحظه صبر کنید ...", "bot");
+    conversationState = "recommendation";
+    handleRecommendation();
+    return;
+  }
+  let prompt = pickRandom(questions[currentField]);
+  if (isRepeat) {
+    prompt = `<span style='color:#d97706'>اطلاعات این بخش برای مشاوره مهم است.</span><br>` + prompt;
+  }
+  appendMessage(prompt, "bot");
+  toggleInput(true);
+}
+
+function isValidAnswer(field, value) {
+  value = value.trim();
+  if (!value) return false;
+  if (field === "gender") return /^(خانم|آقا|مرد|زن)$/i.test(value);
+  if (field === "age") return /^\d+$/.test(value) && +value > 10 && +value < 100;
+  if (field === "height") return /^\d+$/.test(value) && +value > 100 && +value < 250;
+  if (field === "weight") return /^\d+$/.test(value) && +value > 20 && +value < 300;
+  if (field === "phone" && value && !/^(\+98|0)?9\d{9}$/.test(value)) return false;
+  // سایر فیلدها با یک جمله هم معتبرند
+  return true;
+}
+
+// ======== توصیه نهایی و ارتباط با پراکسی ========
+async function fetchWithRetry(prompt) {
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] }),
+      });
+      if (!response.ok) throw new Error(`API Error: ${response.status}`);
+      const result = await response.json();
+      let text = (result?.candidates?.[0]?.content?.parts?.[0]?.text ?? "").trim();
+      return text || "پاسخی دریافت نشد!";
+    } catch (error) {
+      if (attempt < 2) {
+        showLoadingIndicator(`در حال تلاش مجدد برای ارتباط...`);
+        await new Promise(r => setTimeout(r, attempt * 1300));
+      } else throw error;
+    }
+  }
+}
+
+async function handleRecommendation() {
+  toggleInput(false);
+  const loading = showLoadingIndicator("در حال تحلیل تخصصی شرایط شما...");
+  const prompt = `
+    شما به عنوان یک مشاور تغذیه و مکمل ورزشی بسیار حرفه‌ای برای برند ایران پودر باید با توجه به اطلاعات زیر:
+    اطلاعات کاربر: ${JSON.stringify(userInfo)}
+    محصولات: ${JSON.stringify(iranPowderProducts)}
+    1. با نام و احترام به کاربر شروع کن و توضیح بده تحلیل‌هایت بر اساس شرایط اوست.
+    2. بهترین مکمل‌ها را برای هدف و شرایطش تحلیل و معرفی کن (حداکثر سه مورد).
+    3. قیمت و نحوه مصرف هر مکمل را بنویس.
+    4. نکته نهایی یا توصیه کوتاه برای سبک زندگی سالم یا پیگیری با پشتیبانی بنویس.
+    5. خروجی فقط متن فارسی باشد و مستقیم برای نمایش ارسال می‌شود.
+  `;
+  try {
+    const res = await fetchWithRetry(prompt);
+    removeElement(loading);
+    appendMessage(res, "bot");
+    toggleInput(true);
+  } catch (e) {
+    removeElement(loading);
+    appendMessage("متاسفانه سیستم مشاوره فعلا پاسخگو نیست. لطفاً چند دقیقه دیگر دوباره تلاش کنید.", "bot");
+  }
+}
+
+// ======== هندلینگ ورودی ========
+async function handleUserInput() {
+  const msg = userInput.value.trim();
+  if (!msg) return;
+  appendMessage(msg, "user");
+  userInput.value = "";
+  toggleInput(false);
+
+  // ذخیره مقدار یا تکرار سوال
+  if (conversationState === "collecting_info" && currentField) {
+    if (isValidAnswer(currentField, msg)) {
+      userInfo[currentField] = msg;
+      repeatCount = 0;
+      setTimeout(() => askNextQuestion(), 550);
+    } else {
+      repeatCount++;
+      if (repeatCount < 3) setTimeout(() => askNextQuestion(true), 400);
+      else {
+        appendMessage("اگر به هر دلیلی مایل به پاسخ نیستید می‌توانید فقط بنویسید \"رد\" یا \"هیچ\" تا به سوال بعد برویم.", "bot");
+        toggleInput(true);
+        repeatCount = 0;
+      }
+    }
+  }
+}
+
+// ======== شروع مکالمه ========
+function startConversation() {
+  appendMessage(
+    "سلام! به مشاوره تخصصی <strong>ایران پودر</strong> خوش آمدید 😊<br>برای اینکه بهترین برنامه را ارائه بدم چند سوال کوتاه می‌پرسم؛ لطفاً با حوصله و صداقت جواب دهید.<br><span style='color:#6366f1'>در هر مرحله اگر سوالی داشتید می‌توانید بپرسید.</span>",
+    "bot"
+  );
+  setTimeout(() => askNextQuestion(), 1000);
+  toggleInput(true);
+}
+
+sendButton.addEventListener("click", handleUserInput);
+userInput.addEventListener("keypress", e => {
+  if (e.key === "Enter" && !userInput.disabled) handleUserInput();
+});
+window.onload = startConversation;
+</script>
+</body>
+</html>
