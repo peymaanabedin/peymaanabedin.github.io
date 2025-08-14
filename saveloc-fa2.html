@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f9" media="(prefers-color-scheme: light)">
+  <title>Save Loc — ذخیره مکان</title>
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon" href="https://i.postimg.cc/vT811GJ3/App-Icon-2x.png" />
+  <link rel="icon" href="https://i.postimg.cc/vT811GJ3/App-Icon-2x.png" />
+
+  <!-- Fonts / Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous" />
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root{
+      --bg:#0b0b0f; --panel:#101013; --panel-2:#151519; --text:#f5f5f7; --muted:#9ea0a6; --border:#1e1f24;
+      --radius:14px; --radius-lg:18px; --shadow:0 8px 24px rgba(0,0,0,.12);
+    }
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#f7f7f9; --panel:#ffffff; --panel-2:#f3f3f6; --text:#0d0f14; --muted:#6f7683; --border:#e7e9ee; }
+    }
+    [data-theme="light"]{ --bg:#f7f7f9; --panel:#ffffff; --panel-2:#f3f3f6; --text:#0d0f14; --muted:#6f7683; --border:#e7e9ee; }
+    [data-theme="dark"]{ --bg:#0b0b0f; --panel:#101013; --panel-2:#151519; --text:#f5f5f7; --muted:#9ea0a6; --border:#1e1f24; }
+
+    body{
+      background:var(--bg); color:var(--text);
+      font-family:'Vazirmatn', -apple-system, system-ui, "SF Pro Text", Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; -webkit-text-size-adjust:100%;
+      font-size:14px; /* smaller, cleaner */
+    }
+
+    .appbar{
+      position:sticky; top:0; z-index:50; padding-top:env(safe-area-inset-top);
+      background:color-mix(in oklab, var(--bg) 92%, transparent);
+      border-bottom:1px solid var(--border);
+      backdrop-filter:saturate(180%) blur(10px);
+    }
+
+    .card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); }
+
+    /* Sleek buttons */
+    .btn{
+      min-height:44px; border-radius:12px; font-weight:600; font-size:13.5px;
+      transition:transform .06s ease, background-color .2s ease, border-color .2s ease, opacity .2s ease;
+      padding:.6rem .8rem;
+    }
+    .btn:active{ transform:translateY(1px); }
+    .btn-solid{ background:var(--text); color:var(--bg); }
+    .btn-ghost{ background:var(--panel-2); border:1px solid var(--border); color:var(--text); }
+    .btn-outline{ border:1px solid var(--border); color:var(--text); background:transparent; }
+    .btn-danger{ background:#2b2b31; color:#fff; }
+
+    .chip{
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.45rem .7rem; border-radius:9999px;
+      border:1px solid var(--border); background:var(--panel-2); color:var(--text);
+      white-space:nowrap; font-size:12.5px;
+    }
+    .chip[aria-pressed="true"]{ background:var(--panel); box-shadow:var(--shadow); }
+
+    .seg{ display:flex; padding:4px; gap:4px; border:1px solid var(--border); border-radius:9999px; background:var(--panel-2); }
+    .seg button{ min-height:36px; padding:.35rem .75rem; border-radius:9999px; font-weight:600; color:var(--muted); font-size:12.5px; }
+    .seg button[aria-pressed="true"]{ color:var(--text); background:var(--panel); box-shadow:var(--shadow); }
+
+    .toolbar{ display:flex; gap:.5rem; flex-wrap:wrap; }
+    .tool{ display:inline-flex; align-items:center; gap:.45rem; padding:.5rem .7rem; border-radius:10px;
+           border:1px solid var(--border); background:var(--panel-2); font-weight:600; font-size:12.5px; }
+    .tool:active{ transform:translateY(1px); }
+
+    .toast{
+      position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom)); transform:translateX(-50%);
+      background:var(--panel); border:1px solid var(--border); padding:.55rem .8rem; border-radius:12px; color:var(--text);
+      opacity:0; pointer-events:none; transition:.25s; z-index:70;
+    }
+    .toast.show{ opacity:1; bottom:calc(26px + env(safe-area-inset-bottom)); }
+
+    .bottom-nav{
+      position:sticky; bottom:0; z-index:50; padding-bottom:calc(env(safe-area-inset-bottom));
+      background:color-mix(in oklab, var(--bg) 94%, transparent);
+      border-top:1px solid var(--border); backdrop-filter:blur(10px);
+    }
+    .nav-btn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:.5rem 0; color:var(--muted); font-weight:600; font-size:11.5px; }
+    .nav-btn[aria-current="page"]{ color:var(--text); }
+
+    .mono{ font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    input.ios-input, textarea.ios-input{ background:var(--panel-2); border:1px solid var(--border); border-radius:12px; color:var(--text); min-height:40px; font-size:13.5px; }
+    dialog::backdrop{ background:rgba(0,0,0,.5); }
+  </style>
+</head>
+<body class="h-full">
+  <!-- Header -->
+  <header class="appbar">
+    <div class="max-w-2xl mx-auto px-4 py-2.5 flex items-center gap-3">
+      <img class="w-7 h-7 rounded-lg" src="https://i.postimg.cc/vT811GJ3/App-Icon-2x.png" alt="Save Loc" />
+      <div class="font-extrabold text-sm grow text-center sm:text-right">Save Loc</div>
+      <div class="flex items-center gap-2">
+        <button id="installBtn" class="btn btn-outline px-3 py-1.5" title="Install" hidden><i class="fa-solid fa-download"></i></button>
+        <button id="a2hsHint" class="btn btn-outline px-3 py-1.5" title="Add to Home" hidden><i class="fa-regular fa-square-plus"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-2xl mx-auto px-4 pt-4 pb-24 grid gap-4">
+    <!-- LIVE TAB -->
+    <section id="tab-live" role="tabpanel" aria-labelledby="navLive" class="grid gap-4">
+      <div class="card p-4 grid gap-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-[13.5px] font-bold"><i class="fa-solid fa-location-crosshairs me-1.5"></i><span data-i18n="current.title">مکان فعلی</span></h2>
+          <span id="permStatus" class="chip text-[12px]" data-i18n="perm.unknown">دسترسی: <b>نامشخص</b></span>
+        </div>
+
+        <div class="h-1 bg-[var(--panel-2)] rounded-full overflow-hidden">
+          <i id="progBar" class="block h-full w-0 bg-[var(--text)] transition-all duration-300"></i>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button id="locateBtn" class="btn btn-solid"><i class="fa-solid fa-crosshairs me-1.5"></i><span data-i18n="current.getPrecise">📍 موقعیت دقیق</span></button>
+          <button id="openPicker" class="btn btn-ghost"><i class="fa-regular fa-map me-1.5"></i><span data-i18n="current.mapPicker">🗺️ انتخاب روی نقشه</span></button>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12.5px]">
+          <div class="chip mono" id="latBox" data-i18n="current.lat">عرض: —</div>
+          <div class="chip mono" id="lngBox" data-i18n="current.lng">طول: —</div>
+          <div class="chip" id="accBox" data-i18n="current.acc">دقت: —</div>
+          <div class="chip mono" id="eleBox">ارتفاع: —</div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button id="copyLat" class="btn btn-outline"><i class="fa-regular fa-copy me-1.5"></i><span data-i18n="current.copyLat">کپی عرض</span></button>
+          <button id="copyLng" class="btn btn-outline"><i class="fa-regular fa-copy me-1.5"></i><span data-i18n="current.copyLng">کپی طول</span></button>
+          <button id="copyBoth" class="btn btn-outline"><i class="fa-regular fa-copy me-1.5"></i><span data-i18n="current.copyBoth">کپی عرض،طول</span></button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <i class="fa-regular fa-clock text-[var(--muted)]"></i>
+          <div class="text-[var(--muted)] text-[12.5px]" id="tsBox">—</div>
+        </div>
+        <div class="flex flex-wrap gap-2" id="addrRow" style="display:none">
+          <div class="chip" id="addrChip" data-i18n="current.resolving">📍 درحال دریافت آدرس…</div>
+        </div>
+
+        <!-- Maps + Taxi -->
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+          <button id="saveLiveBtn" class="btn btn-solid disabled:opacity-50" disabled><i class="fa-regular fa-star me-1.5"></i><span data-i18n="current.save">ذخیره</span></button>
+          <button id="shareBtn" class="btn btn-outline disabled:opacity-50" disabled><i class="fa-solid fa-arrow-up-from-bracket me-1.5"></i><span data-i18n="common.share">اشتراک</span></button>
+          <button id="openApple" class="btn btn-ghost disabled:opacity-50" disabled><i class="fa-brands fa-apple me-1.5"></i><span data-i18n="maps.apple">اپل</span></button>
+          <button id="openGoogle" class="btn btn-ghost disabled:opacity-50" disabled><i class="fa-brands fa-google me-1.5"></i><span data-i18n="maps.google">گوگل</span></button>
+          <button id="openWaze" class="btn btn-ghost disabled:opacity-50" disabled><i class="fa-solid fa-map-location-dot me-1.5"></i><span data-i18n="maps.waze">ویز</span></button>
+          <button id="dirApple" class="btn btn-ghost disabled:opacity-50" disabled><i class="fa-solid fa-turn-up me-1.5"></i><span data-i18n="maps.appleDir">مسیـریابی اپل</span></button>
+          <button id="openSnapp" class="btn btn-ghost disabled:opacity-50" disabled><i class="fa-solid fa-taxi me-1.5"></i><span data-i18n="maps.snapp">اسنپ</span></button>
+          <button id="openTapsi" class="btn btn-ghost disabled:opacity-50" disabled><i class="fa-solid fa-car-side me-1.5"></i><span data-i18n="maps.tapsi">تپسی</span></button>
+          <button id="openCustom" class="btn btn-outline disabled:opacity-50 col-span-3 sm:col-span-6" disabled><i class="fa-solid fa-up-right-from-square me-1.5"></i><span data-i18n="maps.otherApp">برنامه دیگر</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAVED TAB -->
+    <section id="tab-saved" role="tabpanel" aria-labelledby="navSaved" class="grid gap-4 hidden">
+      <div class="card p-4 grid gap-3">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="text-[13.5px] font-bold"><i class="fa-regular fa-bookmark me-1.5"></i><span data-i18n="saved.title">مکان‌های ذخیره‌شده</span></h2>
+          <div class="toolbar">
+            <button id="exportBtn" class="tool"><i class="fa-solid fa-file-arrow-down"></i><span data-i18n="backup.export">خروجی</span></button>
+            <button id="importBtn" class="tool"><i class="fa-solid fa-file-arrow-up"></i><span data-i18n="backup.import">ورود</span></button>
+            <input id="importFile" type="file" accept="application/json" hidden />
+            <button id="backupBtn" class="tool"><i class="fa-solid fa-briefcase"></i><span data-i18n="backup.backup">پشتیبان</span></button>
+            <input id="restoreFile" type="file" accept="application/json" hidden />
+            <button id="restoreBtn" class="tool"><i class="fa-solid fa-suitcase-rolling"></i><span data-i18n="backup.restore">بازیابی</span></button>
+            <button id="clearAllBtn" class="tool"><i class="fa-solid fa-trash"></i><span data-i18n="backup.clearAll">حذف همه</span></button>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <div class="relative grow">
+            <i class="fa-solid fa-magnifying-glass absolute top-3.5 right-3 text-[var(--muted)]"></i>
+            <input id="searchBox" type="search" class="ios-input w-full py-2.5 pe-9 ps-3" data-i18n-placeholder="saved.searchPh" placeholder="جستجو: نام، آدرس، یادداشت…" aria-label="Search" />
+          </div>
+        </div>
+
+        <!-- Category filter chips -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1" id="catFiltersRow"></div>
+
+        <div id="listArea" class="grid gap-3">
+          <div class="border border-dashed border-[var(--border)] rounded-xl p-5 text-center text-[var(--muted)]" data-i18n="saved.empty">هنوز مکانی ذخیره نشده. از <b>موقعیت دقیق</b> یا <b>انتخاب روی نقشه</b> استفاده کنید.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS MODAL -->
+    <dialog id="settingsModal" class="card w-11/12 max-w-xl p-0">
+      <div class="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
+        <strong class="text-[13.5px] font-bold" data-i18n="settings.title">تنظیمات</strong>
+        <div class="grow"></div>
+        <button id="closeSettings" class="btn btn-outline px-3" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 grid gap-5">
+        <div class="grid gap-2">
+          <label for="customTpl" class="text-[12.5px] text-[var(--muted)]" data-i18n="settings.customTpl">قالب لینک سفارشی (برنامه دیگر)</label>
+          <input id="customTpl" type="text" class="ios-input w-full px-3" placeholder="myapp://open?lat={lat}&lng={lng}&name={name}" />
+          <div class="text-xs text-[var(--muted)]" data-i18n="settings.customHelp">جای‌گذارها: {lat}، {lng}، {name}</div>
+          <div class="flex items-center gap-2">
+            <button id="testCustom" class="btn btn-outline text-[12.5px]" data-i18n="settings.testLink">آزمون لینک</button>
+          </div>
+        </div>
+
+        <div class="grid gap-2">
+          <div class="text-[12.5px] text-[var(--muted)]" data-i18n="settings.categories">دسته‌بندی‌ها</div>
+          <div id="catList" class="grid gap-2" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))"></div>
+          <div class="flex gap-2">
+            <input id="newCatName" type="text" class="ios-input flex-grow px-3" data-i18n-placeholder="settings.newCatPh" placeholder="نام دسته (مثلاً: پارکینگ)" />
+            <input id="newCatIcon" type="text" class="ios-input w-20 px-3" data-i18n-placeholder="settings.newCatIconPh" placeholder="🅿️" />
+            <button id="addCatBtn" class="btn btn-solid text-[12.5px]" data-i18n="common.add">افزودن</button>
+          </div>
+          <div class="text-xs text-[var(--muted)]" data-i18n="settings.catTip">از ایموجی به‌عنوان آیکن استفاده کنید.</div>
+        </div>
+
+        <div class="grid gap-3">
+          <div class="text-[12.5px] text-[var(--muted)]">Theme</div>
+          <div class="seg" role="tablist" aria-label="Theme">
+            <button id="themeAuto" aria-pressed="true">Auto</button>
+            <button id="themeLight" aria-pressed="false">Light</button>
+            <button id="themeDark" aria-pressed="false">Dark</button>
+          </div>
+        </div>
+
+        <div class="grid gap-3">
+          <div class="text-[12.5px] text-[var(--muted)]">Language</div>
+          <div class="seg" role="tablist" aria-label="Language">
+            <button id="langFa" aria-pressed="true">فا</button>
+            <button id="langEn" aria-pressed="false">EN</button>
+          </div>
+          <div>
+            <label for="shareTitle" class="text-[12.5px] text-[var(--muted)]" data-i18n="settings.shareTitle">عنوان اشتراک‌گذاری</label>
+            <input id="shareTitle" type="text" class="ios-input w-full px-3" placeholder="Save Loc" />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button id="saveSettings" class="btn btn-solid" data-i18n="common.save">ذخیره</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- PICKER MODAL -->
+    <dialog id="pickerModal" class="card w-11/12 max-w-xl p-0">
+      <div class="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
+        <strong class="text-[13.5px] font-bold" data-i18n="picker.title">انتخاب روی نقشه</strong>
+        <div class="grow"></div>
+        <button id="closePicker" class="btn btn-outline px-3" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 grid gap-3">
+        <div id="pickerMap" class="w-full h-80 rounded-xl border border-[var(--border)] overflow-hidden"></div>
+        <div class="toolbar">
+          <button id="pickerLocate" class="tool"><i class="fa-solid fa-crosshairs"></i><span data-i18n="picker.locate">یافتن من</span></button>
+          <div class="grow"></div>
+          <div class="flex gap-2">
+            <input id="pickerSearch" type="text" class="ios-input w-56 px-3" data-i18n-placeholder="picker.searchPh" placeholder="جستجوی آدرس…" />
+            <button id="pickerSearchBtn" class="btn btn-outline" data-i18n="picker.searchBtn">جستجو</button>
+            <button id="pickerUse" class="btn btn-solid" data-i18n="picker.useBtn">استفاده از این نقطه</button>
+          </div>
+        </div>
+        <div class="text-[11.5px] text-[var(--muted)]" data-i18n="picker.help">پین را بکشید یا روی نقشه بزنید. جستجو ابتدا شهر شما را در نظر می‌گیرد.</div>
+      </div>
+    </dialog>
+
+    <!-- SAVE MODAL -->
+    <dialog id="saveModal" class="card w-11/12 max-w-xl p-0">
+      <div class="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
+        <strong id="saveModalTitle" class="text-[13.5px] font-bold" data-i18n="save.title">ذخیره مکان</strong>
+        <div class="grow"></div>
+        <button id="closeSave" class="btn btn-outline px-3" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 grid gap-3">
+        <div>
+          <label class="text-[12.5px] text-[var(--muted)]" for="placeName" data-i18n="save.nameLabel">نام</label>
+          <input id="placeName" type="text" class="ios-input w-full px-3" data-i18n-placeholder="save.namePh" placeholder="نقطه من" />
+        </div>
+        <div>
+          <label class="text-[12.5px] text-[var(--muted)]" data-i18n="save.catLabel">دسته‌بندی</label>
+          <div id="catChips" class="flex flex-wrap gap-2 mt-1"></div>
+          <div class="flex gap-2 mt-2">
+            <input id="quickCatName" type="text" class="ios-input flex-grow px-3" data-i18n-placeholder="save.newCatNamePh" placeholder="نام دسته جدید" />
+            <input id="quickCatIcon" type="text" class="ios-input w-20 px-3" data-i18n-placeholder="save.newCatIconPh" placeholder="📌" />
+            <button id="quickAddCat" class="btn btn-outline" data-i18n="common.add">افزودن</button>
+          </div>
+        </div>
+        <div>
+          <label class="text-[12.5px] text-[var(--muted)]" for="placeNotes" data-i18n="save.notesLabel">یادداشت</label>
+          <textarea id="placeNotes" rows="3" class="ios-input w-full px-3 py-2" data-i18n-placeholder="save.notesPh" placeholder="یادداشت اختیاری"></textarea>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12.5px]">
+          <div class="chip mono" id="saveLat" data-i18n="current.lat">عرض: —</div>
+          <div class="chip mono" id="saveLng" data-i18n="current.lng">طول: —</div>
+          <div class="chip" id="saveAcc" data-i18n="current.acc">دقت: —</div>
+          <div class="chip mono" id="saveEle">ارتفاع: —</div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <div class="chip" id="saveAddr">📍 —</div>
+        </div>
+      </div>
+      <div class="px-4 py-3 border-t border-[var(--border)] flex gap-2 justify-end">
+        <button id="saveCancel" class="btn btn-outline" data-i18n="common.cancel">انصراف</button>
+        <button id="saveConfirm" class="btn btn-solid" data-i18n="common.save">ذخیره</button>
+      </div>
+    </dialog>
+
+    <!-- PREVIEW MODAL -->
+    <dialog id="previewModal" class="card w-11/12 max-w-xl p-0">
+      <div class="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
+        <strong id="previewTitle" class="text-[13.5px] font-bold" data-i18n="preview.title">پیش‌نمایش</strong>
+        <div class="grow"></div>
+        <button id="closePreview" class="btn btn-outline px-3" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 grid gap-3">
+        <div id="previewMap" class="w-full h-80 rounded-xl border border-[var(--border)] overflow-hidden"></div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12.5px]">
+          <div id="previewAddr" class="chip col-span-2 sm:col-span-4">—</div>
+          <div id="previewEle" class="chip">ارتفاع: —</div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <button id="pvApple" class="btn btn-ghost"><i class="fa-brands fa-apple me-1.5"></i><span data-i18n="maps.apple">اپل</span></button>
+          <button id="pvGoogle" class="btn btn-ghost"><i class="fa-brands fa-google me-1.5"></i><span data-i18n="maps.google">گوگل</span></button>
+          <button id="pvWaze" class="btn btn-ghost"><i class="fa-solid fa-map-location-dot me-1.5"></i><span data-i18n="maps.waze">ویز</span></button>
+          <button id="pvSnapp" class="btn btn-ghost"><i class="fa-solid fa-taxi me-1.5"></i><span data-i18n="maps.snapp">اسنپ</span></button>
+          <button id="pvTapsi" class="btn btn-ghost"><i class="fa-solid fa-car-side me-1.5"></i><span data-i18n="maps.tapsi">تپسی</span></button>
+          <button id="pvDir" class="btn btn-ghost"><i class="fa-solid fa-turn-up me-1.5"></i><span data-i18n="maps.appleDir">مسیر اپل</span></button>
+          <button id="pvShare" class="btn btn-outline col-span-2 sm:col-span-3"><i class="fa-solid fa-arrow-up-from-bracket me-1.5"></i><span data-i18n="common.share">اشتراک</span></button>
+        </div>
+      </div>
+    </dialog>
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="max-w-2xl mx-auto px-6 grid grid-cols-3">
+      <button id="navLive" class="nav-btn" aria-current="page"><i class="fa-solid fa-location-crosshairs text-sm"></i><span>Live</span></button>
+      <button id="navSaved" class="nav-btn"><i class="fa-regular fa-bookmark text-sm"></i><span>Saved</span></button>
+      <button id="settingsOpenBtn" class="nav-btn"><i class="fa-solid fa-gear text-sm"></i><span>Settings</span></button>
+    </div>
+  </nav>
+
+  <footer class="px-4 py-5 text-center text-[var(--muted)] text-[11.5px]">ساخته شده توسط <b>Peymaan Abedinpour V0.05</b></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite">—</div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    /* Manifest */
+    (function(){
+      const manifest = {
+        name:"Save Loc — ذخیره مکان", short_name:"Save Loc", start_url:"./", display:"standalone",
+        background_color:"#0b0b0f", theme_color:"#0b0b0f",
+        icons:[
+          {src:"https://i.postimg.cc/vT811GJ3/App-Icon-2x.png", sizes:"192x192", type:"image/png", purpose:"any maskable"},
+          {src:"https://i.postimg.cc/vT811GJ3/App-Icon-2x.png", sizes:"512x512", type:"image/png", purpose:"any maskable"}
+        ]
+      };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"}));
+      const link = document.createElement('link'); link.rel = 'manifest'; link.href = url; document.head.appendChild(link);
+    })();
+
+    /* SW */
+    (function(){
+      if(!('serviceWorker' in navigator)) return;
+      const sw = `const CACHE='saveloc-v9';const ASSETS=['./'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{});return res;}).catch(()=>caches.match('./'))))});`;
+      navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'})));
+    })();
+
+    /* Tabs */
+    const tabLive = document.getElementById('tab-live');
+    const tabSaved = document.getElementById('tab-saved');
+    const navLive = document.getElementById('navLive');
+    const navSaved = document.getElementById('navSaved');
+    const settingsOpenBtn = document.getElementById('settingsOpenBtn');
+    function showTab(which){
+      const map = {live:tabLive, saved:tabSaved};
+      Object.keys(map).forEach(k=> map[k].classList.add('hidden'));
+      map[which].classList.remove('hidden');
+      [navLive,navSaved,settingsOpenBtn].forEach(b=>b.removeAttribute('aria-current'));
+      (which==='live'?navLive:navSaved).setAttribute('aria-current','page');
+    }
+    navLive.addEventListener('click', ()=> showTab('live'));
+    navSaved.addEventListener('click', ()=> { showTab('saved'); renderCatFilters(); renderList(); });
+
+    /* Install / iOS A2HS */
+    const installBtn = document.getElementById('installBtn');
+    const a2hsHint = document.getElementById('a2hsHint');
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    let deferredPrompt=null;
+    window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault(); deferredPrompt=e; installBtn.hidden=false;});
+    installBtn.addEventListener('click', async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.hidden=true; });
+    if(isIOS && !isStandalone){ a2hsHint.hidden=false; a2hsHint.addEventListener('click',()=> toast('در iPhone: Share ▸ Add to Home Screen')); }
+
+    /* Element refs (many) */
+    const themeAuto=document.getElementById('themeAuto'), themeLight=document.getElementById('themeLight'), themeDark=document.getElementById('themeDark');
+    const langFa=document.getElementById('langFa'), langEn=document.getElementById('langEn');
+    const locateBtn=document.getElementById('locateBtn'), openPicker=document.getElementById('openPicker'), saveLiveBtn=document.getElementById('saveLiveBtn'), shareBtn=document.getElementById('shareBtn');
+    const progBar=document.getElementById('progBar'), permStatus=document.getElementById('permStatus');
+    const latBox=document.getElementById('latBox'), lngBox=document.getElementById('lngBox'), accBox=document.getElementById('accBox'), eleBox=document.getElementById('eleBox'), tsBox=document.getElementById('tsBox');
+    const addrRow=document.getElementById('addrRow'), addrChip=document.getElementById('addrChip');
+    const copyLat=document.getElementById('copyLat'), copyLng=document.getElementById('copyLng'), copyBoth=document.getElementById('copyBoth');
+    const openApple=document.getElementById('openApple'), openGoogle=document.getElementById('openGoogle'), openWaze=document.getElementById('openWaze'), dirApple=document.getElementById('dirApple'), openCustom=document.getElementById('openCustom'), openSnapp=document.getElementById('openSnapp'), openTapsi=document.getElementById('openTapsi');
+    const listArea=document.getElementById('listArea'), searchBox=document.getElementById('searchBox'), exportBtn=document.getElementById('exportBtn'), importBtn=document.getElementById('importBtn'), importFile=document.getElementById('importFile'), backupBtn=document.getElementById('backupBtn'), restoreBtn=document.getElementById('restoreBtn'), restoreFile=document.getElementById('restoreFile'), clearAllBtn=document.getElementById('clearAllBtn');
+    const pickerModal=document.getElementById('pickerModal'), pickerMapEl=document.getElementById('pickerMap'), pickerLocate=document.getElementById('pickerLocate'), pickerSearch=document.getElementById('pickerSearch'), pickerSearchBtn=document.getElementById('pickerSearchBtn'), pickerUse=document.getElementById('pickerUse'), closePicker=document.getElementById('closePicker');
+    const previewModal=document.getElementById('previewModal'), previewTitle=document.getElementById('previewTitle'), previewMapEl=document.getElementById('previewMap'), previewAddr=document.getElementById('previewAddr'), previewEle=document.getElementById('previewEle'), pvApple=document.getElementById('pvApple'), pvGoogle=document.getElementById('pvGoogle'), pvWaze=document.getElementById('pvWaze'), pvDir=document.getElementById('pvDir'), pvShare=document.getElementById('pvShare'), pvSnapp=document.getElementById('pvSnapp'), pvTapsi=document.getElementById('pvTapsi'), closePreview=document.getElementById('closePreview');
+    const settingsModal=document.getElementById('settingsModal'), closeSettings=document.getElementById('closeSettings'), saveSettingsBtn=document.getElementById('saveSettings'), testCustom=document.getElementById('testCustom'), customTpl=document.getElementById('customTpl'), shareTitle=document.getElementById('shareTitle');
+    const catList=document.getElementById('catList'), newCatName=document.getElementById('newCatName'), newCatIcon=document.getElementById('newCatIcon'), addCatBtn=document.getElementById('addCatBtn');
+    const catChips=document.getElementById('catChips'), quickCatName=document.getElementById('quickCatName'), quickCatIcon=document.getElementById('quickCatIcon'), quickAddCat=document.getElementById('quickAddCat');
+    const saveModal=document.getElementById('saveModal'), saveModalTitle=document.getElementById('saveModalTitle'), closeSave=document.getElementById('closeSave'), saveLat=document.getElementById('saveLat'), saveLng=document.getElementById('saveLng'), saveAcc=document.getElementById('saveAcc'), saveEle=document.getElementById('saveEle'), saveAddr=document.getElementById('saveAddr'), placeName=document.getElementById('placeName'), placeNotes=document.getElementById('placeNotes'), saveCancel=document.getElementById('saveCancel'), saveConfirm=document.getElementById('saveConfirm');
+    const catFiltersRow=document.getElementById('catFiltersRow');
+
+    /* i18n (fixed single identifier) */
+    const i18n_full = {
+      fa: {
+        locale:'fa-IR', dir:'rtl',
+        current:{ title:'مکان فعلی', getPrecise:'📍 موقعیت دقیق', mapPicker:'🗺️ انتخاب روی نقشه', save:'⭐ ذخیره',
+          lat:'عرض: —', lng:'طول: —', acc:'دقت: —', resolving:'📍 درحال دریافت آدرس…',
+          copyLat:'کپی عرض', copyLng:'کپی طول', copyBoth:'کپی عرض،طول',
+          timestamp:(s)=>'زمان: '+s, accUnit:(m)=>'دقت: ±'+m+' متر', latVal:(v)=>'عرض: '+v, lngVal:(v)=>'طول: '+v, eleVal:(v)=>'ارتفاع: '+v+' m'
+        },
+        perm:{unknown:'دسترسی: <b>نامشخص</b>', granted:'دسترسی: <b>مجاز</b>', denied:'دسترسی: <b>رد</b>', prompt:'دسترسی: <b>پرسش</b>'},
+        maps:{apple:'اپل', google:'گوگل', waze:'ویز', appleDir:'مسیر اپل', otherApp:'برنامه دیگر', snapp:'اسنپ', tapsi:'تپسی'},
+        saved:{ title:'مکان‌های ذخیره‌شده', searchPh:'جستجو: نام، آدرس، یادداشت…',
+          empty:'هنوز مکانی ذخیره نشده. از <b>موقعیت دقیق</b> یا <b>انتخاب روی نقشه</b> استفاده کنید.',
+          coords:(lat,lng,acc,time)=>`${lat}، ${lng} • ±${acc} متر • ${time}` },
+        preview:{title:'پیش‌نمایش'},
+        picker:{title:'انتخاب روی نقشه', searchPh:'جستجوی آدرس…', searchBtn:'جستجو', useBtn:'استفاده از این نقطه', help:'پین را بکشید یا روی نقشه بزنید.', locate:'یافتن من'},
+        settings:{ title:'تنظیمات', customTpl:'قالب لینک سفارشی (برنامه دیگر)', customHelp:'{lat}، {lng}، {name}',
+          categories:'دسته‌بندی‌ها', newCatPh:'نام دسته (مثلاً: پارکینگ)', newCatIconPh:'ایموجی (مثلاً: 🅿️)', catTip:'از ایموجی به‌عنوان آیکن استفاده کنید.',
+          shareTitle:'عنوان اشتراک‌گذاری', testLink:'آزمون لینک', edit:'ویرایش', del:'حذف', updated:'به‌روز شد', deleted:'حذف شد'
+        },
+        save:{ title:'ذخیره مکان', nameLabel:'نام', namePh:'نقطه من', catLabel:'دسته‌بندی',
+          newCatNamePh:'نام دسته جدید', newCatIconPh:'ایموجی (📌)', notesLabel:'یادداشت', notesPh:'یادداشت اختیاری' },
+        common:{share:'اشتراک', add:'افزودن', save:'ذخیره', cancel:'انصراف'},
+        backup:{export:'خروجی', import:'ورود', backup:'پشتیبان', restore:'بازیابی', clearAll:'حذف همه',
+          importOk:'ورود انجام شد', importFail:'ورود ناموفق', restoreOk:'بازیابی شد', restoreFail:'بازیابی ناموفق', cleared:'پاک شد' },
+        toasts:{ copied:'کپی شد', copyFail:'کپی ناموفق', shareCopied:'متن کپی شد', shareFail:'اشتراک ناموفق',
+          saved:'ذخیره شد ⭐', updated:'به‌روز شد ✅', deleted:'حذف شد', notFound:'پیدا نشد', found:'یافت شد',
+          searchErr:'خطای جستجو', needCustom:'ابتدا قالب لینک سفارشی را وارد کنید', settingsSaved:'تنظیمات ذخیره شد',
+          enterCatName:'نام دسته را وارد کنید', catAdded:'دسته اضافه شد', geoUnsupported:'مکان‌یابی پشتیبانی نمی‌شود', geoError:'خطای مکان'
+        },
+        dialogs:{ deletePlace:'این مکان حذف شود؟', clearAll:'همهٔ مکان‌ها حذف شوند؟', namePromptDefault:'بدون نام' },
+        catsDefault:[ {id:'all',name:'همه',icon:'⚪'}, {id:'home',name:'خانه',icon:'🏠'}, {id:'work',name:'کار',icon:'💼'}, {id:'parking',name:'پارکینگ',icon:'🅿️'}, {id:'fav',name:'علاقه‌مندی',icon:'⭐'}, {id:'customer',name:'مشتری',icon:'👤'} ]
+      },
+      en: {
+        locale:'en-US', dir:'ltr',
+        current:{ title:'Current Location', getPrecise:'📍 Get Precise', mapPicker:'🗺️ Map Picker', save:'⭐ Save',
+          lat:'lat: —', lng:'lng: —', acc:'accuracy: —', resolving:'📍 Resolving address…',
+          copyLat:'Copy lat', copyLng:'Copy lng', copyBoth:'Copy lat,lng',
+          timestamp:(s)=>'Timestamp: '+s, accUnit:(m)=>'accuracy: ±'+m+' m', latVal:(v)=>'lat: '+v, lngVal:(v)=>'lng: '+v, eleVal:(v)=>'elev: '+v+' m'
+        },
+        perm:{unknown:'Permission: <b>unknown</b>', granted:'Permission: <b>granted</b>', denied:'Permission: <b>denied</b>', prompt:'Permission: <b>prompt</b>'},
+        maps:{apple:'Apple', google:'Google', waze:'Waze', appleDir:'Apple Directions', otherApp:'Other App', snapp:'Snapp', tapsi:'TAPSI'},
+        saved:{ title:'Saved Places', searchPh:'Search name, address, notes…', empty:'No places yet. Use <b>Get Precise</b> or <b>Map Picker</b>.',
+          coords:(lat,lng,acc,time)=>`${lat}, ${lng} • ±${acc} m • ${time}` },
+        preview:{title:'Preview'},
+        picker:{title:'Pick on Map', searchPh:'Search address…', searchBtn:'Search', useBtn:'Use This Point', help:'Drag the pin or tap the map.', locate:'Locate me'},
+        settings:{ title:'Settings', customTpl:'Custom URL template (Other App)', customHelp:'{lat}, {lng}, {name}', categories:'Categories',
+          newCatPh:'Category name (e.g., Parking)', newCatIconPh:'Emoji (e.g., 🅿️)', catTip:'Use emoji as icons.',
+          shareTitle:'Share title', testLink:'Test Custom', edit:'Edit', del:'Delete', updated:'Updated', deleted:'Deleted'
+        },
+        save:{ title:'Save Location', nameLabel:'Name', namePh:'My Spot', catLabel:'Category', newCatNamePh:'New category name', newCatIconPh:'Emoji (📌)', notesLabel:'Notes', notesPh:'Optional notes' },
+        common:{share:'Share', add:'Add', save:'Save', cancel:'Cancel'},
+        backup:{export:'Export', import:'Import', backup:'Backup', restore:'Restore', clearAll:'Clear All',
+          importOk:'Imported', importFail:'Import failed', restoreOk:'Backup restored', restoreFail:'Restore failed', cleared:'Cleared' },
+        toasts:{ copied:'Copied', copyFail:'Copy failed', shareCopied:'Copied to clipboard', shareFail:'Share failed',
+          saved:'Saved ⭐', updated:'Updated ✅', deleted:'Deleted', notFound:'Not found', found:'Found',
+          searchErr:'Search error', needCustom:'Set a custom URL first', settingsSaved:'Settings saved',
+          enterCatName:'Enter a category name', catAdded:'Category added', geoUnsupported:'Geolocation not supported', geoError:'Location error'
+        },
+        dialogs:{ deletePlace:'Delete this place?', clearAll:'Remove ALL saved places?', namePromptDefault:'Unnamed' },
+        catsDefault:[ {id:'all',name:'All',icon:'⚪'}, {id:'home',name:'Home',icon:'🏠'}, {id:'work',name:'Work',icon:'💼'}, {id:'parking',name:'Parking',icon:'🅿️'}, {id:'fav',name:'Favorite',icon:'⭐'}, {id:'customer',name:'Customer',icon:'👤'} ]
+      }
+    };
+    let i18n = i18n_full; // (no duplicate const)
+
+    const PREF_THEME='saveloc.theme', PREF_LANG='saveloc.lang', PREF_CITY='saveloc.city';
+    let LANG = localStorage.getItem(PREF_LANG) || 'fa';
+    let USER_CITY = localStorage.getItem(PREF_CITY) || '';
+
+    function deepGet(obj, path){ return path.split('.').reduce((o,k)=>o && o[k], obj); }
+    function applyTheme(val){
+      const html = document.documentElement; html.removeAttribute('data-theme');
+      if(val==='light'||val==='dark') html.setAttribute('data-theme',val);
+      [themeAuto,themeLight,themeDark].forEach(b=>b.setAttribute('aria-pressed','false'));
+      (val==='light'?themeLight:val==='dark'?themeDark:themeAuto).setAttribute('aria-pressed','true');
+      localStorage.setItem(PREF_THEME,val);
+    }
+    themeAuto.addEventListener('click',()=>applyTheme('auto'));
+    themeLight.addEventListener('click',()=>applyTheme('light'));
+    themeDark.addEventListener('click',()=>applyTheme('dark'));
+
+    function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1700); }
+    function formatTs(t){ return new Date(t).toLocaleString(i18n[LANG].locale); }
+    function setProgress(p){ progBar.style.width=Math.max(0,Math.min(100,p))+'%'; }
+    function downloadBlob(data, type, name){ const blob=new Blob([data],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url); }
+
+    function setLang(lang){
+      LANG=(lang==='en'?'en':'fa'); localStorage.setItem(PREF_LANG,LANG);
+      document.documentElement.lang=(LANG==='en')?'en':'fa'; document.documentElement.dir=i18n[LANG].dir;
+      [langFa,langEn].forEach(b=>b.setAttribute('aria-pressed','false')); (LANG==='en'?langEn:langFa).setAttribute('aria-pressed','true');
+      document.querySelectorAll('[data-i18n]').forEach(el=>{ const k=el.getAttribute('data-i18n'); const v=deepGet(i18n[LANG],k); if(typeof v==='string') el.innerHTML=v; });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ const k=el.getAttribute('data-i18n-placeholder'); const v=deepGet(i18n[LANG],k); if(typeof v==='string') el.setAttribute('placeholder',v); });
+
+      if(current){
+        latBox.textContent=i18n[LANG].current.latVal(current.lat.toFixed(6));
+        lngBox.textContent=i18n[LANG].current.lngVal(current.lng.toFixed(6));
+        accBox.textContent=i18n[LANG].current.accUnit(current.acc);
+        eleBox.textContent=i18n[LANG].current.eleVal(current.ele ?? '—');
+        tsBox.textContent=i18n[LANG].current.timestamp(new Date(current.ts).toLocaleString(i18n[LANG].locale));
+      }else{
+        latBox.textContent=i18n[LANG].current.lat; lngBox.textContent=i18n[LANG].current.lng; accBox.textContent=i18n[LANG].current.acc; eleBox.textContent=i18n[LANG].current.eleVal('—'); tsBox.textContent='—';
+      }
+      renderCatFilters(); renderList();
+    }
+    langFa.addEventListener('click',()=>setLang('fa'));
+    langEn.addEventListener('click',()=>setLang('en'));
+
+    /* Permissions */
+    async function checkPerm(){
+      if(!navigator.permissions || !navigator.geolocation){ permStatus.innerHTML=i18n[LANG].perm.unknown; return; }
+      try{
+        const st=await navigator.permissions.query({name:'geolocation'});
+        const map={granted:i18n[LANG].perm.granted,denied:i18n[LANG].perm.denied,prompt:i18n[LANG].perm.prompt};
+        permStatus.innerHTML=map[st.state]||i18n[LANG].perm.unknown;
+        st.onchange=()=>{ permStatus.innerHTML=map[st.state]||i18n[LANG].perm.unknown; };
+      }catch{ permStatus.innerHTML=i18n[LANG].perm.unknown; }
+    }
+    checkPerm();
+
+    /* Storage */
+    const KEY='saveloc.places.v1', PREF='saveloc.prefs.v1', CATS='saveloc.categories.v1';
+    function readPlaces(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch{ return []; } }
+    function writePlaces(arr){ localStorage.setItem(KEY,JSON.stringify(arr)); }
+    function readPrefs(){ const def={customTpl:'',shareTitle:'Save Loc'}; try{ return {...def,...(JSON.parse(localStorage.getItem(PREF))||{})}; }catch{ return def; } }
+    function writePrefs(p){ localStorage.setItem(PREF,JSON.stringify(p)); }
+    function readCats(){
+      try{ const saved=JSON.parse(localStorage.getItem(CATS)); if(Array.isArray(saved)&&saved.length) return saved; const def=i18n[LANG].catsDefault; localStorage.setItem(CATS,JSON.stringify(def)); return def; }
+      catch{ return i18n[LANG].catsDefault; }
+    }
+    function writeCats(arr){ localStorage.setItem(CATS,JSON.stringify(arr)); }
+
+    /* Reverse Geocode (cached) */
+    function reverseGeocode(lat,lng){
+      const key='addr:'+lat.toFixed(5)+','+lng.toFixed(5);
+      const cached=localStorage.getItem(key); if(cached) return Promise.resolve(cached);
+      return fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=0`,{headers:{'Accept':'application/json'}})
+        .then(r=>r.ok?r.json():Promise.reject()).then(j=>j.display_name||'').then(addr=>{ if(addr) localStorage.setItem(key,addr); return addr; }).catch(()=> '');
+    }
+    function reverseGeocodeDetails(lat,lng){
+      return fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&lat=${lat}&lon=${lng}&zoom=12`,{headers:{'Accept':'application/json'}})
+        .then(r=>r.ok?r.json():Promise.reject()).then(j=>j.address||{}).catch(()=> ({}));
+    }
+
+    /* Elevation */
+    function fetchElevation(lat,lng){
+      const key='elev:'+lat.toFixed(5)+','+lng.toFixed(5);
+      const cached=localStorage.getItem(key); if(cached) return Promise.resolve(+cached);
+      // Open-Elevation free API
+      return fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`)
+        .then(r=>r.ok?r.json():Promise.reject()).then(j=> (j.results&&j.results[0]&&typeof j.results[0].elevation==='number')? j.results[0].elevation : null)
+        .then(e=>{ if(e!==null) localStorage.setItem(key,String(e)); return e; }).catch(()=> null);
+    }
+
+    /* Map links */
+    const appleLink=(lat,lng,name='')=>`https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(name||`${lat.toFixed(6)},${lng.toFixed(6)}`)}`;
+    const googleLink=(lat,lng)=>`https://maps.google.com/maps?q=${lat},${lng}`;
+    const wazeLink=(lat,lng)=>`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+    const appleDirections=(lat,lng,addr='')=>`https://maps.apple.com/?daddr=${lat},${lng}&q=${encodeURIComponent(addr||`${lat.toFixed(6)},${lng.toFixed(6)}`)}&dirflg=d&saddr=Current%20Location`;
+    function customLink(lat,lng,name){ const {customTpl}=readPrefs(); if(!customTpl) return ''; return customTpl.replaceAll('{lat}',lat).replaceAll('{lng}',lng).replaceAll('{name}',encodeURIComponent(name||'')); }
+
+    /* Snapp/TAPSI: copy lat,lng then open app/site */
+    async function openTaxi(app,lat,lng,name,addr){
+      try{ await navigator.clipboard.writeText(`${lat},${lng}`); toast(i18n[LANG].toasts.copied); }catch{}
+      const deep = app==='snapp'
+        ? `snapp://ride?destination_lat=${lat}&destination_lng=${lng}&destination_name=${encodeURIComponent(name||'')}`
+        : `tapsi://app?dest_lat=${lat}&dest_lng=${lng}&dest_name=${encodeURIComponent(name||'')}`;
+      const site = app==='snapp' ? 'https://snapp.ir' : 'https://tapsi.ir';
+      const start = Date.now();
+      window.location.href = deep;
+      setTimeout(()=>{ if(Date.now()-start<900){ window.open(site,'_blank','noopener'); } }, 700);
+    }
+
+    /* Live */
+    let current=null;
+    function enableLive(on){
+      [saveLiveBtn,shareBtn,openApple,openGoogle,openWaze,dirApple,openCustom,copyLat,copyLng,copyBoth,openSnapp,openTapsi].forEach(b=>b.disabled=!on);
+    }
+    locateBtn.addEventListener('click', ()=>{
+      if(!navigator.geolocation){ toast(i18n[LANG].toasts.geoUnsupported); return; }
+      setProgress(10); addrRow.style.display='none';
+      navigator.geolocation.getCurrentPosition(onPos,onErr,{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+      let t=10, iv=setInterval(()=>{ t=Math.min(95,t+4); setProgress(t); },300);
+      async function onPos(pos){
+        clearInterval(iv); setProgress(100);
+        const {latitude,longitude,accuracy}=pos.coords;
+        const ele=await fetchElevation(latitude,longitude);
+        current={lat:latitude,lng:longitude,acc:Math.round(accuracy),ts:Date.now(),ele};
+        latBox.textContent=i18n[LANG].current.latVal(latitude.toFixed(6));
+        lngBox.textContent=i18n[LANG].current.lngVal(longitude.toFixed(6));
+        accBox.textContent=i18n[LANG].current.accUnit(Math.round(accuracy));
+        eleBox.textContent=i18n[LANG].current.eleVal(ele??'—');
+        tsBox.textContent=i18n[LANG].current.timestamp(new Date(current.ts).toLocaleString(i18n[LANG].locale));
+        enableLive(true);
+        reverseGeocode(latitude,longitude).then(addr=>{ if(addr){ current.address=addr; addrChip.textContent='📍 '+addr; addrRow.style.display='flex'; } });
+        // learn user's city for search bias
+        reverseGeocodeDetails(latitude,longitude).then(addr=>{
+          const city=addr.city||addr.town||addr.village||addr.municipality||addr.county||'';
+          if(city){ USER_CITY=city; localStorage.setItem(PREF_CITY,city); }
+        });
+        setTimeout(()=>setProgress(0),300);
+      }
+      function onErr(err){ clearInterval(iv); setProgress(0); toast(err.message||i18n[LANG].toasts.geoError); }
+    });
+    copyLat.addEventListener('click', async ()=>{ if(!current) return; try{ await navigator.clipboard.writeText(String(current.lat)); toast(i18n[LANG].toasts.copied); }catch{ toast(i18n[LANG].toasts.copyFail); } });
+    copyLng.addEventListener('click', async ()=>{ if(!current) return; try{ await navigator.clipboard.writeText(String(current.lng)); toast(i18n[LANG].toasts.copied); }catch{ toast(i18n[LANG].toasts.copyFail); } });
+    copyBoth.addEventListener('click', async ()=>{ if(!current) return; try{ await navigator.clipboard.writeText(`${current.lat},${current.lng}`); toast(i18n[LANG].toasts.copied); }catch{ toast(i18n[LANG].toasts.copyFail); } });
+
+    shareBtn.addEventListener('click', async ()=>{
+      if(!current) return; const prefs=readPrefs(); const url=googleLink(current.lat,current.lng);
+      const text = `${current.address? current.address : (LANG==='fa'?'مکان ذخیره‌شده':'Pinned location')} — ${current.lat.toFixed(6)},${current.lng.toFixed(6)} (±${current.acc} ${LANG==='fa'?'متر':'m'})${current.ele!=null? ' • '+i18n[LANG].current.eleVal(current.ele):''}`;
+      if(navigator.share){ try{ await navigator.share({ title:prefs.shareTitle||'Save Loc', text, url }); }catch{} }
+      else{ try{ await navigator.clipboard.writeText(`${text}\n${url}`); toast(i18n[LANG].toasts.shareCopied); }catch{ toast(i18n[LANG].toasts.shareFail); } }
+    });
+
+    openApple.addEventListener('click', ()=>{ if(!current) return; window.open(appleLink(current.lat,current.lng,current.address||'Location'),'_blank','noopener'); });
+    openGoogle.addEventListener('click', ()=>{ if(!current) return; window.open(googleLink(current.lat,current.lng),'_blank','noopener'); });
+    openWaze.addEventListener('click', ()=>{ if(!current) return; window.open(wazeLink(current.lat,current.lng),'_blank','noopener'); });
+    dirApple.addEventListener('click', ()=>{ if(!current) return; window.open(appleDirections(current.lat,current.lng,current.address||'Destination'),'_blank','noopener'); });
+    openCustom.addEventListener('click', ()=>{ if(!current) return; const url=customLink(current.lat,current.lng,current.address||''); if(url) window.location.href=url; else toast(i18n[LANG].toasts.needCustom); });
+    openSnapp.addEventListener('click', ()=>{ if(!current) return; openTaxi('snapp', current.lat, current.lng, 'Destination', current.address); });
+    openTapsi.addEventListener('click', ()=>{ if(!current) return; openTaxi('tapsi', current.lat, current.lng, 'Destination', current.address); });
+
+    /* Save/Edit */
+    let pendingSave=null, editId=null;
+    function renderCatChips(selected){
+      const cats=readCats().filter(c=>c.id!=='all'); catChips.innerHTML='';
+      cats.forEach(c=>{
+        const b=document.createElement('button'); b.className='chip'; b.setAttribute('aria-pressed', selected && selected.id===c.id ? 'true':'false');
+        b.textContent=`${c.icon} ${c.name}`;
+        b.addEventListener('click',()=>{ [...catChips.children].forEach(n=>n.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); b.dataset.catId=c.id; });
+        b.dataset.catId=c.id; catChips.appendChild(b);
+      });
+    }
+    function selectedCatFromChips(){ const cats=readCats().filter(c=>c.id!=='all'); const btn=[...catChips.children].find(x=>x.getAttribute('aria-pressed')==='true'); const id=btn?btn.dataset.catId:cats[0]?.id; return cats.find(c=>c.id===id) || cats[0]; }
+
+    function openSaveModal(record, mode='save'){
+      pendingSave=record; editId=(mode==='edit')?record.id:null;
+      saveModalTitle.innerHTML=(mode==='edit') ? (LANG==='fa'?'ویرایش مکان':'Edit Location') : i18n[LANG].save.title;
+      placeName.value=record.name || (record.address? record.address.split(',')[0] : (LANG==='fa'?'نقطه من':'My Spot'));
+      placeNotes.value=record.notes||'';
+      saveLat.textContent=i18n[LANG].current.latVal(record.lat.toFixed(6));
+      saveLng.textContent=i18n[LANG].current.lngVal(record.lng.toFixed(6));
+      saveAcc.textContent=i18n[LANG].current.accUnit(record.acc ?? '—');
+      saveEle.textContent=i18n[LANG].current.eleVal(record.ele ?? '—');
+      saveAddr.textContent='📍 '+(record.address || '—');
+      renderCatChips(record.category);
+      saveModal.showModal();
+      // ensure elevation present
+      if(record.ele==null){ fetchElevation(record.lat,record.lng).then(e=>{ if(e!=null){ pendingSave.ele=e; saveEle.textContent=i18n[LANG].current.eleVal(e); } }); }
+    }
+    saveLiveBtn.addEventListener('click', ()=>{ if(!current) return; openSaveModal({ ...current, name:(LANG==='fa'?'مکان فعلی':'Current spot') }, 'save'); });
+    closeSave.addEventListener('click', ()=> saveModal.close());
+    saveCancel.addEventListener('click', ()=> saveModal.close());
+    saveConfirm.addEventListener('click', ()=>{
+      if(!pendingSave) return;
+      const cat=selectedCatFromChips();
+      const place={ id: editId || (crypto.randomUUID?.() || (Date.now()+'-'+Math.random().toString(16).slice(2))), name:(placeName.value || (LANG==='fa'?i18n[LANG].dialogs.namePromptDefault:'Unnamed')).trim(),
+        lat:+pendingSave.lat, lng:+pendingSave.lng, acc:+pendingSave.acc || 0, ts: pendingSave.ts || Date.now(),
+        address: pendingSave.address || '', category: cat, notes:(placeNotes.value||'').trim(), ele: pendingSave.ele ?? null };
+      if(editId){ const arr=readPlaces(); const i=arr.findIndex(x=>x.id===editId); if(i>-1) arr[i]=place; writePlaces(arr); toast(i18n[LANG].toasts.updated); }
+      else{ const arr=readPlaces(); arr.unshift(place); writePlaces(arr); toast(i18n[LANG].toasts.saved); }
+      saveModal.close(); renderList();
+    });
+
+    quickAddCat.addEventListener('click', ()=>{
+      const name=(quickCatName.value||'').trim(); const icon=(quickCatIcon.value||'📌').trim();
+      if(!name){ toast(i18n[LANG].toasts.enterCatName); return; }
+      const arr=readCats(); const cat={id:(crypto.randomUUID?.() || (Date.now()+'-'+Math.random().toString(16).slice(2))), name, icon}; arr.push(cat); writeCats(arr);
+      quickCatName.value=''; quickCatIcon.value=''; renderCatChips(cat); toast(i18n[LANG].toasts.catAdded);
+    });
+
+    /* Picker */
+    let picker=null, pickerMarker=null;
+    openPicker.addEventListener('click', ()=>{ pickerModal.showModal(); setTimeout(initPicker, 20); });
+    closePicker.addEventListener('click', ()=> pickerModal.close());
+
+    function initPicker(){
+      if(!picker){
+        picker=L.map(pickerMapEl,{zoomControl:true, attributionControl:false}).setView([35.6892,51.3890],13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(picker);
+        pickerMarker=L.marker(picker.getCenter(),{draggable:true}).addTo(picker);
+        picker.on('click', e=>{ pickerMarker.setLatLng(e.latlng); });
+      } else { picker.invalidateSize(); }
+      if(current){ picker.setView([current.lat,current.lng],16); pickerMarker.setLatLng([current.lat,current.lng]); }
+    }
+
+    // Locate Me in picker
+    pickerLocate.addEventListener('click', ()=>{
+      if(!navigator.geolocation){ toast(i18n[LANG].toasts.geoUnsupported); return; }
+      navigator.geolocation.getCurrentPosition(async (pos)=>{
+        const {latitude,longitude}=pos.coords;
+        picker.setView([latitude,longitude],16);
+        pickerMarker.setLatLng([latitude,longitude]);
+        // update city bias
+        const a=await reverseGeocodeDetails(latitude,longitude);
+        const city=a.city||a.town||a.village||a.municipality||a.county||'';
+        if(city){ USER_CITY=city; localStorage.setItem(PREF_CITY,city); }
+      }, ()=>toast(i18n[LANG].toasts.geoError), {enableHighAccuracy:true,timeout:12000});
+    });
+
+    // City-biased search: prefer USER_CITY unless query already has a city-like token
+    pickerSearchBtn.addEventListener('click', ()=>{
+      let q=pickerSearch.value.trim();
+      if(!q) return;
+      const hasCityToken = /,|[\u0600-\u06FF]+\s*(شهر|استان)|city|tehran|mashhad|shiraz|isfahan|karaj|tabriz/i.test(q);
+      if(USER_CITY && !hasCityToken){ q = `${q} ${USER_CITY}`; }
+      // Optional viewbox bias if we have current location
+      let url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=1`;
+      if(current){
+        const d=0.35; const minLon=current.lng-d, minLat=current.lat-d, maxLon=current.lng+d, maxLat=current.lat+d;
+        url += `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1`;
+      }
+      fetch(url).then(r=>r.ok?r.json():[]).then(arr=>{
+        if(arr && arr[0]){ const {lat,lon}=arr[0]; const latf=+lat, lonf=+lon; picker.setView([latf,lonf],16); pickerMarker.setLatLng([latf,lonf]); toast(i18n[LANG].toasts.found); }
+        else toast(i18n[LANG].toasts.notFound);
+      }).catch(()=>toast(i18n[LANG].toasts.searchErr));
+    });
+
+    pickerUse.addEventListener('click', ()=>{
+      const {lat,lng}=pickerMarker.getLatLng(); const rec={lat:+lat, lng:+lng, acc:0, ts:Date.now()};
+      reverseGeocode(lat,lng).then(addr=>{ if(addr) rec.address=addr; });
+      fetchElevation(lat,lng).then(e=>{ if(e!=null) rec.ele=e; openSaveModal(rec,'save'); });
+      pickerModal.close();
+    });
+
+    /* Settings */
+    function renderCatList(){
+      const cats=readCats().filter(c=>c.id!=='all'); catList.innerHTML='';
+      cats.forEach((c,idx)=>{
+        const row=document.createElement('div'); row.className='flex items-center justify-between gap-2';
+        const left=document.createElement('div'); left.className='chip'; left.textContent=`${c.icon} ${c.name}`;
+        const right=document.createElement('div'); right.className='flex items-center gap-2';
+        const edit=document.createElement('button'); edit.className='tool'; edit.textContent=i18n[LANG].settings.edit;
+        edit.addEventListener('click',()=>{
+          const nn=prompt(i18n[LANG].settings.edit, c.name); if(nn===null) return;
+          const ni=prompt('Emoji', c.icon); if(ni===null) return;
+          const arr=readCats(); arr[idx]={...c,name:(nn||c.name).trim(),icon:(ni||c.icon).trim()}; writeCats(arr); renderCatList(); renderCatFilters(); toast(i18n[LANG].settings.updated);
+        });
+        const del=document.createElement('button'); del.className='tool'; del.textContent=i18n[LANG].settings.del;
+        del.addEventListener('click',()=>{ if(!confirm(i18n[LANG].dialogs.deletePlace)) return; const arr=readCats().filter(x=>x.id!==c.id); writeCats(arr); renderCatList(); renderCatFilters(); toast(i18n[LANG].settings.deleted); });
+        right.append(edit,del); row.append(left,right); catList.appendChild(row);
+      });
+    }
+    function openSettings(){
+      const p=readPrefs();
+      customTpl.value=p.customTpl||''; shareTitle.value=p.shareTitle||'Save Loc';
+      settingsModal.querySelectorAll('[data-i18n]').forEach(el=>{ const k=el.getAttribute('data-i18n'); const v=deepGet(i18n[LANG],k); if(typeof v==='string') el.innerHTML=v; });
+      settingsModal.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ const k=el.getAttribute('data-i18n-placeholder'); const v=deepGet(i18n[LANG],k); if(typeof v==='string') el.setAttribute('placeholder',v); });
+      renderCatList(); settingsModal.showModal();
+    }
+    settingsOpenBtn.addEventListener('click', ()=> openSettings());
+    closeSettings.addEventListener('click', ()=> settingsModal.close());
+    saveSettingsBtn.addEventListener('click', ()=>{ writePrefs({customTpl:customTpl.value.trim(), shareTitle:shareTitle.value.trim()}); toast(i18n[LANG].toasts.settingsSaved); settingsModal.close(); });
+    testCustom.addEventListener('click', ()=>{
+      const tpl=customTpl.value.trim(); if(!tpl){ toast(i18n[LANG].toasts.needCustom); return; }
+      const url=tpl.replaceAll('{lat}','35.6892').replaceAll('{lng}','51.3890').replaceAll('{name}',encodeURIComponent('Test')); window.location.href=url;
+    });
+
+    /* Saved list + Category filters */
+    let activeCatFilter='all';
+    function renderCatFilters(){
+      const cats=readCats(); catFiltersRow.innerHTML='';
+      cats.forEach(c=>{
+        const btn=document.createElement('button'); btn.className='chip'; btn.setAttribute('aria-pressed', c.id===activeCatFilter?'true':'false');
+        btn.textContent=`${c.icon} ${c.name}`;
+        btn.addEventListener('click',()=>{ activeCatFilter=c.id; [...catFiltersRow.children].forEach(n=>n.setAttribute('aria-pressed','false')); btn.setAttribute('aria-pressed','true'); renderList(); });
+        catFiltersRow.appendChild(btn);
+      });
+    }
+    function coordsLine(p){
+      const base=i18n[LANG].saved.coords(p.lat.toFixed(6),p.lng.toFixed(6),p.acc,formatTs(p.ts));
+      return p.ele!=null ? `${base} • ${LANG==='fa'?'ارتفاع':'elev'} ${p.ele} m` : base;
+    }
+    function renderList(){
+      const q=(searchBox.value||'').toLowerCase().trim();
+      const items=readPlaces().filter(p=>{
+        const hay=(p.name||'')+' '+(p.address||'')+' '+(p.notes||'')+' '+(p.category?.name||'');
+        const matchesQ=!q || hay.toLowerCase().includes(q);
+        const matchesCat=(activeCatFilter==='all') || (p.category && p.category.id===activeCatFilter);
+        return matchesQ && matchesCat;
+      });
+      listArea.innerHTML='';
+      if(!items.length){
+        const d=document.createElement('div'); d.className='border border-dashed border-[var(--border)] rounded-xl p-5 text-center text-[var(--muted)]';
+        d.innerHTML=i18n[LANG].saved.empty; listArea.appendChild(d); return;
+      }
+      items.forEach(p=>{
+        const card=document.createElement('div'); card.className='card p-3 cursor-pointer';
+        const actions=document.createElement('div'); actions.className='hidden mt-3 pt-3 border-t border-[var(--border)] grid grid-cols-2 sm:grid-cols-4 gap-2';
+        card.addEventListener('click',(e)=>{ if(e.target.closest('button')) return; actions.classList.toggle('hidden'); });
+
+        const head=document.createElement('div'); head.className='flex items-baseline gap-2';
+        const title=document.createElement('div'); title.className='font-extrabold min-w-0 truncate'; title.textContent=`${p.category?.icon||'📌'} ${p.name}`;
+        const sub=document.createElement('div'); sub.className='text-[11.5px] text-[var(--muted)] font-mono'; sub.textContent=coordsLine(p);
+        head.append(title);
+        const meta=document.createElement('div'); meta.className='space-y-1'; meta.appendChild(sub);
+        if(p.address){ const a=document.createElement('div'); a.className='text-[11.5px] text-[var(--muted)]'; a.textContent='📍 '+p.address; meta.appendChild(a); }
+        if(p.notes){ const n=document.createElement('div'); n.className='text-[11.5px] text-[var(--muted)]'; n.textContent='📝 '+p.notes; meta.appendChild(n); }
+        const headerRow=document.createElement('div'); headerRow.className='flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between'; headerRow.append(head, meta);
+
+        const mk=(label,icon,fn)=>{ const b=document.createElement('button'); b.className='btn btn-outline'; b.innerHTML=`<i class="${icon} me-1.5"></i>${label}`; b.addEventListener('click',fn); return b; };
+        const previewBtn=mk(i18n[LANG].preview.title,'fa-regular fa-eye',()=>openPreview(p));
+        const appleBtn=mk(i18n[LANG].maps.apple,'fa-brands fa-apple',()=>window.open(appleLink(p.lat,p.lng,p.name),'_blank','noopener'));
+        const googleBtn=mk(i18n[LANG].maps.google,'fa-brands fa-google',()=>window.open(googleLink(p.lat,p.lng),'_blank','noopener'));
+        const wazeBtn=mk(i18n[LANG].maps.waze,'fa-solid fa-map-location-dot',()=>window.open(wazeLink(p.lat,p.lng),'_blank','noopener'));
+        const snappBtn=mk(i18n[LANG].maps.snapp,'fa-solid fa-taxi',()=>openTaxi('snapp', p.lat, p.lng, p.name, p.address));
+        const tapsiBtn=mk(i18n[LANG].maps.tapsi,'fa-solid fa-car-side',()=>openTaxi('tapsi', p.lat, p.lng, p.name, p.address));
+        const dirBtn=mk(i18n[LANG].maps.appleDir,'fa-solid fa-turn-up',()=>window.open(appleDirections(p.lat,p.lng,p.address||p.name),'_blank','noopener'));
+        const shareBtn2=mk(i18n[LANG].common.share,'fa-solid fa-arrow-up-from-bracket',()=>sharePlace(p));
+        const copyPair=mk(i18n[LANG].current.copyBoth,'fa-regular fa-copy',async()=>{ try{ await navigator.clipboard.writeText(`${p.lat},${p.lng}`); toast(i18n[LANG].toasts.copied); }catch{ toast(i18n[LANG].toasts.copyFail); } });
+        const editBtn=mk(i18n[LANG].settings.edit,'fa-regular fa-pen-to-square',()=>openSaveModal(p,'edit'));
+        const delBtn=document.createElement('button'); delBtn.className='btn btn-danger'; delBtn.innerHTML=`<i class="fa-solid fa-trash me-1.5"></i>${i18n[LANG].settings.del}`; delBtn.addEventListener('click',()=>{ if(confirm(i18n[LANG].dialogs.deletePlace)){ remove(p.id); renderList(); toast(i18n[LANG].toasts.deleted); } });
+
+        actions.append(previewBtn,appleBtn,googleBtn,wazeBtn,snappBtn,tapsiBtn,dirBtn,shareBtn2,copyPair,editBtn,delBtn);
+        card.append(headerRow, actions); listArea.appendChild(card);
+      });
+    }
+
+    async function sharePlace(p){
+      const prefs=readPrefs(); const url=googleLink(p.lat,p.lng);
+      const text=`${p.name} — ${p.lat.toFixed(6)},${p.lng.toFixed(6)} (±${p.acc} ${LANG==='fa'?'متر':'m'})${p.ele!=null?' • '+(LANG==='fa'?'ارتفاع':'elev')+' '+p.ele+' m':''}${p.address? '\n'+p.address:''}${p.notes? '\n📝 '+p.notes:''}`;
+      if(navigator.share){ try{ await navigator.share({title:prefs.shareTitle||'Save Loc', text, url}); }catch{} }
+      else{ try{ await navigator.clipboard.writeText(`${text}\n${url}`); toast(i18n[LANG].toasts.shareCopied); }catch{ toast(i18n[LANG].toasts.shareFail); } }
+    }
+    function update(id,patch){ const arr=readPlaces(); const i=arr.findIndex(x=>x.id===id); if(i>-1){ arr[i]={...arr[i],...patch}; writePlaces(arr); } }
+    function remove(id){ writePlaces(readPlaces().filter(x=>x.id!==id)); }
+    searchBox.addEventListener('input', renderList);
+
+    /* Preview (Leaflet) */
+    let preview=null, previewMarker=null;
+    function openPreview(p){
+      previewModal.showModal();
+      setTimeout(()=>{
+        if(!preview){
+          preview=L.map(previewMapEl,{zoomControl:true, attributionControl:false});
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(preview);
+        }
+        preview.setView([p.lat,p.lng],16);
+        if(previewMarker) preview.removeLayer(previewMarker);
+        previewMarker=L.marker([p.lat,p.lng]).addTo(preview);
+        preview.invalidateSize();
+      },20);
+      previewTitle.textContent=i18n[LANG].preview.title+' — '+(p.category?.icon||'📌')+' '+p.name;
+      previewAddr.textContent=p.address || '—';
+      previewEle.textContent= (p.ele!=null) ? i18n[LANG].current.eleVal(p.ele) : i18n[LANG].current.eleVal('—');
+      pvApple.onclick=()=>window.open(appleLink(p.lat,p.lng,p.name),'_blank','noopener');
+      pvGoogle.onclick=()=>window.open(googleLink(p.lat,p.lng),'_blank','noopener');
+      pvWaze.onclick=()=>window.open(wazeLink(p.lat,p.lng),'_blank','noopener');
+      pvDir.onclick=()=>window.open(appleDirections(p.lat,p.lng,p.address||p.name),'_blank','noopener');
+      pvShare.onclick=()=>sharePlace(p);
+      pvSnapp.onclick=()=>openTaxi('snapp', p.lat, p.lng, p.name, p.address);
+      pvTapsi.onclick=()=>openTaxi('tapsi', p.lat, p.lng, p.name, p.address);
+      if(!p.address){ reverseGeocode(p.lat,p.lng).then(addr=>{ if(addr){ p.address=addr; update(p.id,{address:addr}); previewAddr.textContent=addr; renderList(); } }); }
+      if(p.ele==null){ fetchElevation(p.lat,p.lng).then(e=>{ if(e!=null){ p.ele=e; update(p.id,{ele:e}); previewEle.textContent=i18n[LANG].current.eleVal(e); renderList(); } }); }
+    }
+    closePreview.addEventListener('click', ()=> previewModal.close());
+
+    /* Export/Import/Backup/Restore */
+    exportBtn.addEventListener('click', ()=> downloadBlob(JSON.stringify(readPlaces(),null,2),'application/json','saveloc-places.json'));
+    importBtn.addEventListener('click', ()=> importFile.click());
+    importFile.addEventListener('change', ()=>{
+      const f=importFile.files[0]; if(!f) return;
+      const fr=new FileReader(); fr.onload=()=>{
+        try{
+          const arr=JSON.parse(fr.result); if(!Array.isArray(arr)) throw 0;
+          const cur=readPlaces(); const map=new Map(cur.map(x=>[x.id,x])); for(const p of arr){ if(p&&p.id){ map.set(p.id,{...map.get(p.id),...p}); } }
+          writePlaces([...map.values()].sort((a,b)=>b.ts-a.ts)); renderList(); toast(i18n[LANG].backup.importOk);
+        }catch{ toast(i18n[LANG].backup.importFail); }
+        importFile.value='';
+      }; fr.readAsText(f);
+    });
+
+    backupBtn.addEventListener('click', ()=>{ const backup={places:readPlaces(),categories:readCats(),prefs:readPrefs(),version:1,saved_at:new Date().toISOString()}; downloadBlob(JSON.stringify(backup,null,2),'application/json','saveloc-backup.json'); });
+    restoreBtn.addEventListener('click', ()=> restoreFile.click());
+    restoreFile.addEventListener('change', ()=>{
+      const f=restoreFile.files[0]; if(!f) return;
+      const fr=new FileReader(); fr.onload=()=>{
+        try{
+          const obj=JSON.parse(fr.result);
+          if(!obj || !Array.isArray(obj.places) || !Array.isArray(obj.categories)) throw 0;
+          writePlaces(obj.places||[]); writeCats(obj.categories||[]); if(obj.prefs) writePrefs(obj.prefs);
+          renderCatFilters(); renderList(); toast(i18n[LANG].backup.restoreOk);
+        }catch{ toast(i18n[LANG].backup.restoreFail); }
+        restoreFile.value='';
+      }; fr.readAsText(f);
+    });
+
+    clearAllBtn.addEventListener('click', ()=>{ if(confirm(i18n[LANG].dialogs.clearAll)){ localStorage.removeItem(KEY); renderList(); toast(i18n[LANG].backup.cleared); } });
+
+    /* Bottom-nav settings */
+    settingsOpenBtn.addEventListener('click', ()=> openSettings());
+
+    /* Init */
+    setLang(LANG);
+    applyTheme(localStorage.getItem(PREF_THEME)||'auto');
+    enableLive(false);
+    renderCatFilters();
+    renderList();
+
+    /* Tiny sanity tests */
+    (function test(){
+      try {
+        console.group('Save Loc – smoke tests');
+        console.assert(typeof i18n==='object' && i18n.fa && i18n.en, 'i18n ok');
+        console.assert(document.getElementById('pickerLocate'), 'pickerLocate exists');
+        console.assert(document.getElementById('openSnapp') && document.getElementById('openTapsi'), 'Taxi buttons exist');
+        console.groupEnd();
+      } catch(e){ console.error(e); }
+    })();
+  </script>
+</body>
+</html>
