@@ -417,10 +417,10 @@
       const link = document.createElement('link'); link.rel = 'manifest'; link.href = url; document.head.appendChild(link);
     })();
 
-    /* SW (tiny offline) — bump to v13 to force update */
+    /* SW (tiny offline) — bump to v14 to force update */
     (function(){
       if(!('serviceWorker' in navigator)) return;
-      const sw = `const CACHE='saveloc-v13';const ASSETS=['./'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{});return res;}).catch(()=>caches.match('./'))))});`;
+      const sw = `const CACHE='saveloc-v14';const ASSETS=['./'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{});return res;}).catch(()=>caches.match('./'))))});`;
       navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'})));
     })();
 
@@ -519,7 +519,7 @@
     installBtn.addEventListener('click', async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.hidden=true; });
     if(isIOS && !isStandalone){ a2hsHint.hidden=false; a2hsHint.addEventListener('click',()=> toast('در iPhone: Share ▸ Add to Home Screen')); }
 
-    /* Element refs */
+    /* Element refs (no duplicate globals) */
     const themeAuto=document.getElementById('themeAuto'), themeLight=document.getElementById('themeLight'), themeDark=document.getElementById('themeDark');
     const langFa=document.getElementById('langFa'), langEn=document.getElementById('langEn');
     const locateBtn=document.getElementById('locateBtn'), openPicker=document.getElementById('openPicker'), saveLiveBtn=document.getElementById('saveLiveBtn'), shareBtn=document.getElementById('shareBtn');
@@ -826,7 +826,7 @@
       settingsModal.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ const k=el.getAttribute('data-i18n-placeholder'); const v=deepGet(i18n[LANG],k); if(typeof v==='string') el.setAttribute('placeholder',v); });
       renderCatList(); settingsModal.showModal();
     }
-    settingsOpenBtn.addEventListener('click', ()=> openSettings());
+    document.getElementById('settingsOpenBtn').addEventListener('click', ()=> openSettings());
     closeSettings.addEventListener('click', ()=> settingsModal.close());
     saveSettingsBtn.addEventListener('click', ()=>{ writePrefs({customTpl:customTpl.value.trim(), shareTitle:shareTitle.value.trim()}); toast(i18n[LANG].toasts.settingsSaved); settingsModal.close(); });
     testCustom.addEventListener('click', ()=>{
@@ -966,8 +966,7 @@
 
     clearAllBtn.addEventListener('click', ()=>{ if(confirm(i18n[LANG].dialogs.clearAll)){ localStorage.removeItem(KEY); renderList(); toast(i18n[LANG].backup.cleared); } });
 
-    /* Init */
-    let current=null;
+    /* Init (no duplicate let current!) */
     setLang(LANG);
     applyTheme(localStorage.getItem(PREF_THEME)||'auto');
     enableLive(false);
