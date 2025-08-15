@@ -2,7 +2,8 @@
 <html lang="fa" dir="rtl" class="h-full">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0b0b0f" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f7f7f9" media="(prefers-color-scheme: light)">
   <title>Save Loc — ذخیره مکان</title>
@@ -26,7 +27,7 @@
     :root{
       --bg:#0b0b0f; --panel:#101013; --panel-2:#151519; --text:#f5f5f7; --muted:#9ea0a6; --border:#1e1f24;
       --radius:14px; --radius-lg:18px; --shadow:0 8px 24px rgba(0,0,0,.12);
-      --nav-h:64px; /* fixed bottom nav height */
+      --nav-h:64px;
     }
     @media (prefers-color-scheme: light){
       :root{ --bg:#f7f7f9; --panel:#ffffff; --panel-2:#f3f3f6; --text:#0d0f14; --muted:#6f7683; --border:#e7e9ee; }
@@ -35,19 +36,20 @@
     [data-theme="dark"]{ --bg:#0b0b0f; --panel:#101013; --panel-2:#151519; --text:#f5f5f7; --muted:#9ea0a6; --border:#1e1f24; }
 
     *,*::before,*::after{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    html,body{ height:100%; width:100%; max-width:100%; overflow-x:hidden; }
     body{
       background:var(--bg); color:var(--text);
       font-family:'Vazirmatn', -apple-system, system-ui, "SF Pro Text", Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif;
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; -webkit-text-size-adjust:100%;
       font-size:15px; line-height:1.45;
-      overflow-x:hidden;
       -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
     }
-    /* iOS zoom fix: inputs >=16px */
-    input, textarea, select, button { font-size:16px; }
 
-    img,svg,video{ max-width:100%; height:auto; }
+    /* Inputs/buttons at 16px to stop iOS auto-zoom */
+    button, .btn, .tool, input, textarea, select { font-size:16px; }
+
+    img,svg,video{ max-width:100%; height:auto; display:block; }
 
     .appbar{
       position:sticky; top:0; z-index:50; padding-top:env(safe-area-inset-top);
@@ -56,13 +58,13 @@
       backdrop-filter:saturate(180%) blur(10px);
     }
 
-    .card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); }
+    .card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); width:100%; }
 
     /* Buttons */
     .btn{
       min-height:44px; border-radius:12px; font-weight:600;
       transition:transform .06s ease, background-color .2s ease, border-color .2s ease, opacity .2s ease;
-      padding:.6rem .8rem; font-size:14.5px;
+      padding:.6rem .8rem;
     }
     .btn:active{ transform:translateY(1px); }
     .btn-solid{ background:var(--text); color:var(--bg); }
@@ -74,8 +76,8 @@
       display:inline-flex; align-items:center; gap:.4rem;
       padding:.5rem .7rem; border-radius:9999px;
       border:1px solid var(--border); background:var(--panel-2); color:var(--text);
-      white-space:nowrap; font-size:13px; min-height:34px;
-      max-width:100%; overflow:hidden; text-overflow:ellipsis;
+      font-size:13px; min-height:34px;
+      min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     }
 
     .seg{ display:flex; padding:4px; gap:4px; border:1px solid var(--border); border-radius:9999px; background:var(--panel-2); }
@@ -94,7 +96,7 @@
     }
     .toast.show{ opacity:1; bottom:calc(26px + env(safe-area-inset-bottom)); }
 
-    /* Fixed bottom nav (native-ish) */
+    /* Fixed bottom nav */
     .bottom-nav{
       position:fixed; left:0; right:0; bottom:0; z-index:999;
       padding-bottom:calc(env(safe-area-inset-bottom));
@@ -106,39 +108,39 @@
     .nav-btn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:.35rem 0; color:var(--muted); font-weight:700; font-size:12px; }
     .nav-btn[aria-current="page"]{ color:var(--text); }
 
-    /* Inputs */
     .mono{ font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
     input.ios-input, textarea.ios-input{
       background:var(--panel-2); border:1px solid var(--border); border-radius:12px; color:var(--text);
-      min-height:44px; font-size:16px; /* iOS zoom fix */
+      min-height:44px;
     }
     dialog::backdrop{ background:rgba(0,0,0,.5); }
 
-    /* Dialog sizing + mobile scrolling */
+    /* Dialog sizing + internal scrolling (mobile-first) */
     dialog.card{
       width:min(94vw, 560px);
-      max-height:85dvh; /* use dynamic viewport on iOS */
+      max-height:85dvh;
       overflow:hidden; border-radius:18px;
     }
     dialog.card .p-4{
       overflow:auto;
-      max-height:calc(85dvh - 96px); /* header/footer approx */
+      max-height:calc(85dvh - 96px);
       overscroll-behavior:contain;
     }
 
-    /* Map heights in modals */
+    /* Map heights in modals (stable) */
     #pickerMap, #previewMap{
       height:55dvh; max-height:420px; min-height:260px;
+      width:100%;
     }
 
-    /* Main bottom padding so content never hides behind fixed nav */
+    /* Main needs bottom padding so content never hides behind nav */
     main{ padding-bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom)) !important; }
 
-    /* Keep long address chips tidy */
-    #addrChip{ max-width:100%; }
+    /* Prevent grid children from forcing width > viewport */
+    .grid > *, .flex > *, .card > * { min-width:0; }
 
-    /* Hide bottom nav when keyboard is open (iOS) */
-    body.kb .bottom-nav{ transform:translateY(110%); transition:transform .2s ease; }
+    /* Progress bar slightly taller for iOS sub-pixel */
+    .h-1, .h-1\.5 { height: 6px !important; }
   </style>
 </head>
 <body class="h-full">
@@ -394,7 +396,7 @@
     </div>
   </nav>
 
-  <footer class="px-4 pt-2 pb-24 text-center text-[var(--muted)] text-[11.5px]">ساخته شده توسط <b>Peymaan Abedinpour V0.06</b></footer>
+  <footer class="px-4 pt-2 pb-24 text-center text-[var(--muted)] text-[11.5px]">ساخته شده توسط <b>Peymaan Abedinpour V0.07</b></footer>
   <div id="toast" class="toast" role="status" aria-live="polite">—</div>
 
   <!-- Scripts -->
@@ -415,23 +417,12 @@
       const link = document.createElement('link'); link.rel = 'manifest'; link.href = url; document.head.appendChild(link);
     })();
 
-    /* SW (tiny offline) */
+    /* SW (tiny offline) — bump to v13 to force update */
     (function(){
       if(!('serviceWorker' in navigator)) return;
-      const sw = `const CACHE='saveloc-v11';const ASSETS=['./'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{});return res;}).catch(()=>caches.match('./'))))});`;
+      const sw = `const CACHE='saveloc-v13';const ASSETS=['./'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{});return res;}).catch(()=>caches.match('./'))))});`;
       navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'})));
     })();
-
-    /* Detect iOS keyboard via VisualViewport to avoid bottom-nav overlap */
-    if (window.visualViewport) {
-      const vv = window.visualViewport;
-      const onVV = () => {
-        const keyboardOpen = vv.height < window.innerHeight - 120;
-        document.body.classList.toggle('kb', keyboardOpen);
-      };
-      vv.addEventListener('resize', onVV);
-      vv.addEventListener('scroll', onVV);
-    }
 
     /* Tabs */
     const tabLive = document.getElementById('tab-live');
@@ -450,7 +441,7 @@
     navSaved.addEventListener('click', ()=> { showTab('saved'); renderCatFilters(); renderList(); });
   </script>
 
-  <!-- i18n FULL (unchanged from your working version) -->
+  <!-- i18n FULL -->
   <script>
     const i18n_full = {
       fa: {
@@ -516,9 +507,9 @@
     };
   </script>
 
-  <!-- App logic (fixed typo + full i18n) -->
+  <!-- App logic -->
   <script>
-    /* Install / iOS A2HS (moved here after i18n) */
+    /* Install / iOS A2HS */
     const installBtn = document.getElementById('installBtn');
     const a2hsHint = document.getElementById('a2hsHint');
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -528,7 +519,7 @@
     installBtn.addEventListener('click', async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.hidden=true; });
     if(isIOS && !isStandalone){ a2hsHint.hidden=false; a2hsHint.addEventListener('click',()=> toast('در iPhone: Share ▸ Add to Home Screen')); }
 
-    /* Element refs (complete & typo fixed) */
+    /* Element refs */
     const themeAuto=document.getElementById('themeAuto'), themeLight=document.getElementById('themeLight'), themeDark=document.getElementById('themeDark');
     const langFa=document.getElementById('langFa'), langEn=document.getElementById('langEn');
     const locateBtn=document.getElementById('locateBtn'), openPicker=document.getElementById('openPicker'), saveLiveBtn=document.getElementById('saveLiveBtn'), shareBtn=document.getElementById('shareBtn');
@@ -659,7 +650,12 @@
     function enableLive(on){
       [saveLiveBtn,shareBtn,openApple,openGoogle,openWaze,dirApple,openCustom,copyLat,copyLng,copyBoth,openSnapp,openTapsi].forEach(b=>b.disabled=!on);
     }
+
+    // Blur active field before opening dialogs to avoid iOS zoom/reflow
+    function blurActive(){ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
+
     locateBtn.addEventListener('click', ()=>{
+      blurActive();
       if(!navigator.geolocation){ toast(i18n[LANG].toasts.geoUnsupported); return; }
       setProgress(10); addrRow.style.display='none';
       navigator.geolocation.getCurrentPosition(onPos,onErr,{enableHighAccuracy:true,timeout:15000,maximumAge:0});
@@ -676,7 +672,6 @@
         tsBox.textContent=i18n[LANG].current.timestamp(new Date(current.ts).toLocaleString(i18n[LANG].locale));
         enableLive(true);
         reverseGeocode(latitude,longitude).then(addr=>{ if(addr){ current.address=addr; addrChip.textContent='📍 '+addr; addrRow.style.display='flex'; } });
-        // learn user's city for search bias
         reverseGeocodeDetails(latitude,longitude).then(addr=>{
           const city=addr.city||addr.town||addr.village||addr.municipality||addr.county||'';
           if(city){ USER_CITY=city; localStorage.setItem(PREF_CITY,city); }
@@ -685,11 +680,13 @@
       }
       function onErr(err){ clearInterval(iv); setProgress(0); toast(err.message||i18n[LANG].toasts.geoError); }
     });
+
     copyLat.addEventListener('click', async ()=>{ if(!current) return; try{ await navigator.clipboard.writeText(String(current.lat)); toast(i18n[LANG].toasts.copied); }catch{ toast(i18n[LANG].toasts.copyFail); } });
     copyLng.addEventListener('click', async ()=>{ if(!current) return; try{ await navigator.clipboard.writeText(String(current.lng)); toast(i18n[LANG].toasts.copied); }catch{ toast(i18n[LANG].toasts.copyFail); } });
     copyBoth.addEventListener('click', async ()=>{ if(!current) return; try{ await navigator.clipboard.writeText(`${current.lat},${current.lng}`); toast(i18n[LANG].toasts.copied); }catch{ toast(i18n[LANG].toasts.copyFail); } });
 
     shareBtn.addEventListener('click', async ()=>{
+      blurActive();
       if(!current) return; const prefs=readPrefs(); const url=googleLink(current.lat,current.lng);
       const text = `${current.address? current.address : (LANG==='fa'?'مکان ذخیره‌شده':'Pinned location')} — ${current.lat.toFixed(6)},${current.lng.toFixed(6)} (±${current.acc} ${LANG==='fa'?'متر':'m'})${current.ele!=null? ' • '+i18n[LANG].current.eleVal(current.ele):''}`;
       if(navigator.share){ try{ await navigator.share({ title:prefs.shareTitle||'Save Loc', text, url }); }catch{} }
@@ -728,8 +725,8 @@
       saveEle.textContent=i18n[LANG].current.eleVal(record.ele ?? '—');
       saveAddr.textContent='📍 '+(record.address || '—');
       renderCatChips(record.category);
+      blurActive(); // prevent iOS zoom on show
       saveModal.showModal();
-      // ensure elevation present
       if(record.ele==null){ fetchElevation(record.lat,record.lng).then(e=>{ if(e!=null){ pendingSave.ele=e; saveEle.textContent=i18n[LANG].current.eleVal(e); } }); }
     }
     saveLiveBtn.addEventListener('click', ()=>{ if(!current) return; openSaveModal({ ...current, name:(LANG==='fa'?'مکان فعلی':'Current spot') }, 'save'); });
@@ -755,7 +752,7 @@
 
     /* Picker */
     let picker=null, pickerMarker=null;
-    openPicker.addEventListener('click', ()=>{ pickerModal.showModal(); setTimeout(initPicker, 20); });
+    openPicker.addEventListener('click', ()=>{ blurActive(); pickerModal.showModal(); setTimeout(initPicker, 20); });
     closePicker.addEventListener('click', ()=> pickerModal.close());
 
     function initPicker(){
@@ -768,7 +765,6 @@
       if(current){ picker.setView([current.lat,current.lng],16); pickerMarker.setLatLng([current.lat,current.lng]); }
     }
 
-    // Locate Me in picker
     pickerLocate.addEventListener('click', ()=>{
       if(!navigator.geolocation){ toast(i18n[LANG].toasts.geoUnsupported); return; }
       navigator.geolocation.getCurrentPosition(async (pos)=>{
@@ -781,7 +777,6 @@
       }, ()=>toast(i18n[LANG].toasts.geoError), {enableHighAccuracy:true,timeout:12000});
     });
 
-    // City-biased search
     pickerSearchBtn.addEventListener('click', ()=>{
       let q=pickerSearch.value.trim();
       if(!q) return;
@@ -799,6 +794,7 @@
     });
 
     pickerUse.addEventListener('click', ()=>{
+      blurActive();
       const {lat,lng}=pickerMarker.getLatLng(); const rec={lat:+lat, lng:+lng, acc:0, ts:Date.now()};
       reverseGeocode(lat,lng).then(addr=>{ if(addr) rec.address=addr; });
       fetchElevation(lat,lng).then(e=>{ if(e!=null) rec.ele=e; openSaveModal(rec,'save'); });
@@ -911,6 +907,7 @@
     /* Preview (Leaflet) */
     let preview=null, previewMarker=null;
     function openPreview(p){
+      blurActive();
       previewModal.showModal();
       setTimeout(()=>{
         if(!preview){
@@ -970,13 +967,14 @@
     clearAllBtn.addEventListener('click', ()=>{ if(confirm(i18n[LANG].dialogs.clearAll)){ localStorage.removeItem(KEY); renderList(); toast(i18n[LANG].backup.cleared); } });
 
     /* Init */
+    let current=null;
     setLang(LANG);
     applyTheme(localStorage.getItem(PREF_THEME)||'auto');
     enableLive(false);
     renderCatFilters();
     renderList();
 
-    /* Tiny sanity tests */
+    /* Smoke tests */
     (function test(){
       try {
         console.group('Save Loc – smoke tests');
