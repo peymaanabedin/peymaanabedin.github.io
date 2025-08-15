@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>مبدل تصویر/متن ⇄ ایموجی • EmojiCoder</title>
+
+<!-- iOS PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="EmojiCoder">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><rect width='100%%' height='100%%' rx='40' fill='%230b0b0f'/><text x='50%%' y='56%%' font-size='96' text-anchor='middle' fill='white'>🔐</text></svg>">
+<meta name="theme-color" content="#0b0b0f">
+
+<!-- Vazirmatn (web) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#0b0b0f; --panel:#0f1116; --surface:#141821; --text:#f4f6fb; --muted:#9aa3ad;
+    --brand:#4f86ff; --brand-2:#7da7ff; --success:#16c47f; --warn:#ffb020;
+    --border:#1b2130; --ring:rgba(79,134,255,.28); --shadow:0 22px 56px rgba(0,0,0,.46);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Roboto Mono", monospace;
+    --round:22px; --radius:14px; --motion: 180ms cubic-bezier(.2,.8,.2,1);
+  }
+  :root.light{
+    --bg:#f7f9fd; --panel:#ffffff; --surface:#f1f4fa; --text:#0b1325; --muted:#657286;
+    --brand:#2b6eff; --brand-2:#6a95ff; --border:#e7ecf4; --ring:rgba(43,110,255,.18);
+    --shadow:0 16px 40px rgba(2,16,48,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font:16px/1.6 "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    transition: background var(--motion), color var(--motion);
+  }
+  .shell{max-width:1060px; margin:0 auto; padding:18px; display:flex; flex-direction:column; gap:14px}
+  header{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:3;
+    padding:6px 0; background:linear-gradient(180deg, var(--bg) 75%, rgba(0,0,0,0));
+    backdrop-filter:saturate(1.15);
+  }
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo{width:44px; height:44px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(180deg,var(--brand),var(--brand-2)); color:#fff; font-size:22px; box-shadow:var(--shadow)}
+  .title{font-weight:800; letter-spacing:.2px}
+  .sub{color:var(--muted); font-size:.95rem}
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border);
+    background:var(--panel); border-radius:12px; box-shadow:var(--shadow); transition:transform var(--motion)
+  }
+  .chip:active{transform:translateY(1px)}
+  .chip button, .chip select{background:transparent; border:none; color:var(--text); font-weight:700}
+  .seg{display:flex; padding:6px; border:1px solid var(--border); background:var(--panel); border-radius:16px; box-shadow:var(--shadow)}
+  .seg.small{padding:4px}
+  .seg button{appearance:none;border:none;background:transparent;color:var(--muted);padding:10px 14px;border-radius:12px;font-weight:800;transition: background var(--motion), color var(--motion)}
+  .seg button.active{background:var(--brand); color:#fff}
+  main{display:grid; gap:14px}
+  .grid{display:grid; gap:14px}
+  @media(min-width:960px){ .grid{grid-template-columns:1fr 1fr} }
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--round); padding:16px; box-shadow:var(--shadow);
+    transition: border var(--motion), background var(--motion);
+  }
+  .group{display:grid; gap:10px}
+  .label{font-weight:750; color:var(--muted); letter-spacing:.2px}
+  .drop{
+    display:grid; place-items:center; text-align:center; padding:28px; border:1.5px dashed var(--border);
+    background:var(--surface); border-radius:18px; min-height:160px; cursor:pointer; transition:border-color var(--motion), background var(--motion)
+  }
+  .drop.drag{border-color:var(--brand); background:linear-gradient(0deg, transparent 0%, rgba(79,134,255,.06) 100%)}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    padding:12px 14px; border-radius:14px; border:1px solid var(--border);
+    background:var(--brand); color:#fff; font-weight:800; text-decoration:none; cursor:pointer;
+    transition:transform .05s ease, filter var(--motion), background var(--motion), color var(--motion);
+    will-change: transform;
+  }
+  .btn:hover{filter:brightness(1.05)} .btn:active{transform:translateY(1px)}
+  .btn.secondary{background:transparent; color:var(--text)}
+  .btn.ghost{background:transparent; border-color:transparent; color:var(--muted)}
+  .mini{font-size:.92rem; padding:10px 12px}
+  input[type="password"], input[type="text"], input[type="file"], .mono, textarea{
+    width:100%; padding:12px 12px; border-radius:14px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text); outline:none; transition: box-shadow var(--motion), background var(--motion);
+  }
+  input:focus, textarea:focus{box-shadow:0 0 0 6px var(--ring)}
+  .mono, textarea{font-family:var(--mono)}
+  .switch{position:relative; width:54px; height:30px; border-radius:999px; background:var(--surface); border:1px solid var(--border); cursor:pointer; transition:background var(--motion)}
+  .switch>i{position:absolute; top:2px; inset-inline-start:2px; width:26px; height:26px; border-radius:50%; background:#fff; transition:transform var(--motion)}
+  .switch.on{background:linear-gradient(180deg,var(--success),#14b079)} .switch.on>i{transform:translateX(-26px)} html[dir="ltr"] .switch.on>i{transform:translateX(26px)}
+  .muted{color:var(--muted)}
+  #emojiOut{min-height:520px; font-size:18px; line-height:1.38; letter-spacing:.2px}
+  #emojiIn{min-height:320px; font-size:16px}
+  .stats{display:flex; gap:8px; align-items:center; color:var(--muted); font-weight:700; flex-wrap:wrap}
+  .stat-chip{padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:var(--surface)}
+  .sharebar{display:grid; grid-template-columns:repeat(5,1fr); gap:10px}
+  .sharebtn{display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--border); border-radius:12px; padding:10px; background:var(--surface); color:var(--text); font-weight:800; text-decoration:none}
+  .sharebtn svg{width:20px;height:20px}
+  .prog{height:10px; background:var(--surface); border:1px solid var(--border); border-radius:999px; overflow:hidden}
+  .prog>div{height:100%; width:0%; background:linear-gradient(90deg,var(--brand),var(--brand-2)); transition:width .06s}
+  footer{opacity:.8; font-size:.95rem; text-align:center; padding:20px 0}
+  .badge{display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(22,196,127,.12); color:var(--success); font-weight:800}
+  .hidden{display:none !important}
+  .preview{display:grid; place-items:center; min-height:160px; border:1.5px dashed var(--border); border-radius:16px; background:var(--surface); padding:12px}
+  .meta{display:flex; gap:8px; flex-wrap:wrap; color:var(--muted); font-weight:700}
+  .meta span{background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:6px 10px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="logo">🔐</div>
+      <div>
+        <div class="title">مبدل تصویر/متن ⇄ ایموجی</div>
+        <div class="sub">مدرن، سریع، با رمز اختیاری</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="chip"><span>🌓</span><button id="themeToggle" aria-label="Theme">روشن/تاریک</button></div>
+      <div class="chip"><button id="installBtn" class="ghost">➕ نصب</button></div>
+    </div>
+  </header>
+
+  <div class="seg" role="tablist" style="justify-content:center">
+    <button id="tabEncode" class="active" role="tab" aria-selected="true">رمزگذاری</button>
+    <button id="tabDecode" role="tab" aria-selected="false">رمزگشایی</button>
+  </div>
+
+  <!-- ENCODE -->
+  <section id="panelEncode" class="grid" role="tabpanel" aria-labelledby="tabEncode">
+    <div class="card group">
+      <div class="label">۱) حالت ورودی</div>
+      <div class="seg small" id="modeSeg" role="tablist">
+        <button id="modeImg" class="active" role="tab" aria-selected="true">تصویر</button>
+        <button id="modeText" role="tab" aria-selected="false">متن</button>
+      </div>
+
+      <!-- Image section -->
+      <div id="imgSection" class="group">
+        <div class="label">۲) تصویر را انتخاب کنید</div>
+        <div id="drop" class="drop" tabindex="0">
+          <div><div style="font-size:48px">🖼️</div><div class="muted">JPG/PNG/WebP/AVIF • تا 5MB</div></div>
+          <input id="file" type="file" accept="image/*" class="hidden">
+        </div>
+
+        <div class="group">
+          <div class="label">پیش‌نمایش</div>
+          <div id="inPreview" class="preview"><span class="muted">—</span></div>
+          <div id="inMeta" class="meta hidden">
+            <span id="metaName">—</span><span id="metaDim">—</span><span id="metaSize">—</span>
+            <span id="metaCodec">—</span><span id="metaMode">—</span>
+          </div>
+        </div>
+
+        <div class="card group" style="margin-top:8px">
+          <div class="row" style="justify-content:space-between">
+            <div>
+              <div class="label">بهینه‌سازی هوشمند</div>
+              <div class="muted" id="optDesc">فعال (پیشنهادی) • کمترین تعداد ایموجی</div>
+            </div>
+            <div id="optSwitch" class="switch on" role="switch" aria-checked="true" title="Smart Optimize"><i></i></div>
+          </div>
+          <div class="row">
+            <button id="optimizeBtn" class="btn secondary mini">✨ اجرای بهینه‌سازی</button>
+            <span id="optBadge" class="badge hidden"></span>
+          </div>
+          <div id="optProg" class="prog hidden" aria-hidden="true"><div></div></div>
+        </div>
+      </div>
+
+      <!-- Text section -->
+      <div id="textSection" class="group hidden">
+        <div class="label">۲) متن را وارد کنید</div>
+        <textarea id="textIn" class="mono" placeholder="متن خود را اینجا بنویسید…"></textarea>
+        <div class="meta"><span id="textLen">0 کاراکتر</span></div>
+      </div>
+
+      <!-- Password (shared) -->
+      <div class="card group" style="margin-top:8px">
+        <div class="row" style="justify-content:space-between">
+          <div>
+            <div class="label">رمز عبور</div>
+            <div class="muted">AES-GCM • اختیاری (برای متن و تصویر)</div>
+          </div>
+          <div id="passSwitch" class="switch" role="switch" aria-checked="false" title="Use Password"><i></i></div>
+        </div>
+        <div id="passRow" class="row hidden">
+          <input id="password" type="password" placeholder="••••••••" aria-label="Password (optional)" style="flex:1">
+          <button id="togglePass" class="btn secondary mini" type="button">👁️</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="encodeBtn" class="btn">🔐 تبدیل به ایموجی</button>
+        <button id="clearIn" class="btn secondary">🧹 پاک‌سازی</button>
+      </div>
+      <div id="encProg" class="prog hidden" aria-hidden="true"><div></div></div>
+    </div>
+
+    <div class="card group">
+      <div class="label">خروجی ایموجی</div>
+      <textarea id="emojiOut" class="mono" placeholder="…" readonly></textarea>
+      <div class="row">
+        <button id="copyEmoji" class="btn">📋 کپی</button>
+        <button id="shareSystem" class="btn secondary">🔗 اشتراک</button>
+        <button id="saveTxt" class="btn secondary">💾 ذخیره به .txt</button>
+      </div>
+      <div class="sharebar">
+        <a id="shareWA" class="sharebtn" href="#" target="_blank" rel="noopener" title="WhatsApp">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.52 3.48A11.83 11.83 0 0 0 12 .67 11.33 11.33 0 0 0 .67 12a11.2 11.2 0 0 0 1.64 5.86L.5 23.5l5.79-1.77A11.4 11.4 0 0 0 12 23.33 11.33 11.33 0 0 0 23.33 12a11.8 11.8 0 0 0-2.81-8.52Z"/></svg>
+        </a>
+        <a id="shareTG" class="sharebtn" href="#" target="_blank" rel="noopener" title="Telegram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9.04 15.52 8.9 19.2a.76.76 0 0 0 1.2.64l2.88-2.1 3.98 2.94a1.31 1.31 0 0 0 2.06-.82l3.88-17.3a1.07 1.07 0 0 0-1.48-1.23L1.05 9.2A1.15 1.15 0 0 0 1.1 11l5.8 1.8 13.46-7.82L9.04 15.52Z"/></svg>
+        </a>
+        <a id="shareSMS" class="sharebtn" href="#" title="SMS/iMessage">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z"/></svg>
+        </a>
+        <a id="shareMail" class="sharebtn" href="#" title="Gmail / Email">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5L4 8V6l8 5 8-5v2Z"/></svg>
+        </a>
+        <button id="copySmall" class="sharebtn" title="Copy">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1Zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"/></svg>
+        </button>
+      </div>
+      <div class="stats">
+        <span class="stat-chip">🔢 تعداد ایموجی: <strong id="emojiCount">0</strong></span>
+        <span class="stat-chip">🧮 الفبا: <strong id="alphaInfo">—</strong></span>
+        <span class="stat-chip">📦 حجم تقریبی: <strong id="estSize">0B</strong></span>
+      </div>
+      <div id="encProg2" class="prog hidden" aria-hidden="true"><div></div></div>
+    </div>
+  </section>
+
+  <!-- DECODE -->
+  <section id="panelDecode" class="grid hidden" role="tabpanel" aria-labelledby="tabDecode">
+    <div class="card group">
+      <div class="label">۱) متن ایموجی را بچسبانید یا از .txt وارد کنید</div>
+      <textarea id="emojiIn" class="mono" placeholder="…"></textarea>
+      <div class="row">
+        <button id="pasteEmoji" class="btn secondary">📥 چسباندن</button>
+        <label class="btn secondary" for="txtImport">📄 وارد کردن .txt</label>
+        <input id="txtImport" type="file" accept=".txt,text/plain" class="hidden">
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <div class="label">رمز عبور (در صورت استفاده)</div>
+        <div class="row" style="margin-inline-start:auto">
+          <input id="password2" type="password" placeholder="••••••••" aria-label="Password (if used)" style="flex:1">
+          <button id="togglePass2" class="btn secondary mini" type="button">👁️</button>
+        </div>
+      </div>
+      <div class="muted">اگر رمز استفاده شده، همان را وارد کنید.</div>
+      <div class="row">
+        <button id="decodeBtn" class="btn">🔓 تبدیل</button>
+        <button id="clearOut" class="btn secondary">🧹 پاک‌سازی</button>
+      </div>
+      <div id="decProg" class="prog hidden" aria-hidden="true"><div></div></div>
+    </div>
+
+    <div class="card group">
+      <div class="label">۲) نتیجه</div>
+      <!-- image result -->
+      <div id="imgWrap" class="preview"><span class="muted">—</span></div>
+      <div class="row"><a id="dlLink" class="btn secondary hidden" download>⬇️ دانلود تصویر</a></div>
+      <!-- text result -->
+      <div id="textWrap" class="group hidden">
+        <textarea id="decodedText" class="mono" readonly placeholder="—"></textarea>
+        <div class="row">
+          <button id="copyDecoded" class="btn secondary">📋 کپی متن</button>
+          <a id="dlText" class="btn secondary hidden" download="decoded.txt">⬇️ دانلود متن</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>© 2025 • created by <strong>pym</strong></footer>
+</div>
+
+<script>
+/* ==== theme ==== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function setTheme(mode){ const light=mode==='light'; document.documentElement.classList.toggle('light',light); localStorage.setItem('theme',mode); (document.querySelector('meta[name="theme-color"]')||{}).content=light?'#ffffff':'#0b0b0f'; }
+setTheme(localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'));
+$('#themeToggle').onclick=()=>setTheme(document.documentElement.classList.contains('light')?'dark':'light');
+
+/* ==== tabs ==== */
+function showTab(which){ const enc=which==='enc'; $('#tabEncode').classList.toggle('active',enc); $('#panelEncode').classList.toggle('hidden',!enc); $('#tabDecode').classList.toggle('active',!enc); $('#panelDecode').classList.toggle('hidden',enc); }
+$('#tabEncode').onclick=()=>showTab('enc'); $('#tabDecode').onclick=()=>showTab('dec'); showTab('enc');
+
+/* ==== alphabet ==== */
+const CATEGORY_BLOCK=`
+People
+😄 😆 😊 😃 ☺️ 😏 😍 😘 😚 😳 😌 😆 😁 😉 😜 😝 😀 😗 😙 😛 😴 😟 😦 😧 😮 😬 😕 😯 😑 😒 😅 😓 😥 😩 😔 😞 😖 😨 😰 😣 😢 😭 😂 😲 😱 😫 😠 😡 😤 😪 😋 😷 😎 😵 👿 😈 😐 😶 😇 👽 💛 💙 💜 ❤️ 💚 💔 💓 💗 💕 💞 💘 💖 ✨ ⭐ 🌟 💫 💥 💢 ❗ ❓ ❕ ❔ 💤 💨 🎶 🎵 🔥 💩 👍 👎 👌 👊 ✊ ✌️ 👋 ✋ 👐 ☝️ 👇 👈 👉 🙌 🙏 👆 👏 💪 🤘 🖕 🚶 🏃 👫 👪 👬 👭 💃 👯 🙆‍♀️ 🙅 💁 🙋 👰‍♀️ 🙇 💏 💑 💆 💇 💅 👦 👧 👩 👨 👶 👵 👴 👲 👳‍♂️ 👷 👮 👼 👸 😺 😸 😻 😽 😼 🙀 😿 😹 😾 👹 👺 🙈 🙉 🙊 💂‍♂️ 💀 🐾 👄 💋 💧 👂 👀 👃 👅 💌 👤 👥 💬 💭
+Nature
+☀️ ☔ ☁️ ❄️ ⛄ ⚡ 🌀 🌁 🌊 🐱 🐶 🐭 🐹 🐰 🐺 🐸 🐯 🐨 🐻 🐷 🐽 🐮 🐗 🐵 🐒 🐴 🐎 🐫 🐑 🐘 🐼 🐍 🐦 🐤 🐥 🐣 🐔 🐧 🐢 🐛 🐝 🐜 🪲 🐌 🐙 🐠 🐟 🐳 🐋 🐬 🐄 🐏 🐀 🐃 🐅 🐇 🐉 🐐 🐓 🐕 🐖 🐁 🐂 🐲 🐡 🐊 🐪 🐆 🐈 🐩 🐾 💐 🌸 🌷 🍀 🌹 🌻 🌺 🍁 🍃 🍂 🌿 🍄 🌵 🌴 🌲 🌳 🌰 🌱 🌼 🌾 🐚 🌐 🌞 🌝 🌚 🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘 🌜 🌛 🌔 🌍 🌎 🌏 🌋 🌌 ⛅
+Objects
+🎍 💝 🎎 🎒 🎓 🎏 🎆 🎇 🎐 🎑 🎃 👻 🎅 🎄 🎁 🔔 🔕 🎋 🎉 🎊 🎈 🔮 💿 📀 💾 📷 📹 🎥 💻 📺 📱 ☎️ 📞 📟 📠 💽 📼 🔉 🔈 🔇 📢 📣 ⌛ ⏳ ⏰ ⌚ 📻 📡 ➿ 🔍 🔎 🔓 🔒 🔏 🔐 🔑 💡 🔦 🔆 🔅 🔌 🔋 📲 📧 📫 📮 🛀 🛁 🚿 🚽 🔧 🔩 🔨 💺 💰 💴 💵 💷 💶 💳 💸 📥 📤 ✉️ 📨 📯 📪 📬 📭 🚪 🚬 💣 🔫 🔪 💊 💉 📄 📃 📑 📊 📈 📉 📜 📋 📆 📅 📇 📁 📂 ✂️ 📌 📎 ✒️ ✏️ 📏 📐 📕 📗 📘 📙 📓 📔 📒 📚 🔖 📛 🔬 🔭 📰 🏈 🏀 ⚽ ⚾ 🎾 🎱 🏉 🎳 ⛳ 🚵 🚴 🏇 🏂 🏊 🏄 🎿 ♠️ ♥️ ♣️ ♦️ 💎 💍 🏆 🎼 🎹 🎻 👾 🎮 🃏 🎴 🎲 🎯 🀄 🎬 📝 📖 🎨 🎤 🎧 🎺 🎷 🎸 👞 👡 👠 💄 👢 👕 👔 👚 👗 🎽 👖 👘 👙 🎀 🎩 👑 👒 🌂 💼 👜 👝 👛 👓 🎣 ☕ 🍵 🍶 🍼 🍺 🍻 🍸 🍹 🍷 🍴 🍕 🍔 🍟 🍗 🍖 🍝 🍜 🍣 🍤 🍱 🍥 🍙 🍘 🍚 🍲 🍢 🍡 🥚 🍞 🍩 🍮 🍦 🍨 🍧 🎂 🍰 🍪 🍫 🍬 🍭 🍯 🍎 🍏 🍊 🍋 🍒 🍇 🍉 🍓 🍑 🍈 🍌 🍐 🍍 🍠 🍆 🍅 🌽
+Places
+🏠 🏡 🏫 🏢 🏣 🏥 🏦 🏪 🏩 🏨 💒 ⛪ 🏬 🏤 🌇 🌆 🏯 🏰 ⛺ 🏭 🗼 🗾 🗻 🌄 🌅 🌠 🗽 🌉 🎠 🌈 🎡 ⛲ 🎢 🚢 🚤 ⛵ 🚣 ⚓ 🚀 ✈️ 🚁 🚂 🚊 🚞 🚲 🚡 🚟 🚠 🚜 🚙 🚘 🚗 🚕 🚖 🚛 🚌 🚍 🚨 🚓 🚔 🚒 🚑 🚐 🚚 🚋 🚉 🚆 🚅 🚄 🚈 🚝 🚃 🚎 🎫 ⛽ 🚦 🚥 ⚠️ 🚧 🔰 🏧 🎰 🚏 💈 ♨️ 🏁 🎌 🏮 🗿 🎪 🎭 📍 🚩 🇯🇵 🇰🇷 🇨🇳 🇺🇸 🇫🇷 🇪🇸 🇮🇹 🇷🇺 🇬🇧 🇩🇪
+Symbols
+1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟 🔢 0️⃣ #️⃣ 🔣 ◀️ ⬇️ ▶️ ⬅️ 🔠 🔡 🔤 ↙️ ↘️ ➡️ ⬆️ ↖️ ↗️ ⏬ ⏫ 🔽 ⤵️ ⤴️ ↩️ ↪️ ↔️ ↕️ 🔼 🔃 🔄 ⏪ ⏩ ℹ️ 🆗 🔀 🔁 🔂 🆕 🔝 🆙 🆒 🆓 🆖 🎦 🈁 📶 🈹 🈴 🈺 🈯 🈷️ 🈶 🈵 🈚 🈸 🈳 🈲 🈂️ 🚻 🚹 🚺 🚼 🚭 🅿️ ♿ 🚇 🛄 🉑 🚾 🚰 🚮 ㊙️ ㊗️ Ⓜ️ 🛂 🛅 🛃 🉐 🆑 🆘 🆔 🚫 🔞 📵 🚯 🚱 🚳 🚷 🚸 ⛔ ✳️ ✴️ 💟 🆚 📳 📴 💹 💱 ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓ ⛎ 🔯 ❎ 🅰️ 🅱️ 🆎 🅾️ 💠 ♻️ 🔚 🔛
+`;
+function graphemesFromText(t){const g=[...t.matchAll(/(\p{Extended_Pictographic}\uFE0F?|\p{Emoji_Presentation})/gu)].map(m=>m[0]); return g.length?g:[...t];}
+function buildAlphabet(){const set=new Set(graphemesFromText(CATEGORY_BLOCK).filter(e=>!!e.trim())); const all=[...set]; const pow2=[1024,512,256,128,64].find(n=>all.length>=n)||64; return {arr:all.slice(0,pow2), size:pow2};}
+const SAFE64=["😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊","😍","😘","😜","🤪","😎","🤓","🧐","🥳","🤩","😇","🙂","🤗","🤠","😺","🙈","🙉","🙊","🐵","🐶","🐱","🦊","🐼","🐯","🦁","🐸","🦄","🐷","🐮","🐰","🐻","🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🍒","🍑","🍍","🥝","🥥","🥑","🌶️","🌽","🥕","🥔","🥦","🍞","🧀","🍪","🍰"];
+const {arr:BIG_ALPHABET,size:BIG_SIZE}=buildAlphabet(); const BIG_BITS=Math.log2(BIG_SIZE)|0;
+const MAPS={big:new Map(BIG_ALPHABET.map((e,i)=>[e,i])), safe:new Map(SAFE64.map((e,i)=>[e,i]))};
+const ALPHA={BIG:0, SAFE:1};
+function encodeHeader(alphaID,bits,len){const s=SAFE64,out=[s[alphaID&63],s[bits&63]]; for(let sh=30; sh>=0; sh-=6) out.push(s[(len>>>sh)&63]); return out.join('');}
+function decodeHeader(s){const gr=[...s.matchAll(/(\p{Extended_Pictographic}\uFE0F?)/gu)].map(m=>m[0]); const header=(gr.length?gr:[...s]).slice(0,8); const m=MAPS.safe; let len=0; for(let i=0;i<6;i++) len=(len<<6)|(m.get(header[2+i])||0); return {alphaID:m.get(header[0]), bits:m.get(header[1]), raw:header.join('')};}
+
+/* ==== utils ==== */
+const te=new TextEncoder(), td=new TextDecoder();
+const prettyBytes=n=>!n?"0B":((k=1024,u=['B','KB','MB','GB'],i=Math.floor(Math.log(n)/Math.log(k))),(n/Math.pow(k,i)).toFixed(i?1:0)+u[i]);
+function toast(msg){const t=document.createElement('div'); t.textContent=msg; t.style.cssText="position:fixed;inset-inline:0;left:0;right:0;bottom:18px;margin:auto;width:max-content;max-width:90vw;padding:10px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);z-index:9999;font-weight:800"; document.body.appendChild(t); setTimeout(()=>t.remove(),1500);}
+function setBar(el,p){if(!el) return; const bar=el.querySelector('div'); el.classList.remove('hidden'); bar.style.width=Math.round(p*100)+'%'; if(p>=1) setTimeout(()=>el.classList.add('hidden'),500);}
+
+/* ==== crypto ==== */
+const V=1;
+async function deriveKey(pass,salt){const base=await crypto.subtle.importKey('raw',te.encode(pass),'PBKDF2',false,['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt,iterations:120000},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function pack(bytes,mime,pass){const enc=!!pass,salt=enc?crypto.getRandomValues(new Uint8Array(16)):new Uint8Array(),iv=enc?crypto.getRandomValues(new Uint8Array(12)):new Uint8Array(); let data=bytes; if(enc){const key=await deriveKey(pass,salt); data=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,bytes));} const mb=te.encode(mime),ml=mb.length; const out=new Uint8Array(2+(enc?28:0)+2+ml+data.length); let p=0; out[p++]=V; out[p++]=enc?1:0; if(enc){out.set(salt,p); p+=16; out.set(iv,p); p+=12;} out[p++]=(ml>>8)&255; out[p++]=ml&255; out.set(mb,p); p+=ml; out.set(data,p); return out;}
+async function unpack(u8,pass){let p=0; const ver=u8[p++]; if(ver!==V) throw Error('Unsupported'); const flags=u8[p++],enc=(flags&1)===1; let salt=new Uint8Array(), iv=new Uint8Array(); if(enc){salt=u8.slice(p,p+16); p+=16; iv=u8.slice(p,p+12); p+=12;} const ml=(u8[p++]<<8)|u8[p++]; const mime=td.decode(u8.slice(p,p+ml)); p+=ml; let data=u8.slice(p); if(enc){if(!pass) throw Error('Password required'); const key=await deriveKey(pass,salt); data=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv},key,data));} return {mime,data};}
+
+/* ==== smart optimize (images) ==== */
+async function blobToImageBitmap(blob){ try{ return await createImageBitmap(blob); } catch{ return await new Promise((res,rej)=>{ const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=URL.createObjectURL(blob); }); } }
+function detectComplexity(img){const s=32,c=document.createElement('canvas'); c.width=s;c.height=s; const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,s,s); const d=ctx.getImageData(0,0,s,s).data; let varSum=0,prev=null; for(let i=0;i<d.length;i+=4){const y=0.2126*d[i]+0.7152*d[i+1]+0.0722*d[i+2]; if(prev!=null)varSum+=Math.abs(y-prev); prev=y;} return varSum/(s*s);}
+async function makeVariant(file,maxDim,q,type){
+  const src=await blobToImageBitmap(file); const w=src.width,h=src.height; const r=Math.min(maxDim/w,maxDim/h,1);
+  const nw=Math.max(1,Math.round(w*r)), nh=Math.max(1,Math.round(h*r));
+  const useOff=typeof OffscreenCanvas!=='undefined';
+  const cv=useOff?new OffscreenCanvas(nw,nh):Object.assign(document.createElement('canvas'),{width:nw,height:nh});
+  const ctx=cv.getContext('2d',{alpha:true}); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high'; ctx.drawImage(src,0,0,nw,nh);
+  const toBlob=(c,m,q)=>new Promise(res=>{ if(c.convertToBlob){ c.convertToBlob({type:m,quality:q}).then(res).catch(()=>res(null)); } else c.toBlob(b=>res(b),m,q); });
+  let blob=await toBlob(cv,type,q); if(!blob && type==='image/avif') blob=await toBlob(cv,'image/webp',q);
+  return blob||file;
+}
+function estimateEmojiCount(byteLen,bits){return 8+Math.ceil((byteLen*8)/bits);}
+async function smartOptimize(file, pass, bits, onProgress){
+  const img=await blobToImageBitmap(file); file.width=img.width; file.height=img.height;
+  const comp=detectComplexity(img);
+  const longSide=Math.max(img.width,img.height);
+  const baseSizes=[Math.min(2560,longSide),2048,1600,1280,1024,896,768,640].filter((v,i,a)=>v && (!i||v<a[i-1]));
+  const sizes=comp<12?baseSizes.slice(2):baseSizes.slice(1);
+  const qHi=comp>20?0.86:0.78, qLo=comp>20?0.62:0.52, qs=[qHi,(qHi+qLo)/2,qLo];
+  const types=['image/avif','image/webp','image/jpeg'];
+  const total=Math.min(sizes.length*qs.length*types.length,24); let tried=0, best={count:Infinity,blob:null,name:file.name};
+  for(const t of types){ for(const s of sizes){ for(const q of qs){
+    tried++; onProgress && onProgress(tried/total*0.9);
+    const b=await makeVariant(file,s,q,t); const u8=new Uint8Array(await b.arrayBuffer());
+    const packed=await pack(u8,b.type||'application/octet-stream',pass); const count=estimateEmojiCount(packed.length,bits);
+    if(count<best.count){ const ib=await blobToImageBitmap(b); best={count,blob:b,name:(file.name.replace(/\.[^.]+$/,'')||'image')+(b.type.includes('avif')?'.avif':b.type.includes('webp')?'.webp':'.jpg'), w:ib.width,h:ib.height, codec:b.type}; }
+  } } }
+  onProgress && onProgress(1); return best;
+}
+
+/* ==== worker (base-N) ==== */
+const workerCode=`
+self.onmessage=(e)=>{
+  const {type,payload}=e.data;
+  if(type==='encode'){
+    const {bytes,bits,alphabet}=payload; const mask=(1<<bits)-1; let acc=0,accBits=0,out=[],CH=1<<15;
+    for(let i=0;i<bytes.length;i++){
+      acc=(acc<<8)|bytes[i]; accBits+=8;
+      while(accBits>=bits){ accBits-=bits; out.push(alphabet[(acc>>accBits)&mask]); }
+      if((i&0x7fff)===0) self.postMessage({type:'progress',p:i/bytes.length});
+      if(out.length>=CH){ self.postMessage({type:'piece',text:out.join('')}); out.length=0; }
+    }
+    if(accBits>0) out.push(alphabet[(acc<<(bits-accBits))&mask]);
+    if(out.length) self.postMessage({type:'piece',text:out.join('')});
+    self.postMessage({type:'done'});
+  } else if(type==='decode'){
+    const {emojiText,bits,mapEntries}=payload; const map=new Map(mapEntries);
+    const arr=[...emojiText.matchAll(/(\\p{Extended_Pictographic}\\uFE0F?)/gu)].map(m=>m[0]); const list=arr.length?arr:[...emojiText];
+    let acc=0,accBits=0; const out=[];
+    for(let i=0;i<list.length;i++){
+      const v=map.get(list[i]); if(v===undefined) continue; acc=(acc<<bits)|v; accBits+=bits;
+      while(accBits>=8){ accBits-=8; out.push((acc>>accBits)&255); }
+      if((i&0x3fff)===0) self.postMessage({type:'progress',p:i/list.length});
+    }
+    const u8=new Uint8Array(out); self.postMessage({type:'bytes',u8}, [u8.buffer]);
+  }
+}`;
+const workerURL=URL.createObjectURL(new Blob([workerCode],{type:'text/javascript'}));
+const baseNWorker=new Worker(workerURL);
+
+/* ==== UI: encode ==== */
+let mode='image'; // 'image' | 'text'
+const drop=$('#drop'), fInput=$('#file'), inPrev=$('#inPreview'), meta=$('#inMeta'),
+  metaName=$('#metaName'), metaDim=$('#metaDim'), metaSize=$('#metaSize'), metaCodec=$('#metaCodec'), metaMode=$('#metaMode');
+let picked=null, optimized=null, useOptimized=true;
+const optSwitch=$('#optSwitch'), optBtn=$('#optimizeBtn'), optBadge=$('#optBadge'), optProg=$('#optProg'), optDesc=$('#optDesc');
+const passSwitch=$('#passSwitch'), passRow=$('#passRow'), passIn=$('#password');
+const setOpt=p=>setBar(optProg,p), encProg=$('#encProg'), encProg2=$('#encProg2');
+const setEnc=p=>{setBar(encProg,p); setBar(encProg2,p);};
+const decProg=$('#decProg'), setDec=p=>setBar(decProg,p);
+
+/* Mode switch */
+function setMode(m){
+  mode=m;
+  $('#modeImg').classList.toggle('active',m==='image');
+  $('#modeText').classList.toggle('active',m==='text');
+  $('#imgSection').classList.toggle('hidden',m!=='image');
+  $('#textSection').classList.toggle('hidden',m!=='text');
+}
+$('#modeImg').onclick=()=>setMode('image');
+$('#modeText').onclick=()=>setMode('text');
+
+/* Drop & pick */
+['click','keydown'].forEach(evt=> drop?.addEventListener(evt, e=>{ if(evt==='keydown' && !(e.key==='Enter'||e.key===' ')) return; fInput.click(); }));
+drop?.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('drag'); });
+drop?.addEventListener('dragleave', ()=> drop.classList.remove('drag'));
+drop?.addEventListener('drop', e=>{ e.preventDefault(); drop.classList.remove('drag'); const f=e.dataTransfer.files?.[0]; if(f) setPicked(f,true); });
+fInput?.addEventListener('change', e=>{ const f=e.target.files?.[0]; if(f) setPicked(f,true); });
+
+function renderPreview(fileOrBlob,label,dim){
+  const url=URL.createObjectURL(fileOrBlob);
+  inPrev.innerHTML=`<img src="${url}" alt="preview" style="max-width:100%;border-radius:14px">`;
+  meta.classList.remove('hidden');
+  metaName.textContent=label; metaDim.textContent=dim||'—'; metaSize.textContent=prettyBytes(fileOrBlob.size||0);
+  metaCodec.textContent=(fileOrBlob.type||'').replace('image/','').toUpperCase()||'—';
+  metaMode.textContent=useOptimized?'بهینه‌سازی: فعال':'بهینه‌سازی: غیرفعال';
+}
+async function setPicked(file, auto){
+  if(!/^image\//.test(file.type)) return toast('فقط تصویر / Image only');
+  if(file.size>5*1024*1024) return toast('حداکثر 5MB');
+  picked=file; optimized=null; useOptimized=true; optSwitch.classList.add('on'); optSwitch.setAttribute('aria-checked','true'); optDesc.textContent='فعال (پیشنهادی) • کمترین تعداد ایموجی';
+  optBadge.classList.add('hidden');
+  const img=await blobToImageBitmap(file);
+  renderPreview(file,file.name,`${img.width}×${img.height}`);
+  $('#drop').innerHTML=`<div><div style="font-size:42px">✅</div><div class="muted">${file.name} • ${prettyBytes(file.size)}</div></div>`;
+  if(auto) runOptimize();
+}
+
+/* Switches & password */
+optSwitch.onclick=()=>{ useOptimized=!optSwitch.classList.contains('on'); optSwitch.classList.toggle('on',useOptimized); optSwitch.setAttribute('aria-checked',String(useOptimized)); optDesc.textContent=useOptimized?'فعال (پیشنهادی) • کمترین تعداد ایموجی':'غیرفعال • استفاده از تصویر اصلی'; if(picked){ const showing=(useOptimized&&optimized)?optimized:picked; renderPreview(showing,(showing.name||'image'), showing.width&&showing.height?`${showing.width}×${showing.height}`:'—'); } };
+passSwitch.onclick=()=>{ const on=!passSwitch.classList.contains('on'); passSwitch.classList.toggle('on',on); passSwitch.setAttribute('aria-checked',String(on)); passRow.classList.toggle('hidden',!on); if(!on) passIn.value=''; };
+$('#togglePass').onclick=()=> passIn.type=(passIn.type==='password'?'text':'password');
+
+/* Text input stats */
+$('#textIn').addEventListener('input', e=>{ const t=e.target.value; $('#textLen').textContent=`${t.length} کاراکتر`; });
+
+/* Optimize */
+async function runOptimize(){
+  try{
+    if(!picked) return toast('ابتدا تصویر را انتخاب کنید');
+    setOpt(0.02);
+    const pass = passSwitch.classList.contains('on') ? passIn.value.trim() : '';
+    const best=await smartOptimize(picked, pass, BIG_BITS, p=> setOpt(0.02+0.9*p));
+    optimized=new File([best.blob], best.name, {type:best.blob.type});
+    optimized.width=best.w; optimized.height=best.h;
+    useOptimized=true; optSwitch.classList.add('on'); optSwitch.setAttribute('aria-checked','true');
+    optBadge.textContent=`بهترین انتخاب • ${optimized.name} • ${prettyBytes(optimized.size)} • ~${best.count} ایموجی`; optBadge.classList.remove('hidden');
+    renderPreview(optimized, optimized.name, `${optimized.width}×${optimized.height}`);
+    $('#drop').innerHTML=`<div><div style="font-size:42px">✨</div><div class="muted">${optimized.name} • ${prettyBytes(optimized.size)}</div></div>`;
+    setOpt(1);
+  }catch(e){ alert(e.message||e); }
+}
+optBtn.onclick=()=>{ if(mode==='image') runOptimize(); else toast('بهینه‌سازی فقط برای تصویر است'); };
+
+/* Share + counts */
+function shareLinks(text){ const enc=encodeURIComponent(text||''); return {wa:`https://wa.me/?text=${enc}`,tg:`https://t.me/share/url?url=&text=${enc}`,sms:`sms:&body=${enc}`,mail:`mailto:?subject=${encodeURIComponent('Emoji data')}&body=${enc}`}; }
+function wireShareButtons(txt){ const L=shareLinks(txt); $('#shareWA').href=L.wa; $('#shareTG').href=L.tg; $('#shareSMS').href=L.sms; $('#shareMail').href=L.mail; }
+function updateCounts(str,bits){ const gs=[...str.matchAll(/(\p{Extended_Pictographic}\uFE0F?)/gu)].map(m=>m[0]); const emojis=(gs.length?gs:[...str]).length; $('#emojiCount').textContent=String(emojis); $('#alphaInfo').textContent=`${bits}-bit`; $('#estSize').textContent=prettyBytes(str.length*2); }
+
+/* Encode button */
+$('#encodeBtn').onclick= async ()=>{
+  try{
+    const pass = passSwitch.classList.contains('on') ? passIn.value.trim() : '';
+    const bits=BIG_BITS, alphabet=BIG_ALPHABET, header=encodeHeader(ALPHA.BIG,bits,0); // len filled by worker result size (we prepend header after worker)
+    let payloadBytes, mime;
+    if(mode==='text'){
+      const text=$('#textIn').value||''; if(!text) return toast('متن خالی است');
+      payloadBytes=te.encode(text); mime='text/plain;charset=utf-8';
+    }else{
+      const file=(useOptimized && optimized)?optimized:picked;
+      if(!file) return toast('تصویر انتخاب نشده');
+      payloadBytes=new Uint8Array(await file.arrayBuffer()); mime=file.type||'image/png';
+    }
+    setEnc(0.08);
+    const packed=await pack(payloadBytes, mime, pass);
+    // re-make header with correct length
+    const realHeader=encodeHeader(ALPHA.BIG,bits,packed.length);
+    let body='';
+    baseNWorker.onmessage=(ev)=>{
+      const {type,p,text}=ev.data;
+      if(type==='progress'){ setEnc(0.12+0.76*(p||0)); }
+      else if(type==='piece'){ body+=text; }
+      else if(type==='done'){ const out=realHeader+body; $('#emojiOut').value=out; wireShareButtons(out); updateCounts(out,bits); setEnc(1); }
+    };
+    baseNWorker.postMessage({type:'encode', payload:{bytes:packed, bits, alphabet}});
+  }catch(e){ alert(e.message||e); }
+};
+
+/* toolbar actions */
+$('#clearIn').onclick=()=>{ picked=null; optimized=null; useOptimized=true; if($('#drop')) $('#drop').innerHTML=`<div><div style="font-size:48px">🖼️</div><div class="muted">JPG/PNG/WebP/AVIF • تا 5MB</div></div>`; inPrev.innerHTML='<span class="muted">—</span>'; meta.classList.add('hidden'); $('#textIn').value=''; $('#textLen').textContent='0 کاراکتر'; passIn.value=''; $('#emojiOut').value=''; $('#emojiCount').textContent='0'; $('#alphaInfo').textContent='—'; $('#estSize').textContent='0B'; optBadge.classList.add('hidden'); setMode('image'); };
+$('#copyEmoji').onclick= async ()=>{ try{ await navigator.clipboard.writeText($('#emojiOut').value); toast('کپی شد'); }catch{ toast('Clipboard blocked'); } };
+$('#copySmall').onclick= async ()=>{ try{ await navigator.clipboard.writeText($('#emojiOut').value); toast('Copied'); }catch{} };
+$('#saveTxt').onclick= ()=>{ const text=$('#emojiOut').value||''; const blob=new Blob([text],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='emoji.txt'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); };
+$('#shareSystem').onclick= async ()=>{ const text=$('#emojiOut').value.trim(); if(!text) return toast('خروجی خالی است'); if(navigator.share){ try{ await navigator.share({text}); }catch{} } else { await navigator.clipboard.writeText(text); toast('کپی شد'); } };
+$('#emojiOut').addEventListener('input', ()=>{ const v=$('#emojiOut').value; wireShareButtons(v); updateCounts(v,BIG_BITS); });
+
+/* ==== decode ==== */
+$('#togglePass2').onclick=()=>{ const p2=$('#password2'); p2.type=(p2.type==='password'?'text':'password'); };
+$('#pasteEmoji').onclick= async ()=>{ try{ const t=await navigator.clipboard.readText(); if(t) $('#emojiIn').value=t; }catch{} };
+$('#txtImport').addEventListener('change', async e=>{ const f=e.target.files?.[0]; if(!f) return; const txt=await f.text(); $('#emojiIn').value=txt; toast('متن بارگذاری شد'); });
+
+$('#decodeBtn').onclick= async ()=>{
+  try{
+    const text=$('#emojiIn').value.trim(); if(!text) return; setDec(0.06);
+    const H=decodeHeader(text); const bits=H.bits, body=text.slice(H.raw.length);
+    const mapEntries=BIG_ALPHABET.map((e,i)=>[e,i]); // header stores BIG
+    baseNWorker.onmessage= async (ev)=>{
+      const {type,p,u8}=ev.data;
+      if(type==='progress'){ setDec(0.06+0.46*(p||0)); }
+      else if(type==='bytes'){
+        setDec(0.62);
+        let mime,data;
+        try{
+          const unp=await unpack(new Uint8Array(u8), $('#password2').value.trim());
+          mime=unp.mime; data=unp.data;
+        }catch(err){ alert(err.message||err); setDec(1); return; }
+        // Decide: text or image?
+        if(mime && (mime.startsWith('text/') || mime.includes('json') || mime.includes('xml'))) {
+          const txt=td.decode(data);
+          $('#textWrap').classList.remove('hidden');
+          $('#decodedText').value=txt;
+          const blob=new Blob([txt],{type:mime||'text/plain;charset=utf-8'}); const url=URL.createObjectURL(blob);
+          $('#dlText').href=url; $('#dlText').classList.remove('hidden');
+          $('#imgWrap').innerHTML='<span class="muted">—</span>'; $('#dlLink').classList.add('hidden');
+        } else {
+          const blob=new Blob([data],{type:mime||'image/png'}); const url=URL.createObjectURL(blob);
+          $('#imgWrap').innerHTML=`<img src="${url}" alt="preview" style="max-width:100%;border-radius:16px">`;
+          const ext=(mime?.split('/')[1]||'png').replace('jpeg','jpg'); const dl=$('#dlLink'); dl.href=url; dl.download=`decoded.${ext}`; dl.classList.remove('hidden');
+          $('#textWrap').classList.add('hidden'); $('#dlText').classList.add('hidden');
+        }
+        setDec(1);
+      }
+    };
+    baseNWorker.postMessage({type:'decode', payload:{emojiText:body, bits, mapEntries}});
+  }catch(e){ alert(e.message||e); }
+};
+$('#copyDecoded').onclick= async ()=>{ try{ await navigator.clipboard.writeText($('#decodedText').value||''); toast('کپی شد'); }catch{} };
+$('#clearOut').onclick=()=>{ $('#emojiIn').value=''; $('#password2').value=''; $('#imgWrap').innerHTML='<span class="muted">—</span>'; $('#dlLink').classList.add('hidden'); $('#decodedText').value=''; $('#textWrap').classList.add('hidden'); $('#dlText').classList.add('hidden'); };
+
+/* ==== PWA ==== */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',(e)=>{ e.preventDefault(); deferredPrompt=e; $('#installBtn').classList.remove('hidden'); });
+$('#installBtn').onclick=()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; } else alert('Add to Home Screen'); };
+const manifest={name:"EmojiCoder",short_name:"EmojiCoder",start_url:"./",display:"standalone",background_color:"#0b0b0f",
+  theme_color: document.documentElement.classList.contains('light') ? "#ffffff" : "#0b0b0f",
+  icons:[{"src":"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect rx='96' width='512' height='512' fill='%230b0b0f'/><text x='50%%' y='56%%' font-size='260' text-anchor='middle' fill='white'>🔐</text></svg>","sizes":"512x512","type":"image/svg+xml"}]};
+const mURL=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'})); const link=document.createElement('link'); link.rel='manifest'; link.href=mURL; document.head.appendChild(link);
+const swCode=`self.addEventListener('install',e=>{e.waitUntil(caches.open('emoji-v8').then(c=>c.addAll(['./']))); self.skipWaiting();});
+self.addEventListener('activate',e=>self.clients.claim());
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url); if(u.origin===location.origin){e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const cp=res.clone(); caches.open('emoji-v8').then(c=>c.put(e.request,cp)); return res;}).catch(()=>caches.match('./'))));}});`;
+if('serviceWorker' in navigator){ const swURL=URL.createObjectURL(new Blob([swCode],{type:'text/javascript'})); navigator.serviceWorker.register(swURL).catch(()=>{}); }
+
+/* init */
+wireShareButtons('');
+</script>
+</body>
+</html>
