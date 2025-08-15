@@ -77,7 +77,15 @@
       padding:.5rem .7rem; border-radius:9999px;
       border:1px solid var(--border); background:var(--panel-2); color:var(--text);
       font-size:13px; min-height:34px;
-      min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      min-width:0; max-width:100%;
+      /* default chips stay one-line */
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    /* WRAPPING chips for addresses (full visibility) */
+    .chip.wrap{
+      white-space:normal; overflow:visible; text-overflow:clip;
+      overflow-wrap:anywhere; word-break:break-word; line-height:1.4;
+      border-radius:14px; align-items:flex-start; padding:.6rem .75rem;
     }
 
     .seg{ display:flex; padding:4px; gap:4px; border:1px solid var(--border); border-radius:9999px; background:var(--panel-2); }
@@ -141,6 +149,27 @@
 
     /* Progress bar slightly taller for iOS sub-pixel */
     .h-1, .h-1\.5 { height: 6px !important; }
+
+    /* ---------- Redesigned Category Filter ---------- */
+    .cat-scroll{
+      display:flex; gap:.5rem; overflow-x:auto; padding-bottom:.25rem;
+      -webkit-overflow-scrolling:touch; scrollbar-width:none;
+    }
+    .cat-scroll::-webkit-scrollbar{ display:none; }
+    .cat-btn{
+      flex:0 0 auto; display:flex; align-items:center; gap:.55rem;
+      padding:.6rem .9rem; border-radius:9999px; border:1px solid var(--border);
+      background:var(--panel-2); color:var(--text);
+      font-weight:800; font-size:14px; line-height:1;
+    }
+    .cat-btn .cat-emoji{ font-size:18px; line-height:1; }
+    .cat-btn[aria-pressed="true"]{ background:var(--panel); box-shadow:var(--shadow); color:var(--text); }
+    /* When space is tight, allow text to continue; no clipping */
+    .cat-btn span{ white-space:nowrap; }
+    /* Optional: make first button (“All/همه”) visually distinct */
+    .cat-btn.is-all{ border-style:dashed; }
+    /* Address blocks in list */
+    .address-text{ white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
   </style>
 </head>
 <body class="h-full">
@@ -193,7 +222,7 @@
           <div class="text-[var(--muted)] text-[12.5px]" id="tsBox">—</div>
         </div>
         <div class="flex flex-wrap gap-2" id="addrRow" style="display:none">
-          <div class="chip" id="addrChip" data-i18n="current.resolving">📍 درحال دریافت آدرس…</div>
+          <div class="chip wrap" id="addrChip" data-i18n="current.resolving">📍 درحال دریافت آدرس…</div>
         </div>
 
         <!-- Maps + Taxi -->
@@ -234,8 +263,8 @@
           </div>
         </div>
 
-        <!-- Category filter chips -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1" id="catFiltersRow"></div>
+        <!-- Category filter pills (NEW) -->
+        <div class="cat-scroll" id="catFiltersRow"></div>
 
         <div id="listArea" class="grid gap-3">
           <div class="border border-dashed border-[var(--border)] rounded-xl p-5 text-center text-[var(--muted)]" data-i18n="saved.empty">هنوز مکانی ذخیره نشده. از <b>موقعیت دقیق</b> یا <b>انتخاب روی نقشه</b> استفاده کنید.</div>
@@ -352,7 +381,7 @@
           <div class="chip mono" id="saveEle">ارتفاع: —</div>
         </div>
         <div class="flex flex-wrap gap-2">
-          <div class="chip" id="saveAddr">📍 —</div>
+          <div class="chip wrap" id="saveAddr">📍 —</div>
         </div>
       </div>
       <div class="px-4 py-3 border-t border-[var(--border)] flex gap-2 justify-end">
@@ -371,7 +400,7 @@
       <div class="p-4 grid gap-3">
         <div id="previewMap" class="w-full rounded-xl border border-[var(--border)] overflow-hidden"></div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[13px]">
-          <div id="previewAddr" class="chip col-span-2 sm:col-span-4">—</div>
+          <div id="previewAddr" class="chip wrap col-span-2 sm:col-span-4">—</div>
           <div id="previewEle" class="chip">ارتفاع: —</div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -396,7 +425,7 @@
     </div>
   </nav>
 
-  <footer class="px-4 pt-2 pb-24 text-center text-[var(--muted)] text-[11.5px]">ساخته شده توسط <b>Peymaan Abedinpour V0.07</b></footer>
+  <footer class="px-4 pt-2 pb-24 text-center text-[var(--muted)] text-[11.5px]">ساخته شده توسط <b>Peymaan Abedinpour V0.08</b></footer>
   <div id="toast" class="toast" role="status" aria-live="polite">—</div>
 
   <!-- Scripts -->
@@ -417,10 +446,10 @@
       const link = document.createElement('link'); link.rel = 'manifest'; link.href = url; document.head.appendChild(link);
     })();
 
-    /* SW (tiny offline) — bump to v14 to force update */
+    /* SW (tiny offline) — bump to v15 to force update */
     (function(){
       if(!('serviceWorker' in navigator)) return;
-      const sw = `const CACHE='saveloc-v14';const ASSETS=['./'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{});return res;}).catch(()=>caches.match('./'))))});`;
+      const sw = `const CACHE='saveloc-v15';const ASSETS=['./'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{});return res;}).catch(()=>caches.match('./'))))});`;
       navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'})));
     })();
 
@@ -519,7 +548,7 @@
     installBtn.addEventListener('click', async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.hidden=true; });
     if(isIOS && !isStandalone){ a2hsHint.hidden=false; a2hsHint.addEventListener('click',()=> toast('در iPhone: Share ▸ Add to Home Screen')); }
 
-    /* Element refs (no duplicate globals) */
+    /* Element refs */
     const themeAuto=document.getElementById('themeAuto'), themeLight=document.getElementById('themeLight'), themeDark=document.getElementById('themeDark');
     const langFa=document.getElementById('langFa'), langEn=document.getElementById('langEn');
     const locateBtn=document.getElementById('locateBtn'), openPicker=document.getElementById('openPicker'), saveLiveBtn=document.getElementById('saveLiveBtn'), shareBtn=document.getElementById('shareBtn');
@@ -536,6 +565,7 @@
     const catChips=document.getElementById('catChips'), quickCatName=document.getElementById('quickCatName'), quickCatIcon=document.getElementById('quickCatIcon'), quickAddCat=document.getElementById('quickAddCat');
     const saveModal=document.getElementById('saveModal'), saveModalTitle=document.getElementById('saveModalTitle'), closeSave=document.getElementById('closeSave'), saveLat=document.getElementById('saveLat'), saveLng=document.getElementById('saveLng'), saveAcc=document.getElementById('saveAcc'), saveEle=document.getElementById('saveEle'), saveAddr=document.getElementById('saveAddr'), placeName=document.getElementById('placeName'), placeNotes=document.getElementById('placeNotes'), saveCancel=document.getElementById('saveCancel'), saveConfirm=document.getElementById('saveConfirm');
     const catFiltersRow=document.getElementById('catFiltersRow');
+    const settingsOpenBtn2=document.getElementById('settingsOpenBtn');
 
     /* i18n */
     let i18n = i18n_full;
@@ -651,7 +681,6 @@
       [saveLiveBtn,shareBtn,openApple,openGoogle,openWaze,dirApple,openCustom,copyLat,copyLng,copyBoth,openSnapp,openTapsi].forEach(b=>b.disabled=!on);
     }
 
-    // Blur active field before opening dialogs to avoid iOS zoom/reflow
     function blurActive(){ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
 
     locateBtn.addEventListener('click', ()=>{
@@ -725,7 +754,7 @@
       saveEle.textContent=i18n[LANG].current.eleVal(record.ele ?? '—');
       saveAddr.textContent='📍 '+(record.address || '—');
       renderCatChips(record.category);
-      blurActive(); // prevent iOS zoom on show
+      blurActive();
       saveModal.showModal();
       if(record.ele==null){ fetchElevation(record.lat,record.lng).then(e=>{ if(e!=null){ pendingSave.ele=e; saveEle.textContent=i18n[LANG].current.eleVal(e); } }); }
     }
@@ -826,7 +855,7 @@
       settingsModal.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ const k=el.getAttribute('data-i18n-placeholder'); const v=deepGet(i18n[LANG],k); if(typeof v==='string') el.setAttribute('placeholder',v); });
       renderCatList(); settingsModal.showModal();
     }
-    document.getElementById('settingsOpenBtn').addEventListener('click', ()=> openSettings());
+    settingsOpenBtn2.addEventListener('click', ()=> openSettings());
     closeSettings.addEventListener('click', ()=> settingsModal.close());
     saveSettingsBtn.addEventListener('click', ()=>{ writePrefs({customTpl:customTpl.value.trim(), shareTitle:shareTitle.value.trim()}); toast(i18n[LANG].toasts.settingsSaved); settingsModal.close(); });
     testCustom.addEventListener('click', ()=>{
@@ -834,13 +863,18 @@
       const url=tpl.replaceAll('{lat}','35.6892').replaceAll('{lng}','51.3890').replaceAll('{name}',encodeURIComponent('Test')); window.location.href=url;
     });
 
-    /* Saved list + Category filters */
+    /* Saved list + Category filters (NEW pills) */
     let activeCatFilter='all';
     function renderCatFilters(){
-      const cats=readCats(); catFiltersRow.innerHTML='';
+      const cats=readCats();
+      catFiltersRow.innerHTML='';
       cats.forEach(c=>{
-        const btn=document.createElement('button'); btn.className='chip'; btn.setAttribute('aria-pressed', c.id===activeCatFilter?'true':'false');
-        btn.textContent=`${c.icon} ${c.name}`;
+        const btn=document.createElement('button');
+        btn.className='cat-btn'+(c.id==='all'?' is-all':'');
+        btn.setAttribute('aria-pressed', c.id===activeCatFilter?'true':'false');
+        const emo=document.createElement('span'); emo.className='cat-emoji'; emo.textContent=c.icon;
+        const label=document.createElement('span'); label.textContent=' '+c.name;
+        btn.append(emo,label);
         btn.addEventListener('click',()=>{ activeCatFilter=c.id; [...catFiltersRow.children].forEach(n=>n.setAttribute('aria-pressed','false')); btn.setAttribute('aria-pressed','true'); renderList(); });
         catFiltersRow.appendChild(btn);
       });
@@ -872,8 +906,8 @@
         const sub=document.createElement('div'); sub.className='text-[12px] text-[var(--muted)] font-mono'; sub.textContent=coordsLine(p);
         head.append(title);
         const meta=document.createElement('div'); meta.className='space-y-1'; meta.appendChild(sub);
-        if(p.address){ const a=document.createElement('div'); a.className='text-[12px] text-[var(--muted)] truncate'; a.textContent='📍 '+p.address; meta.appendChild(a); }
-        if(p.notes){ const n=document.createElement('div'); n.className='text-[12px] text-[var(--muted)]'; n.textContent='📝 '+p.notes; meta.appendChild(n); }
+        if(p.address){ const a=document.createElement('div'); a.className='text-[12px] text-[var(--muted)] address-text'; a.textContent='📍 '+p.address; meta.appendChild(a); }
+        if(p.notes){ const n=document.createElement('div'); n.className='text-[12px] text-[var(--muted)] address-text'; n.textContent='📝 '+p.notes; meta.appendChild(n); }
         const headerRow=document.createElement('div'); headerRow.className='flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between'; headerRow.append(head, meta);
 
         const mk=(label,icon,fn)=>{ const b=document.createElement('button'); b.className='btn btn-outline'; b.innerHTML=`<i class="${icon} me-1.5"></i>${label}`; b.addEventListener('click',fn); return b; };
@@ -966,7 +1000,7 @@
 
     clearAllBtn.addEventListener('click', ()=>{ if(confirm(i18n[LANG].dialogs.clearAll)){ localStorage.removeItem(KEY); renderList(); toast(i18n[LANG].backup.cleared); } });
 
-    /* Init (no duplicate let current!) */
+    /* Init */
     setLang(LANG);
     applyTheme(localStorage.getItem(PREF_THEME)||'auto');
     enableLive(false);
