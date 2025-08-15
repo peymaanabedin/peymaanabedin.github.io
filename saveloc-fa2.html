@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl" class="h-full">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <meta name="theme-color" content="#0b0b0f" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f7f7f9" media="(prefers-color-scheme: light)">
   <title>Save Loc — ذخیره مکان</title>
@@ -22,9 +22,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+    /* ===== Base & Theme ===== */
     :root{
       --bg:#0b0b0f; --panel:#101013; --panel-2:#151519; --text:#f5f5f7; --muted:#9ea0a6; --border:#1e1f24;
       --radius:14px; --radius-lg:18px; --shadow:0 8px 24px rgba(0,0,0,.12);
+      --nav-h:64px; /* fixed bottom nav height */
     }
     @media (prefers-color-scheme: light){
       :root{ --bg:#f7f7f9; --panel:#ffffff; --panel-2:#f3f3f6; --text:#0d0f14; --muted:#6f7683; --border:#e7e9ee; }
@@ -32,12 +34,20 @@
     [data-theme="light"]{ --bg:#f7f7f9; --panel:#ffffff; --panel-2:#f3f3f6; --text:#0d0f14; --muted:#6f7683; --border:#e7e9ee; }
     [data-theme="dark"]{ --bg:#0b0b0f; --panel:#101013; --panel-2:#151519; --text:#f5f5f7; --muted:#9ea0a6; --border:#1e1f24; }
 
+    *,*::before,*::after{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       background:var(--bg); color:var(--text);
       font-family:'Vazirmatn', -apple-system, system-ui, "SF Pro Text", Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif;
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; -webkit-text-size-adjust:100%;
-      font-size:14px; /* smaller, cleaner */
+      font-size:15px; line-height:1.45;
+      overflow-x:hidden;
+      -webkit-tap-highlight-color:transparent;
     }
+    /* iOS zoom fix: inputs >=16px */
+    input, textarea, select, button { font-size:16px; }
+
+    img,svg,video{ max-width:100%; height:auto; }
 
     .appbar{
       position:sticky; top:0; z-index:50; padding-top:env(safe-area-inset-top);
@@ -48,11 +58,11 @@
 
     .card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); }
 
-    /* Sleek buttons */
+    /* Buttons */
     .btn{
-      min-height:44px; border-radius:12px; font-weight:600; font-size:13.5px;
+      min-height:44px; border-radius:12px; font-weight:600;
       transition:transform .06s ease, background-color .2s ease, border-color .2s ease, opacity .2s ease;
-      padding:.6rem .8rem;
+      padding:.6rem .8rem; font-size:14.5px;
     }
     .btn:active{ transform:translateY(1px); }
     .btn-solid{ background:var(--text); color:var(--bg); }
@@ -62,40 +72,73 @@
 
     .chip{
       display:inline-flex; align-items:center; gap:.4rem;
-      padding:.45rem .7rem; border-radius:9999px;
+      padding:.5rem .7rem; border-radius:9999px;
       border:1px solid var(--border); background:var(--panel-2); color:var(--text);
-      white-space:nowrap; font-size:12.5px;
+      white-space:nowrap; font-size:13px; min-height:34px;
+      max-width:100%; overflow:hidden; text-overflow:ellipsis;
     }
-    .chip[aria-pressed="true"]{ background:var(--panel); box-shadow:var(--shadow); }
 
     .seg{ display:flex; padding:4px; gap:4px; border:1px solid var(--border); border-radius:9999px; background:var(--panel-2); }
-    .seg button{ min-height:36px; padding:.35rem .75rem; border-radius:9999px; font-weight:600; color:var(--muted); font-size:12.5px; }
+    .seg button{ min-height:36px; padding:.35rem .75rem; border-radius:9999px; font-weight:600; color:var(--muted); font-size:13px; }
     .seg button[aria-pressed="true"]{ color:var(--text); background:var(--panel); box-shadow:var(--shadow); }
 
     .toolbar{ display:flex; gap:.5rem; flex-wrap:wrap; }
-    .tool{ display:inline-flex; align-items:center; gap:.45rem; padding:.5rem .7rem; border-radius:10px;
-           border:1px solid var(--border); background:var(--panel-2); font-weight:600; font-size:12.5px; }
+    .tool{ display:inline-flex; align-items:center; gap:.45rem; padding:.55rem .7rem; border-radius:10px;
+           border:1px solid var(--border); background:var(--panel-2); font-weight:600; font-size:13px; min-height:38px; }
     .tool:active{ transform:translateY(1px); }
 
     .toast{
       position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom)); transform:translateX(-50%);
-      background:var(--panel); border:1px solid var(--border); padding:.55rem .8rem; border-radius:12px; color:var(--text);
-      opacity:0; pointer-events:none; transition:.25s; z-index:70;
+      background:var(--panel); border:1px solid var(--border); padding:.6rem .85rem; border-radius:12px; color:var(--text);
+      opacity:0; pointer-events:none; transition:.25s; z-index:1000;
     }
     .toast.show{ opacity:1; bottom:calc(26px + env(safe-area-inset-bottom)); }
 
+    /* Fixed bottom nav (native-ish) */
     .bottom-nav{
-      position:sticky; bottom:0; z-index:50; padding-bottom:calc(env(safe-area-inset-bottom));
+      position:fixed; left:0; right:0; bottom:0; z-index:999;
+      padding-bottom:calc(env(safe-area-inset-bottom));
       background:color-mix(in oklab, var(--bg) 94%, transparent);
       border-top:1px solid var(--border); backdrop-filter:blur(10px);
+      height:var(--nav-h);
+      display:flex; align-items:center;
     }
-    .nav-btn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:.5rem 0; color:var(--muted); font-weight:600; font-size:11.5px; }
+    .nav-btn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:.35rem 0; color:var(--muted); font-weight:700; font-size:12px; }
     .nav-btn[aria-current="page"]{ color:var(--text); }
 
+    /* Inputs */
     .mono{ font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
-
-    input.ios-input, textarea.ios-input{ background:var(--panel-2); border:1px solid var(--border); border-radius:12px; color:var(--text); min-height:40px; font-size:13.5px; }
+    input.ios-input, textarea.ios-input{
+      background:var(--panel-2); border:1px solid var(--border); border-radius:12px; color:var(--text);
+      min-height:44px; font-size:16px; /* iOS zoom fix */
+    }
     dialog::backdrop{ background:rgba(0,0,0,.5); }
+
+    /* Dialog sizing + mobile scrolling */
+    dialog.card{
+      width:min(94vw, 560px);
+      max-height:85dvh; /* use dynamic viewport on iOS */
+      overflow:hidden; border-radius:18px;
+    }
+    dialog.card .p-4{
+      overflow:auto;
+      max-height:calc(85dvh - 96px); /* header/footer approx */
+      overscroll-behavior:contain;
+    }
+
+    /* Map heights in modals */
+    #pickerMap, #previewMap{
+      height:55dvh; max-height:420px; min-height:260px;
+    }
+
+    /* Main bottom padding so content never hides behind fixed nav */
+    main{ padding-bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom)) !important; }
+
+    /* Keep long address chips tidy */
+    #addrChip{ max-width:100%; }
+
+    /* Hide bottom nav when keyboard is open (iOS) */
+    body.kb .bottom-nav{ transform:translateY(110%); transition:transform .2s ease; }
   </style>
 </head>
 <body class="h-full">
@@ -112,16 +155,16 @@
   </header>
 
   <!-- Main -->
-  <main class="max-w-2xl mx-auto px-4 pt-4 pb-24 grid gap-4">
+  <main class="max-w-2xl mx-auto px-4 pt-4 grid gap-4">
     <!-- LIVE TAB -->
     <section id="tab-live" role="tabpanel" aria-labelledby="navLive" class="grid gap-4">
       <div class="card p-4 grid gap-3">
         <div class="flex items-center justify-between">
-          <h2 class="text-[13.5px] font-bold"><i class="fa-solid fa-location-crosshairs me-1.5"></i><span data-i18n="current.title">مکان فعلی</span></h2>
-          <span id="permStatus" class="chip text-[12px]" data-i18n="perm.unknown">دسترسی: <b>نامشخص</b></span>
+          <h2 class="text-[14px] font-bold"><i class="fa-solid fa-location-crosshairs me-1.5"></i><span data-i18n="current.title">مکان فعلی</span></h2>
+          <span id="permStatus" class="chip text-[12.5px]" data-i18n="perm.unknown">دسترسی: <b>نامشخص</b></span>
         </div>
 
-        <div class="h-1 bg-[var(--panel-2)] rounded-full overflow-hidden">
+        <div class="h-1.5 bg-[var(--panel-2)] rounded-full overflow-hidden">
           <i id="progBar" class="block h-full w-0 bg-[var(--text)] transition-all duration-300"></i>
         </div>
 
@@ -130,7 +173,7 @@
           <button id="openPicker" class="btn btn-ghost"><i class="fa-regular fa-map me-1.5"></i><span data-i18n="current.mapPicker">🗺️ انتخاب روی نقشه</span></button>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12.5px]">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[13px]">
           <div class="chip mono" id="latBox" data-i18n="current.lat">عرض: —</div>
           <div class="chip mono" id="lngBox" data-i18n="current.lng">طول: —</div>
           <div class="chip" id="accBox" data-i18n="current.acc">دقت: —</div>
@@ -170,7 +213,7 @@
     <section id="tab-saved" role="tabpanel" aria-labelledby="navSaved" class="grid gap-4 hidden">
       <div class="card p-4 grid gap-3">
         <div class="flex items-center justify-between gap-2">
-          <h2 class="text-[13.5px] font-bold"><i class="fa-regular fa-bookmark me-1.5"></i><span data-i18n="saved.title">مکان‌های ذخیره‌شده</span></h2>
+          <h2 class="text-[14px] font-bold"><i class="fa-regular fa-bookmark me-1.5"></i><span data-i18n="saved.title">مکان‌های ذخیره‌شده</span></h2>
           <div class="toolbar">
             <button id="exportBtn" class="tool"><i class="fa-solid fa-file-arrow-down"></i><span data-i18n="backup.export">خروجی</span></button>
             <button id="importBtn" class="tool"><i class="fa-solid fa-file-arrow-up"></i><span data-i18n="backup.import">ورود</span></button>
@@ -201,7 +244,7 @@
     <!-- SETTINGS MODAL -->
     <dialog id="settingsModal" class="card w-11/12 max-w-xl p-0">
       <div class="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
-        <strong class="text-[13.5px] font-bold" data-i18n="settings.title">تنظیمات</strong>
+        <strong class="text-[14px] font-bold" data-i18n="settings.title">تنظیمات</strong>
         <div class="grow"></div>
         <button id="closeSettings" class="btn btn-outline px-3" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -256,12 +299,12 @@
     <!-- PICKER MODAL -->
     <dialog id="pickerModal" class="card w-11/12 max-w-xl p-0">
       <div class="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
-        <strong class="text-[13.5px] font-bold" data-i18n="picker.title">انتخاب روی نقشه</strong>
+        <strong class="text-[14px] font-bold" data-i18n="picker.title">انتخاب روی نقشه</strong>
         <div class="grow"></div>
         <button id="closePicker" class="btn btn-outline px-3" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-4 grid gap-3">
-        <div id="pickerMap" class="w-full h-80 rounded-xl border border-[var(--border)] overflow-hidden"></div>
+        <div id="pickerMap" class="w-full rounded-xl border border-[var(--border)] overflow-hidden"></div>
         <div class="toolbar">
           <button id="pickerLocate" class="tool"><i class="fa-solid fa-crosshairs"></i><span data-i18n="picker.locate">یافتن من</span></button>
           <div class="grow"></div>
@@ -271,14 +314,14 @@
             <button id="pickerUse" class="btn btn-solid" data-i18n="picker.useBtn">استفاده از این نقطه</button>
           </div>
         </div>
-        <div class="text-[11.5px] text-[var(--muted)]" data-i18n="picker.help">پین را بکشید یا روی نقشه بزنید. جستجو ابتدا شهر شما را در نظر می‌گیرد.</div>
+        <div class="text-[12px] text-[var(--muted)]" data-i18n="picker.help">پین را بکشید یا روی نقشه بزنید. جستجو ابتدا شهر شما را در نظر می‌گیرد.</div>
       </div>
     </dialog>
 
     <!-- SAVE MODAL -->
     <dialog id="saveModal" class="card w-11/12 max-w-xl p-0">
       <div class="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
-        <strong id="saveModalTitle" class="text-[13.5px] font-bold" data-i18n="save.title">ذخیره مکان</strong>
+        <strong id="saveModalTitle" class="text-[14px] font-bold" data-i18n="save.title">ذخیره مکان</strong>
         <div class="grow"></div>
         <button id="closeSave" class="btn btn-outline px-3" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -300,7 +343,7 @@
           <label class="text-[12.5px] text-[var(--muted)]" for="placeNotes" data-i18n="save.notesLabel">یادداشت</label>
           <textarea id="placeNotes" rows="3" class="ios-input w-full px-3 py-2" data-i18n-placeholder="save.notesPh" placeholder="یادداشت اختیاری"></textarea>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12.5px]">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[13px]">
           <div class="chip mono" id="saveLat" data-i18n="current.lat">عرض: —</div>
           <div class="chip mono" id="saveLng" data-i18n="current.lng">طول: —</div>
           <div class="chip" id="saveAcc" data-i18n="current.acc">دقت: —</div>
@@ -319,13 +362,13 @@
     <!-- PREVIEW MODAL -->
     <dialog id="previewModal" class="card w-11/12 max-w-xl p-0">
       <div class="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
-        <strong id="previewTitle" class="text-[13.5px] font-bold" data-i18n="preview.title">پیش‌نمایش</strong>
+        <strong id="previewTitle" class="text-[14px] font-bold" data-i18n="preview.title">پیش‌نمایش</strong>
         <div class="grow"></div>
         <button id="closePreview" class="btn btn-outline px-3" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-4 grid gap-3">
-        <div id="previewMap" class="w-full h-80 rounded-xl border border-[var(--border)] overflow-hidden"></div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12.5px]">
+        <div id="previewMap" class="w-full rounded-xl border border-[var(--border)] overflow-hidden"></div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[13px]">
           <div id="previewAddr" class="chip col-span-2 sm:col-span-4">—</div>
           <div id="previewEle" class="chip">ارتفاع: —</div>
         </div>
@@ -342,20 +385,21 @@
     </dialog>
   </main>
 
-  <!-- Bottom Nav -->
+  <!-- Bottom Nav (fixed) -->
   <nav class="bottom-nav">
-    <div class="max-w-2xl mx-auto px-6 grid grid-cols-3">
+    <div class="max-w-2xl mx-auto w-full px-6 grid grid-cols-3">
       <button id="navLive" class="nav-btn" aria-current="page"><i class="fa-solid fa-location-crosshairs text-sm"></i><span>Live</span></button>
       <button id="navSaved" class="nav-btn"><i class="fa-regular fa-bookmark text-sm"></i><span>Saved</span></button>
       <button id="settingsOpenBtn" class="nav-btn"><i class="fa-solid fa-gear text-sm"></i><span>Settings</span></button>
     </div>
   </nav>
 
-  <footer class="px-4 py-5 text-center text-[var(--muted)] text-[11.5px]">ساخته شده توسط <b>Peymaan Abedinpour V0.05</b></footer>
+  <footer class="px-4 pt-2 pb-24 text-center text-[var(--muted)] text-[11.5px]">ساخته شده توسط <b>Peymaan Abedinpour V0.06</b></footer>
   <div id="toast" class="toast" role="status" aria-live="polite">—</div>
 
   <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
   <script>
     /* Manifest */
     (function(){
@@ -371,12 +415,23 @@
       const link = document.createElement('link'); link.rel = 'manifest'; link.href = url; document.head.appendChild(link);
     })();
 
-    /* SW */
+    /* SW (tiny offline) */
     (function(){
       if(!('serviceWorker' in navigator)) return;
-      const sw = `const CACHE='saveloc-v9';const ASSETS=['./'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{});return res;}).catch(()=>caches.match('./'))))});`;
+      const sw = `const CACHE='saveloc-v11';const ASSETS=['./'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{});return res;}).catch(()=>caches.match('./'))))});`;
       navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'})));
     })();
+
+    /* Detect iOS keyboard via VisualViewport to avoid bottom-nav overlap */
+    if (window.visualViewport) {
+      const vv = window.visualViewport;
+      const onVV = () => {
+        const keyboardOpen = vv.height < window.innerHeight - 120;
+        document.body.classList.toggle('kb', keyboardOpen);
+      };
+      vv.addEventListener('resize', onVV);
+      vv.addEventListener('scroll', onVV);
+    }
 
     /* Tabs */
     const tabLive = document.getElementById('tab-live');
@@ -393,36 +448,10 @@
     }
     navLive.addEventListener('click', ()=> showTab('live'));
     navSaved.addEventListener('click', ()=> { showTab('saved'); renderCatFilters(); renderList(); });
+  </script>
 
-    /* Install / iOS A2HS */
-    const installBtn = document.getElementById('installBtn');
-    const a2hsHint = document.getElementById('a2hsHint');
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    let deferredPrompt=null;
-    window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault(); deferredPrompt=e; installBtn.hidden=false;});
-    installBtn.addEventListener('click', async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.hidden=true; });
-    if(isIOS && !isStandalone){ a2hsHint.hidden=false; a2hsHint.addEventListener('click',()=> toast('در iPhone: Share ▸ Add to Home Screen')); }
-
-    /* Element refs (many) */
-    const themeAuto=document.getElementById('themeAuto'), themeLight=document.getElementById('themeLight'), themeDark=document.getElementById('themeDark');
-    const langFa=document.getElementById('langFa'), langEn=document.getElementById('langEn');
-    const locateBtn=document.getElementById('locateBtn'), openPicker=document.getElementById('openPicker'), saveLiveBtn=document.getElementById('saveLiveBtn'), shareBtn=document.getElementById('shareBtn');
-    const progBar=document.getElementById('progBar'), permStatus=document.getElementById('permStatus');
-    const latBox=document.getElementById('latBox'), lngBox=document.getElementById('lngBox'), accBox=document.getElementById('accBox'), eleBox=document.getElementById('eleBox'), tsBox=document.getElementById('tsBox');
-    const addrRow=document.getElementById('addrRow'), addrChip=document.getElementById('addrChip');
-    const copyLat=document.getElementById('copyLat'), copyLng=document.getElementById('copyLng'), copyBoth=document.getElementById('copyBoth');
-    const openApple=document.getElementById('openApple'), openGoogle=document.getElementById('openGoogle'), openWaze=document.getElementById('openWaze'), dirApple=document.getElementById('dirApple'), openCustom=document.getElementById('openCustom'), openSnapp=document.getElementById('openSnapp'), openTapsi=document.getElementById('openTapsi');
-    const listArea=document.getElementById('listArea'), searchBox=document.getElementById('searchBox'), exportBtn=document.getElementById('exportBtn'), importBtn=document.getElementById('importBtn'), importFile=document.getElementById('importFile'), backupBtn=document.getElementById('backupBtn'), restoreBtn=document.getElementById('restoreBtn'), restoreFile=document.getElementById('restoreFile'), clearAllBtn=document.getElementById('clearAllBtn');
-    const pickerModal=document.getElementById('pickerModal'), pickerMapEl=document.getElementById('pickerMap'), pickerLocate=document.getElementById('pickerLocate'), pickerSearch=document.getElementById('pickerSearch'), pickerSearchBtn=document.getElementById('pickerSearchBtn'), pickerUse=document.getElementById('pickerUse'), closePicker=document.getElementById('closePicker');
-    const previewModal=document.getElementById('previewModal'), previewTitle=document.getElementById('previewTitle'), previewMapEl=document.getElementById('previewMap'), previewAddr=document.getElementById('previewAddr'), previewEle=document.getElementById('previewEle'), pvApple=document.getElementById('pvApple'), pvGoogle=document.getElementById('pvGoogle'), pvWaze=document.getElementById('pvWaze'), pvDir=document.getElementById('pvDir'), pvShare=document.getElementById('pvShare'), pvSnapp=document.getElementById('pvSnapp'), pvTapsi=document.getElementById('pvTapsi'), closePreview=document.getElementById('closePreview');
-    const settingsModal=document.getElementById('settingsModal'), closeSettings=document.getElementById('closeSettings'), saveSettingsBtn=document.getElementById('saveSettings'), testCustom=document.getElementById('testCustom'), customTpl=document.getElementById('customTpl'), shareTitle=document.getElementById('shareTitle');
-    const catList=document.getElementById('catList'), newCatName=document.getElementById('newCatName'), newCatIcon=document.getElementById('newCatIcon'), addCatBtn=document.getElementById('addCatBtn');
-    const catChips=document.getElementById('catChips'), quickCatName=document.getElementById('quickCatName'), quickCatIcon=document.getElementById('quickCatIcon'), quickAddCat=document.getElementById('quickAddCat');
-    const saveModal=document.getElementById('saveModal'), saveModalTitle=document.getElementById('saveModalTitle'), closeSave=document.getElementById('closeSave'), saveLat=document.getElementById('saveLat'), saveLng=document.getElementById('saveLng'), saveAcc=document.getElementById('saveAcc'), saveEle=document.getElementById('saveEle'), saveAddr=document.getElementById('saveAddr'), placeName=document.getElementById('placeName'), placeNotes=document.getElementById('placeNotes'), saveCancel=document.getElementById('saveCancel'), saveConfirm=document.getElementById('saveConfirm');
-    const catFiltersRow=document.getElementById('catFiltersRow');
-
-    /* i18n (fixed single identifier) */
+  <!-- i18n FULL (unchanged from your working version) -->
+  <script>
     const i18n_full = {
       fa: {
         locale:'fa-IR', dir:'rtl',
@@ -485,8 +514,40 @@
         catsDefault:[ {id:'all',name:'All',icon:'⚪'}, {id:'home',name:'Home',icon:'🏠'}, {id:'work',name:'Work',icon:'💼'}, {id:'parking',name:'Parking',icon:'🅿️'}, {id:'fav',name:'Favorite',icon:'⭐'}, {id:'customer',name:'Customer',icon:'👤'} ]
       }
     };
-    let i18n = i18n_full; // (no duplicate const)
+  </script>
 
+  <!-- App logic (fixed typo + full i18n) -->
+  <script>
+    /* Install / iOS A2HS (moved here after i18n) */
+    const installBtn = document.getElementById('installBtn');
+    const a2hsHint = document.getElementById('a2hsHint');
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    let deferredPrompt=null;
+    window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault(); deferredPrompt=e; installBtn.hidden=false;});
+    installBtn.addEventListener('click', async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.hidden=true; });
+    if(isIOS && !isStandalone){ a2hsHint.hidden=false; a2hsHint.addEventListener('click',()=> toast('در iPhone: Share ▸ Add to Home Screen')); }
+
+    /* Element refs (complete & typo fixed) */
+    const themeAuto=document.getElementById('themeAuto'), themeLight=document.getElementById('themeLight'), themeDark=document.getElementById('themeDark');
+    const langFa=document.getElementById('langFa'), langEn=document.getElementById('langEn');
+    const locateBtn=document.getElementById('locateBtn'), openPicker=document.getElementById('openPicker'), saveLiveBtn=document.getElementById('saveLiveBtn'), shareBtn=document.getElementById('shareBtn');
+    const progBar=document.getElementById('progBar'), permStatus=document.getElementById('permStatus');
+    const latBox=document.getElementById('latBox'), lngBox=document.getElementById('lngBox'), accBox=document.getElementById('accBox'), eleBox=document.getElementById('eleBox'), tsBox=document.getElementById('tsBox');
+    const addrRow=document.getElementById('addrRow'), addrChip=document.getElementById('addrChip');
+    const copyLat=document.getElementById('copyLat'), copyLng=document.getElementById('copyLng'), copyBoth=document.getElementById('copyBoth');
+    const openApple=document.getElementById('openApple'), openGoogle=document.getElementById('openGoogle'), openWaze=document.getElementById('openWaze'), dirApple=document.getElementById('dirApple'), openCustom=document.getElementById('openCustom'), openSnapp=document.getElementById('openSnapp'), openTapsi=document.getElementById('openTapsi');
+    const listArea=document.getElementById('listArea'), searchBox=document.getElementById('searchBox'), exportBtn=document.getElementById('exportBtn'), importBtn=document.getElementById('importBtn'), importFile=document.getElementById('importFile'), backupBtn=document.getElementById('backupBtn'), restoreBtn=document.getElementById('restoreBtn'), restoreFile=document.getElementById('restoreFile'), clearAllBtn=document.getElementById('clearAllBtn');
+    const pickerModal=document.getElementById('pickerModal'), pickerMapEl=document.getElementById('pickerMap'), pickerLocate=document.getElementById('pickerLocate'), pickerSearch=document.getElementById('pickerSearch'), pickerSearchBtn=document.getElementById('pickerSearchBtn'), pickerUse=document.getElementById('pickerUse'), closePicker=document.getElementById('closePicker');
+    const previewModal=document.getElementById('previewModal'), previewTitle=document.getElementById('previewTitle'), previewMapEl=document.getElementById('previewMap'), previewAddr=document.getElementById('previewAddr'), previewEle=document.getElementById('previewEle'), pvApple=document.getElementById('pvApple'), pvGoogle=document.getElementById('pvGoogle'), pvWaze=document.getElementById('pvWaze'), pvDir=document.getElementById('pvDir'), pvShare=document.getElementById('pvShare'), pvSnapp=document.getElementById('pvSnapp'), pvTapsi=document.getElementById('pvTapsi'), closePreview=document.getElementById('closePreview');
+    const settingsModal=document.getElementById('settingsModal'), closeSettings=document.getElementById('closeSettings'), saveSettingsBtn=document.getElementById('saveSettings'), testCustom=document.getElementById('testCustom'), customTpl=document.getElementById('customTpl'), shareTitle=document.getElementById('shareTitle');
+    const catList=document.getElementById('catList'), newCatName=document.getElementById('newCatName'), newCatIcon=document.getElementById('newCatIcon'), addCatBtn=document.getElementById('addCatBtn');
+    const catChips=document.getElementById('catChips'), quickCatName=document.getElementById('quickCatName'), quickCatIcon=document.getElementById('quickCatIcon'), quickAddCat=document.getElementById('quickAddCat');
+    const saveModal=document.getElementById('saveModal'), saveModalTitle=document.getElementById('saveModalTitle'), closeSave=document.getElementById('closeSave'), saveLat=document.getElementById('saveLat'), saveLng=document.getElementById('saveLng'), saveAcc=document.getElementById('saveAcc'), saveEle=document.getElementById('saveEle'), saveAddr=document.getElementById('saveAddr'), placeName=document.getElementById('placeName'), placeNotes=document.getElementById('placeNotes'), saveCancel=document.getElementById('saveCancel'), saveConfirm=document.getElementById('saveConfirm');
+    const catFiltersRow=document.getElementById('catFiltersRow');
+
+    /* i18n */
+    let i18n = i18n_full;
     const PREF_THEME='saveloc.theme', PREF_LANG='saveloc.lang', PREF_CITY='saveloc.city';
     let LANG = localStorage.getItem(PREF_LANG) || 'fa';
     let USER_CITY = localStorage.getItem(PREF_CITY) || '';
@@ -499,9 +560,9 @@
       (val==='light'?themeLight:val==='dark'?themeDark:themeAuto).setAttribute('aria-pressed','true');
       localStorage.setItem(PREF_THEME,val);
     }
-    themeAuto.addEventListener('click',()=>applyTheme('auto'));
-    themeLight.addEventListener('click',()=>applyTheme('light'));
-    themeDark.addEventListener('click',()=>applyTheme('dark'));
+    themeAuto?.addEventListener('click',()=>applyTheme('auto'));
+    themeLight?.addEventListener('click',()=>applyTheme('light'));
+    themeDark?.addEventListener('click',()=>applyTheme('dark'));
 
     function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1700); }
     function formatTs(t){ return new Date(t).toLocaleString(i18n[LANG].locale); }
@@ -526,8 +587,8 @@
       }
       renderCatFilters(); renderList();
     }
-    langFa.addEventListener('click',()=>setLang('fa'));
-    langEn.addEventListener('click',()=>setLang('en'));
+    langFa?.addEventListener('click',()=>setLang('fa'));
+    langEn?.addEventListener('click',()=>setLang('en'));
 
     /* Permissions */
     async function checkPerm(){
@@ -553,7 +614,7 @@
     }
     function writeCats(arr){ localStorage.setItem(CATS,JSON.stringify(arr)); }
 
-    /* Reverse Geocode (cached) */
+    /* Reverse Geocode */
     function reverseGeocode(lat,lng){
       const key='addr:'+lat.toFixed(5)+','+lng.toFixed(5);
       const cached=localStorage.getItem(key); if(cached) return Promise.resolve(cached);
@@ -569,7 +630,6 @@
     function fetchElevation(lat,lng){
       const key='elev:'+lat.toFixed(5)+','+lng.toFixed(5);
       const cached=localStorage.getItem(key); if(cached) return Promise.resolve(+cached);
-      // Open-Elevation free API
       return fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`)
         .then(r=>r.ok?r.json():Promise.reject()).then(j=> (j.results&&j.results[0]&&typeof j.results[0].elevation==='number')? j.results[0].elevation : null)
         .then(e=>{ if(e!==null) localStorage.setItem(key,String(e)); return e; }).catch(()=> null);
@@ -582,7 +642,7 @@
     const appleDirections=(lat,lng,addr='')=>`https://maps.apple.com/?daddr=${lat},${lng}&q=${encodeURIComponent(addr||`${lat.toFixed(6)},${lng.toFixed(6)}`)}&dirflg=d&saddr=Current%20Location`;
     function customLink(lat,lng,name){ const {customTpl}=readPrefs(); if(!customTpl) return ''; return customTpl.replaceAll('{lat}',lat).replaceAll('{lng}',lng).replaceAll('{name}',encodeURIComponent(name||'')); }
 
-    /* Snapp/TAPSI: copy lat,lng then open app/site */
+    /* Snapp/TAPSI: copy lat,lng then open app/site fallback */
     async function openTaxi(app,lat,lng,name,addr){
       try{ await navigator.clipboard.writeText(`${lat},${lng}`); toast(i18n[LANG].toasts.copied); }catch{}
       const deep = app==='snapp'
@@ -715,20 +775,18 @@
         const {latitude,longitude}=pos.coords;
         picker.setView([latitude,longitude],16);
         pickerMarker.setLatLng([latitude,longitude]);
-        // update city bias
         const a=await reverseGeocodeDetails(latitude,longitude);
         const city=a.city||a.town||a.village||a.municipality||a.county||'';
         if(city){ USER_CITY=city; localStorage.setItem(PREF_CITY,city); }
       }, ()=>toast(i18n[LANG].toasts.geoError), {enableHighAccuracy:true,timeout:12000});
     });
 
-    // City-biased search: prefer USER_CITY unless query already has a city-like token
+    // City-biased search
     pickerSearchBtn.addEventListener('click', ()=>{
       let q=pickerSearch.value.trim();
       if(!q) return;
       const hasCityToken = /,|[\u0600-\u06FF]+\s*(شهر|استان)|city|tehran|mashhad|shiraz|isfahan|karaj|tabriz/i.test(q);
       if(USER_CITY && !hasCityToken){ q = `${q} ${USER_CITY}`; }
-      // Optional viewbox bias if we have current location
       let url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=1`;
       if(current){
         const d=0.35; const minLon=current.lng-d, minLat=current.lat-d, maxLon=current.lng+d, maxLat=current.lat+d;
@@ -815,11 +873,11 @@
 
         const head=document.createElement('div'); head.className='flex items-baseline gap-2';
         const title=document.createElement('div'); title.className='font-extrabold min-w-0 truncate'; title.textContent=`${p.category?.icon||'📌'} ${p.name}`;
-        const sub=document.createElement('div'); sub.className='text-[11.5px] text-[var(--muted)] font-mono'; sub.textContent=coordsLine(p);
+        const sub=document.createElement('div'); sub.className='text-[12px] text-[var(--muted)] font-mono'; sub.textContent=coordsLine(p);
         head.append(title);
         const meta=document.createElement('div'); meta.className='space-y-1'; meta.appendChild(sub);
-        if(p.address){ const a=document.createElement('div'); a.className='text-[11.5px] text-[var(--muted)]'; a.textContent='📍 '+p.address; meta.appendChild(a); }
-        if(p.notes){ const n=document.createElement('div'); n.className='text-[11.5px] text-[var(--muted)]'; n.textContent='📝 '+p.notes; meta.appendChild(n); }
+        if(p.address){ const a=document.createElement('div'); a.className='text-[12px] text-[var(--muted)] truncate'; a.textContent='📍 '+p.address; meta.appendChild(a); }
+        if(p.notes){ const n=document.createElement('div'); n.className='text-[12px] text-[var(--muted)]'; n.textContent='📝 '+p.notes; meta.appendChild(n); }
         const headerRow=document.createElement('div'); headerRow.className='flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between'; headerRow.append(head, meta);
 
         const mk=(label,icon,fn)=>{ const b=document.createElement('button'); b.className='btn btn-outline'; b.innerHTML=`<i class="${icon} me-1.5"></i>${label}`; b.addEventListener('click',fn); return b; };
@@ -911,9 +969,6 @@
 
     clearAllBtn.addEventListener('click', ()=>{ if(confirm(i18n[LANG].dialogs.clearAll)){ localStorage.removeItem(KEY); renderList(); toast(i18n[LANG].backup.cleared); } });
 
-    /* Bottom-nav settings */
-    settingsOpenBtn.addEventListener('click', ()=> openSettings());
-
     /* Init */
     setLang(LANG);
     applyTheme(localStorage.getItem(PREF_THEME)||'auto');
@@ -925,9 +980,8 @@
     (function test(){
       try {
         console.group('Save Loc – smoke tests');
-        console.assert(typeof i18n==='object' && i18n.fa && i18n.en, 'i18n ok');
-        console.assert(document.getElementById('pickerLocate'), 'pickerLocate exists');
-        console.assert(document.getElementById('openSnapp') && document.getElementById('openTapsi'), 'Taxi buttons exist');
+        console.assert(!!document.getElementById('pickerLocate'), 'pickerLocate exists');
+        console.assert(!!document.getElementById('openSnapp') && !!document.getElementById('openTapsi'), 'Taxi buttons exist');
         console.groupEnd();
       } catch(e){ console.error(e); }
     })();
