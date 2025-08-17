@@ -132,7 +132,7 @@ select,.pill{
 /* Mobile: hide HOLD/NEXT; tighten */
 @media (max-width: 640px){
   .arena{ flex-direction:column; align-items:center; gap:6px }
-  .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px) }
+  /* .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px) } */
   /* When header hides during play, add top safe area so board never clips under the notch */
   body.started .main{ padding-top: calc(env(safe-area-inset-top,0px) + 6px); }
   body.started header{ display:none; }
