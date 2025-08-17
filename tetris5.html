@@ -86,7 +86,7 @@ select,.pill{
 #scoreBadge{
   position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:15;
   padding:6px 12px; border-radius:999px; background:#0a0d10cc; border:1px solid #2a3139;
-  font:800 13px/1 system-ui; color:var(--accent); white-space:nowrap;
+  font:800 13px/1 system-ui; color:#00e5ff; white-space:nowrap;
 }
 
 /* Overlays */
@@ -536,22 +536,88 @@ document.addEventListener('keyup',e=>{
   }
 });
 
-/* ===== Touch (scroll locked while playing) ===== */
-let tSX=0,tSY=0,tStart=0;
+/* ===== TOUCH: ultra-responsive =====
+   - Tap = rotate CW
+   - Swipe up = rotate CCW
+   - Swipe down = HARD DROP (immediate)
+   - Drag left/right moves step-per-distance for lag-free feel
+*/
+let touchStartX=0,touchStartY=0,touchMoved=false,tStart=0;
+let consumedDown=false, consumedUp=false;
 gameCanvas.addEventListener('touchstart', e=>{
   if(!started){ startGame(); }
   audioCtx.resume().catch(()=>{});
   if(shouldLock()) e.preventDefault();
-  const t=e.touches[0]; tSX=t.clientX; tSY=t.clientY; tStart=performance.now();
+  const t=e.touches[0];
+  touchStartX=t.clientX; touchStartY=t.clientY; tStart=performance.now();
+  touchMoved=false; consumedDown=false; consumedUp=false;
 },{passive:false});
-gameCanvas.addEventListener('touchmove', e=>{ if(shouldLock()) e.preventDefault(); },{passive:false});
+
+gameCanvas.addEventListener('touchmove', e=>{
+  if(shouldLock()) e.preventDefault();
+  const t=e.touches[0];
+  const dx=t.clientX - touchStartX;
+  const dy=t.clientY - touchStartY;
+  const adx=Math.abs(dx), ady=Math.abs(dy);
+
+  // Dynamic thresholds scale with block size (crisp on any screen)
+  const STEP = Math.max(10, BLOCK * 0.55);     // distance for one horizontal step
+  const DOWN_SWEEP = Math.max(18, BLOCK * 0.60); // swipe down trigger
+  const UP_SWEEP   = Math.max(18, BLOCK * 0.60); // swipe up trigger
+
+  // Immediate HARD DROP on downward swipe
+  if(!consumedDown && dy > DOWN_SWEEP){
+    consumedDown = true;
+    hardDrop();
+    return; // end gesture; piece has locked/spawned
+  }
+
+  // Rotate CCW on upward swipe (once)
+  if(!consumedUp && dy < -UP_SWEEP){
+    consumedUp = true;
+    rotate(-1);
+    return;
+  }
+
+  // Horizontal drag: move step-per-distance (fast and precise)
+  if(adx > ady && adx >= STEP){
+    touchMoved = true;
+    const steps = Math.min(5, Math.floor(adx / STEP)); // cap burst to keep control
+    const dir = dx > 0 ? 1 : -1;
+    for(let i=0;i<steps;i++){ move(dir,0); }
+    // re-anchor to current finger to keep continuous stepping
+    touchStartX = t.clientX;
+  }
+},{passive:false});
+
 gameCanvas.addEventListener('touchend', e=>{
   if(shouldLock()) e.preventDefault();
-  const t=e.changedTouches[0], dx=t.clientX-tSX, dy=t.clientY-tSY;
-  const adx=Math.abs(dx), ady=Math.abs(dy), dt=performance.now()-tStart;
-  if(adx<12 && ady<12 && dt<180){ rotate(+1); return; } // tap = CW
-  if(adx>ady){ if(dx>24) move(1,0); else if(dx<-24) move(-1,0); }
-  else{ if(dy>26){ if(dt>220) hardDrop(); else softDrop(); } else if(dy<-26){ rotate(-1); } }
+  const t=e.changedTouches[0];
+  const dx=t.clientX - touchStartX;
+  const dy=t.clientY - touchStartY;
+  const adx=Math.abs(dx), ady=Math.abs(dy);
+  const dt=performance.now()-tStart;
+
+  // If we already did hard drop, ignore
+  if(consumedDown) return;
+
+  // Light tap => rotate CW
+  const TAP_DIST = Math.max(8, BLOCK * 0.33);
+  const TAP_TIME = 200;
+  if(adx < TAP_DIST && ady < TAP_DIST && dt < TAP_TIME && !touchMoved){
+    rotate(+1);
+    return;
+  }
+
+  // If end flick left/right without much drag, do one nudge
+  const FLICK = Math.max(14, BLOCK * 0.45);
+  if(adx > ady && adx >= FLICK){
+    move(dx>0?1:-1, 0);
+  } else if(ady >= FLICK){
+    // fallback: if user finished with a downward flick and we didn't consume, still hard drop
+    if(dy > 0) hardDrop();
+    else rotate(-1);
+  }
 },{passive:false});
 
 /* Pause overlay click to resume */
