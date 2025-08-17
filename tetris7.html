@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
 <title>BlockDropper</title>
 
 <!-- PWA basics -->
@@ -17,6 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BlockDropper">
 <link rel="apple-touch-icon" href="https://i.postimg.cc/yd3nzpjV/App-Icon-2x.png">
+<meta name="format-detection" content="telephone=no" />
 
 <style>
 :root{
@@ -59,7 +59,7 @@ h1{font:800 clamp(18px,2.2vw,28px)/1.1 system-ui; margin:0}
 #menu{
   position:fixed; top:0; right:-320px; width:320px; height:100%;
   background:var(--panel); border-left:1px solid #22303a;
-  box-shadow:-10px 0 30px #000c; z-index:1001;
+  box-shadow:-10px 0 30px #000c; z-index:1002;
   transition:right .28s ease; padding:16px 14px 18px; overflow:auto;
   -webkit-overflow-scrolling:touch;
 }
@@ -191,7 +191,7 @@ select,.pill{
   </div>
 
   <div class="section">
-    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by pymn © 2025</button>
+    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by Peymaan Abedinpour© 2025</button>
   </div>
 </aside>
 
@@ -352,7 +352,8 @@ function loadBest(){ best = parseInt(localStorage.getItem('tetris_best')||'0',10
 function saveBest(){ if(score>best){ best=score; localStorage.setItem('tetris_best',String(best)); bestEl.textContent=bestTopEl.textContent=best.toLocaleString(); }}
 
 /* ===== Controls (menu) ===== */
-document.getElementById('levelSel').addEventListener('change',e=>{ level=parseInt(e.target.value,10); dropT=0; });
+levelSel.addEventListener('change',e=>{ level=parseInt(e.target.value,10); dropT=0; });
+
 document.getElementById('toggleGrid').addEventListener('change',e=>{ gridOn=e.target.checked; draw(); });
 document.getElementById('toggleSound').addEventListener('change',e=>{ soundOn=e.target.checked; });
 document.getElementById('toggleBag').addEventListener('change',e=>{ use7Bag=e.target.checked; });
@@ -484,10 +485,7 @@ function hardDrop(){
   requestAnimationFrame(()=>{
     let moved=false;
     while(move(0,1)){ score+=2; moved=true; }
-    if(moved){
-      if(navigator.vibrate) try{ navigator.vibrate(8); }catch{}
-      playSound(120,.08,'square');
-    }
+    if(moved){ if(navigator.vibrate) try{ navigator.vibrate(8); }catch{} playSound(120,.08,'square'); }
     lockNow();
   });
 }
@@ -520,7 +518,6 @@ function lockNow(){
 function updateScore(cl){ const pts=[0,40,100,300,1200]; score+=pts[cl]*level; saveBest(); }
 
 /* ===== Loop ===== */
-let rotCW=0, rotCCW=0; // declared earlier for finesse math
 function gameLoop(ct=0){
   if(!gameOver && !pause){
     const dt=ct-lastT; lastT=ct; gameT+=dt; dropT+=dt;
@@ -555,7 +552,7 @@ pauseBtn.addEventListener('click',()=>togglePause());
 
 /* ===== Keyboard ===== */
 document.addEventListener('keydown',e=>{
-  if(!started && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','KeyZ','KeyX'].includes(e.code)){ startGame(); }
+  if(!started && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','KeyZ','KeyX','Enter'].includes(e.code)){ startGame(); }
   if(gameOver) return;
   switch(e.code){
     case 'ArrowLeft': if(!keys.left){keys.left=true; beginAutoShift(-1);} break;
@@ -655,7 +652,6 @@ document.getElementById('pauseOverlay').addEventListener('click',()=>togglePause
 
 /* ===== PWA manifest (dynamic) & SW registration ===== */
 (function setupPWA(){
-  // Create a manifest on the fly (Android/desktop). iOS uses meta + apple-touch-icon above.
   const manifest = {
     name: "BlockDropper",
     short_name: "BlockDropper",
@@ -675,25 +671,10 @@ document.getElementById('pauseOverlay').addEventListener('click',()=>togglePause
   link.href = URL.createObjectURL(blob);
   document.head.appendChild(link);
 
-  // Try to register a simple offline Service Worker (best effort; ignored on file://).
+  // Service worker via blob URLs may be blocked in some browsers; wrap safely.
   if ('serviceWorker' in navigator) {
-    const swCode = `
-      const CACHE='bd-v1';
-      const CORE=['./','https://i.postimg.cc/yd3nzpjV/App-Icon-2x.png'];
-      self.addEventListener('install',e=>{
-        e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));
-      });
-      self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});
-      self.addEventListener('fetch',e=>{
-        const req=e.request;
-        e.respondWith(
-          caches.match(req).then(r=>r||fetch(req).then(res=>{
-            const cp=res.clone(); caches.open(CACHE).then(c=>c.put(req,cp)); return res;
-          })).catch(()=>caches.match('./'))
-        );
-      });
-    `;
     try{
+      const swCode = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());`;
       const swBlob = new Blob([swCode], {type:'text/javascript'});
       const swURL = URL.createObjectURL(swBlob);
       navigator.serviceWorker.register(swURL, {scope:'./'}).catch(()=>{});
@@ -702,7 +683,6 @@ document.getElementById('pauseOverlay').addEventListener('click',()=>togglePause
 })();
 
 /* ===== Boot ===== */
-function loadBest(){ best = parseInt(localStorage.getItem('tetris_best')||'0',10); bestEl.textContent=best.toLocaleString(); bestTopEl.textContent=best.toLocaleString(); }
 function boot(){ loadBest(); layout(); draw(); updateScrollLock(); }
 boot();
 </script>
