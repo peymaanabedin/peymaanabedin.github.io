@@ -22,9 +22,6 @@
 :root{
   --bg:#0d0f12; --panel:#14171b; --text:#e9eef3; --muted:#9aa4af;
   --accent:#00e5ff; --grid: rgba(0,229,255,.14); --boardW: 380px;
-  /* Safe area proxies for JS sizing */
-  --sat: env(safe-area-inset-top);
-  --sab: env(safe-area-inset-bottom);
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -80,9 +77,8 @@ select,.pill{
 
 /* Arena */
 .main{flex:1; width:100%; display:grid; place-items:center; 
-  /* Use modern viewport units and subtract safe areas for perfect centering in iOS PWA */
-  min-height: calc(100svh - var(--sat) - var(--sab));
-  min-height: calc(100dvh - var(--sat) - var(--sab));
+  /* Use modern viewport units and safe-area at bottom */
+  min-height: 100svh; min-height: 100dvh;
   padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));
 }
 .arena{display:flex; align-items:flex-start; justify-content:center; gap:14px; width:100%; max-width:1200px}
@@ -132,7 +128,7 @@ select,.pill{
 /* Mobile: hide HOLD/NEXT; tighten */
 @media (max-width: 640px){
   .arena{ flex-direction:column; align-items:center; gap:6px }
-  /* Top align the stage on phones so the board hugs the button area (no big empty band) */
+  /* Top align the stage on phones so the board hugs the button area */
   .main{ padding:6px 6px env(safe-area-inset-bottom,0px); place-items:start center; }
   /* When header hides during play, add only safe-area padding so nothing sits under the notch */
   body.started .main{ padding-top: calc(env(safe-area-inset-top,0px) + 4px); }
@@ -143,29 +139,10 @@ select,.pill{
   #pauseBtn{ top:6px; left:6px }
 }
 @media (min-height: 700px) and (max-width: 640px){
-  /* On taller phones keep it a touch lower for breathing room */
-  .main{ padding-top: calc(env(safe-area-inset-top,0px) + 8px); }
-}
-  /* Top align the stage on phones so the board hugs the button area (no big empty band) */
-  .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px); place-items:start center; }
-  /* When header hides during play, add only safe-area padding so nothing sits under the notch */
-  body.started .main{ padding-top: calc(env(safe-area-inset-top,0px) + 4px); }
-  body.started header{ display:none; }
-  #holdCard,#nextCard{ display:none !important; }
-  .board{ border-radius:12px }
-  #scoreBadge{ top:6px }
-  #pauseBtn{ top:6px; left:6px }
-}
-@media (min-height: 700px) and (max-width: 640px){
-  /* On taller phones keep it a touch lower for breathing room */
   .main{ padding-top: calc(env(safe-area-inset-top,0px) + 8px); }
 }
 @media (min-width: 641px){
-  /* Ensure HOLD & NEXT are visible on desktop even if a prior rule tried to hide them */
-  .sidebar-card#holdCard, .sidebar-card#nextCard{ display:block !important; }
-}
-
-  /* Ensure HOLD & NEXT are visible on desktop even if a prior rule tried to hide them */
+  /* Ensure HOLD & NEXT are visible on desktop */
   .sidebar-card#holdCard, .sidebar-card#nextCard{ display:block !important; }
 }
 </style>
@@ -232,7 +209,7 @@ select,.pill{
   </div>
 
   <div class="section">
-    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour v0.05© 2025</button>
+    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by pymn © 2025</button>
   </div>
 </aside>
 
@@ -418,6 +395,7 @@ function loadBest(){ best = parseInt(localStorage.getItem('tetris_best')||'0',10
 function saveBest(){ if(score>best){ best=score; localStorage.setItem('tetris_best',String(best)); bestEl.textContent=bestTopEl.textContent=best.toLocaleString(); }}
 
 /* ===== Controls (menu) ===== */
+const levelSel = document.getElementById('levelSel');
 levelSel.addEventListener('change',e=>{ level=parseInt(e.target.value,10); dropT=0; });
 
 document.getElementById('toggleGrid').addEventListener('change',e=>{ gridOn=e.target.checked; draw(); });
