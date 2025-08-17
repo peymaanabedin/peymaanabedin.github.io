@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد قیمت فلزات</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vazirmatn Font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles for a polished look and Vazirmatn font */
+        body {
+            font-family: 'Vazirmatn', sans-serif; /* Apply Vazirmatn font */
+            background-color: #f0f2f5; /* Lighter, more modern background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem; /* Increased padding */
+            direction: rtl; /* Set direction for RTL */
+            text-align: right; /* Align text to the right */
+        }
+
+        .dashboard-card {
+            background-color: #ffffff;
+            border-radius: 2rem; /* Even more rounded corners for softness */
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.08), 0 6px 18px rgba(0, 0, 0, 0.05); /* Deeper, softer shadow */
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: none; /* No visible border for a cleaner look */
+            position: relative;
+            overflow: hidden; /* Ensure content stays within rounded corners */
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+            box-shadow: inset 0 0 0 2px rgba(96, 165, 250, 0.5); /* Subtle inner border on hover */
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px); /* More pronounced lift */
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1); /* Enhanced shadow on hover */
+        }
+
+        .dashboard-card:hover::before {
+            opacity: 1;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); /* Deeper, richer indigo gradient */
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+
+        .metal-image {
+            width: 6rem; /* Larger image size */
+            height: 6rem;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #f3f4f6; /* Light border around image */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Soft shadow for image */
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95); /* More opaque for focus */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .spinner {
+            border: 8px solid #e0e7ff; /* Lighter grey for spinner */
+            border-top: 8px solid #4f46e5; /* Deeper indigo */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div id="loading-spinner" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p class="mt-4 text-xl font-medium text-gray-700">در حال بارگذاری اطلاعات...</p>
+    </div>
+
+    <div class="container mx-auto max-w-7xl">
+        <div class="gradient-bg text-white p-10 rounded-3xl mb-10 shadow-xl text-center">
+            <h1 class="text-4xl sm:text-6xl font-extrabold mb-4 leading-tight">
+                قیمت جهانی فلزات 📈
+            </h1>
+            <p class="text-xl sm:text-2xl opacity-90 leading-relaxed">
+                بینش بازار در لحظه، در دستان شما.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+            <!-- Latest Closing Prices Section -->
+            <div class="dashboard-card p-8 flex flex-col col-span-1 md:col-span-2 lg:col-span-3">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-end">
+                    آخرین قیمت‌های پایانی <i data-lucide="trending-up" class="w-8 h-8 mr-3 text-emerald-500"></i>
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Aluminium Closing Price -->
+                    <div class="p-6 bg-blue-50 rounded-2xl flex flex-col items-center shadow-md border-b-4 border-blue-200">
+                        <img src="https://placehold.co/96x96/ADD8E6/000?text=Aluminum" alt="Aluminum" class="metal-image mb-4">
+                        <p class="text-gray-600 text-base mb-1">قیمت پایانی آلومینیوم</p>
+                        <p class="text-4xl font-extrabold text-blue-800" id="alum-close">--</p>
+                        <p class="text-sm text-gray-400 mt-2" id="alum-close-date">--</p>
+                    </div>
+
+                    <!-- Copper Closing Price -->
+                    <div class="p-6 bg-red-50 rounded-2xl flex flex-col items-center shadow-md border-b-4 border-red-200">
+                        <img src="https://placehold.co/96x96/D88C7E/000?text=Copper" alt="Copper" class="metal-image mb-4">
+                        <p class="text-gray-600 text-base mb-1">قیمت پایانی مس</p>
+                        <p class="text-4xl font-extrabold text-red-800" id="copper-close">--</p>
+                        <p class="text-sm text-gray-400 mt-2" id="copper-close-date">--</p>
+                    </div>
+
+                    <!-- Zinc Closing Price -->
+                    <div class="p-6 bg-green-50 rounded-2xl flex flex-col items-center shadow-md border-b-4 border-green-200">
+                        <img src="https://placehold.co/96x96/90EE90/000?text=Zinc" alt="Zinc" class="metal-image mb-4">
+                        <p class="text-gray-600 text-base mb-1">قیمت پایانی روی</p>
+                        <p class="text-4xl font-extrabold text-green-800" id="zinc-close">--</p>
+                        <p class="text-sm text-gray-400 mt-2" id="zinc-close-date">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Latest Spot Prices Section -->
+            <div class="dashboard-card p-8 flex flex-col col-span-1 md:col-span-2 lg:col-span-3">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-end">
+                    آخرین قیمت‌های لحظه‌ای (پرسش) <i data-lucide="bar-chart-2" class="w-8 h-8 mr-3 text-purple-500"></i>
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Aluminium Spot Ask -->
+                    <div class="p-6 bg-blue-50 rounded-2xl flex flex-col items-center shadow-md border-b-4 border-blue-200">
+                        <img src="https://placehold.co/96x96/ADD8E6/000?text=Aluminum" alt="Aluminum" class="metal-image mb-4">
+                        <p class="text-gray-600 text-base mb-1">قیمت لحظه‌ای آلومینیوم</p>
+                        <p class="text-4xl font-extrabold text-blue-800" id="al-spot-ask">--</p>
+                    </div>
+
+                    <!-- Copper Spot Ask -->
+                    <div class="p-6 bg-red-50 rounded-2xl flex flex-col items-center shadow-md border-b-4 border-red-200">
+                        <img src="https://placehold.co/96x96/D88C7E/000?text=Copper" alt="Copper" class="metal-image mb-4">
+                        <p class="text-gray-600 text-base mb-1">قیمت لحظه‌ای مس</p>
+                        <p class="text-4xl font-extrabold text-red-800" id="cu-spot-ask">--</p>
+                    </div>
+
+                    <!-- Zinc Spot Ask -->
+                    <div class="p-6 bg-green-50 rounded-2xl flex flex-col items-center shadow-md border-b-4 border-green-200">
+                        <img src="https://placehold.co/96x96/90EE90/000?text=Zinc" alt="Zinc" class="metal-image mb-4">
+                        <p class="text-gray-600 text-base mb-1">قیمت لحظه‌ای روی</p>
+                        <p class="text-4xl font-extrabold text-green-800" id="zn-spot-ask">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timestamp Card -->
+            <div class="dashboard-card p-8 col-span-1 md:col-span-2 lg:col-span-3">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-end">
+                    آخرین به‌روزرسانی <i data-lucide="timer" class="w-8 h-8 mr-3 text-indigo-500"></i>
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="p-6 bg-gray-50 rounded-2xl flex flex-col items-center shadow-md border-b-4 border-gray-200">
+                        <i data-lucide="globe" class="w-12 h-12 text-indigo-600 mb-3"></i>
+                        <div>
+                            <p class="text-gray-600 text-base mb-1">برچسب زمانی UTC</p>
+                            <p class="text-2xl font-bold text-gray-900" id="timestamp-utc">--</p>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-gray-50 rounded-2xl flex flex-col items-center shadow-md border-b-4 border-gray-200">
+                        <i data-lucide="calendar-check" class="w-12 h-12 text-indigo-600 mb-3"></i>
+                        <div>
+                            <p class="text-gray-600 text-base mb-1">تاریخ شمسی</p>
+                            <p class="text-2xl font-bold text-gray-900" id="jalali-date">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-gray-500 text-sm mt-10 opacity-80">
+            داده‌ها توسط metalsmarket.net ارائه شده است.
+        </p>
+    </div>
+
+    <script>
+        // Function to fetch data from the API with retry mechanism
+        async function fetchMetalPrices() {
+            const loadingSpinner = document.getElementById('loading-spinner');
+            loadingSpinner.classList.remove('hidden'); // Show loading spinner
+
+            const maxRetries = 3;
+            let currentDelay = 1000; // 1 second
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch('https://aluminium.chbk.app/api/all-prices');
+                    if (!response.ok) {
+                        // If it's an HTTP error, it might not be a network issue, but rather a server error.
+                        // We can still retry on these, but might want to handle specific status codes differently.
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    console.log('API Data:', data); // Log the full API response for debugging
+
+                    // Update Closing Prices
+                    document.getElementById('alum-close').textContent = `${parseFloat(data.closing_latest.values.alum_close).toFixed(2)} $`;
+                    document.getElementById('alum-close-date').textContent = data.closing_latest.values.alum_close_date;
+
+                    document.getElementById('copper-close').textContent = `${parseFloat(data.closing_latest.values.copper_close).toFixed(2)} $`;
+                    document.getElementById('copper-close-date').textContent = data.closing_latest.values.copper_close_date;
+
+                    document.getElementById('zinc-close').textContent = `${parseFloat(data.closing_latest.values.zinc_close).toFixed(2)} $`;
+                    document.getElementById('zinc-close-date').textContent = data.closing_latest.values.zinc_close_date;
+
+                    // Update Spot Prices
+                    document.getElementById('al-spot-ask').textContent = `${parseFloat(data.latest_spot.al_spot_ask).toFixed(2)} $`;
+                    document.getElementById('cu-spot-ask').textContent = `${parseFloat(data.latest_spot.cu_spot_ask).toFixed(2)} $`;
+                    document.getElementById('zn-spot-ask').textContent = `${parseFloat(data.latest_spot.zn_spot_ask).toFixed(2)} $`;
+
+                    // Update Timestamps
+                    const utcDate = new Date(data.latest_spot.timestamp_utc).toLocaleString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit',
+                        timeZoneName: 'short', timeZone: 'UTC'
+                    });
+                    document.getElementById('timestamp-utc').textContent = utcDate;
+                    document.getElementById('jalali-date').textContent = data.latest_spot.jalali;
+
+                    // If successful, break the loop
+                    return;
+
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    if (i < maxRetries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, currentDelay));
+                        currentDelay *= 2; // Exponential backoff
+                    } else {
+                        // If all retries fail, display error message to the user
+                        const container = document.querySelector('.container');
+                        container.innerHTML = `
+                            <div class="text-center p-8 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-md mt-10" style="direction: rtl; text-align: right;">
+                                <p class="font-bold text-2xl mb-3">خطا در بارگذاری داده‌ها!</p>
+                                <p class="text-lg">متاسفانه امکان دریافت قیمت فلزات وجود ندارد. لطفاً بعداً دوباره تلاش کنید.</p>
+                                <p class="text-sm mt-3 opacity-80">جزئیات خطا: ${error.message}</p>
+                            </div>
+                        `;
+                        throw error; // Re-throw to indicate failure
+                    }
+                }
+            }
+        }
+
+        // Fetch data when the page loads
+        window.onload = fetchMetalPrices;
+
+        // Render Lucide icons initially and after data is loaded/error
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+        });
+
+    </script>
+</body>
+</html>
