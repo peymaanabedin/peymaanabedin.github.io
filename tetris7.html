@@ -132,7 +132,7 @@ select,.pill{
 @media (max-width: 640px){
   .arena{ flex-direction:column; align-items:center; gap:6px }
   /* Top align the stage on phones so the board hugs the button area */
-  .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 5px); place-items:start center; }
+  .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 5px); /*place-items:start center;*/ }
 
   /* When header hides during play, add only safe-area padding so nothing sits under the notch */
   body.started .main{ padding-top: calc(env(safe-area-inset-top,0px) + 4px); }
