@@ -121,7 +121,14 @@ select,.pill{
 
 /* Mobile: hide HOLD/NEXT; tighten */
 @media (max-width: 640px){
-  .arena{ flex-direction:column; align-items:center; gap:10px }
+  .arena{ flex-direction:column; align-items:center; gap:6px }
+  .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px) }
+  body.started header{ display:none; }
+  #holdCard,#nextCard{ display:none !important; }
+  .board{ border-radius:12px }
+  #scoreBadge{ top:6px }
+  #pauseBtn{ top:6px; left:6px }
+}
   #holdCard,#nextCard{ display:none !important; }
   .board{ border-radius:12px }
   #scoreBadge{ top:6px }
@@ -191,7 +198,7 @@ select,.pill{
   </div>
 
   <div class="section">
-    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by Peymaan Abedinpour© 2025</button>
+    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour© 2025 v0.2</button>
   </div>
 </aside>
 
@@ -290,12 +297,21 @@ let nextCtx=nextC.getContext('2d'); let holdCtx=holdC.getContext('2d');
 
 const BOARD_W=10, BOARD_H=20; let BLOCK=20;
 function computeBoardCssSize(){
-  const vh=Math.max(document.documentElement.clientHeight,window.innerHeight||0);
-  const headerH=document.querySelector('header').offsetHeight+8;
-  const availH=vh-headerH-16, vw=Math.max(document.documentElement.clientWidth,window.innerWidth||0);
-  const frac=isMobile()?0.985:(vw<980?0.52:0.40);
-  const cssW=Math.max(240,Math.min(680,Math.min(Math.floor(vw*frac),Math.floor(availH/2))));
-  document.documentElement.style.setProperty('--boardW',cssW+'px'); return cssW;
+  const vv = window.visualViewport;
+  const vh = vv ? vv.height : Math.max(document.documentElement.clientHeight, window.innerHeight||0);
+  const vw = vv ? vv.width  : Math.max(document.documentElement.clientWidth,  window.innerWidth||0);
+  const headerH = document.querySelector('header').offsetHeight;
+  // All vertical padding that could push the board down; keep tiny margin to avoid overflow
+  const verticalGaps = isMobile() ? 8 : 16;
+  // Use the actual visual viewport height so iOS address bar changes don't crop the board
+  const availH = Math.max(200, Math.floor(vh - headerH - verticalGaps));
+  // Board is 1:2 (w:h), so width is limited by height/2
+  const widthFromHeight = Math.floor(availH / 2);
+  // Also cap by viewport width so we keep small side gutters
+  const widthFromViewport = Math.floor(vw * (isMobile() ? 0.98 : (vw < 980 ? 0.52 : 0.40)));
+  const cssW = Math.max(220, Math.min(widthFromHeight, widthFromViewport));
+  document.documentElement.style.setProperty('--boardW', cssW + 'px');
+  return cssW;
 }
 function layout(){
   const cssW=computeBoardCssSize(), cssH=cssW*2;
@@ -305,6 +321,10 @@ function layout(){
   draw();
 }
 window.addEventListener('resize', layout);
+if (window.visualViewport) {
+  visualViewport.addEventListener('resize', layout);
+  visualViewport.addEventListener('scroll', layout);
+}
 
 /* ===== Pieces & Kicks ===== */
 const PIECES={ I:{shape:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],color:'#00f7ff'},
@@ -379,7 +399,7 @@ document.addEventListener('gesturestart', preventDefault, {passive:false});
 function startGame(){
   if(started) return;
   audioCtx.resume().catch(()=>{});
-  resetGame(); started=true;
+  resetGame(); started=true; document.body.classList.add('started');
   document.getElementById('startOverlay').style.display='none';
   requestAnimationFrame(gameLoop); updateScrollLock();
 }
