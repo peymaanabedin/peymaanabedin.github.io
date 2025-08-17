@@ -132,7 +132,7 @@ select,.pill{
 @media (max-width: 640px){
   .arena{ flex-direction:column; align-items:center; gap:6px }
   /* Top align the stage on phones so the board hugs the button area */
-  .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 15px); place-items:start center; }
+  .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 5px); place-items:start center; }
 
   /* When header hides during play, add only safe-area padding so nothing sits under the notch */
   body.started .main{ padding-top: calc(env(safe-area-inset-top,0px) + 4px); }
@@ -213,7 +213,7 @@ select,.pill{
   </div>
 
   <div class="section">
-    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour v0.1 © 2025</button>
+    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour v0.2 © 2025</button>
   </div>
 </aside>
 
@@ -322,7 +322,7 @@ function computeBoardCssSize(){
   const sat = parseFloat(rs.getPropertyValue('--sat')) || 0; // safe area top
   const sab = parseFloat(rs.getPropertyValue('--sab')) || 0; // safe area bottom
   const extraTop = headerVisible ? 0 : sat;
-  const extraBottom = sab + (isMobile()?15:0); // add ~15px mobile padding so board clears UI
+  const extraBottom = sab + (isMobile()?5:0); // add ~5px mobile padding so board clears UI
   const verticalGaps = isMobile() ? 0 : 16;
   // Available height strictly inside the visual viewport and safe areas
   const availH = Math.max(220, Math.floor(vh - headerH - verticalGaps - extraTop - extraBottom));
@@ -624,44 +624,48 @@ document.addEventListener('keyup',e=>{
 
 /* ===== TOUCH tuned (iPhone 12 smooth) ===== */
 let touchStartX=0,touchStartY=0,touchMoved=false,tStart=0;
-let consumedDown=false, consumedUp=false;
+let consumedDown=false;
+let dirLock=null; // 'x' or 'y' once movement intent is clear
 
 function touchTuning(){
-  let STEP = Math.max(10, BLOCK * 0.55);          // horizontal step
-  let SOFT_DIST = Math.max(14, BLOCK * 0.60);     // start soft-drop dragging
-  let HD_DIST = Math.max(36, BLOCK * 1.10);       // min downward travel for hard drop (move)
-  let HD_DIST2 = Math.max(64, BLOCK * 1.90);      // absolute distance fallback for end flick
-  let TAP_DIST = Math.max(8,  BLOCK * 0.33);      // tap threshold
-  let FLICK = Math.max(18, BLOCK * 0.55);         // general flick threshold
-  let HD_VEL = 0.60;                              // px/ms vertical speed needed for hard drop
-  let VERT_DOM = 1.30;                            // vertical must dominate horizontal by 30%
-  let DEAD_TIME = 100;                            // ignore hard-drop for the first 100ms
+  // Natural & controllable: soft drags are gentle, flicks are decisive
+  const DIR_LOCK_DIST = Math.max(12, BLOCK*0.40); // distance before locking axis
+  let STEP = Math.max(10, BLOCK * 0.55);          // horizontal move step
+  let SOFT_DIST = Math.max(16, BLOCK * 0.62);     // start soft-drop dragging
+  let HD_DIST = Math.max(28, BLOCK * 0.95);       // min travel during move for hard drop
+  let HD_DIST2 = Math.max(40, BLOCK * 1.45);      // fallback distance at end for hard drop
+  let TAP_DIST = Math.max(8,  BLOCK * 0.33);      // rotate tap
+  let FLICK = Math.max(16, BLOCK * 0.50);         // general flick threshold
+  let HD_VEL = 0.50;                              // px/ms for hard drop (~500px/s)
+  let VERT_DOM = 1.25;                            // vertical dominance factor
+  let DEAD_TIME = 70;                              // ms before hard drop allowed
   if(isIPhone12()){
-    STEP       = Math.max(9,  BLOCK * 0.48);
-    SOFT_DIST  = Math.max(16, BLOCK * 0.65);
-    HD_DIST    = Math.max(42, BLOCK * 1.25);
-    HD_DIST2   = Math.max(70, BLOCK * 2.00);
+    STEP       = Math.max(9,  BLOCK * 0.50);
+    SOFT_DIST  = Math.max(18, BLOCK * 0.66);
+    HD_DIST    = Math.max(30, BLOCK * 1.05);
+    HD_DIST2   = Math.max(44, BLOCK * 1.55);
     TAP_DIST   = Math.max(7,  BLOCK * 0.30);
-    FLICK      = Math.max(20, BLOCK * 0.60);
-    HD_VEL     = 0.65;
-    VERT_DOM   = 1.35;
-    DEAD_TIME  = 110;
+    FLICK      = Math.max(18, BLOCK * 0.52);
+    HD_VEL     = 0.55;
+    VERT_DOM   = 1.28;
+    DEAD_TIME  = 80;
   }
-  return {STEP, SOFT_DIST, HD_DIST, HD_DIST2, TAP_DIST, FLICK, HD_VEL, VERT_DOM, DEAD_TIME};
+  return {DIR_LOCK_DIST, STEP, SOFT_DIST, HD_DIST, HD_DIST2, TAP_DIST, FLICK, HD_VEL, VERT_DOM, DEAD_TIME};
 }
 
 gameCanvas.addEventListener('touchstart', e=>{
+  // Always prevent default on the board for rock-solid control (even pre-start)
+  e.preventDefault();
   if(!started){ startGame(); }
   audioCtx.resume().catch(()=>{});
-  if(shouldLock()) e.preventDefault();
   const t=e.touches[0];
   touchStartX=t.clientX; touchStartY=t.clientY; tStart=performance.now();
-  touchMoved=false; consumedDown=false; consumedUp=false;
+  touchMoved=false; consumedDown=false; dirLock=null;
 },{passive:false});
 
 gameCanvas.addEventListener('touchmove', e=>{
-  if(shouldLock()) e.preventDefault();
-  const {STEP, SOFT_DIST, HD_DIST, HD_DIST2, HD_VEL, VERT_DOM, DEAD_TIME} = touchTuning();
+  e.preventDefault();
+  const {DIR_LOCK_DIST, STEP, SOFT_DIST, HD_DIST, HD_DIST2, HD_VEL, VERT_DOM, DEAD_TIME} = touchTuning();
   const t=e.touches[0];
   const dx=t.clientX - touchStartX;
   const dy=t.clientY - touchStartY;
@@ -669,30 +673,34 @@ gameCanvas.addEventListener('touchmove', e=>{
   const dt=performance.now()-tStart;
   const vy = dy / Math.max(1, dt);
 
-  // Intentional, fast vertical flick -> hard drop
-  if(!consumedDown && dy > HD_DIST && (vy > HD_VEL || dy > HD_DIST2) && ady > adx*VERT_DOM && dt > DEAD_TIME){
-    consumedDown = true; hardDrop(); return;
-  }
+  // Decide axis once user intent is clear
+  if(!dirLock && (adx+ady) >= DIR_LOCK_DIST){ dirLock = (adx > ady*1.15) ? 'x' : 'y'; }
 
-  // Gentle downward drag -> controlled soft drop steps
-  if(dy > SOFT_DIST && ady > adx*VERT_DOM){
-    const steps = Math.min(6, Math.floor((dy - SOFT_DIST) / (BLOCK * 0.75)) + 1);
-    for(let i=0;i<steps;i++) softDrop();
-    touchStartY = t.clientY; // reset baseline so it feels smooth
-  }
-
-  // Horizontal slides
-  if(adx > ady && adx >= STEP){
-    touchMoved = true;
-    const steps = Math.min(6, Math.floor(adx / STEP));
-    const dir = dx > 0 ? 1 : -1;
-    for(let i=0;i<steps;i++) move(dir,0);
-    touchStartX = t.clientX;
+  if(dirLock === 'y'){
+    // Intentional, fast downward flick -> hard drop
+    if(!consumedDown && dy > HD_DIST && (vy > HD_VEL || dy > HD_DIST2) && ady > adx*VERT_DOM && dt > DEAD_TIME){
+      consumedDown = true; hardDrop(); return;
+    }
+    // Gentle downward drag -> controlled soft drop
+    if(dy > SOFT_DIST && ady > adx*VERT_DOM){
+      const steps = Math.min(3, Math.floor((dy - SOFT_DIST) / (BLOCK * 0.8)) + 1);
+      for(let i=0;i<steps;i++) softDrop();
+      touchStartY = t.clientY; // smooth baseline reset
+    }
+  } else if(dirLock === 'x'){
+    // Horizontal slides
+    if(adx >= STEP){
+      touchMoved = true;
+      const steps = Math.min(4, Math.floor(adx / STEP));
+      const dir = dx > 0 ? 1 : -1;
+      for(let i=0;i<steps;i++) move(dir,0);
+      touchStartX = t.clientX;
+    }
   }
 },{passive:false});
 
 gameCanvas.addEventListener('touchend', e=>{
-  if(shouldLock()) e.preventDefault();
+  e.preventDefault();
   const {TAP_DIST, FLICK, HD_DIST2, HD_VEL, VERT_DOM} = touchTuning();
   const t=e.changedTouches[0];
   const dx=t.clientX - touchStartX;
@@ -704,21 +712,19 @@ gameCanvas.addEventListener('touchend', e=>{
   if(consumedDown) return;
 
   // Quick tap -> rotate CW
-  if(adx < TAP_DIST && ady < TAP_DIST && dt < 220 && !touchMoved){
-    rotate(+1); return;
-  }
+  if(adx < TAP_DIST && ady < TAP_DIST && dt < 220 && !touchMoved){ rotate(+1); return; }
 
-  // Vertical flicks with control
-  if(ady >= FLICK && ady > adx*VERT_DOM){
-    if(dy > 0 && (ady > HD_DIST2 || vy > HD_VEL)) hardDrop();
-    else if(dy > 0) softDrop();
-    else rotate(-1);
-    return;
-  }
-
-  // Horizontal flick
-  if(adx >= FLICK && adx > ady){
-    move(dx>0?1:-1, 0);
+  if(dirLock === 'y'){
+    // End-of-swipe logic: decisive vertical flicks
+    if(ady >= FLICK && ady > adx*VERT_DOM){
+      if(dy > 0 && (ady > HD_DIST2 || vy > HD_VEL)) hardDrop();
+      else if(dy > 0) softDrop();
+      else rotate(-1);
+      return;
+    }
+  } else if(dirLock === 'x'){
+    // Horizontal flick nudge at release
+    if(adx >= FLICK && adx > ady){ move(dx>0?1:-1, 0); return; }
   }
 },{passive:false});
 
