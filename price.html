@@ -160,7 +160,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Aluminium Closing Price -->
                     <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Aluminium_bars.jpg/1280px-Aluminium_bars.jpg" alt="Aluminum" class="metal-image mb-4">
+                        <img src="https://placehold.co/96x96/D3D3D3/000?text=Aluminum" alt="Aluminum" class="metal-image mb-4">
                         <p class="text-gray-400 text-base mb-1">قیمت پایانی آلومینیوم</p>
                         <p class="text-4xl font-extrabold text-white" id="alum-close">--</p>
                         <p class="text-sm text-gray-500 mt-2" id="alum-close-date">--</p>
@@ -168,7 +168,7 @@
 
                     <!-- Copper Closing Price -->
                     <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Copper_bar.jpg/1280px-Copper_bar.jpg" alt="Copper" class="metal-image mb-4">
+                        <img src="https://placehold.co/96x96/B87333/000?text=Copper" alt="Copper" class="metal-image mb-4">
                         <p class="text-gray-400 text-base mb-1">قیمت پایانی مس</p>
                         <p class="text-4xl font-extrabold text-white" id="copper-close">--</p>
                         <p class="text-sm text-gray-500 mt-2" id="copper-close-date">--</p>
@@ -176,7 +176,7 @@
 
                     <!-- Zinc Closing Price -->
                     <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Zinc_pieces.jpg/1280px-Zinc_pieces.jpg" alt="Zinc" class="metal-image mb-4">
+                        <img src="https://placehold.co/96x96/708090/000?text=Zinc" alt="Zinc" class="metal-image mb-4">
                         <p class="text-gray-400 text-base mb-1">قیمت پایانی روی</p>
                         <p class="text-4xl font-extrabold text-white" id="zinc-close">--</p>
                         <p class="text-sm text-gray-500 mt-2" id="zinc-close-date">--</p>
@@ -192,21 +192,21 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Aluminium Spot Ask -->
                     <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Aluminium_bars.jpg/1280px-Aluminium_bars.jpg" alt="Aluminum" class="metal-image mb-4">
+                        <img src="https://placehold.co/96x96/D3D3D3/000?text=Aluminum" alt="Aluminum" class="metal-image mb-4">
                         <p class="text-gray-400 text-base mb-1">قیمت لحظه‌ای آلومینیوم</p>
                         <p class="text-4xl font-extrabold text-white" id="al-spot-ask">--</p>
                     </div>
 
                     <!-- Copper Spot Ask -->
                     <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Copper_bar.jpg/1280px-Copper_bar.jpg" alt="Copper" class="metal-image mb-4">
+                        <img src="https://placehold.co/96x96/B87333/000?text=Copper" alt="Copper" class="metal-image mb-4">
                         <p class="text-gray-400 text-base mb-1">قیمت لحظه‌ای مس</p>
                         <p class="text-4xl font-extrabold text-white" id="cu-spot-ask">--</p>
                     </div>
 
                     <!-- Zinc Spot Ask -->
                     <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Zinc_pieces.jpg/1280px-Zinc_pieces.jpg" alt="Zinc" class="metal-image mb-4">
+                        <img src="https://placehold.co/96x96/708090/000?text=Zinc" alt="Zinc" class="metal-image mb-4">
                         <p class="text-gray-400 text-base mb-1">قیمت لحظه‌ای روی</p>
                         <p class="text-4xl font-extrabold text-white" id="zn-spot-ask">--</p>
                     </div>
@@ -257,14 +257,14 @@
 
             for (let i = 0; i < maxRetries; i++) {
                 try {
+                    console.log(`Attempting to fetch data (Attempt ${i + 1})...`);
                     // Use the proxied URL for fetching
                     const response = await fetch(proxiedUrl);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     const data = await response.json();
-                    console.log('API Data:', data); // Log the full API response for debugging
-
+                    console.log('Data fetched successfully!'); // Log success
                     // Update Closing Prices
                     document.getElementById('alum-close').textContent = `${parseFloat(data.closing_latest.values.alum_close).toFixed(2)} $`;
                     document.getElementById('alum-close-date').textContent = data.closing_latest.values.alum_close_date;
@@ -312,6 +312,7 @@
                     }
                 } finally {
                     // This block will always execute whether try or catch succeeds/fails
+                    console.log('Finished fetchMetalPrices attempt, hiding spinner.');
                     loadingSpinner.classList.add('hidden'); // Ensure spinner is hidden
                 }
             }
