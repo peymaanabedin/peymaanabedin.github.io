@@ -155,7 +155,7 @@
             <!-- Latest Closing Prices Section -->
             <div class="dashboard-card p-8 flex flex-col col-span-1 md:col-span-2 lg:col-span-3">
                 <h2 class="text-3xl font-bold text-gray-100 mb-6 flex items-center justify-end">
-                    آخرین قیمت‌های پایانی <i class="fa-solid fa-chart-line text-green-400 w-8 h-8 mr-3"></i>
+                    آخرین قیمت‌های پایانی <i class="fa-solid fa-chart-line text-gray-400 w-8 h-8 mr-3"></i>
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Aluminium Closing Price -->
@@ -187,7 +187,7 @@
             <!-- Latest Spot Prices Section -->
             <div class="dashboard-card p-8 flex flex-col col-span-1 md:col-span-2 lg:col-span-3">
                 <h2 class="text-3xl font-bold text-gray-100 mb-6 flex items-center justify-end">
-                    آخرین قیمت‌های لحظه‌ای (پرسش) <i class="fa-solid fa-chart-bar text-purple-400 w-8 h-8 mr-3"></i>
+                    آخرین قیمت‌های لحظه‌ای <i class="fa-solid fa-chart-bar text-gray-400 w-8 h-8 mr-3"></i>
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Aluminium Spot Ask -->
@@ -216,7 +216,7 @@
             <!-- Timestamp Card -->
             <div class="dashboard-card p-8 col-span-1 md:col-span-2 lg:col-span-3">
                 <h2 class="text-3xl font-bold text-gray-100 mb-6 flex items-center justify-end">
-                    آخرین به‌روزرسانی <i class="fa-solid fa-clock text-indigo-400 w-8 h-8 mr-3"></i>
+                    آخرین به‌روزرسانی <i class="fa-solid fa-clock text-gray-400 w-8 h-8 mr-3"></i>
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div class="price-item-card p-6 flex flex-col items-center">
@@ -299,6 +299,7 @@
                         currentDelay *= 2; // Exponential backoff
                     } else {
                         // If all retries fail, display error message to the user
+                        loadingSpinner.classList.add('hidden'); // Ensure spinner is hidden on final error
                         const container = document.querySelector('.container');
                         container.innerHTML = `
                             <div class="text-center p-8 bg-red-800 text-white rounded-lg shadow-md mt-10" style="direction: rtl; text-align: right;">
@@ -309,6 +310,9 @@
                         `;
                         throw error; // Re-throw to indicate failure
                     }
+                } finally {
+                    // This block will always execute whether try or catch succeeds/fails
+                    loadingSpinner.classList.add('hidden'); // Ensure spinner is hidden
                 }
             }
         }
