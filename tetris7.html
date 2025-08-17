@@ -79,7 +79,7 @@ select,.pill{
 }
 
 /* Arena */
-.main{flex:1; width:100%; display:grid; /* place-items:center */; 
+.main{flex:1; width:100%; display:grid; place-items:center; 
   /* Use modern viewport units and safe-area at bottom */
   min-height: 100svh; min-height: 100dvh;
   padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));
@@ -148,6 +148,11 @@ select,.pill{
 @media (min-width: 641px){
   /* Ensure HOLD & NEXT are visible on desktop */
   .sidebar-card#holdCard, .sidebar-card#nextCard{ display:block !important; }
+  /* Allow vertical scroll during play on desktop */
+  body.play-lock{ position:static; overflow:auto; }
+  /* Let content dictate page height and start from top for natural scrolling */
+  .main{ min-height:auto; place-items:start center; padding:16px 16px 24px; }
+}
 }
 </style>
 </head>
@@ -213,7 +218,7 @@ select,.pill{
   </div>
 
   <div class="section">
-    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour v0.2 © 2025</button>
+    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour v0.3© 2025</button>
   </div>
 </aside>
 
@@ -321,22 +326,26 @@ function computeBoardCssSize(){
   const rs = getComputedStyle(document.documentElement);
   const sat = parseFloat(rs.getPropertyValue('--sat')) || 0; // safe area top
   const sab = parseFloat(rs.getPropertyValue('--sab')) || 0; // safe area bottom
-  const extraTop = headerVisible ? 0 : sat;
-  const extraBottom = sab + (isMobile()?5:0); // add ~5px mobile padding so board clears UI
-  const verticalGaps = isMobile() ? 0 : 16;
-  // Available height strictly inside the visual viewport and safe areas
-  const availH = Math.max(220, Math.floor(vh - headerH - verticalGaps - extraTop - extraBottom));
-  // Board is 1:2 (w:h)
-  const widthFromHeight = Math.floor(availH / 2);
-  const widthFromViewport = Math.floor(vw * (isMobile() ? 0.98 : (vw < 980 ? 0.52 : 0.40)));
-  let cssW = Math.max(220, Math.min(widthFromHeight, widthFromViewport));
-  // Fill any tiny leftover height so the bottom gap vanishes
-  const targetH = cssW * 2;
-  const spare = availH - targetH;
-  if (spare >= 2) {
-    const boost = Math.min(Math.floor(spare/2), Math.max(0, widthFromViewport - cssW));
-    if (boost > 0) cssW += boost;
+
+  if (!isMobile()) {
+    // Desktop: don't constrain by height; allow page to scroll vertically if needed
+    const widthFromViewport = Math.floor(vw * (vw < 980 ? 0.48 : 0.42));
+    const cssW = Math.max(260, Math.min(widthFromViewport, 780));
+    document.documentElement.style.setProperty('--boardW', cssW + 'px');
+    return cssW;
   }
+
+  // Mobile: fit strictly within visual viewport height
+  const extraTop = headerVisible ? 0 : sat;
+  const extraBottom = sab + 5; // 5px comfort padding at bottom
+  const verticalGaps = 0;
+  const availH = Math.max(220, Math.floor(vh - headerH - verticalGaps - extraTop - extraBottom));
+  const widthFromHeight = Math.floor(availH / 2);
+  const widthFromViewport = Math.floor(vw * 0.98);
+  let cssW = Math.max(220, Math.min(widthFromHeight, widthFromViewport));
+  document.documentElement.style.setProperty('--boardW', cssW + 'px');
+  return cssW;
+}
   document.documentElement.style.setProperty('--boardW', cssW + 'px');
   return cssW;
 }
@@ -415,7 +424,7 @@ document.getElementById('restartBtn').addEventListener('click',()=>{ resetGame()
 document.getElementById('pauseMenuBtn').addEventListener('click',()=> togglePause());
 
 /* ===== Scroll/zoom lock ===== */
-function shouldLock(){ return started && !pause && !gameOver && !menu.classList.contains('active'); }
+function shouldLock(){ return isMobile() && started && !pause && !gameOver && !menu.classList.contains('active'); }
 function updateScrollLock(){
   if(shouldLock()){ document.body.classList.add('play-lock'); window.addEventListener('touchmove', preventDefault, {passive:false}); }
   else{ document.body.classList.remove('play-lock'); window.removeEventListener('touchmove', preventDefault, {passive:false}); }
@@ -769,3 +778,4 @@ boot();
 </script>
 </body>
 </html>
+
