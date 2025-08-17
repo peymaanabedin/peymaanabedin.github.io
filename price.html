@@ -14,25 +14,27 @@
         /* Custom styles for a polished, dark theme and Vazirmatn font */
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background-color: #1a1a1a; /* Dark background */
+            background-color: #0f172a; /* Even darker, deeper background (slate-900) */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 1.5rem;
+            padding: 2rem; /* Increased padding for more breathing room */
             direction: rtl;
             text-align: right;
-            color: #e0e0e0; /* Light default text color */
+            color: #cbd5e1; /* Lighter grey text for better contrast */
         }
 
         .dashboard-card {
-            background-color: #2a2a2a; /* Slightly lighter dark card background */
-            border-radius: 2rem;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.1); /* Darker shadow */
+            background-color: #1e293b; /* Darker card background (slate-800) */
+            border-radius: 2.5rem; /* Even more rounded corners for modern softness */
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
             transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             border: none;
             position: relative;
             overflow: hidden;
+            border-top: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle top border for depth */
+            border-left: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle left border for depth */
         }
 
         .dashboard-card::before {
@@ -42,16 +44,16 @@
             left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 2rem;
+            border-radius: 2.5rem;
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
             pointer-events: none;
-            box-shadow: inset 0 0 0 2px rgba(74, 144, 226, 0.3); /* Subtle blue inner border on hover for dark theme */
+            box-shadow: inset 0 0 0 2px rgba(96, 165, 250, 0.4); /* Brighter, subtle blue inner border on hover */
         }
 
         .dashboard-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.15);
+            transform: translateY(-10px); /* More significant lift on hover */
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4), 0 12px 30px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
         }
 
         .dashboard-card:hover::before {
@@ -59,31 +61,39 @@
         }
 
         .gradient-bg {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%); /* Deep, subtle dark gradient */
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%); /* Maintain subtle dark gradient for header */
             position: relative;
             overflow: hidden;
             z-index: 1;
+            border-radius: 2.5rem; /* Match card border-radius */
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
         }
 
         .gradient-bg::before {
             content: '';
             position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); /* More subtle white glow */
-            top: -100px;
-            right: -100px;
+            width: 400px; /* Larger glow effect */
+            height: 400px;
+            background: radial-gradient(circle, rgba(148, 163, 184, 0.07) 0%, transparent 70%); /* More subtle white glow */
+            top: -150px;
+            right: -150px;
             transform: rotate(45deg);
             z-index: -1;
         }
 
         .metal-image {
-            width: 6rem;
-            height: 6rem;
+            width: 7rem; /* Slightly larger images */
+            height: 7rem;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid #374151; /* Darker border around image */
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Darker shadow for image */
+            border: 5px solid #374151; /* Thicker, consistent border around image */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* More pronounced shadow for image */
+            filter: grayscale(80%) brightness(120%) contrast(100%); /* Subtle monochrome effect for images */
+            transition: filter 0.3s ease-in-out;
+        }
+
+        .metal-image:hover {
+            filter: grayscale(0%) brightness(100%) contrast(100%); /* Color on hover */
         }
 
         .loading-overlay {
@@ -92,7 +102,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85); /* Darker opaque for focus */
+            background-color: rgba(0, 0, 0, 0.95); /* Even darker opaque for full focus */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -103,11 +113,11 @@
         }
 
         .spinner {
-            border: 8px solid #4a5568; /* Darker grey for spinner */
-            border-top: 8px solid #6366f1; /* Consistent indigo */
+            border: 8px solid #4a5568;
+            border-top: 8px solid #6366f1;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 70px; /* Larger spinner */
+            height: 70px;
             animation: spin 1s linear infinite;
         }
 
@@ -118,20 +128,24 @@
 
         /* Styles for individual price cards within dark theme */
         .price-item-card {
-            background-color: #374151; /* Darker background for price items */
-            border-radius: 1rem; /* Slightly less rounded for inner cards */
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border-bottom: 4px solid #4a5568; /* Darker border */
-            color: #e0e0e0; /* Light text for values */
+            background-color: #2b3a4a; /* Slightly lighter shade for inner cards */
+            border-radius: 1.25rem; /* Consistent rounding */
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15); /* Defined inner card shadow */
+            border-bottom: 5px solid #475569; /* Slightly thicker, more defined bottom border */
+            color: #e2e8f0; /* Lighter text for values */
+            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
         }
-        .price-item-card p.text-gray-600 { /* Labels */
-            color: #a0aec0; /* Lighter grey for labels */
+
+        .price-item-card:hover {
+            background-color: #334155; /* Slightly lighter on hover */
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
         }
-        .price-item-card p.text-gray-400 { /* Dates */
-            color: #718096; /* Even lighter grey for dates */
+
+        .price-item-card p.text-gray-400 { /* Labels and Dates */
+            color: #94a3b8; /* Smoother grey */
         }
         .price-item-card p.font-extrabold { /* Main values */
-            color: #ffffff; /* White for main values */
+            color: #e2e8f0; /* Near white for main values */
         }
     </style>
 </head>
@@ -142,102 +156,102 @@
     </div>
 
     <div class="container mx-auto max-w-7xl">
-        <div class="gradient-bg text-white p-10 rounded-3xl mb-10 shadow-xl text-center">
-            <h1 class="text-4xl sm:text-6xl font-extrabold mb-4 leading-tight">
-                قیمت جهانی فلزات 📈
+        <div class="gradient-bg text-white p-12 rounded-3xl mb-12 shadow-xl text-center">
+            <h1 class="text-4xl sm:text-6xl font-extrabold mb-5 leading-tight">
+                قیمت جهانی فلزات <span class="text-emerald-300">📈</span>
             </h1>
-            <p class="text-xl sm:text-2xl opacity-90 leading-relaxed">
-                بینش بازار در لحظه، در دستان شما.
+            <p class="text-xl sm:text-2xl opacity-90 leading-relaxed max-w-2xl mx-auto">
+                بینش‌های لحظه‌ای و دقیق بازار، در دستان شما.
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
             <!-- Latest Closing Prices Section -->
             <div class="dashboard-card p-8 flex flex-col col-span-1 md:col-span-2 lg:col-span-3">
-                <h2 class="text-3xl font-bold text-gray-100 mb-6 flex items-center justify-end">
-                    آخرین قیمت‌های پایانی <i class="fa-solid fa-chart-line text-gray-400 w-8 h-8 mr-3"></i>
+                <h2 class="text-3xl font-bold text-gray-100 mb-8 flex items-center justify-end">
+                    آخرین قیمت‌های پایانی <i class="fa-solid fa-chart-line text-gray-400 text-3xl mr-3"></i>
                 </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Aluminium Closing Price -->
-                    <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://placehold.co/96x96/D3D3D3/000?text=Aluminum" alt="Aluminum" class="metal-image mb-4">
-                        <p class="text-gray-400 text-base mb-1">قیمت پایانی آلومینیوم</p>
-                        <p class="text-4xl font-extrabold text-white" id="alum-close">--</p>
-                        <p class="text-sm text-gray-500 mt-2" id="alum-close-date">--</p>
+                    <div class="price-item-card p-7 flex flex-col items-center">
+                        <img src="https://images.unsplash.com/photo-1596707427218-1b6e4e8a8b1a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Aluminum" class="metal-image mb-5">
+                        <p class="text-gray-400 text-lg mb-2">قیمت پایانی آلومینیوم</p>
+                        <p class="text-5xl font-extrabold text-white" id="alum-close">--</p>
+                        <p class="text-sm text-gray-500 mt-3" id="alum-close-date">--</p>
                     </div>
 
                     <!-- Copper Closing Price -->
-                    <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://placehold.co/96x96/B87333/000?text=Copper" alt="Copper" class="metal-image mb-4">
-                        <p class="text-gray-400 text-base mb-1">قیمت پایانی مس</p>
-                        <p class="text-4xl font-extrabold text-white" id="copper-close">--</p>
-                        <p class="text-sm text-gray-500 mt-2" id="copper-close-date">--</p>
+                    <div class="price-item-card p-7 flex flex-col items-center">
+                        <img src="https://images.unsplash.com/photo-1598972846875-dd8602b9e115?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Copper" class="metal-image mb-5">
+                        <p class="text-gray-400 text-lg mb-2">قیمت پایانی مس</p>
+                        <p class="text-5xl font-extrabold text-white" id="copper-close">--</p>
+                        <p class="text-sm text-gray-500 mt-3" id="copper-close-date">--</p>
                     </div>
 
                     <!-- Zinc Closing Price -->
-                    <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://placehold.co/96x96/708090/000?text=Zinc" alt="Zinc" class="metal-image mb-4">
-                        <p class="text-gray-400 text-base mb-1">قیمت پایانی روی</p>
-                        <p class="text-4xl font-extrabold text-white" id="zinc-close">--</p>
-                        <p class="text-sm text-gray-500 mt-2" id="zinc-close-date">--</p>
+                    <div class="price-item-card p-7 flex flex-col items-center">
+                        <img src="https://images.unsplash.com/photo-1627993077610-18456637e199?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Zinc" class="metal-image mb-5">
+                        <p class="text-gray-400 text-lg mb-2">قیمت پایانی روی</p>
+                        <p class="text-5xl font-extrabold text-white" id="zinc-close">--</p>
+                        <p class="text-sm text-gray-500 mt-3" id="zinc-close-date">--</p>
                     </div>
                 </div>
             </div>
 
             <!-- Latest Spot Prices Section -->
             <div class="dashboard-card p-8 flex flex-col col-span-1 md:col-span-2 lg:col-span-3">
-                <h2 class="text-3xl font-bold text-gray-100 mb-6 flex items-center justify-end">
-                    آخرین قیمت‌های لحظه‌ای <i class="fa-solid fa-chart-bar text-gray-400 w-8 h-8 mr-3"></i>
+                <h2 class="text-3xl font-bold text-gray-100 mb-8 flex items-center justify-end">
+                    آخرین قیمت‌های لحظه‌ای <i class="fa-solid fa-chart-bar text-gray-400 text-3xl mr-3"></i>
                 </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Aluminium Spot Ask -->
-                    <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://placehold.co/96x96/D3D3D3/000?text=Aluminum" alt="Aluminum" class="metal-image mb-4">
-                        <p class="text-gray-400 text-base mb-1">قیمت لحظه‌ای آلومینیوم</p>
-                        <p class="text-4xl font-extrabold text-white" id="al-spot-ask">--</p>
+                    <div class="price-item-card p-7 flex flex-col items-center">
+                        <img src="https://images.unsplash.com/photo-1596707427218-1b6e4e8a8b1a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Aluminum" class="metal-image mb-5">
+                        <p class="text-gray-400 text-lg mb-2">قیمت لحظه‌ای آلومینیوم</p>
+                        <p class="text-5xl font-extrabold text-white" id="al-spot-ask">--</p>
                     </div>
 
                     <!-- Copper Spot Ask -->
-                    <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://placehold.co/96x96/B87333/000?text=Copper" alt="Copper" class="metal-image mb-4">
-                        <p class="text-gray-400 text-base mb-1">قیمت لحظه‌ای مس</p>
-                        <p class="text-4xl font-extrabold text-white" id="cu-spot-ask">--</p>
+                    <div class="price-item-card p-7 flex flex-col items-center">
+                        <img src="https://images.unsplash.com/photo-1598972846875-dd8602b9e115?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Copper" class="metal-image mb-5">
+                        <p class="text-gray-400 text-lg mb-2">قیمت لحظه‌ای مس</p>
+                        <p class="text-5xl font-extrabold text-white" id="cu-spot-ask">--</p>
                     </div>
 
                     <!-- Zinc Spot Ask -->
-                    <div class="price-item-card p-6 flex flex-col items-center">
-                        <img src="https://placehold.co/96x96/708090/000?text=Zinc" alt="Zinc" class="metal-image mb-4">
-                        <p class="text-gray-400 text-base mb-1">قیمت لحظه‌ای روی</p>
-                        <p class="text-4xl font-extrabold text-white" id="zn-spot-ask">--</p>
+                    <div class="price-item-card p-7 flex flex-col items-center">
+                        <img src="https://images.unsplash.com/photo-1627993077610-18456637e199?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Zinc" class="metal-image mb-5">
+                        <p class="text-gray-400 text-lg mb-2">قیمت لحظه‌ای روی</p>
+                        <p class="text-5xl font-extrabold text-white" id="zn-spot-ask">--</p>
                     </div>
                 </div>
             </div>
 
             <!-- Timestamp Card -->
             <div class="dashboard-card p-8 col-span-1 md:col-span-2 lg:col-span-3">
-                <h2 class="text-3xl font-bold text-gray-100 mb-6 flex items-center justify-end">
-                    آخرین به‌روزرسانی <i class="fa-solid fa-clock text-gray-400 w-8 h-8 mr-3"></i>
+                <h2 class="text-3xl font-bold text-gray-100 mb-8 flex items-center justify-end">
+                    آخرین به‌روزرسانی <i class="fa-solid fa-clock text-gray-400 text-3xl mr-3"></i>
                 </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="price-item-card p-6 flex flex-col items-center">
-                        <i class="fa-solid fa-globe text-gray-400 w-12 h-12 mb-3"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div class="price-item-card p-7 flex flex-col items-center">
+                        <i class="fa-solid fa-globe text-gray-400 text-6xl mb-4"></i>
                         <div>
-                            <p class="text-gray-400 text-base mb-1">برچسب زمانی UTC</p>
-                            <p class="text-2xl font-bold text-white" id="timestamp-utc">--</p>
+                            <p class="text-gray-400 text-lg mb-2">برچسب زمانی UTC</p>
+                            <p class="text-3xl font-bold text-white" id="timestamp-utc">--</p>
                         </div>
                     </div>
-                    <div class="price-item-card p-6 flex flex-col items-center">
-                        <i class="fa-solid fa-calendar-alt text-gray-400 w-12 h-12 mb-3"></i>
+                    <div class="price-item-card p-7 flex flex-col items-center">
+                        <i class="fa-solid fa-calendar-alt text-gray-400 text-6xl mb-4"></i>
                         <div>
-                            <p class="text-gray-400 text-base mb-1">تاریخ شمسی</p>
-                            <p class="text-2xl font-bold text-white" id="jalali-date">--</p>
+                            <p class="text-gray-400 text-lg mb-2">تاریخ شمسی</p>
+                            <p class="text-3xl font-bold text-white" id="jalali-date">--</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <p class="text-center text-gray-500 text-sm mt-10 opacity-80">
+        <p class="text-center text-gray-500 text-sm mt-12 opacity-80">
             داده‌ها توسط metalsmarket.net ارائه شده است.
         </p>
     </div>
