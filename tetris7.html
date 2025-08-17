@@ -22,6 +22,9 @@
 :root{
   --bg:#0d0f12; --panel:#14171b; --text:#e9eef3; --muted:#9aa4af;
   --accent:#00e5ff; --grid: rgba(0,229,255,.14); --boardW: 380px;
+  /* Safe area vars for JS sizing */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -210,7 +213,7 @@ select,.pill{
   </div>
 
   <div class="section">
-    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour© 2025 v0.09</button>
+    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by pymn © 2025</button>
   </div>
 </aside>
 
@@ -624,15 +627,15 @@ let touchStartX=0,touchStartY=0,touchMoved=false,tStart=0;
 let consumedDown=false, consumedUp=false;
 
 function touchTuning(){
-  let STEP = Math.max(10, BLOCK * 0.55);
-  let SOFT_DIST = Math.max(14, BLOCK * 0.60);
-  let HD_DIST = Math.max(36, BLOCK * 1.10);
-  let HD_DIST2 = Math.max(64, BLOCK * 1.90);
-  let TAP_DIST = Math.max(8,  BLOCK * 0.33);
-  let FLICK = Math.max(18, BLOCK * 0.55);
-  let HD_VEL = 0.60; // px/ms (600 px/s) for hard-drop flicks
-  let VERT_DOM = 1.30; // vertical must dominate horizontal by 30%
-  let DEAD_TIME = 100; // ignore hard-drop detection for first 100ms
+  let STEP = Math.max(10, BLOCK * 0.55);          // horizontal step
+  let SOFT_DIST = Math.max(14, BLOCK * 0.60);     // start soft-drop dragging
+  let HD_DIST = Math.max(36, BLOCK * 1.10);       // min downward travel for hard drop (move)
+  let HD_DIST2 = Math.max(64, BLOCK * 1.90);      // absolute distance fallback for end flick
+  let TAP_DIST = Math.max(8,  BLOCK * 0.33);      // tap threshold
+  let FLICK = Math.max(18, BLOCK * 0.55);         // general flick threshold
+  let HD_VEL = 0.60;                              // px/ms vertical speed needed for hard drop
+  let VERT_DOM = 1.30;                            // vertical must dominate horizontal by 30%
+  let DEAD_TIME = 100;                            // ignore hard-drop for the first 100ms
   if(isIPhone12()){
     STEP       = Math.max(9,  BLOCK * 0.48);
     SOFT_DIST  = Math.max(16, BLOCK * 0.65);
@@ -645,8 +648,6 @@ function touchTuning(){
     DEAD_TIME  = 110;
   }
   return {STEP, SOFT_DIST, HD_DIST, HD_DIST2, TAP_DIST, FLICK, HD_VEL, VERT_DOM, DEAD_TIME};
-}
-  return {STEP, DOWN_SWEEP, UP_SWEEP, TAP_DIST, FLICK};
 }
 
 gameCanvas.addEventListener('touchstart', e=>{
@@ -677,30 +678,10 @@ gameCanvas.addEventListener('touchmove', e=>{
   if(dy > SOFT_DIST && ady > adx*VERT_DOM){
     const steps = Math.min(6, Math.floor((dy - SOFT_DIST) / (BLOCK * 0.75)) + 1);
     for(let i=0;i<steps;i++) softDrop();
-    touchStartY = t.clientY; // reset baseline so it feels smooth, not jumpy
+    touchStartY = t.clientY; // reset baseline so it feels smooth
   }
 
   // Horizontal slides
-  if(adx > ady && adx >= STEP){
-    touchMoved = true;
-    const steps = Math.min(6, Math.floor(adx / STEP));
-    const dir = dx > 0 ? 1 : -1;
-    for(let i=0;i<steps;i++) move(dir,0);
-    touchStartX = t.clientX;
-  }
-},{passive:false});
-  const {STEP, DOWN_SWEEP, UP_SWEEP} = touchTuning();
-  const t=e.touches[0];
-  const dx=t.clientX - touchStartX;
-  const dy=t.clientY - touchStartY;
-  const adx=Math.abs(dx), ady=Math.abs(dy);
-
-  if(!consumedDown && dy > DOWN_SWEEP){
-    consumedDown = true; hardDrop(); return;
-  }
-  if(!consumedUp && dy < -UP_SWEEP){
-    consumedUp = true; rotate(-1); return;
-  }
   if(adx > ady && adx >= STEP){
     touchMoved = true;
     const steps = Math.min(6, Math.floor(adx / STEP));
@@ -738,24 +719,6 @@ gameCanvas.addEventListener('touchend', e=>{
   // Horizontal flick
   if(adx >= FLICK && adx > ady){
     move(dx>0?1:-1, 0);
-  }
-},{passive:false});
-  const {TAP_DIST, FLICK} = touchTuning();
-  const t=e.changedTouches[0];
-  const dx=t.clientX - touchStartX;
-  const dy=t.clientY - touchStartY;
-  const adx=Math.abs(dx), ady=Math.abs(dy);
-  const dt=performance.now()-tStart;
-
-  if(consumedDown) return;
-
-  if(adx < TAP_DIST && ady < TAP_DIST && dt < 200 && !touchMoved){
-    rotate(+1); return;
-  }
-  if(adx > ady && adx >= FLICK){
-    move(dx>0?1:-1, 0);
-  } else if(ady >= FLICK){
-    if(dy > 0) hardDrop(); else rotate(-1);
   }
 },{passive:false});
 
