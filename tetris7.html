@@ -153,7 +153,6 @@ select,.pill{
   /* Let content dictate page height and start from top for natural scrolling */
   .main{ min-height:auto; place-items:start center; padding:16px 16px 24px; }
 }
-}
 </style>
 </head>
 <body>
@@ -218,7 +217,7 @@ select,.pill{
   </div>
 
   <div class="section">
-    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour v0.3© 2025</button>
+    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour v0.4 © 2025</button>
   </div>
 </aside>
 
@@ -328,9 +327,12 @@ function computeBoardCssSize(){
   const sab = parseFloat(rs.getPropertyValue('--sab')) || 0; // safe area bottom
 
   if (!isMobile()) {
-    // Desktop: don't constrain by height; allow page to scroll vertically if needed
-    const widthFromViewport = Math.floor(vw * (vw < 980 ? 0.48 : 0.42));
-    const cssW = Math.max(260, Math.min(widthFromViewport, 780));
+    // Desktop: make the board as big as possible while fully fitting the viewport height (no scroll)
+    const verticalPad = 24; // matches .main desktop bottom padding
+    const availH = Math.max(300, Math.floor(vh - headerH - verticalPad));
+    const widthFromHeight = Math.floor(availH / 2);
+    const widthFromViewport = Math.floor(vw * (vw < 1100 ? 0.50 : 0.54)); // a bit bigger than before
+    const cssW = Math.max(300, Math.min(widthFromHeight, widthFromViewport, 820));
     document.documentElement.style.setProperty('--boardW', cssW + 'px');
     return cssW;
   }
@@ -343,9 +345,6 @@ function computeBoardCssSize(){
   const widthFromHeight = Math.floor(availH / 2);
   const widthFromViewport = Math.floor(vw * 0.98);
   let cssW = Math.max(220, Math.min(widthFromHeight, widthFromViewport));
-  document.documentElement.style.setProperty('--boardW', cssW + 'px');
-  return cssW;
-}
   document.documentElement.style.setProperty('--boardW', cssW + 'px');
   return cssW;
 }
