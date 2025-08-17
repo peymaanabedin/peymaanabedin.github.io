@@ -129,7 +129,8 @@ select,.pill{
 @media (max-width: 640px){
   .arena{ flex-direction:column; align-items:center; gap:6px }
   /* Top align the stage on phones so the board hugs the button area */
-  .main{ padding:6px 6px env(safe-area-inset-bottom,0px); place-items:start center; }
+  .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 15px); place-items:start center; }
+
   /* When header hides during play, add only safe-area padding so nothing sits under the notch */
   body.started .main{ padding-top: calc(env(safe-area-inset-top,0px) + 4px); }
   body.started header{ display:none; }
@@ -209,7 +210,7 @@ select,.pill{
   </div>
 
   <div class="section">
-    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by pymn © 2025</button>
+    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour© 2025 v0.09</button>
   </div>
 </aside>
 
@@ -318,7 +319,7 @@ function computeBoardCssSize(){
   const sat = parseFloat(rs.getPropertyValue('--sat')) || 0; // safe area top
   const sab = parseFloat(rs.getPropertyValue('--sab')) || 0; // safe area bottom
   const extraTop = headerVisible ? 0 : sat;
-  const extraBottom = sab; // keep only safe area at bottom (no extra px)
+  const extraBottom = sab + (isMobile()?15:0); // add ~15px mobile padding so board clears UI
   const verticalGaps = isMobile() ? 0 : 16;
   // Available height strictly inside the visual viewport and safe areas
   const availH = Math.max(220, Math.floor(vh - headerH - verticalGaps - extraTop - extraBottom));
@@ -624,17 +625,27 @@ let consumedDown=false, consumedUp=false;
 
 function touchTuning(){
   let STEP = Math.max(10, BLOCK * 0.55);
-  let DOWN_SWEEP = Math.max(16, BLOCK * 0.50);
-  let UP_SWEEP   = Math.max(18, BLOCK * 0.55);
-  let TAP_DIST   = Math.max(8,  BLOCK * 0.33);
-  let FLICK      = Math.max(12, BLOCK * 0.40);
+  let SOFT_DIST = Math.max(14, BLOCK * 0.60);
+  let HD_DIST = Math.max(36, BLOCK * 1.10);
+  let HD_DIST2 = Math.max(64, BLOCK * 1.90);
+  let TAP_DIST = Math.max(8,  BLOCK * 0.33);
+  let FLICK = Math.max(18, BLOCK * 0.55);
+  let HD_VEL = 0.60; // px/ms (600 px/s) for hard-drop flicks
+  let VERT_DOM = 1.30; // vertical must dominate horizontal by 30%
+  let DEAD_TIME = 100; // ignore hard-drop detection for first 100ms
   if(isIPhone12()){
-    STEP       = Math.max(8,  BLOCK * 0.42);
-    DOWN_SWEEP = Math.max(12, BLOCK * 0.38);
-    UP_SWEEP   = Math.max(14, BLOCK * 0.45);
-    TAP_DIST   = Math.max(6,  BLOCK * 0.28);
-    FLICK      = Math.max(10, BLOCK * 0.35);
+    STEP       = Math.max(9,  BLOCK * 0.48);
+    SOFT_DIST  = Math.max(16, BLOCK * 0.65);
+    HD_DIST    = Math.max(42, BLOCK * 1.25);
+    HD_DIST2   = Math.max(70, BLOCK * 2.00);
+    TAP_DIST   = Math.max(7,  BLOCK * 0.30);
+    FLICK      = Math.max(20, BLOCK * 0.60);
+    HD_VEL     = 0.65;
+    VERT_DOM   = 1.35;
+    DEAD_TIME  = 110;
   }
+  return {STEP, SOFT_DIST, HD_DIST, HD_DIST2, TAP_DIST, FLICK, HD_VEL, VERT_DOM, DEAD_TIME};
+}
   return {STEP, DOWN_SWEEP, UP_SWEEP, TAP_DIST, FLICK};
 }
 
@@ -649,6 +660,35 @@ gameCanvas.addEventListener('touchstart', e=>{
 
 gameCanvas.addEventListener('touchmove', e=>{
   if(shouldLock()) e.preventDefault();
+  const {STEP, SOFT_DIST, HD_DIST, HD_DIST2, HD_VEL, VERT_DOM, DEAD_TIME} = touchTuning();
+  const t=e.touches[0];
+  const dx=t.clientX - touchStartX;
+  const dy=t.clientY - touchStartY;
+  const adx=Math.abs(dx), ady=Math.abs(dy);
+  const dt=performance.now()-tStart;
+  const vy = dy / Math.max(1, dt);
+
+  // Intentional, fast vertical flick -> hard drop
+  if(!consumedDown && dy > HD_DIST && (vy > HD_VEL || dy > HD_DIST2) && ady > adx*VERT_DOM && dt > DEAD_TIME){
+    consumedDown = true; hardDrop(); return;
+  }
+
+  // Gentle downward drag -> controlled soft drop steps
+  if(dy > SOFT_DIST && ady > adx*VERT_DOM){
+    const steps = Math.min(6, Math.floor((dy - SOFT_DIST) / (BLOCK * 0.75)) + 1);
+    for(let i=0;i<steps;i++) softDrop();
+    touchStartY = t.clientY; // reset baseline so it feels smooth, not jumpy
+  }
+
+  // Horizontal slides
+  if(adx > ady && adx >= STEP){
+    touchMoved = true;
+    const steps = Math.min(6, Math.floor(adx / STEP));
+    const dir = dx > 0 ? 1 : -1;
+    for(let i=0;i<steps;i++) move(dir,0);
+    touchStartX = t.clientX;
+  }
+},{passive:false});
   const {STEP, DOWN_SWEEP, UP_SWEEP} = touchTuning();
   const t=e.touches[0];
   const dx=t.clientX - touchStartX;
@@ -672,6 +712,34 @@ gameCanvas.addEventListener('touchmove', e=>{
 
 gameCanvas.addEventListener('touchend', e=>{
   if(shouldLock()) e.preventDefault();
+  const {TAP_DIST, FLICK, HD_DIST2, HD_VEL, VERT_DOM} = touchTuning();
+  const t=e.changedTouches[0];
+  const dx=t.clientX - touchStartX;
+  const dy=t.clientY - touchStartY;
+  const adx=Math.abs(dx), ady=Math.abs(dy);
+  const dt=performance.now()-tStart;
+  const vy = ady / Math.max(1, dt);
+
+  if(consumedDown) return;
+
+  // Quick tap -> rotate CW
+  if(adx < TAP_DIST && ady < TAP_DIST && dt < 220 && !touchMoved){
+    rotate(+1); return;
+  }
+
+  // Vertical flicks with control
+  if(ady >= FLICK && ady > adx*VERT_DOM){
+    if(dy > 0 && (ady > HD_DIST2 || vy > HD_VEL)) hardDrop();
+    else if(dy > 0) softDrop();
+    else rotate(-1);
+    return;
+  }
+
+  // Horizontal flick
+  if(adx >= FLICK && adx > ady){
+    move(dx>0?1:-1, 0);
+  }
+},{passive:false});
   const {TAP_DIST, FLICK} = touchTuning();
   const t=e.changedTouches[0];
   const dx=t.clientX - touchStartX;
