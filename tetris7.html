@@ -2,29 +2,28 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-<title>BlockDropper</title>
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Tetris Pro</title>
 
-<!-- PWA basics -->
+<!-- App Icon + PWA Meta -->
 <meta name="theme-color" content="#0d0f12">
-<meta name="application-name" content="BlockDropper">
-<link rel="icon" href="https://i.postimg.cc/yd3nzpjV/App-Icon-2x.png" sizes="192x192">
-<link rel="icon" href="https://i.postimg.cc/yd3nzpjV/App-Icon-2x.png" sizes="512x512">
-
-<!-- iOS PWA -->
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tetris Pro">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BlockDropper">
-<link rel="apple-touch-icon" href="https://i.postimg.cc/yd3nzpjV/App-Icon-2x.png">
-<meta name="format-detection" content="telephone=no" />
+
+<!-- Favicons / Touch Icons (reuse same URL for simplicity) -->
+<link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/4xfMzpH5/App-Icon-2x.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://i.postimg.cc/4xfMzpH5/App-Icon-2x.png">
+<link rel="apple-touch-icon" href="https://i.postimg.cc/4xfMzpH5/App-Icon-2x.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://i.postimg.cc/4xfMzpH5/App-Icon-2x.png">
+<link rel="manifest" id="app-manifest" href="#">
 
 <style>
 :root{
   --bg:#0d0f12; --panel:#14171b; --text:#e9eef3; --muted:#9aa4af;
   --accent:#00e5ff; --grid: rgba(0,229,255,.14); --boardW: 380px;
-  /* Safe area vars for JS sizing */
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -33,8 +32,6 @@ html,body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   overscroll-behavior:none;
 }
-/* Fill viewport and allow main to center content vertically */
-body{ display:flex; flex-direction:column; min-height:100svh; min-height:100dvh; }
 body.play-lock{ overflow:hidden; position:fixed; inset:0; }
 header{
   position:sticky; top:0; z-index:100; width:100%;
@@ -64,7 +61,7 @@ h1{font:800 clamp(18px,2.2vw,28px)/1.1 system-ui; margin:0}
 #menu{
   position:fixed; top:0; right:-320px; width:320px; height:100%;
   background:var(--panel); border-left:1px solid #22303a;
-  box-shadow:-10px 0 30px #000c; z-index:1002;
+  box-shadow:-10px 0 30px #000c; z-index:1001;
   transition:right .28s ease; padding:16px 14px 18px; overflow:auto;
   -webkit-overflow-scrolling:touch;
 }
@@ -79,11 +76,7 @@ select,.pill{
 }
 
 /* Arena */
-.main{flex:1; width:100%; display:grid; place-items:center; 
-  /* Use modern viewport units and safe-area at bottom */
-  min-height: 100svh; min-height: 100dvh;
-  padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));
-}
+.main{flex:1; width:100%; display:grid; place-items:center; padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));}
 .arena{display:flex; align-items:flex-start; justify-content:center; gap:14px; width:100%; max-width:1200px}
 .sidebar-card{
   min-width:150px; background:var(--panel); border:1px solid #1f2a33; border-radius:14px;
@@ -92,7 +85,6 @@ select,.pill{
 .sidebar-card h4{margin:0 0 8px; color:var(--muted); font:800 12px/1 system-ui; letter-spacing:.4px}
 .sidebar-card canvas{ display:block; width:100%; height:auto; background:#05080b; border-radius:10px; }
 
-/* Stage / Board */
 .stage{ position:relative; display:grid; place-items:center; }
 .board{
   width:var(--boardW); height:calc(var(--boardW) * 2);
@@ -130,35 +122,18 @@ select,.pill{
 
 /* Mobile: hide HOLD/NEXT; tighten */
 @media (max-width: 640px){
-  .arena{ flex-direction:column; align-items:center; gap:6px }
-  /* Top align the stage on phones so the board hugs the button area */
-  .main{ padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 5px); place-items:start center; }
-
-  /* When header hides during play, add only safe-area padding so nothing sits under the notch */
-  body.started .main{ padding-top: calc(env(safe-area-inset-top,0px) + 4px); }
-  body.started header{ display:none; }
+  .arena{ flex-direction:column; align-items:center; gap:10px }
   #holdCard,#nextCard{ display:none !important; }
   .board{ border-radius:12px }
   #scoreBadge{ top:6px }
   #pauseBtn{ top:6px; left:6px }
-}
-@media (min-height: 700px) and (max-width: 640px){
-  .main{ padding-top: calc(env(safe-area-inset-top,0px) + 8px); }
-}
-@media (min-width: 641px){
-  /* Ensure HOLD & NEXT are visible on desktop */
-  .sidebar-card#holdCard, .sidebar-card#nextCard{ display:block !important; }
-  /* Allow vertical scroll during play on desktop */
-  body.play-lock{ position:static; overflow:auto; }
-  /* Let content dictate page height and start from top for natural scrolling */
-  .main{ min-height:auto; place-items:start center; padding:16px 16px 24px; }
 }
 </style>
 </head>
 <body>
 <header>
   <div class="header-inner">
-    <h1>BlockDropper</h1>
+    <h1>Tetris Pro</h1>
     <span class="badge">Smooth 60</span>
     <div class="header-spacer"></div>
   </div>
@@ -215,9 +190,8 @@ select,.pill{
     <div class="row" style="justify-content:space-between"><span>Finesse faults</span><b id="finesse">0</b></div>
     <div class="row" style="justify-content:space-between"><span>Last event</span><b id="lastEvent">—</b></div>
   </div>
-
-  <div class="section">
-    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour v0.4 © 2025</button>
+      <div class="section">
+    <button class="pill" style="font-weight:800;cursor:default" disabled>Created by peymaan abedinpour v0.5 © 2025</button>
   </div>
 </aside>
 
@@ -265,6 +239,27 @@ select,.pill{
 </main>
 
 <script>
+/* Inject a Manifest at runtime so this single file has A2HS support */
+(function(){
+  const ICON_URL = "https://i.postimg.cc/4xfMzpH5/App-Icon-2x.png";
+  const manifest = {
+    name: "Tetris Pro",
+    short_name: "Tetris",
+    start_url: "./",
+    display: "standalone",
+    background_color: "#0d0f12",
+    theme_color: "#0d0f12",
+    icons: [
+      { src: ICON_URL, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+      { src: ICON_URL, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type: "application/manifest+json"});
+  const url  = URL.createObjectURL(blob);
+  const link = document.querySelector('link#app-manifest');
+  if(link) link.href = url;
+})();
+
 /* ===== Helpers ===== */
 function setupHiDPICanvas(canvas, cssW, cssH){
   const dpr = Math.max(1, window.devicePixelRatio || 1);
@@ -291,8 +286,8 @@ function isIPhone12(){
 const burger = document.getElementById('burger');
 const menu = document.getElementById('menu');
 const menuBackdrop = document.getElementById('menuBackdrop');
-function menuOpen(){ menu.classList.add('active'); menuBackdrop.style.display='block'; updateScrollLock(); layout(); }
-function menuClose(){ menu.classList.remove('active'); menuBackdrop.style.display='none'; updateScrollLock(); layout(); }
+function menuOpen(){ menu.classList.add('active'); menuBackdrop.style.display='block'; updateScrollLock(); }
+function menuClose(){ menu.classList.remove('active'); menuBackdrop.style.display='none'; updateScrollLock(); }
 burger.addEventListener('click', menuOpen);
 menuBackdrop.addEventListener('click', menuClose);
 
@@ -316,37 +311,12 @@ let nextCtx=nextC.getContext('2d'); let holdCtx=holdC.getContext('2d');
 
 const BOARD_W=10, BOARD_H=20; let BLOCK=20;
 function computeBoardCssSize(){
-  const vv = window.visualViewport;
-  const vh = vv ? vv.height : Math.max(document.documentElement.clientHeight, window.innerHeight||0);
-  const vw = vv ? vv.width  : Math.max(document.documentElement.clientWidth,  window.innerWidth||0);
-  const header = document.querySelector('header');
-  const headerVisible = getComputedStyle(header).display !== 'none';
-  const headerH = headerVisible ? header.offsetHeight : 0;
-  const rs = getComputedStyle(document.documentElement);
-  const sat = parseFloat(rs.getPropertyValue('--sat')) || 0; // safe area top
-  const sab = parseFloat(rs.getPropertyValue('--sab')) || 0; // safe area bottom
-
-  if (!isMobile()) {
-    // Desktop: make the board as big as possible while fully fitting the viewport height (no scroll)
-    const verticalPad = 24; // matches .main desktop bottom padding
-    const availH = Math.max(300, Math.floor(vh - headerH - verticalPad));
-    const widthFromHeight = Math.floor(availH / 2);
-    const widthFromViewport = Math.floor(vw * (vw < 1100 ? 0.50 : 0.54)); // a bit bigger than before
-    const cssW = Math.max(300, Math.min(widthFromHeight, widthFromViewport, 820));
-    document.documentElement.style.setProperty('--boardW', cssW + 'px');
-    return cssW;
-  }
-
-  // Mobile: fit strictly within visual viewport height
-  const extraTop = headerVisible ? 0 : sat;
-  const extraBottom = sab + 5; // 5px comfort padding at bottom
-  const verticalGaps = 0;
-  const availH = Math.max(220, Math.floor(vh - headerH - verticalGaps - extraTop - extraBottom));
-  const widthFromHeight = Math.floor(availH / 2);
-  const widthFromViewport = Math.floor(vw * 0.98);
-  let cssW = Math.max(220, Math.min(widthFromHeight, widthFromViewport));
-  document.documentElement.style.setProperty('--boardW', cssW + 'px');
-  return cssW;
+  const vh=Math.max(document.documentElement.clientHeight,window.innerHeight||0);
+  const headerH=document.querySelector('header').offsetHeight+8;
+  const availH=vh-headerH-16, vw=Math.max(document.documentElement.clientWidth,window.innerWidth||0);
+  const frac=isMobile()?0.985:(vw<980?0.52:0.40);
+  const cssW=Math.max(240,Math.min(680,Math.min(Math.floor(vw*frac),Math.floor(availH/2))));
+  document.documentElement.style.setProperty('--boardW',cssW+'px'); return cssW;
 }
 function layout(){
   const cssW=computeBoardCssSize(), cssH=cssW*2;
@@ -356,10 +326,6 @@ function layout(){
   draw();
 }
 window.addEventListener('resize', layout);
-if (window.visualViewport) {
-  visualViewport.addEventListener('resize', layout);
-  visualViewport.addEventListener('scroll', layout);
-}
 
 /* ===== Pieces & Kicks ===== */
 const PIECES={ I:{shape:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],color:'#00f7ff'},
@@ -407,9 +373,7 @@ function loadBest(){ best = parseInt(localStorage.getItem('tetris_best')||'0',10
 function saveBest(){ if(score>best){ best=score; localStorage.setItem('tetris_best',String(best)); bestEl.textContent=bestTopEl.textContent=best.toLocaleString(); }}
 
 /* ===== Controls (menu) ===== */
-const levelSel = document.getElementById('levelSel');
-levelSel.addEventListener('change',e=>{ level=parseInt(e.target.value,10); dropT=0; });
-
+document.getElementById('levelSel').addEventListener('change',e=>{ level=parseInt(e.target.value,10); dropT=0; });
 document.getElementById('toggleGrid').addEventListener('change',e=>{ gridOn=e.target.checked; draw(); });
 document.getElementById('toggleSound').addEventListener('change',e=>{ soundOn=e.target.checked; });
 document.getElementById('toggleBag').addEventListener('change',e=>{ use7Bag=e.target.checked; });
@@ -423,7 +387,7 @@ document.getElementById('restartBtn').addEventListener('click',()=>{ resetGame()
 document.getElementById('pauseMenuBtn').addEventListener('click',()=> togglePause());
 
 /* ===== Scroll/zoom lock ===== */
-function shouldLock(){ return isMobile() && started && !pause && !gameOver && !menu.classList.contains('active'); }
+function shouldLock(){ return started && !pause && !gameOver && !menu.classList.contains('active'); }
 function updateScrollLock(){
   if(shouldLock()){ document.body.classList.add('play-lock'); window.addEventListener('touchmove', preventDefault, {passive:false}); }
   else{ document.body.classList.remove('play-lock'); window.removeEventListener('touchmove', preventDefault, {passive:false}); }
@@ -435,7 +399,7 @@ document.addEventListener('gesturestart', preventDefault, {passive:false});
 function startGame(){
   if(started) return;
   audioCtx.resume().catch(()=>{});
-  resetGame(); started=true; document.body.classList.add('started'); layout();
+  resetGame(); started=true;
   document.getElementById('startOverlay').style.display='none';
   requestAnimationFrame(gameLoop); updateScrollLock();
 }
@@ -541,7 +505,10 @@ function hardDrop(){
   requestAnimationFrame(()=>{
     let moved=false;
     while(move(0,1)){ score+=2; moved=true; }
-    if(moved){ if(navigator.vibrate) try{ navigator.vibrate(8); }catch{} playSound(120,.08,'square'); }
+    if(moved){
+      if(navigator.vibrate) try{ navigator.vibrate(8); }catch{}
+      playSound(120,.08,'square');
+    }
     lockNow();
   });
 }
@@ -608,7 +575,7 @@ pauseBtn.addEventListener('click',()=>togglePause());
 
 /* ===== Keyboard ===== */
 document.addEventListener('keydown',e=>{
-  if(!started && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','KeyZ','KeyX','Enter'].includes(e.code)){ startGame(); }
+  if(!started && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','KeyZ','KeyX'].includes(e.code)){ startGame(); }
   if(gameOver) return;
   switch(e.code){
     case 'ArrowLeft': if(!keys.left){keys.left=true; beginAutoShift(-1);} break;
@@ -630,146 +597,147 @@ document.addEventListener('keyup',e=>{
   }
 });
 
-/* ===== TOUCH tuned (iPhone 12 smooth) ===== */
-let touchStartX=0,touchStartY=0,touchMoved=false,tStart=0;
-let consumedDown=false;
-let dirLock=null; // 'x' or 'y' once movement intent is clear
-
+/* ===== TOUCH: precision, controlled, and angle-safe =====
+   Gestures:
+   - Tap: rotate CW
+   - Upward straight swipe (near-vertical): rotate CCW
+   - Downward straight swipe (near-vertical): HARD DROP
+   - Horizontal drag: step-per-distance with throttle (precise control)
+   - Micro/angled movements are ignored (no soft drop via touch)
+*/
 function touchTuning(){
-  // Natural & controllable: soft drags are gentle, flicks are decisive
-  const DIR_LOCK_DIST = Math.max(12, BLOCK*0.40); // distance before locking axis
-  let STEP = Math.max(10, BLOCK * 0.55);          // horizontal move step
-  let SOFT_DIST = Math.max(16, BLOCK * 0.62);     // start soft-drop dragging
-  let HD_DIST = Math.max(28, BLOCK * 0.95);       // min travel during move for hard drop
-  let HD_DIST2 = Math.max(40, BLOCK * 1.45);      // fallback distance at end for hard drop
-  let TAP_DIST = Math.max(8,  BLOCK * 0.33);      // rotate tap
-  let FLICK = Math.max(16, BLOCK * 0.50);         // general flick threshold
-  let HD_VEL = 0.50;                              // px/ms for hard drop (~500px/s)
-  let VERT_DOM = 1.25;                            // vertical dominance factor
-  let DEAD_TIME = 70;                              // ms before hard drop allowed
+  const B = BLOCK;
+  let ORIENT      = Math.max(10, B * 0.55); // min movement to decide orientation
+  let STEP        = Math.max(16, B * 0.60); // horizontal pixels per step
+  let HORIZ_MS    = 55;                      // min ms between horizontal steps
+  let DROP_DIST   = Math.max(30, B * 1.00);  // min vertical distance for hard drop
+  let FLICK       = Math.max(28, B * 0.95);  // end-of-gesture vertical action
+  let TAP_DIST    = Math.max(8,  B * 0.33);  // tap radius
+  let MAX_TILT    = 0.22;                    // <= ~12.5° from vertical counts as straight
+  let HARD_DROP_V = 0.65;                    // px/ms minimum downward speed
+
   if(isIPhone12()){
-    STEP       = Math.max(9,  BLOCK * 0.50);
-    SOFT_DIST  = Math.max(18, BLOCK * 0.66);
-    HD_DIST    = Math.max(30, BLOCK * 1.05);
-    HD_DIST2   = Math.max(44, BLOCK * 1.55);
-    TAP_DIST   = Math.max(7,  BLOCK * 0.30);
-    FLICK      = Math.max(18, BLOCK * 0.52);
-    HD_VEL     = 0.55;
-    VERT_DOM   = 1.28;
-    DEAD_TIME  = 80;
+    ORIENT    = Math.max(8,  B * 0.48);
+    STEP      = Math.max(14, B * 0.56);
+    HORIZ_MS  = 50;
+    DROP_DIST = Math.max(26, B * 0.95);
+    FLICK     = Math.max(26, B * 0.90);
+    HARD_DROP_V = 0.60;
   }
-  return {DIR_LOCK_DIST, STEP, SOFT_DIST, HD_DIST, HD_DIST2, TAP_DIST, FLICK, HD_VEL, VERT_DOM, DEAD_TIME};
+  return { ORIENT, STEP, HORIZ_MS, DROP_DIST, FLICK, TAP_DIST, MAX_TILT, HARD_DROP_V };
 }
+const nearlyVertical = (dx, dy, MAX_TILT) => Math.abs(dx) <= Math.abs(dy) * MAX_TILT;
+
+let g = {
+  mode: 'neutral', // 'neutral' | 'horiz' | 'vert' | 'locked'
+  startX: 0, startY: 0, lastX: 0, lastY: 0, startT: 0, lastT: 0,
+  hAccum: 0, lastHorizTime: 0,
+  consumedDown: false, moved: false
+};
 
 gameCanvas.addEventListener('touchstart', e=>{
-  // Always prevent default on the board for rock-solid control (even pre-start)
-  e.preventDefault();
   if(!started){ startGame(); }
   audioCtx.resume().catch(()=>{});
-  const t=e.touches[0];
-  touchStartX=t.clientX; touchStartY=t.clientY; tStart=performance.now();
-  touchMoved=false; consumedDown=false; dirLock=null;
+  if(shouldLock()) e.preventDefault();
+
+  const t = e.touches[0];
+  const now = performance.now();
+  g.mode = 'neutral';
+  g.startX = g.lastX = t.clientX;
+  g.startY = g.lastY = t.clientY;
+  g.startT = g.lastT = now;
+  g.hAccum = 0;
+  g.lastHorizTime = now;
+  g.consumedDown = false;
+  g.moved = false;
 },{passive:false});
 
 gameCanvas.addEventListener('touchmove', e=>{
-  e.preventDefault();
-  const {DIR_LOCK_DIST, STEP, SOFT_DIST, HD_DIST, HD_DIST2, HD_VEL, VERT_DOM, DEAD_TIME} = touchTuning();
-  const t=e.touches[0];
-  const dx=t.clientX - touchStartX;
-  const dy=t.clientY - touchStartY;
-  const adx=Math.abs(dx), ady=Math.abs(dy);
-  const dt=performance.now()-tStart;
-  const vy = dy / Math.max(1, dt);
+  if(shouldLock()) e.preventDefault();
+  const { ORIENT, STEP, HORIZ_MS, DROP_DIST, MAX_TILT, HARD_DROP_V } = touchTuning();
+  const t = e.touches[0];
+  const now = performance.now();
 
-  // Decide axis once user intent is clear
-  if(!dirLock && (adx+ady) >= DIR_LOCK_DIST){ dirLock = (adx > ady*1.15) ? 'x' : 'y'; }
+  const dxs = t.clientX - g.startX; // total delta from start
+  const dys = t.clientY - g.startY;
+  const adxs = Math.abs(dxs), adys = Math.abs(dys);
 
-  if(dirLock === 'y'){
-    // Intentional, fast downward flick -> hard drop
-    if(!consumedDown && dy > HD_DIST && (vy > HD_VEL || dy > HD_DIST2) && ady > adx*VERT_DOM && dt > DEAD_TIME){
-      consumedDown = true; hardDrop(); return;
+  // Decide gesture orientation once movement is clear enough
+  if(g.mode === 'neutral'){
+    const dist = Math.hypot(dxs, dys);
+    if(dist < ORIENT) return; // ignore micro moves
+    g.mode = (adys >= adxs * 1.35) ? 'vert' : 'horiz';
+  }
+
+  // Strict vertical path: only consider truly vertical downward swipe
+  if(g.mode === 'vert'){
+    // instantaneous vector since previous sample
+    const dx = t.clientX - g.lastX;
+    const dy = t.clientY - g.lastY;
+    const dt = Math.max(1, now - g.lastT);
+    const velY = dy / dt; // px/ms
+
+    if(!g.consumedDown &&
+       dys > DROP_DIST &&
+       velY >= HARD_DROP_V &&
+       nearlyVertical(dxs, dys, MAX_TILT)){
+      g.consumedDown = true;
+      hardDrop();
+      g.mode = 'locked';
+      return;
     }
-    // Gentle downward drag -> controlled soft drop
-    if(dy > SOFT_DIST && ady > adx*VERT_DOM){
-      const steps = Math.min(3, Math.floor((dy - SOFT_DIST) / (BLOCK * 0.8)) + 1);
-      for(let i=0;i<steps;i++) softDrop();
-      touchStartY = t.clientY; // smooth baseline reset
-    }
-  } else if(dirLock === 'x'){
-    // Horizontal slides
-    if(adx >= STEP){
-      touchMoved = true;
-      const steps = Math.min(4, Math.floor(adx / STEP));
-      const dir = dx > 0 ? 1 : -1;
+    // Ignore other vertical movement (prevents soft drops)
+    g.lastX = t.clientX; g.lastY = t.clientY; g.lastT = now;
+    return;
+  }
+
+  // Horizontal drag with throttled steps for precise control
+  if(g.mode === 'horiz'){
+    const deltaX = t.clientX - g.lastX;
+    g.hAccum += deltaX;
+
+    const timeOk = (now - g.lastHorizTime) >= HORIZ_MS;
+    const needSteps = Math.floor(Math.abs(g.hAccum) / STEP);
+    if(timeOk && needSteps > 0){
+      const dir = g.hAccum > 0 ? 1 : -1;
+      const steps = Math.min(6, needSteps); // cap burst
       for(let i=0;i<steps;i++) move(dir,0);
-      touchStartX = t.clientX;
+      g.hAccum -= dir * steps * STEP;
+      g.lastHorizTime = performance.now();
+      g.moved = true;
     }
+    g.lastX = t.clientX; g.lastY = t.clientY; g.lastT = now;
+    return;
   }
 },{passive:false});
 
 gameCanvas.addEventListener('touchend', e=>{
-  e.preventDefault();
-  const {TAP_DIST, FLICK, HD_DIST2, HD_VEL, VERT_DOM} = touchTuning();
-  const t=e.changedTouches[0];
-  const dx=t.clientX - touchStartX;
-  const dy=t.clientY - touchStartY;
-  const adx=Math.abs(dx), ady=Math.abs(dy);
-  const dt=performance.now()-tStart;
-  const vy = ady / Math.max(1, dt);
+  if(shouldLock()) e.preventDefault();
+  const { TAP_DIST, FLICK, MAX_TILT } = touchTuning();
+  if(g.mode === 'locked' || g.consumedDown) return;
 
-  if(consumedDown) return;
+  const t  = e.changedTouches[0];
+  const dt = performance.now() - g.startT;
+  const dx = t.clientX - g.startX;
+  const dy = t.clientY - g.startY;
+  const adx = Math.abs(dx), ady = Math.abs(dy);
 
-  // Quick tap -> rotate CW
-  if(adx < TAP_DIST && ady < TAP_DIST && dt < 220 && !touchMoved){ rotate(+1); return; }
-
-  if(dirLock === 'y'){
-    // End-of-swipe logic: decisive vertical flicks
-    if(ady >= FLICK && ady > adx*VERT_DOM){
-      if(dy > 0 && (ady > HD_DIST2 || vy > HD_VEL)) hardDrop();
-      else if(dy > 0) softDrop();
-      else rotate(-1);
-      return;
-    }
-  } else if(dirLock === 'x'){
-    // Horizontal flick nudge at release
-    if(adx >= FLICK && adx > ady){ move(dx>0?1:-1, 0); return; }
+  // TAP -> rotate CW (small & quick)
+  if(adx < TAP_DIST && ady < TAP_DIST && dt < 230 && !g.moved){
+    rotate(+1);
+    return;
   }
+
+  // End-of-gesture straight vertical actions
+  if(ady >= FLICK && nearlyVertical(dx, dy, MAX_TILT)){
+    if(dy > 0) { hardDrop(); return; }
+    else { rotate(-1); return; }
+  }
+  // Otherwise ignore ambiguous touch
 },{passive:false});
 
 /* Pause overlay click to resume */
 document.getElementById('pauseOverlay').addEventListener('click',()=>togglePause(false));
-
-/* ===== PWA manifest (dynamic) & SW registration ===== */
-(function setupPWA(){
-  const manifest = {
-    name: "BlockDropper",
-    short_name: "BlockDropper",
-    start_url: ".",
-    scope: ".",
-    display: "standalone",
-    background_color: "#0d0f12",
-    theme_color: "#0d0f12",
-    icons: [
-      { src: "https://i.postimg.cc/yd3nzpjV/App-Icon-2x.png", sizes: "192x192", type: "image/png", purpose:"any maskable" },
-      { src: "https://i.postimg.cc/yd3nzpjV/App-Icon-2x.png", sizes: "512x512", type: "image/png", purpose:"any maskable" }
-    ]
-  };
-  const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-  const link = document.createElement('link');
-  link.rel = 'manifest';
-  link.href = URL.createObjectURL(blob);
-  document.head.appendChild(link);
-
-  // Service worker via blob URLs may be blocked in some browsers; wrap safely.
-  if ('serviceWorker' in navigator) {
-    try{
-      const swCode = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());`;
-      const swBlob = new Blob([swCode], {type:'text/javascript'});
-      const swURL = URL.createObjectURL(swBlob);
-      navigator.serviceWorker.register(swURL, {scope:'./'}).catch(()=>{});
-    }catch{}
-  }
-})();
 
 /* ===== Boot ===== */
 function boot(){ loadBest(); layout(); draw(); updateScrollLock(); }
@@ -777,4 +745,3 @@ boot();
 </script>
 </body>
 </html>
-
