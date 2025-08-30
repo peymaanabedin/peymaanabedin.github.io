@@ -562,12 +562,12 @@
         .new-invoice-btn:hover {
             transform: translateX(-50%) scale(1.05);
         }
-        
+
         @media(min-width: 820px) {
             .new-invoice-btn {
-                left: calc(50% - 440px + 12px + 28px);
+                right: 20px;
+                left: auto;
                 transform: none;
-                bottom: 20px;
             }
         }
     </style>
@@ -1182,7 +1182,7 @@
             btnPrint: $('btnPrint'),
             btnCopyHTML: $('btnCopyHTML'),
             btnNew: $('btnNew'),
-            btnNewFloating: $('btnNewFloating'), // New button
+            btnNewFloating: $('btnNewFloating'),
             moreClose: $('moreClose'),
             // row modal
             rowModal: $('rowModal'),
