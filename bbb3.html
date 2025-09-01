@@ -182,8 +182,7 @@
                         <div class="flex items-center justify-between text-lg font-extrabold"><span>مبلغ پرداختی</span><span id="sumAfter">۰</span></div>
 
                         <div class="pt-2">
-                            <button id="promoToggle" class="text-brand hover:underline text-sm">کد تخفیف دارید؟</button>
-                            <div id="promoBox" class="overflow-hidden max-h-0 opacity-0 transition-all duration-300">
+                            <div id="promoBox" class="transition-all duration-300">
                                 <div class="mt-2 grid grid-cols-[1fr,auto] gap-2">
                                     <input id="promoInput" class="rounded-xl border border-stroke px-3 py-2" placeholder="کد تخفیف" />
                                     <button id="promoApply" class="rounded-xl bg-ink text-white px-4 py-2 hidden">ثبت کد</button>
@@ -223,8 +222,7 @@
                     <div class="flex items-center justify-between text-lg font-extrabold"><span>مبلغ پرداختی</span><span id="mSumAfter">۰</span></div>
 
                     <div class="pt-2">
-                        <button id="mPromoToggle" class="text-brand hover:underline text-sm">کد تخفیف دارید؟</button>
-                        <div id="mPromoBox" class="overflow-hidden max-h-0 opacity-0 transition-all duration-300">
+                        <div id="mPromoBox" class="transition-all duration-300">
                             <div class="mt-2 grid grid-cols-[1fr,auto] gap-2">
                                 <input id="mPromoInput" class="rounded-xl border border-stroke px-3 py-2" placeholder="کد تخفیف" />
                                 <button id="mPromoApply" class="rounded-xl bg-ink text-white px-4 py-2 hidden">ثبت کد</button>
@@ -321,8 +319,7 @@
                         <div class="flex items-center justify-between text-lg font-extrabold"><span>مبلغ پرداختی</span><span id="coSumAfter">۰</span></div>
 
                         <div class="pt-2">
-                            <button id="coPromoToggle" class="text-brand hover:underline text-sm">کد تخفیف دارید؟</button>
-                            <div id="coPromoBox" class="overflow-hidden max-h-0 opacity-0 transition-all duration-300">
+                            <div id="coPromoBox" class="transition-all duration-300">
                                 <div class="mt-2 grid grid-cols-[1fr,auto] gap-2">
                                     <input id="coPromoInput" class="rounded-xl border border-stroke px-3 py-2" placeholder="کد تخفیف" />
                                     <button id="coPromoApply" class="rounded-xl bg-ink text-white px-4 py-2 hidden">ثبت کد</button>
@@ -350,7 +347,7 @@
 
     <div id="lightbox" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close></div>
-        <div class="relative mx-auto mt-6 w-[94vw] max-w-[1100px] rounded-2xl bg-white shadow-2xl overflow-hidden animate-pop">
+        <div class="relative mx-auto mt-6 w-[94vw] max-w-[1100px] rounded-2xl bg-white shadow-2xl animate-pop">
             <div class="flex items-center justify-between border-b border-stroke px-4 py-3">
                 <div class="flex items-center gap-2">
                     <span id="lbBrand" class="text-sm text-slate-600"></span>
@@ -364,7 +361,7 @@
                             <img id="lbImg" class="w-full h-full object-contain" alt="تصویر محصول" />
                             <div id="lbOff" class="hidden absolute right-3 top-3 rounded-full border border-sky-200 bg-sky-50 text-sky-700 text-[11px] px-2 py-1 font-bold shadow-sm select-none"></div>
                         </div>
-                        <div id="lbThumbs" class="flex gap-2 p-3 overflow-x-auto inline-scroll scrollbar-none"></div>
+                        <div id="lbThumbs" class="flex gap-2 p-3 inline-scroll scrollbar-none overflow-x-hidden"></div>
                         <div class="flex items-center gap-2 px-3 pb-3">
                             <button id="lbShare" class="flex-1 rounded-xl border border-stroke bg-white/80 px-4 py-2.5 font-bold text-ink hover:bg-slate-50">
                                 <span class="flex items-center justify-center gap-2">
@@ -397,7 +394,7 @@
                                 <button data-tab="desc" class="px-3 py-2 rounded-lg text-sm transition-all data-[active=true]:font-bold data-[active=true]:bg-white data-[active=true]:shadow-md data-[active=true]:scale-105">توضیحات</button>
                             </nav>
                         </div>
-                        <div id="lbTabContent" class="rounded-xl border border-stroke bg-white/70 backdrop-blur p-3 overflow-hidden">
+                        <div id="lbTabContent" class="rounded-xl border border-stroke bg-white/70 backdrop-blur p-3">
                             <div id="tab-buy" class="grid grid-rows-[auto,auto,1fr] gap-3">
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
@@ -432,7 +429,7 @@
     </div>
 
     <div id="loginSheet" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" data-close></div>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close></div>
         <div class="absolute bottom-0 inset-x-0 rounded-t-2xl bg-white shadow-2xl p-5 space-y-3 max-h-[86vh] overflow-auto">
             <div class="mx-auto max-w-sm">
                 <div class="text-center">
@@ -661,11 +658,11 @@
                 const active = state.activeBrand === c.id;
                 return `
                     <button class="snap-start flex flex-none min-w-[84px] sm:min-w-[96px] flex-col items-center gap-1.5 transition-all will-change-transform
-                                             hover:scale-105 data-[focus=true]:scale-110 data-[focus=true]:shadow-card"
-                                    data-id="${c.id}" data-focus="${active ? 'true' : 'false'}" aria-label="${c.title}">
-                                <span class="grid size-10 sm:size-11 place-items-center rounded-xl bg-white/80 border border-white/60">${logo}</span>
-                                <span class="text-[11px] sm:text-xs ${active ? 'font-bold' : ''}">${c.title}</span>
-                            </button>`;
+                         hover:scale-105 data-[focus=true]:scale-110 data-[focus=true]:shadow-card"
+                 data-id="${c.id}" data-focus="${active ? 'true' : 'false'}" aria-label="${c.title}">
+                <span class="grid size-10 sm:size-11 place-items-center rounded-xl bg-white/80 border border-white/60">${logo}</span>
+                <span class="text-[11px] sm:text-xs ${active ? 'font-bold' : ''}">${c.title}</span>
+            </button>`;
             }).join('');
 
             $$('#cats>button').forEach(b => b.addEventListener('click', () => {
@@ -676,17 +673,6 @@
                     window.scrollTo({ top, behavior: 'smooth' });
                 }
             }));
-
-            root.addEventListener('scroll', () => {
-                const mid = root.getBoundingClientRect().left + root.clientWidth / 2;
-                let best = null, bestDist = 1e9;
-                $$('#cats>button').forEach(btn => {
-                    const rect = btn.getBoundingClientRect();
-                    const d = Math.abs((rect.left + rect.width / 2) - mid);
-                    if (d < bestDist) { bestDist = d; best = btn; }
-                });
-                if (best) { $$('#cats>button').forEach(x => x.dataset.focus = 'false'); best.dataset.focus = 'true'; }
-            });
         }
         function setActiveBrandFromSection(id) {
             state.activeBrand = id;
@@ -861,7 +847,7 @@
                                     <button type="button" class="w-10 grid place-items-center text-base hover:bg-slate-50" onclick="event.stopPropagation(); changeQty('${it.id}',1)">＋</button>
                                 </div>` : `
                                 <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-300 hover:border-slate-400 hover:bg-slate-50 px-4 py-2.5 font-bold text-slate-800"
-                                            onclick="event.stopPropagation(); openLightbox('${it.id}')">مشاهده و خرید</button>`
+                                                onclick="event.stopPropagation(); openLightbox('${it.id}')">مشاهده و خرید</button>`
             }
                         </div>
                         <div class="text-left leading-5 select-none" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
@@ -947,6 +933,7 @@
                     if (e.isIntersecting && e.intersectionRatio > 0.2) {
                         const id = e.target.id.replace('sec-', '');
                         setActiveBrandFromSection(id);
+                        syncCategoryScroll(id);
                     }
                 });
             }, options);
@@ -954,6 +941,22 @@
                 const sec = document.getElementById('sec-' + c.id);
                 if (sec) io.observe(sec);
             });
+        }
+
+        function syncCategoryScroll(activeId) {
+            const catsContainer = $('#cats');
+            const activeBtn = $(`#cats button[data-id="${activeId}"]`);
+            if (activeBtn) {
+                const containerRect = catsContainer.getBoundingClientRect();
+                const buttonRect = activeBtn.getBoundingClientRect();
+                
+                const scrollPosition = catsContainer.scrollLeft + buttonRect.left - containerRect.left - (containerRect.width / 2) + (buttonRect.width / 2);
+                
+                catsContainer.scrollTo({
+                    left: scrollPosition,
+                    behavior: 'smooth'
+                });
+            }
         }
 
         // ========= Cart & totals =========
@@ -1267,33 +1270,15 @@
         }
 
         // ========= Promo UI =========
-        function toggleCollapse(box) {
-            const isOpened = box.dataset.open === 'true';
-            box.dataset.open = isOpened ? 'false' : 'true';
-            box.style.maxHeight = isOpened ? '0px' : box.scrollHeight + 'px';
-            box.style.opacity = isOpened ? 0 : 1;
-        }
         function wirePromo(scope = '') {
             const id = x => scope ? `#${scope}${x}` : `#${x}`;
-            const t = $(id('promoToggle'));
             const box = $(id('promoBox'));
             const input = $(id('promoInput'));
             const apply = $(id('promoApply'));
             const cancel = $(id('promoCancel'));
             const msg = $(id('promoMsg'));
             
-            if (!t || !box) return;
-
-            t.addEventListener('click', () => {
-                toggleCollapse(box);
-                if (box.dataset.open === 'true') {
-                    input.focus();
-                    if (input.value.trim().length > 0) {
-                        apply.classList.remove('hidden');
-                        cancel.classList.remove('hidden');
-                    }
-                }
-            });
+            if (!box) return;
 
             input.addEventListener('input', () => {
                 const hasValue = input.value.trim().length > 0;
@@ -1307,7 +1292,6 @@
                     state.promo = res;
                     store.set('promo', state.promo);
                     msg.textContent = `(${res.code}) اعمال شد`;
-                    toggleCollapse(box);
                     drawCart();
                     if (state.view === 'checkout') drawCheckout();
                 } else {
@@ -1321,8 +1305,13 @@
                 input.value = '';
                 drawCart();
                 if (state.view === 'checkout') drawCheckout();
-                toggleCollapse(box);
+                apply.classList.add('hidden');
+                cancel.classList.add('hidden');
             });
+
+            const hasValueOnLoad = input.value.trim().length > 0;
+            apply.classList.toggle('hidden', !hasValueOnLoad);
+            cancel.classList.toggle('hidden', !hasValueOnLoad);
         }
 
         // ========= Login (phone + code) =========
@@ -1365,7 +1354,6 @@
 
         // ========= Boot =========
         (function () {
-            // Update the header text with Jalali date
             $('#update-text-desktop').textContent = `موجودی و قیمت (${getJalaliDate()}) بروز می‌باشد`;
             $('#update-text-mobile').textContent = `موجودی و قیمت (${getJalaliDate()}) بروز می‌باشد`;
 
