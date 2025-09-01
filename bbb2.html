@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" translate="no">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>فروشگاه موبایل — استاندارد جهانی</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { DEFAULT: '#2563eb', 600: '#1d4ed8', 700: '#1e40af' },
+                        ink:'#0f172a',
+                        stroke:'#e6e8ee',
+                        soft:'#f6f8fc',
+                        success:'#059669',
+                        warning:'#f59e0b'
+                    },
+                    boxShadow:{
+                        card:'0 10px 28px rgba(2,8,23,.08)',
+                        float:'0 8px 24px rgba(37,99,235,.22)',
+                        glass:'0 12px 40px rgba(15,23,42,.12)'
+                    },
+                    borderRadius:{ xl2:'1rem' },
+                    keyframes:{
+                        pop:{'0%':{transform:'scale(.96)',opacity:.0},'100%':{transform:'scale(1)',opacity:1}},
+                        shimmer:{'0%':{backgroundPosition:'200% 0'},'100%':{backgroundPosition:'-200% 0'}},
+                        pulse:{'0%':{transform:'scale(1)'},'50%':{transform:'scale(1.1)'},'100%':{transform:'scale(1)'}}
+                    },
+                    animation:{ pop:'pop .18s ease', shimmer:'shimmer 1.2s linear infinite', pulse:'pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        html,body{font-family:'Vazirmatn',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'Noto Naskh Arabic','Noto Sans Arabic',sans-serif;}
+        html{ -webkit-text-size-adjust:100%; text-rendering:optimizeLegibility; -webkit-font-smoothing:antialiased }
+        body{padding-bottom:120px;padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
+        @media (min-width: 1024px) { body{padding-bottom:0;} }
+        .scrollbar-none{scrollbar-width:none;-ms-overflow-style:none}
+        .scrollbar-none::-webkit-scrollbar{display:none}
+        .inline-scroll{-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain;touch-action:pan-x}
+        .edge-fade::before,.edge-fade::after{content:"";position:absolute;top:0;bottom:0;width:48px;pointer-events:none;z-index:1}
+        .edge-fade::before{right:0;background:linear-gradient(to left,rgba(255,255,255,.96),rgba(255,255,255,0))}
+        .edge-fade::after{left:0;background:linear-gradient(to right,rgba(255,255,255,.96),rgba(255,255,255,0))}
+        .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .tabnums{font-variant-numeric: tabular-nums}
+        mark{background:#fde68a;padding:0 .2em;border-radius:.25rem}
+        .filter-pulse{position:absolute;top:-4px;right:-4px;width:12px;height:12px;background:#059669;border-radius:9999px;animation:pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;border:2px solid #fff}
+        
+        .price-input-group {
+            display: grid;
+            gap: 0.5rem;
+        }
+        @media (min-width: 768px) {
+            .price-input-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[radial-gradient(1200px_600px_at_90%_-10%,#fff_0%,#fff_40%,#f3f6fb_100%)] text-ink leading-relaxed">
+
+    <header class="sticky top-0 z-50 border-b border-stroke bg-white/70 backdrop-blur-xl">
+        <div class="mx-auto max-w-[1400px] px-4 py-2.5 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-2" aria-label="خانه">
+                <span class="grid size-8 place-items-center rounded-xl bg-brand/12 text-brand">📱</span>
+                <strong class="text-slate-800">مگاپـن — موبایل</strong>
+            </a>
+            <button id="btnLogin" class="rounded-full border border-stroke bg-white/80 px-4 py-2.5 hover:bg-white/100 shadow-sm text-sm">
+                ورود
+            </button>
+        </div>
+
+        <div class="mx-auto max-w-[1400px] px-4 pb-2">
+            <div class="relative rounded-2xl border border-stroke bg-white/60 backdrop-blur-xl shadow-glass overflow-hidden edge-fade">
+                <div id="cats" class="flex gap-2 sm:gap-6 overflow-x-auto inline-scroll px-3 py-2 whitespace-nowrap scrollbar-none snap-x snap-mandatory select-none"></div>
+            </div>
+        </div>
+    </header>
+
+    <section id="menuView">
+        <div class="mx-auto max-w-[1400px] px-4 mt-4 grid grid-cols-1 lg:grid-cols-[1fr,22rem] gap-4">
+            <main class="space-y-3">
+                <div class="relative grid grid-cols-1 gap-3 sm:grid-cols-[1fr,auto] items-start">
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <input id="q" class="w-full rounded-xl border border-stroke bg-white/70 backdrop-blur px-11 py-3 shadow-card focus:outline-none focus:ring-2 focus:ring-brand/30" placeholder="جستجوی سریع بین گوشی‌ها…" aria-label="جستجو"/>
+                            <svg class="absolute right-3 top-1/2 -translate-y-1/2 size-5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                            <button id="qClear" class="hidden absolute left-2 top-1/2 -translate-y-1/2 size-9 rounded-full grid place-items-center hover:bg-slate-100" aria-label="پاک کردن">×</button>
+                        </div>
+                        <button id="btnFilters" class="relative rounded-xl border border-stroke bg-white/80 px-3 py-2.5 shadow-card hover:bg-white text-sm flex items-center gap-2">
+                            فیلترها
+                            <span id="filter-pulse" class="hidden filter-pulse"></span>
+                            <svg id="filter-icon" class="size-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="rounded-xl border border-stroke bg-white/70 backdrop-blur shadow-card p-1 flex items-center gap-1 w-full sm:w-auto">
+                        <span class="px-2 text-sm text-slate-600">مرتب‌سازی:</span>
+                        <div id="sortGrp" class="flex gap-1">
+                            <button data-sort="default" class="px-3 py-2 rounded-lg text-sm border border-transparent data-[active=true]:border-brand data-[active=true]:bg-brand/10" data-active="true">پیش‌فرض</button>
+                            <button data-sort="asc" class="px-3 py-2 rounded-lg text-sm border border-transparent data-[active=true]:border-brand data-[active=true]:bg-brand/10">ارزان‌تر</button>
+                            <button data-sort="desc" class="px-3 py-2 rounded-lg text-sm border border-transparent data-[active=true]:border-brand data-[active=true]:bg-brand/10">گران‌تر</button>
+                        </div>
+                    </div>
+
+                    <div id="filtersPanel" class="hidden col-span-full rounded-2xl border border-stroke bg-white/90 backdrop-blur-xl shadow-glass p-3 space-y-3">
+                        <div class="grid md:grid-cols-5 gap-3">
+                            <div>
+                                <div class="text-xs text-slate-500 mb-1">برند</div>
+                                <div id="fltBrands" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500 mb-1">حافظه (ROM)</div>
+                                <div id="fltROM" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500 mb-1">رم (RAM)</div>
+                                <div id="fltRAM" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500 mb-1">وضعیت</div>
+                                <div id="fltActive" class="flex flex-wrap gap-1.5">
+                                    <button data-activeval="all" class="px-3 py-1.5 rounded-full border border-slate-300 text-sm data-[sel=true]:border-brand data-[sel=true]:bg-brand/10" data-sel="true">همه</button>
+                                    <button data-activeval="new" class="px-3 py-1.5 rounded-full border border-slate-300 text-sm">آکبند</button>
+                                    <button data-activeval="active" class="px-3 py-1.5 rounded-full border border-slate-300 text-sm">اکتیو</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500 mb-1">بازه قیمت</div>
+                                <div class="price-input-group">
+                                    <div class="relative">
+                                        <div class="text-xs text-slate-500 mb-1">از قیمت</div>
+                                        <input id="fltMin" type="text" inputmode="numeric" class="w-full rounded-lg border border-stroke px-3 py-2 text-sm tabnums" placeholder="حداقل">
+                                    </div>
+                                    <div class="relative">
+                                        <div class="text-xs text-slate-500 mb-1">تا قیمت</div>
+                                        <input id="fltMax" type="text" inputmode="numeric" class="w-full rounded-lg border border-stroke px-3 py-2 text-sm tabnums" placeholder="حداکثر">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 justify-between">
+                            <div id="fltSummary" class="text-xs text-slate-600"></div>
+                            <div class="flex items-center gap-2">
+                                <button id="fltClear" class="rounded-lg border border-stroke px-3 py-1.5 text-sm">حذف فیلترها</button>
+                                <button id="fltApply" class="rounded-lg bg-ink text-white px-4 py-2 text-sm">اعمال فیلتر</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="searchMeta" class="hidden text-sm text-slate-600"></div>
+                <div id="grid" class="space-y-10"></div>
+            </main>
+
+            <aside class="hidden lg:block">
+                <div id="cartPanel" class="sticky top-24 rounded-xl border border-stroke bg-white shadow-card">
+                    <div class="flex items-center justify-between p-4 border-b border-stroke">
+                        <h3 class="m-0 text-base font-bold">سبد خرید <span id="cartCount" class="opacity-70">(۰)</span></h3>
+                        <button id="clearCart" class="size-8 rounded-lg border border-stroke grid place-items-center hover:bg-slate-50" title="خالی کردن">🗑️</button>
+                    </div>
+                    <div id="cartLines" class="max-h-[60vh] overflow-auto p-3 space-y-3"></div>
+                    <div id="cartSummary" class="border-t border-stroke p-4 space-y-3">
+                        <div class="flex items-center justify-between text-slate-700"><span class="text-slate-500">جمع قبل تخفیف</span><span id="sumBefore">۰</span></div>
+                        <div class="flex items-center justify-between text-slate-700"><span class="text-slate-500">تخفیف</span><span id="sumDiscount">۰</span></div>
+                        <div class="flex items-center justify-between text-lg font-extrabold"><span>مبلغ پرداختی</span><span id="sumAfter">۰</span></div>
+
+                        <div class="pt-2">
+                            <button id="promoToggle" class="text-brand hover:underline text-sm">کد تخفیف دارید؟</button>
+                            <div id="promoBox" class="overflow-hidden max-h-0 opacity-0 transition-all duration-300">
+                                <div class="mt-2 grid grid-cols-[1fr,auto] gap-2">
+                                    <input id="promoInput" class="rounded-xl border border-stroke px-3 py-2" placeholder="کد تخفیف"/>
+                                    <button id="promoApply" class="rounded-xl bg-ink text-white px-4 py-2">ثبت کد</button>
+                                </div>
+                                <div class="mt-1 flex items-center justify-between">
+                                    <button id="promoCancel" class="text-xs text-slate-500 hover:underline">انصراف</button>
+                                    <span id="promoMsg" class="text-xs ml-2"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="goCheckout" class="w-full rounded-xl bg-brand text-white py-3 shadow-float hover:bg-brand-600 disabled:opacity-60 disabled:cursor-not-allowed">تکمیل سفارش</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <button id="mobileCartBtn" class="lg:!hidden fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-brand text-white px-5 py-3 shadow-float flex items-center gap-2">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="21" r="1.6"/><circle cx="18" cy="21" r="1.6"/></svg>
+            سبد خرید <span id="mCartCount" class="font-extrabold">(۰)</span>
+        </button>
+        <div id="mCart" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" data-close></div>
+            <div class="absolute bottom-0 inset-x-0 rounded-t-2xl bg-white shadow-2xl p-4 space-y-3 max-h-[78vh] overflow-auto">
+                <div class="flex items-center justify-between">
+                    <strong>سبد خرید <span id="mCartCount2" class="opacity-70">(۰)</span></strong>
+                    <button class="rounded-lg border border-stroke px-3 py-1" data-close>بستن</button>
+                </div>
+                <div id="mCartLines" class="space-y-3"></div>
+                <div id="mCartSummary" class="border-t border-stroke pt-3 space-y-2">
+                    <div class="flex items-center justify-between text-slate-700"><span class="text-slate-500">جمع قبل تخفیف</span><span id="mSumBefore">۰</span></div>
+                    <div class="flex items-center justify-between text-slate-700"><span class="text-slate-500">تخفیف</span><span id="mSumDiscount">۰</span></div>
+                    <div class="flex items-center justify-between text-lg font-extrabold"><span>مبلغ پرداختی</span><span id="mSumAfter">۰</span></div>
+
+                    <div class="pt-2">
+                        <button id="mPromoToggle" class="text-brand hover:underline text-sm">کد تخفیف دارید؟</button>
+                        <div id="mPromoBox" class="overflow-hidden max-h-0 opacity-0 transition-all duration-300">
+                            <div class="mt-2 grid grid-cols-[1fr,auto] gap-2">
+                                <input id="mPromoInput" class="rounded-xl border border-stroke px-3 py-2" placeholder="کد تخفیف"/>
+                                <button id="mPromoApply" class="rounded-xl bg-ink text-white px-4 py-2">ثبت کد</button>
+                            </div>
+                            <div class="mt-1 flex items-center justify-between">
+                                <button id="mPromoCancel" class="text-xs text-slate-500 hover:underline">انصراف</button>
+                                <span id="mPromoMsg" class="text-xs ml-2"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="mGoCheckout" class="w-full rounded-xl bg-brand text-white py-3 shadow-float hover:bg-brand-600 disabled:opacity-60 disabled:cursor-not-allowed">تکمیل سفارش</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="checkoutView" class="hidden">
+        <div class="mx-auto max-w-[1400px] px-4 mt-4 grid grid-cols-1 lg:grid-cols-[1fr,22rem] gap-4">
+            <main class="space-y-4">
+                <div class="rounded-xl border border-stroke bg-white/75 backdrop-blur-xl shadow-glass p-4">
+                    <nav class="flex items-center gap-3 text-sm">
+                        <div class="inline-flex items-center gap-2">
+                            <span class="inline-grid place-items-center size-7 rounded-full bg-brand text-white font-bold">۱</span>
+                            <span>سبد خرید</span>
+                        </div>
+                        <span class="opacity-30">—</span>
+                        <div class="inline-flex items-center gap-2">
+                            <span class="inline-grid place-items-center size-7 rounded-full bg-ink text-white font-bold">۲</span>
+                            <span>اطلاعات</span>
+                        </div>
+                        <span class="opacity-30">—</span>
+                        <div class="inline-flex items-center gap-2">
+                            <span class="inline-grid place-items-center size-7 rounded-full bg-slate-200 text-slate-600 font-bold">۳</span>
+                            <span>پرداخت</span>
+                        </div>
+                    </nav>
+                </div>
+
+                <div class="rounded-xl border border-stroke bg-white shadow-card p-4 space-y-3">
+                    <div class="font-bold">روش تحویل سفارش</div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="dBike" class="delivery-btn rounded-xl border border-stroke bg-white py-3 flex flex-col items-center gap-1 data-[active=true]:border-brand data-[active=true]:ring-1 data-[active=true]:ring-brand/20" data-active="true">
+                            <svg class="size-6 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5.5 16 3-7h5l-3 7m0 0H7m3.5 0H17M6 20a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>
+                            ارسال توسط پیک
+                        </button>
+                        <button id="dPickup" class="delivery-btn rounded-xl border border-stroke bg-white py-3 flex flex-col items-center gap-1">
+                            <svg class="size-6 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M5 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/></svg>
+                            تحویل حضوری
+                        </button>
+                    </div>
+                </div>
+
+                <div id="addrCard" class="rounded-xl border border-stroke bg-white shadow-card p-4 space-y-3">
+                    <div class="font-bold">نشانی ارسال</div>
+                    <div class="flex items-center justify-between rounded-lg border border-stroke px-3 py-2">
+                        <div>
+                            <div class="text-sm opacity-70">ارسال به محل کار</div>
+                            <div class="text-slate-900 truncate max-w-[65vw] lg:max-w-[40vw]">تهران، خیابان مثال، پلاک ۱۲، واحد ۳</div>
+                        </div>
+                        <button class="rounded-lg border border-stroke px-3 py-1.5 hover:bg-slate-50">تغییر آدرس</button>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-stroke bg-white shadow-card p-4 space-y-3">
+                    <div class="font-bold">پرداخت آنلاین</div>
+                    <div class="rounded-lg border border-stroke px-3 py-2 flex items-center justify-between">
+                        <div class="text-slate-700">درگاه پرداخت (نمایشی)</div>
+                        <div class="text-xs px-2 py-1 rounded bg-slate-100">امن و سریع</div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-stroke bg-white shadow-card p-4 space-y-3">
+                    <div class="font-bold">توضیحات سفارش</div>
+                    <textarea id="orderNote" class="w-full rounded-xl border border-stroke px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20" rows="3" placeholder="مثال: ارسال سریع‌تر در ساعات اداری."></textarea>
+                </div>
+            </main>
+
+            <aside>
+                <div class="rounded-xl border border-stroke bg-white shadow-card">
+                    <div class="flex items-center justify-between p-4 border-b border-stroke">
+                        <h3 class="m-0 text-base font-bold">سبد خرید</h3>
+                        <button id="backToMenu" class="text-brand hover:underline">بازگشت به لیست</button>
+                    </div>
+                    <div id="coCartLines" class="max-h-[50vh] overflow-auto p-3 space-y-3"></div>
+                    <div id="coCartSummary" class="border-t border-stroke p-4 space-y-3">
+                        <div class="flex items-center justify-between text-slate-700"><span class="text-slate-500">جمع قبل تخفیف</span><span id="coSumBefore">۰</span></div>
+                        <div class="flex items-center justify-between text-slate-700"><span class="text-slate-500">تخفیف</span><span id="coSumDiscount">۰</span></div>
+                        <div class="flex items-center justify-between text-slate-700"><span class="text-slate-500">هزینه ارسال</span><span id="coShipping">۰</span></div>
+                        <div class="flex items-center justify-between text-lg font-extrabold"><span>مبلغ پرداختی</span><span id="coSumAfter">۰</span></div>
+
+                        <div class="pt-2">
+                            <button id="coPromoToggle" class="text-brand hover:underline text-sm">کد تخفیف دارید؟</button>
+                            <div id="coPromoBox" class="overflow-hidden max-h-0 opacity-0 transition-all duration-300">
+                                <div class="mt-2 grid grid-cols-[1fr,auto] gap-2">
+                                    <input id="coPromoInput" class="rounded-xl border border-stroke px-3 py-2" placeholder="کد تخفیف"/>
+                                    <button id="coPromoApply" class="rounded-xl bg-ink text-white px-4 py-2">ثبت کد</button>
+                                </div>
+                                <div class="mt-1 flex items-center justify-between">
+                                    <button id="coPromoCancel" class="text-xs text-slate-500 hover:underline">انصراف</button>
+                                    <span id="coPromoMsg" class="text-xs ml-2"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <div id="payBar" class="fixed bottom-0 inset-x-0 z-40 hidden">
+            <div class="mx-auto max-w-[1400px] px-4">
+                <div class="rounded-t-2xl border border-stroke bg-white/85 backdrop-blur shadow-glass p-3 flex items-center justify-between">
+                    <div class="text-slate-700">مجموع پرداختی: <span id="coGrand" class="font-extrabold text-slate-900 text-xl">۰</span></div>
+                    <button class="rounded-xl bg-brand text-white px-5 py-3 shadow-float hover:bg-brand-600">پرداخت آنلاین</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="lightbox" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close></div>
+        <div class="relative mx-auto mt-6 w-[94vw] max-w-[1100px] rounded-2xl bg-white shadow-2xl overflow-hidden animate-pop">
+
+            <div class="flex items-center justify-between border-b border-stroke px-4 py-3">
+                <div class="flex items-center gap-2">
+                    <span id="lbBrand" class="text-sm text-slate-600"></span>
+                </div>
+                <button id="lbClose" class="size-9 rounded-full border border-stroke grid place-items-center" aria-label="بستن">×</button>
+            </div>
+
+            <div class="md:h-[82vh] h-[86vh] overflow-y-auto">
+                <div class="grid md:grid-cols-[4fr,6fr] gap-0">
+                    <section class="p-0">
+                        <div class="relative h-[300px] md:h-[360px] bg-soft">
+                            <img id="lbImg" class="w-full h-full object-contain" alt="تصویر محصول" />
+                            <div id="lbOff" class="hidden absolute right-3 top-3 rounded-full border border-sky-200 bg-sky-50 text-sky-700 text-[11px] px-2 py-1 font-bold shadow-sm select-none"></div>
+                        </div>
+                        <div id="lbThumbs" class="flex gap-2 p-3 overflow-x-auto inline-scroll scrollbar-none"></div>
+                    </section>
+
+                    <section class="p-4 md:p-5 space-y-4">
+                        <h1 id="lbTitle" class="m-0 text-[18px] md:text-xl font-extrabold leading-7"></h1>
+
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <div id="lbOld" class="text-sm text-slate-400 line-through"></div>
+                                <div class="flex items-baseline gap-1">
+                                    <div id="lbNew" class="text-2xl font-extrabold tabnums"></div>
+                                </div>
+                            </div>
+                            <button id="lbAdd" class="rounded-xl bg-brand text-white px-4 py-2.5 font-bold disabled:opacity-60 disabled:cursor-not-allowed">افزودن به سبد</button>
+                        </div>
+                        
+                        <div id="lbStatus" class="flex flex-wrap gap-1.5 text-sm mt-3"></div>
+
+                        <div id="lbTabsWrap" class="relative">
+                            <nav id="lbTabs" class="grid grid-cols-3 gap-2 rounded-xl bg-slate-100 p-1">
+                                <button data-tab="buy" class="px-3 py-2 rounded-lg text-sm transition-all data-[active=true]:font-bold data-[active=true]:bg-white data-[active=true]:shadow-md data-[active=true]:scale-105" data-active="true">خرید</button>
+                                <button data-tab="specs" class="px-3 py-2 rounded-lg text-sm transition-all data-[active=true]:font-bold data-[active=true]:bg-white data-[active=true]:shadow-md data-[active=true]:scale-105">مشخصات</button>
+                                <button data-tab="desc" class="px-3 py-2 rounded-lg text-sm transition-all data-[active=true]:font-bold data-[active=true]:bg-white data-[active=true]:shadow-md data-[active=true]:scale-105">توضیحات</button>
+                            </nav>
+                        </div>
+
+                        <div id="lbTabContent" class="rounded-xl border border-stroke bg-white/70 backdrop-blur p-3 overflow-hidden">
+                            <div id="tab-buy" class="grid grid-rows-[auto,auto,1fr] gap-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <div class="text-xs text-slate-500 mb-1">حافظه</div>
+                                        <div id="lbRom" class="flex flex-wrap gap-1.5"></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-slate-500 mb-1">رنگ</div>
+                                        <div id="lbColor" class="flex flex-wrap gap-1.5"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="font-bold mb-1">افزودنی‌ها (اکسسوری)</div>
+                                    <div id="lbAddons" class="grid grid-cols-1 gap-2"></div>
+                                </div>
+                                <div>
+                                    <div class="font-bold mb-1">ترکیب‌های پیشنهادی / با این می‌خرند</div>
+                                    <div id="lbBundles" class="space-y-2"></div>
+                                </div>
+                            </div>
+
+                            <div id="tab-specs" class="hidden">
+                                <dl id="lbSpecs" class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm"></dl>
+                            </div>
+
+                            <div id="tab-desc" class="hidden">
+                                <p id="lbDesc" class="text-slate-700 text-sm leading-6 m-0"></p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginSheet" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" data-close></div>
+        <div class="absolute bottom-0 inset-x-0 rounded-t-2xl bg-white shadow-2xl p-5 space-y-3 max-h-[86vh] overflow-auto">
+            <div class="mx-auto max-w-sm">
+                <div class="text-center">
+                    <div class="mx-auto size-12 rounded-2xl bg-slate-100 grid place-items-center">🔐</div>
+                    <h3 class="mt-2 mb-1 text-lg font-extrabold">ورود / ثبت‌نام</h3>
+                    <p class="text-sm text-slate-600">شماره موبایل خود را وارد کنید تا کد تایید ارسال شود.</p>
+                </div>
+                <div id="loginStep1" class="space-y-3">
+                    <label class="block">
+                        <span class="text-sm text-slate-600">شماره موبایل</span>
+                        <input id="loginPhone" class="mt-1 w-full rounded-xl border border-stroke px-3 py-2 text-center tabnums" placeholder="09xxxxxxxxx" inputmode="numeric" />
+                    </label>
+                    <button id="sendCode" class="w-full rounded-xl bg-ink text-white px-4 py-3 shadow-card">ارسال کد</button>
+                </div>
+                <div id="loginStep2" class="hidden space-y-3">
+                    <p class="text-sm text-slate-600 text-center">کد تایید به شماره واردشده ارسال شد.</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <input class="codeInput w-10 h-12 rounded-xl border border-stroke text-center text-lg tabnums" maxlength="1" />
+                        <input class="codeInput w-10 h-12 rounded-xl border border-stroke text-center text-lg tabnums" maxlength="1" />
+                        <input class="codeInput w-10 h-12 rounded-xl border border-stroke text-center text-lg tabnums" maxlength="1" />
+                        <input class="codeInput w-10 h-12 rounded-xl border border-stroke text-center text-lg tabnums" maxlength="1" />
+                        <input class="codeInput w-10 h-12 rounded-xl border border-stroke text-center text-lg tabnums" maxlength="1" />
+                        <input class="codeInput w-10 h-12 rounded-xl border border-stroke text-center text-lg tabnums" maxlength="1" />
+                    </div>
+                    <button id="verifyCode" class="w-full rounded-xl bg-brand text-white px-4 py-3 shadow-card">تایید و ورود</button>
+                </div>
+                <div class="text-center">
+                    <button class="mt-2 text-sm text-slate-500 hover:underline" data-close>انصراف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-full bg-ink text-white px-4 py-2 opacity-0 pointer-events-none transition">پیام</div>
+    <div id="a11y" class="sr-only" aria-live="polite"></div>
+    
+    <footer class="mt-8 mb-8">
+        <div class="mx-auto max-w-[1400px] px-4">
+            <div class="rounded-2xl border border-stroke bg-white shadow-card p-4 flex items-center justify-between">
+                <div class="text-slate-600 text-sm">
+                    طراحی شده توسط پیمان
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L3 6v6c0 5.5 3.5 10.5 9 12 5.5-1.5 9-6.5 9-12V6L12 2z" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 10L10 16L8 14" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ========= Helpers =========
+        const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+        const toman=n=>new Intl.NumberFormat('fa-IR').format(Math.max(0,Math.round(n)))+' تومان';
+        const formatNumberWithCommas = num => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        const splitAndFormatPrice = price => {
+            const parts = toman(price).split(' ');
+            const number = parts.slice(0, -1).join(' ');
+            const currency = parts.slice(-1);
+            return { number, currency };
+        };
+        const store={get(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
+        const toast=(m)=>{const t=$('#toast');t.textContent=m;t.style.opacity=1;clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity=0,1800);}
+        const ICONS={
+            rom:`<svg class='size-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8'><rect x='3' y='5' width='18' height='14' rx='2'/><path d='M7 5v14M17 5v14'/></svg>`,
+            ram:`<svg class='size-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8'><rect x='5' y='7' width='14' height='10' rx='2'/><path d='M8 17v2M12 17v2M16 17v2M8 5v2M12 5v2M16 5v2'/></svg>`,
+            display:`<svg class='size-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8'><rect x='3' y='5' width='18' height='12' rx='2'/><path d='M9 21h6'/></svg>`,
+            active:`<svg class='size-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M5 12l4 4 10-10'/></svg>`,
+            seal:`<svg class='size-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8'><path d='M12 2l3 3 4-.5-.5 4 3 3-3 3 .5 4-4-.5-3 3-3-3-4 .5.5-4-3-3 3-3-.5-4 4 .5 3-3z'/></svg>`,
+            tag:`<svg class='size-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8'><path d='M3 12l9-9 9 9-9 9-9-9z'/><circle cx='12' cy='12' r='2'/></svg>`,
+            warranty:`<svg class='size-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 2l7 4v6c0 5-3 8-7 10-4-2-7-5-7-10V6l7-4z'/></svg>`,
+            register:`<svg class='size-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><circle cx='12' cy='12' r='9'/><path d='M8 12l2 2 4-4'/></svg>`,
+            warning:`<svg class='size-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 9v4M12 17h.01'/><path d='M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/></svg>`
+        };
+
+        // ========= Data =========
+        const BRAND_LOGOS = {
+            apple:(c='#111827')=>`<svg class="size-6" viewBox="0 0 256 256" fill="${c}" xmlns="http://www.w3.org/2000/svg"><path d="M200 170c-6 13-9 18-17 29-12 17-28 37-48 37-18 0-23-11-43-11-21 0-27 11-45 11-20 0-35-18-48-36C-6 175-9 132 15 103 28 87 47 77 65 77c18 0 30 12 45 12 14 0 23-12 45-12 16 0 33 9 45 24-40 22-33 82 0 69zM161 0c1 17-13 41-35 41C124 23 140 0 161 0z"/></svg>`,
+            samsung:(c='#0ea5e9')=>`<svg class="size-6" viewBox="0 0 128 32" xmlns="http://www.w3.org/2000/svg"><rect width="128" height="32" rx="6" fill="none"/><text x="64" y="21" text-anchor="middle" font-size="16" font-weight="700" fill="${c}" font-family="system-ui,Segoe UI,Arial">SAMSUNG</text></svg>`,
+            xiaomi:(c='#fb923c')=>`<svg class="size-6" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="${c}"/><text x="16" y="21" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="system-ui">mi</text></svg>`,
+            huawei:(c='#ef4444')=>`<svg class="size-6" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="${c}"/><path d="M8 20c4-1 12-1 16 0-3 3-5 5-8 5s-5-2-8-5z" fill="#fff"/></svg>`,
+            oneplus:(c='#ef4444')=>`<svg class="size-6" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="white" stroke="${c}"/><text x="16" y="21" text-anchor="middle" font-size="14" font-weight="700" fill="${c}" font-family="system-ui">1+</text></svg>`,
+            google:(c='#22c55e')=>`<svg class="size-6" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" stroke="${c}" stroke-width="4" fill="none"/></svg>`,
+            nokia:(c='#3b82f6')=>`<svg class="size-6" viewBox="0 0 64 24"><text x="32" y="17" text-anchor="middle" font-size="16" font-weight="700" fill="${c}" font-family="system-ui">NOKIA</text></svg>`
+        };
+
+        const DEFAULT_CATS = [
+            { id:'apple', title:'Apple', color:'#111827', logo:'apple' },
+            { id:'samsung',title:'Samsung',color:'#0ea5e9', logo:'samsung' },
+            { id:'xiaomi', title:'Xiaomi', color:'#fb923c', logo:'xiaomi' },
+            { id:'huawei', title:'Huawei', color:'#ef4444', logo:'huawei' },
+            { id:'oneplus',title:'OnePlus',color:'#ef4444', logo:'oneplus' },
+            { id:'google', title:'Google', color:'#22c55e', logo:'google' },
+            { id:'nokia', title:'Nokia', color:'#3b82f6', logo:'nokia' }
+        ];
+
+        const ACCESSORIES = [
+            {id:'case_sil', title:'قاب سیلیکونی', price:390000, off:.1, img:'https://images.unsplash.com/photo-1585386959984-a41552231658?q=80&w=1200&auto=format&fit=crop'},
+            {id:'sp_glass', title:'گلس تمام‌صفحه', price:240000, off:0, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop'},
+            {id:'pd20w', title:'شارژر سریع 20W', price:890000, off:.05, img:'https://images.unsplash.com/photo-1598331668826-20cecc596b36?q=80&w=1200&auto=format&fit=crop'},
+            {id:'airbuds', title:'هندزفری بلوتوث', price:2490000, off:.08, img:'https://images.unsplash.com/photo-1518449037270-85e79f2be394?q=80&w=1200&auto=format&fit=crop'}
+        ];
+
+        // ---- Seed 5 phones per brand (concise generator) ----
+        const IMG1='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200&auto=format&fit=crop';
+        const IMG2='https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop';
+        const IMG3='https://images.unsplash.com/photo-1527689368864-3a821dbccc34?q=80&w=1200&auto=format&fit=crop';
+        const brandColors={
+            apple:[{code:'natural',label:'Titan',sw:'#cabaa5'},{code:'black',label:'Black',sw:'#111827'},{code:'blue',label:'Blue',sw:'#334155'}],
+            samsung:[{code:'gray',label:'Gray',sw:'#6b7280'},{code:'violet',label:'Violet',sw:'#a78bfa'}],
+            xiaomi:[{code:'black',label:'Black',sw:'#111827'},{code:'green',label:'Green',sw:'#16a34a'}],
+            huawei:[{code:'black',label:'Black',sw:'#111827'},{code:'red',label:'Red',sw:'#ef4444'}],
+            oneplus:[{code:'black',label:'Black',sw:'#111827'},{code:'mint',label:'Mint',sw:'#9ae6b4'}],
+            google:[{code:'obs',label:'Obsidian',sw:'#111827'},{code:'por',label:'Porcelain',sw:'#e5e7eb'}],
+            nokia:[{code:'blue',label:'Blue',sw:'#2563eb'},{code:'gray',label:'Gray',sw:'#64748b'}]
+        };
+
+        function makePhone(brand, id, title, price, rom, ram, display, active=false, off=.06, warranty=12, partNo='EUX'){
+            return {
+                id, title, brand, rom, ram, display, active,
+                partNo, register:true, warranty,
+                price, off,
+                colors: brandColors[brand]||[{code:'black',label:'Black',sw:'#111827'}],
+                variants:[{rom:rom,price:price},{rom:rom*2,price:Math.round(price*1.12)}],
+                desc:`${title} با نمایشگر ${display} اینچ، رم ${ram} گیگابایت و حافظه ${rom} گیگابایت.`,
+                gallery:[IMG1,IMG2,IMG3],
+                addons:['case_sil','sp_glass','pd20w'].slice(0,2),
+                bundles:[{title:'پک محافظ', items:[id,'case_sil','sp_glass'], discount:.07}],
+                also:['airbuds','pd20w']
+            }
+        }
+
+        const SEED={
+            apple:[
+                ['ip15p','Apple iPhone 15 Pro',79900000,256,8,6.1,false,.05,18,'LL/A'],
+                ['ip15','Apple iPhone 15',62900000,128,6,6.1,false,.04,18,'LL/A'],
+                ['ip15pl','Apple iPhone 15 Plus',67900000,128,6,6.7,false,.04,18,'LL/A'],
+                ['ip14','Apple iPhone 14',51900000,128,6,6.1,true,.02,12,'LL/A'],
+                ['ipse3','Apple iPhone SE (2022)',27900000,64,4,4.7,true,0,12,'LL/A']
+            ],
+            samsung:[
+                ['s24u','Samsung Galaxy S24 Ultra',69900000,256,12,6.8,true,.12,12,'EUX'],
+                ['s24p','Samsung Galaxy S24+',58900000,256,12,6.7,false,.08,12,'EUX'],
+                ['s24','Samsung Galaxy S24',52900000,256,8,6.2,false,.06,12,'EUX'],
+                ['s23fe','Samsung Galaxy S23 FE',38900000,128,8,6.4,true,.05,12,'EUX'],
+                ['a55','Samsung Galaxy A55',22900000,128,8,6.6,true,.03,12,'EUX']
+            ],
+            xiaomi:[
+                ['mi14u','Xiaomi 14 Ultra',46900000,512,16,6.73,false,.1,18,'CH'],
+                ['mi14','Xiaomi 14',38900000,256,12,6.36,false,.08,18,'CH'],
+                ['mi13tp','Xiaomi 13T Pro',28900000,256,12,6.67,true,.09,18,'CH'],
+                ['rn13p','Redmi Note 13 Pro',16900000,256,8,6.67,true,.06,18,'GL'],
+                ['pocof6','POCO F6',19900000,256,12,6.67,true,.05,18,'GL']
+            ],
+            huawei:[
+                ['p60p','Huawei P60 Pro',35900000,256,8,6.67,true,.07,12,'MEA'],
+                ['mate60','Huawei Mate 60',42900000,256,12,6.7,false,.06,12,'MEA'],
+                ['nova12i','Huawei nova 12i',16900000,128,8,6.7,true,.05,12,'MEA'],
+                ['nova11','Huawei nova 11',18900000,256,8,6.7,true,.05,12,'MEA'],
+                ['y9a','Huawei Y9a',9990000,128,6,6.63,true,.02,12,'MEA']
+            ],
+            oneplus:[
+                ['op12','OnePlus 12',32900000,256,16,6.82,false,.08,12,'IN'],
+                ['op12r','OnePlus 12R',24900000,256,12,6.78,true,.07,12,'IN'],
+                ['op11','OnePlus 11',27900000,256,16,6.7,true,.06,12,'IN'],
+                ['n3','OnePlus Nord 3',16900000,256,12,6.74,true,.05,12,'IN'],
+                ['nce4','OnePlus Nord CE 4',12900000,128,8,6.7,true,.04,12,'IN']
+            ],
+            google:[
+                ['px8p','Google Pixel 8 Pro',34900000,256,12,6.7,false,.08,12,'US'],
+                ['px8','Google Pixel 8',28900000,128,8,6.2,false,.06,12,'US'],
+                ['px7a','Google Pixel 7a',19900000,128,8,6.1,true,.05,12,'US'],
+                ['px7','Google Pixel 7',21900000,128,8,6.3,true,.05,12,'US'],
+                ['pxfold','Google Pixel Fold',52900000,256,12,7.6,false,.1,12,'US']
+            ],
+            nokia:[
+                ['nx30','Nokia X30',10900000,128,8,6.43,true,.05,12,'EU'],
+                ['ng60','Nokia G60',8990000,128,6,6.58,true,.04,12,'EU'],
+                ['ng22','Nokia G22',6990000,128,4,6.52,true,.03,12,'EU'],
+                ['nc32','Nokia C32',4990000,64,4,6.5,true,.02,12,'EU'],
+                ['nxr21','Nokia XR21',12900000,128,6,6.49,true,.05,12,'EU']
+            ]
+        };
+
+        const PHONES = Object.entries(SEED).flatMap(([brand, items]) =>
+            items.map(args => makePhone(brand, ...args))
+        );
+
+        const ACCESSORY_MENU = ACCESSORIES.map(a=>({id:a.id,title:a.title,brand:'accessory',rom:0,ram:0,display:0,active:false,partNo:'',register:false,warranty:0,price:a.price,off:a.off,img:a.img,variants:[{rom:0,price:a.price}],colors:[],desc:'',gallery:[a.img],addons:[],bundles:[],also:[]}));
+
+        let CATEGORIES=[...DEFAULT_CATS], MENU=[...PHONES, ...ACCESSORY_MENU];
+
+        // ========= State =========
+        const SHIPPING=40000;
+        const state={
+            view:'menu',
+            q:'',
+            sort:'default',
+            activeBrand:'apple',
+            cart:store.get('cart',{}),
+            promo:store.get('promo',{code:null,type:null,rate:0,value:0}),
+            filters:{ brands:new Set(), roms:new Set(), rams:new Set(), active:'all', priceMin:null, priceMax:null },
+            lbId:null, lbVariant:null, lbColor:null, lbAddonSel:new Set(), lbGalleryIndex:0,
+            delivery:'bike',
+            lbTab: 'buy'
+        };
+
+        // ========= Promo =========
+        function applyPromo(code){const c=(code||'').trim().toUpperCase();if(c==='OFF20')return {ok:true,code:c,type:'percent',rate:.20};if(c==='50K')return{ok:true,code:c,type:'fixed',value:50000};return {ok:false,msg:'کد نامعتبر است'};}
+        function clearPromo(){state.promo={code:null,type:null,rate:0,value:0};store.set('promo',state.promo);}
+
+        // ========= Categories =========
+        function renderCats(){
+            const root=$('#cats');
+            root.innerHTML=CATEGORIES.map(c=>{
+                const logo=(BRAND_LOGOS[c.logo]||BRAND_LOGOS.apple)(c.color);
+                const active = state.activeBrand===c.id;
+                return `
+                    <button class="snap-start flex flex-none min-w-[84px] sm:min-w-[96px] flex-col items-center gap-1.5 transition-all will-change-transform
+                                        hover:scale-105 data-[focus=true]:scale-110 data-[focus=true]:shadow-card"
+                            data-id="${c.id}" data-focus="${active?'true':'false'}" aria-label="${c.title}">
+                        <span class="grid size-10 sm:size-11 place-items-center rounded-xl bg-white/80 border border-white/60">${logo}</span>
+                        <span class="text-[11px] sm:text-xs ${active?'font-bold':''}">${c.title}</span>
+                    </button>`;
+            }).join('');
+
+            // click -> scroll to section
+            $$('#cats>button').forEach(b=>b.addEventListener('click',()=>{
+                const target = document.getElementById('sec-'+b.dataset.id);
+                if(target){
+                    const headerH = document.querySelector('header').offsetHeight || 64;
+                    const top = target.getBoundingClientRect().top + window.scrollY - (headerH + 12);
+                    window.scrollTo({top,behavior:'smooth'});
+                }
+            }));
+
+            // focus while scrolling
+            root.addEventListener('scroll',()=>{
+                const mid = root.getBoundingClientRect().left + root.clientWidth/2;
+                let best=null, bestDist=1e9;
+                $$('#cats>button').forEach(btn=>{
+                    const rect=btn.getBoundingClientRect();
+                    const d=Math.abs((rect.left+rect.width/2)-mid);
+                    if(d<bestDist){bestDist=d;best=btn;}
+                });
+                if(best){ $$('#cats>button').forEach(x=>x.dataset.focus='false'); best.dataset.focus='true'; }
+            });
+        }
+        function setActiveBrandFromSection(id){
+            state.activeBrand=id;
+            $$('#cats>button').forEach(b=>{ b.dataset.focus = (b.dataset.id===id)?'true':'false'; });
+        }
+
+        // ========= Utils =========
+        const newPrice=it=>Math.round(it.price*(1-(it.off||0)));
+        const contains=(a,b)=>a.toLowerCase().includes((b||'').toLowerCase());
+        function highlight(text, q){
+            if(!q) return text;
+            const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'ig');
+            return text.replace(re, m=>`<mark>${m}</mark>`);
+        }
+
+        // ========= Filters =========
+        function unique(arr){return [...new Set(arr)]}
+        function deriveOptions(){
+            const phones = MENU.filter(m=>m.brand!=='accessory');
+            const roms = unique(phones.flatMap(p=> (p.variants?.map(v=>v.rom)||[p.rom]) )).sort((a,b)=>a-b);
+            const rams = unique(phones.map(p=>p.ram)).sort((a,b)=>a-b);
+            const prices = phones.map(p=>newPrice(p));
+            const minP = Math.min(...prices), maxP=Math.max(...prices);
+            return {roms,rams,minP,maxP};
+        }
+        
+        function updateFilterSummary(){
+            const b=[...state.filters.brands].length, r=[...state.filters.roms].length, m=[...state.filters.rams].length;
+            const { minP, maxP } = deriveOptions();
+            
+            const effectiveMin = state.filters.priceMin !== null ? state.filters.priceMin : minP;
+            const effectiveMax = state.filters.priceMax !== null ? state.filters.priceMax : maxP;
+
+            const hasFilters = b > 0 || r > 0 || m > 0 || state.filters.active !== 'all' || 
+                               (state.filters.priceMin !== null && state.filters.priceMin !== minP) || 
+                               (state.filters.priceMax !== null && state.filters.priceMax !== maxP);
+            
+            $('#filter-pulse').classList.toggle('hidden', !hasFilters);
+
+            const sum=`برند: ${b||'همه'} / ROM: ${r||'همه'} / RAM: ${m||'همه'} / قیمت: ${toman(effectiveMin)} تا ${toman(effectiveMax)}`;
+            $('#fltSummary').textContent=sum;
+        }
+        function toggleSet(set,val,btn){
+            if(set.has(val)) set.delete(val); else set.add(val);
+            btn.classList.toggle('border-brand'); btn.classList.toggle('bg-brand/10');
+            updateFilterSummary();
+        }
+        function renderFilters(){
+            const {roms,rams,minP,maxP} = deriveOptions();
+            const fb=$('#fltBrands'); fb.innerHTML=DEFAULT_CATS.map(c=>`<button data-brand="${c.id}" class="px-3 py-1.5 rounded-full border border-slate-300 text-sm">${c.title}</button>`).join('');
+            const fr=$('#fltROM'); fr.innerHTML=roms.map(r=>`<button data-rom="${r}" class="px-3 py-1.5 rounded-full border border-slate-300 text-sm">${r}GB</button>`).join('');
+            const fm=$('#fltRAM'); fm.innerHTML=rams.map(r=>`<button data-ram="${r}" class="px-3 py-1.5 rounded-full border border-slate-300 text-sm">${r}GB</button>`).join('');
+
+            fb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>toggleSet(state.filters.brands,b.dataset.brand,b)));
+            fr.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>toggleSet(state.filters.roms,Number(b.dataset.rom),b)));
+            fm.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>toggleSet(state.filters.rams,Number(b.dataset.ram),b)));
+
+            $$('#fltActive [data-activeval]').forEach(b=>b.addEventListener('click',()=>{
+                $$('#fltActive [data-activeval]').forEach(x=>x.dataset.sel='false'); b.dataset.sel='true';
+                state.filters.active=b.dataset.activeval;
+            }));
+
+            // New price input logic
+            function normalizeInput(val) {
+                return val.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/,/g, '');
+            }
+            function formatAndSetInput(input, value) {
+                if (value !== null) {
+                    const formatted = formatNumberWithCommas(value);
+                    input.value = formatted;
+                } else {
+                    input.value = '';
+                }
+            }
+            
+            const fltMinInput = $('#fltMin');
+            const fltMaxInput = $('#fltMax');
+
+            formatAndSetInput(fltMinInput, state.filters.priceMin);
+            formatAndSetInput(fltMaxInput, state.filters.priceMax);
+
+            fltMinInput.addEventListener('input', e => {
+                const rawValue = normalizeInput(e.target.value);
+                const v = rawValue ? Number(rawValue) : null;
+                state.filters.priceMin = v;
+                formatAndSetInput(fltMinInput, v);
+                updateFilterSummary();
+            });
+            fltMaxInput.addEventListener('input', e => {
+                const rawValue = normalizeInput(e.target.value);
+                const v = rawValue ? Number(rawValue) : null;
+                state.filters.priceMax = v;
+                formatAndSetInput(fltMaxInput, v);
+                updateFilterSummary();
+            });
+
+            $('#fltApply').addEventListener('click',()=>{ $('#filtersPanel').classList.add('hidden'); renderGrid(); });
+            $('#fltClear').addEventListener('click',()=>{ state.filters={brands:new Set(),roms:new Set(),rams:new Set(),active:'all',priceMin:null,priceMax:null}; renderFilters(); updateFilterSummary(); renderGrid(); });
+
+            updateFilterSummary();
+        }
+        function applyAllFilters(list){
+            const f=state.filters;
+            const {minP, maxP} = deriveOptions();
+
+            let L=list.filter(p=>p.brand!=='accessory');
+            if(f.brands.size>0) L=L.filter(p=>f.brands.has(p.brand));
+            if(f.roms.size>0) L=L.filter(p=> (p.variants?.some(v=>f.roms.has(v.rom))) || (p.rom && f.roms.has(p.rom)) );
+            if(f.rams.size>0) L=L.filter(p=> f.rams.has(p.ram));
+            if(f.active==='new') L=L.filter(p=>!p.active);
+            if(f.active==='active')L=L.filter(p=> p.active);
+            
+            const effectiveMin = f.priceMin !== null ? f.priceMin : minP;
+            const effectiveMax = f.priceMax !== null ? f.priceMax : maxP;
+
+            L=L.filter(p=> newPrice(p)>=effectiveMin && newPrice(p)<=effectiveMax);
+            return L;
+        }
+
+        // ========= Cards =========
+        function placeholderCard(){return `<article class="h-full overflow-hidden rounded-2xl border border-stroke bg-white shadow-card p-3"><div class="h-40 rounded-xl animate-shimmer" style="background:linear-gradient(90deg,#f1f5f9 0%,#e2e8f0 50%,#f1f5f9 100%);background-size:200% 100%"></div><div class="mt-3 h-3 rounded animate-shimmer" style="background:linear-gradient(90deg,#f1f5f9 0%,#e2e8f0 50%,#f1f5f9 100%);background-size:200% 100%"></div><div class="mt-2 h-3 w-1/2 rounded animate-shimmer" style="background:linear-gradient(90deg,#f1f5f9 0%,#e2e8f0 50%,#f1f5f9 100%);background-size:200% 100%"></div></article>`}
+        const chip=(svg,txt)=>`<span class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[11px]">${svg}<span>${txt}</span></span>`;
+        const tiny=(svg,txt)=>`<span class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10.5px] text-slate-600">${svg}<span>${txt}</span></span>`;
+
+        function productCard(it){
+            const qty = state.cart[it.id] || 0;
+            const hasOff = it.off && it.off > 0;
+            const pNow = hasOff ? newPrice(it) : it.price;
+            const { number: nowNum, currency: nowCur } = splitAndFormatPrice(pNow);
+            const oldTxt = hasOff ? toman(it.price) : '';
+            const title = highlight(it.title, state.q.trim());
+
+            return `
+            <article class="group relative overflow-hidden rounded-2xl border border-stroke bg-white shadow-card transition-all hover:-translate-y-0.5" itemscope itemtype="https://schema.org/Product">
+                <meta itemprop="brand" content="${it.brand}"/><meta itemprop="sku" content="${it.id}"/>
+
+                <div class="relative h-44 md:h-48 cursor-pointer" data-open="${it.id}" aria-label="${it.title}">
+                    ${hasOff ? `<div class="absolute right-3 top-3 rounded-full border border-sky-200 bg-sky-50 text-sky-700 text-[11px] px-2 py-1 font-bold shadow-sm select-none">٪${Math.round(it.off*100)}</div>`:''}
+                    <img src="${(it.gallery?.[0]||it.img||'')}" alt="${it.title}" class="h-full w-full object-cover" loading="lazy" decoding="async" itemprop="image">
+                    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white/85 to-transparent"></div>
+                </div>
+
+                <div class="p-3.5 space-y-2.5">
+                    <h3 class="text-[15px] font-bold leading-6 line-clamp-2" itemprop="name">${title}</h3>
+
+                    <div class="flex flex-wrap gap-1.5">
+                        ${chip(ICONS.rom, (it.rom||it.variants?.[0]?.rom||0)+'GB')}
+                        ${chip(ICONS.ram, it.ram+'GB RAM')}
+                        ${chip(ICONS.display, it.display+'"')}
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        ${tiny(it.active?ICONS.active:ICONS.seal, it.active?'اکتیو شده':'آکبند')}
+                        ${tiny(ICONS.tag, 'پارت '+(it.partNo||'-'))}
+                    </div>
+
+                    <div class="mt-1 flex flex-row-reverse items-center justify-between">
+                        <div class="justify-self-end">
+                            ${ qty>0 ? `
+                                <div class="inline-flex h-10 items-stretch rounded-full border border-slate-300 overflow-hidden shadow-sm select-none">
+                                    <button type="button" class="w-10 grid place-items-center text-base hover:bg-slate-50" onclick="event.stopPropagation(); changeQty('${it.id}',-1)">−</button>
+                                    <span class="min-w-10 px-2 grid place-items-center text-sm font-semibold tabnums">${qty}</span>
+                                    <button type="button" class="w-10 grid place-items-center text-base hover:bg-slate-50" onclick="event.stopPropagation(); changeQty('${it.id}',1)">＋</button>
+                                </div>`
+                            : `
+                                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-300 hover:border-slate-400 hover:bg-slate-50 px-4 py-2.5 font-bold text-slate-800"
+                                        onclick="event.stopPropagation(); openLightbox('${it.id}')">مشاهده و خرید</button>`
+                            }
+                        </div>
+
+                        <div class="text-left leading-5 select-none" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                            ${hasOff?`<div class="text-[11px] text-slate-400 line-through mb-0.5">${oldTxt}</div>`:''}
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-[18px] font-extrabold text-slate-900 tabnums" itemprop="price" content="${pNow}">${nowNum}</span>
+                                <span class="text-[11px] text-slate-500" itemprop="priceCurrency" content="IRR">${nowCur||''}</span>
+                            </div>
+                            <link itemprop="availability" href="https://schema.org/InStock" />
+                        </div>
+                    </div>
+                </div>
+            </article>`;
+        }
+
+        // ========= Sections render =========
+        function sectionHeader(cat){
+            const logo=(BRAND_LOGOS[cat.logo]||BRAND_LOGOS.apple)(cat.color);
+            return `
+                <div id="sec-${cat.id}" class="scroll-mt-24">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="grid size-8 place-items-center rounded-xl bg-white border border-stroke">${logo}</span>
+                        <h2 class="m-0 text-base sm:text-lg font-extrabold">${cat.title}</h2>
+                    </div>
+                    <div class="h-px bg-gradient-to-l from-transparent via-stroke to-transparent mb-3"></div>
+                </div>
+            `;
+        }
+        function renderGrid(){
+            const q=state.q.trim();
+            const allFiltered = applyAllFilters(MENU);
+            let filtered = q ? allFiltered.filter(m=>contains((m.title||''),q)) : allFiltered;
+            
+            $('#searchMeta').classList.toggle('hidden',!q);
+            if(q) $('#searchMeta').textContent=`نتایج برای «${q}»`;
+
+            if(state.sort==='asc') filtered=filtered.slice().sort((a,b)=>newPrice(a)-newPrice(b));
+            if(state.sort==='desc') filtered=filtered.slice().sort((a,b)=>newPrice(b)-newPrice(a));
+
+            const byBrand = {};
+            filtered.forEach(p=>{
+                if(!byBrand[p.brand]) byBrand[p.brand] = [];
+                byBrand[p.brand].push(p);
+            });
+
+            const grid=$('#grid'); grid.innerHTML='';
+            CATEGORIES.forEach(cat=>{
+                if (byBrand[cat.id] && byBrand[cat.id].length > 0) {
+                    const wrap=document.createElement('section');
+                    wrap.innerHTML=sectionHeader(cat)+`<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" id="grid-${cat.id}"></div>`;
+                    grid.appendChild(wrap);
+                    const container=wrap.querySelector('#grid-'+cat.id);
+                    const items=(byBrand[cat.id]||[]).slice(0,5);
+                    container.innerHTML = items.map(productCard).join('');
+                }
+            });
+
+            if(grid.innerHTML === '') {
+                grid.innerHTML = `<div class="text-center text-slate-400 p-8">متاسفانه با فیلترهای اعمال شده، محصولی یافت نشد.</div>`;
+            }
+
+            $$('[data-open]').forEach(el=>el.addEventListener('click',()=>openLightbox(el.getAttribute('data-open'))));
+            updateFilterSummary();
+            observeBrandSections();
+        }
+        
+        function updateFilterIconColor() {
+            const hasFilters = [...state.filters.brands].length > 0 ||
+                               [...state.filters.roms].length > 0 ||
+                               [...state.filters.rams].length > 0 ||
+                               state.filters.active !== 'all' ||
+                               state.filters.priceMin !== null ||
+                               state.filters.priceMax !== null;
+            $('#filter-icon').style.color = hasFilters ? '#2563eb' : '';
+            $('#filter-icon').style.opacity = hasFilters ? '1' : '0.5';
+        }
+
+        function observeBrandSections(){
+            const headerH=document.querySelector('header').offsetHeight||64;
+            const options={ root:null, rootMargin:`-${headerH+10}px 0px -70% 0px`, threshold:[0,0.2,0.6]};
+            const io=new IntersectionObserver(entries=>{
+                entries.forEach(e=>{
+                    if(e.isIntersecting && e.intersectionRatio>0.2){
+                        const id=e.target.id.replace('sec-','');
+                        setActiveBrandFromSection(id);
+                    }
+                });
+            },options);
+            CATEGORIES.forEach(c=>{
+                const sec=document.getElementById('sec-'+c.id);
+                if(sec) io.observe(sec);
+            });
+        }
+
+        // ========= Cart & totals =========
+        function persist(){store.set('cart',state.cart);}
+        function addToCart(id,qty=1){state.cart[id]=(state.cart[id]||0)+qty;persist();drawCart();renderGrid();if(state.view==='checkout')drawCheckout();toast('به سبد اضافه شد');$('#a11y').textContent='به سبد خرید اضافه شد';}
+        function changeQty(id,d){const q=(state.cart[id]||0)+d;if(q<=0)delete state.cart[id];else state.cart[id]=q;persist();drawCart();renderGrid();if(state.view==='checkout')drawCheckout();}
+        function clearCart(){state.cart={};persist();drawCart();renderGrid();if(state.view==='checkout')drawCheckout();}
+        function lines(){
+            return Object.entries(state.cart).map(([id,qty])=>{
+                let it=MENU.find(x=>x.id===id);
+                if(!it && id.startsWith('var|')) it = MENU.find(x=>x.id===id);
+                if(!it) return null;
+                return {id,qty,it,old:it.price,newer:newPrice(it)};
+            }).filter(Boolean);
+        }
+        function computeSums(){
+            const L=lines();
+            const before=L.reduce((s,l)=>s+l.old*l.qty,0);
+            const afterItems=L.reduce((s,l)=>s+l.newer*l.qty,0);
+            let promoAmt=0;
+            if(state.promo?.code){
+                if(state.promo.type==='percent') promoAmt=Math.round(afterItems*(state.promo.rate||0));
+                if(state.promo.type==='fixed') promoAmt=state.promo.value||0;
+                promoAmt=Math.min(promoAmt,afterItems);
+            }
+            const afterFinal=Math.max(0,afterItems-promoAmt);
+            const itemDiscount=before-afterItems;
+            const totalDiscount=itemDiscount+promoAmt;
+            const count=Object.values(state.cart).reduce((s,n)=>s+n,0);
+            return {before,afterItems,afterFinal,itemDiscount,promoAmt,totalDiscount,count};
+        }
+        function lineHTML(l){
+            const total = l.newer * l.qty;
+            const img = (l.it.gallery?.[0]||l.it.img||'');
+            return `
+            <div class="rounded-2xl border border-stroke bg-white p-3.5 shadow-sm">
+                <div class="grid grid-cols-[auto,1fr,auto] gap-3 sm:gap-4 items-center">
+                    <img src="${img}" alt="${l.it.title}" class="size-12 sm:size-14 rounded-xl object-cover border border-stroke/70">
+                    <div class="min-w-0">
+                        <div class="text-[13.5px] sm:text-[14px] font-bold leading-6 break-words">${l.it.title}</div>
+                        <div class="mt-1 flex flex-wrap gap-1.5 text-[11px] text-slate-600">
+                            ${l.it.variantLabel? tiny(ICONS.rom, l.it.variantLabel):''}
+                            ${l.it.colorLabel? tiny(ICONS.tag, l.it.colorLabel):''}
+                        </div>
+                        <div class="mt-2 inline-flex items-stretch h-9 rounded-full border border-slate-300 overflow-hidden shadow-sm select-none">
+                            <button class="w-9 grid place-items-center text-base hover:bg-slate-50" onclick="changeQty('${l.id}',-1)">−</button>
+                            <span class="px-3 grid place-items-center text-sm font-medium tabnums" role="status" aria-live="polite">${l.qty}</span>
+                            <button class="w-9 grid place-items-center text-base hover:bg-slate-50" onclick="changeQty('${l.id}',1)">＋</button>
+                        </div>
+                    </div>
+                    <div class="text-left leading-5">
+                        <div class="text-[15px] sm:text-[16px] font-extrabold text-slate-900 whitespace-nowrap tabnums">${toman(total)}</div>
+                        <div class="mt-1 text-[11px] text-slate-500 whitespace-nowrap tabular-nums">هر عدد: ${toman(l.newer)}</div>
+                    </div>
+                </div>
+            </div>`;
+        }
+        function updateCheckoutCTA(){
+            const S=computeSums();
+            const btn1=$('#goCheckout');
+            const disabled = (S.count===0);
+            if(btn1){
+                btn1.disabled = disabled;
+                btn1.textContent = disabled ? 'سبد خرید خالی می باشد' : 'تکمیل سفارش';
+            }
+            $('#cartCount').textContent=`(${S.count||0})`;
+            $('#mCartCount').textContent=`(${S.count||0})`;
+            $('#mCartCount2').textContent=`(${S.count||0})`;
+        }
+        function drawCart(){
+            const L=lines(), S=computeSums();
+            $('#cartLines').innerHTML=L.length?L.map(lineHTML).join(''):`<div class='text-center text-slate-500 mt-2'>سبد خرید خالی است.</div>`;
+            $('#sumBefore').textContent=toman(S.before);
+            $('#sumDiscount').textContent=toman(S.totalDiscount);
+            $('#sumAfter').textContent=toman(S.afterFinal);
+            
+            $('#mCartLines').innerHTML=$('#cartLines').innerHTML;
+            $('#mSumBefore').textContent=toman(S.before);
+            $('#mSumDiscount').textContent=toman(S.totalDiscount);
+            $('#mSumAfter').textContent=toman(S.afterFinal);
+            
+            const isCartEmpty = S.count === 0;
+            $('#cartSummary').style.display = isCartEmpty ? 'none' : 'block';
+            $('#mCartSummary').style.display = isCartEmpty ? 'none' : 'block';
+
+            store.set('promo',state.promo);
+            updateCheckoutCTA();
+        }
+
+        // ========= Checkout =========
+        function openCheckout(){state.view='checkout';$('#menuView').classList.add('hidden');$('#checkoutView').classList.remove('hidden');$('#payBar').classList.remove('hidden');$('#mCart').classList.add('hidden');drawCheckout();window.scrollTo({top:0,behavior:'smooth'});}
+        function backToMenu(){state.view='menu';$('#checkoutView').classList.add('hidden');$('#payBar').classList.add('hidden');$('#menuView').classList.remove('hidden');}
+        function drawCheckout(){
+            const L=lines(), S=computeSums();
+            $('#coCartLines').innerHTML=L.length?L.map(lineHTML).join(''):`<div class='text-center text-slate-500 mt-2'>سبد خرید خالی است.</div>`;
+            const shipping=(state.delivery==='bike'&&L.length)?SHIPPING:0;
+            $('#coSumBefore').textContent=toman(S.before);
+            $('#coSumDiscount').textContent=toman(S.totalDiscount);
+            $('#coShipping').textContent=toman(shipping);
+            const grand=S.afterFinal+shipping;$('#coSumAfter').textContent=toman(grand);$('#coGrand').textContent=toman(grand);
+        }
+
+        // ========= Lightbox (no zoom) =========
+        const activePill=(sel)=>`px-3 py-1.5 rounded-full border ${sel?'border-brand bg-brand/10 text-ink font-bold':'border-slate-300 hover:bg-slate-50'} text-sm`;
+
+        function renderLBVariants(it){
+            const romBox = $('#lbRom'); romBox.innerHTML='';
+            (it.variants||[{rom:it.rom, price:it.price}]).forEach(v=>{
+                const b=document.createElement('button'); b.type='button';
+                b.className = activePill(state.lbVariant?.rom===v.rom); b.textContent = `${v.rom}GB`;
+                b.addEventListener('click',()=>{state.lbVariant=v; renderLBVariants(it); updateLBPrice(it);});
+                romBox.appendChild(b);
+            });
+
+            const colorBox = $('#lbColor'); colorBox.innerHTML='';
+            (it.colors||[{code:'default',label:'Default',sw:'#111'}]).forEach(c=>{
+                const b=document.createElement('button'); b.type='button';
+                b.className = activePill(state.lbColor?.code===c.code);
+                b.innerHTML = `<span class="inline-flex items-center gap-2"><span class="size-3 rounded-full border" style="background:${c.sw}"></span>${c.label}</span>`;
+                b.addEventListener('click',()=>{state.lbColor=c; renderLBVariants(it); updateLBPrice(it);});
+                colorBox.appendChild(b);
+            });
+        }
+
+        function renderLBAddons(it){
+            const box=$('#lbAddons'); box.innerHTML='';
+            (it.addons||[]).forEach(id=>{
+                const ad = MENU.find(x=>x.id===id); if(!ad) return;
+                const row=document.createElement('label');
+                row.className='flex items-center justify-between rounded-xl border border-stroke px-3 py-2';
+                row.innerHTML=`<div class="flex items-center gap-2">
+                    <img src="${ad.gallery?.[0]||ad.img}" class="size-9 rounded-lg object-cover border border-stroke/70" alt="">
+                    <div class="text-sm">${ad.title}</div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                    <div class="text-sm tabnums">${toman(newPrice(ad))}</div>
+                    <input type="checkbox" class="addon">
+                    </div>`;
+                const input=row.querySelector('input');
+                input.addEventListener('change',e=>{ if(e.target.checked) state.lbAddonSel.add(ad.id); else state.lbAddonSel.delete(ad.id); updateLBPrice(it);});
+                box.appendChild(row);
+            });
+        }
+
+        function renderLBBundles(it){
+            const box=$('#lbBundles'); box.innerHTML='';
+            (it.bundles||[]).forEach(b=>{
+                const items=(b.items||[]).map(id=> id===it.id? it : MENU.find(m=>m.id===id)).filter(Boolean);
+                const sum=items.reduce((s,x)=>s+newPrice(x),0);
+                const discounted=Math.round(sum*(1-(b.discount||0)));
+                const el=document.createElement('div');
+                el.className='rounded-xl border border-stroke p-3 flex items-center justify-between';
+                el.innerHTML=`<div class="text-sm">
+                    <div class="font-bold">${b.title}</div>
+                    <div class="text-slate-600 mt-0.5">${items.map(i=>i.title).join(' + ')}</div>
+                    </div>
+                    <div class="flex items-end gap-2">
+                    ${b.discount?`<div class="text-xs line-through text-slate-400 tabnums">${toman(sum)}</div>`:''}
+                    <div class="text-base font-extrabold tabnums">${toman(discounted)}</div>
+                    <button class="rounded-lg border border-slate-300 px-3 py-1.5 hover:bg-slate-50 text-sm">افزودن همه</button>`;
+                el.querySelector('button').addEventListener('click',()=>{ items.forEach(x=>addToCart(x.id,1)); });
+                box.appendChild(el);
+            });
+
+            // with-this
+            if((it.also||[]).length){
+                const alsoItems=(it.also||[]).map(id=>MENU.find(m=>m.id===id)).filter(Boolean);
+                const wrap=document.createElement('div');
+                wrap.className='rounded-xl border border-stroke p-3';
+                wrap.innerHTML=`<div class="text-sm font-bold mb-2">با این می‌خرند</div><div id="also-grid" class="grid grid-cols-1 gap-2"></div>`;
+                const grid=wrap.querySelector('#also-grid');
+                alsoItems.forEach(a=>{
+                    const row=document.createElement('div');
+                    row.className='flex items-center justify-between';
+                    const isAdded = state.cart[a.id] > 0;
+                    row.innerHTML=`<div class="flex items-center gap-2">
+                        <img src="${a.gallery?.[0]||a.img}" class="size-9 rounded-lg object-cover border border-stroke/70" alt="">
+                        <div class="text-sm">${a.title}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                        <div class="text-sm tabnums">${toman(newPrice(a))}</div>
+                        <button class="rounded-lg border border-slate-300 px-3 py-1.5 hover:bg-slate-50 text-sm" data-also-id="${a.id}">${isAdded ? 'حذف' : 'افزودن'}</button>
+                        </div>`;
+                    row.querySelector('button').addEventListener('click', (e) => {
+                        const id = e.target.dataset.alsoId;
+                        if (state.cart[id] > 0) {
+                            changeQty(id, -1);
+                            e.target.textContent = 'حذف';
+                        } else {
+                            addToCart(id, 1);
+                            e.target.textContent = 'افزودن';
+                        }
+                    });
+                    grid.appendChild(row);
+                });
+                box.appendChild(wrap);
+            }
+        }
+
+        function renderLBSpecs(it){
+            const dl=$('#lbSpecs'); dl.innerHTML='';
+            const row=(k,v)=>{const dt=document.createElement('dt');dt.className='text-slate-500';dt.textContent=k;const dd=document.createElement('dd');dd.className='tabnums';dd.textContent=v;dl.append(dt,dd);}
+            row('برند', it.brand);
+            row('حافظه پایه', (it.rom||'-')+'GB');
+            row('رم', it.ram+'GB');
+            row('نمایشگر', it.display+'"');
+            row('پارت نامبر', it.partNo||'-');
+            row('رجیستر', it.register?'دارای رجیستری':'—');
+            row('گارانتی', it.warranty? (it.warranty+' ماه') : '—');
+        }
+        function renderLBStatus(it){
+            const box=$('#lbStatus'); box.innerHTML='';
+            const c=(color,txt,icon)=>`<span class="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[12px]" style="border-color:${color};background:${color}1A;"><span style="color:${color}">${icon}</span><span>${txt}</span></span>`;
+            box.innerHTML=[
+                c(it.register?'#059669':'#ef4444', it.register?'ثبت رجیستری: تایید شده':'نیاز به بررسی رجیستری', it.register?ICONS.register:ICONS.warning),
+                c('#2563eb', it.warranty?('گارانتی '+it.warranty+' ماهه'):'بدون گارانتی', ICONS.warranty),
+                c(it.active?'#f59e0b':'#10b981', it.active?'وضعیت: اکتیو':'وضعیت: آکبند', it.active?ICONS.warning:ICONS.seal)
+            ].join(' ');
+        }
+        function renderLBGallery(it){
+            const main=$('#lbImg'); const thumbs=$('#lbThumbs');
+            thumbs.innerHTML='';
+            const imgs=it.gallery?.length?it.gallery:[it.img];
+            state.lbGalleryIndex=0;
+            main.src=imgs[0]||'';
+            imgs.forEach((src,i)=>{
+                const b=document.createElement('button'); b.className='rounded-xl flex-none overflow-hidden border border-stroke'; b.innerHTML=`<img src="${src}" class="w-20 h-16 object-cover">`;
+                b.addEventListener('click',()=>{ main.src=src; state.lbGalleryIndex=i; }); thumbs.appendChild(b);
+            });
+        }
+
+        function switchTabs(){
+            const tabs=$$('#lbTabs button');
+            tabs.forEach(btn=>btn.addEventListener('click',()=>{
+                tabs.forEach(x=>x.dataset.active='false'); btn.dataset.active='true';
+                ['buy','specs','desc'].forEach(t=>$('#tab-'+t).classList.add('hidden'));
+                $('#tab-'+btn.dataset.tab).classList.remove('hidden');
+            }));
+        }
+
+        function updateLBPrice(it){
+            const basePrice = state.lbVariant?.price ?? it.price;
+            const hasOff = it.off && it.off > 0;
+            const pNow = hasOff ? Math.round(basePrice*(1-it.off)) : basePrice;
+
+            let addonsSum=0; [...state.lbAddonSel].forEach(id=>{ const ad=MENU.find(x=>x.id===id); addonsSum += newPrice(ad); });
+
+            const total=pNow+addonsSum;
+            $('#lbOld').textContent = hasOff ? toman(basePrice) : '';
+            $('#lbNew').textContent = toman(total);
+
+            const offLabel=$('#lbOff');
+            if(hasOff){ offLabel.classList.remove('hidden'); offLabel.textContent='٪'+Math.round(it.off*100); }
+            else { offLabel.classList.add('hidden'); }
+
+            $('#lbAdd').dataset.total=String(total);
+        }
+
+        function openLightbox(id){
+            const it=MENU.find(m=>m.id===id); if(!it) return;
+            state.lbId=id; state.lbAddonSel=new Set();
+            state.lbVariant=(it.variants && it.variants[0]) || {rom:it.rom, price:it.price};
+            state.lbColor=(it.colors && it.colors[0]) || null;
+            state.lbTab = 'buy';
+
+            $('#lbTitle').textContent=it.title;
+            $('#lbBrand').textContent=it.brand;
+
+            renderLBGallery(it);
+            renderLBVariants(it);
+            renderLBAddons(it);
+            renderLBBundles(it);
+            renderLBSpecs(it);
+            renderLBStatus(it);
+
+            // set default tab to 'buy'
+            $$('#lbTabs button').forEach(b => {
+                b.dataset.active = (b.dataset.tab === 'buy') ? 'true' : 'false';
+            });
+            $('#tab-buy').classList.remove('hidden');
+            $('#tab-specs').classList.add('hidden');
+            $('#tab-desc').classList.add('hidden');
+
+            updateLBPrice(it);
+
+            $('#lightbox').classList.remove('hidden');
+        }
+        function closeLightbox(){$('#lightbox').classList.add('hidden');}
+
+        // ========= Search/Sort =========
+        function bindSortAndSearch(){
+            $('#q').addEventListener('input',e=>{state.q=e.target.value;$('#qClear').classList.toggle('hidden',!state.q);renderGrid();});
+            $('#qClear').addEventListener('click',()=>{state.q='';$('#q').value='';$('#qClear').classList.add('hidden');renderGrid();});
+            $$('#sortGrp [data-sort]').forEach(btn=>btn.addEventListener('click',()=>{$$('#sortGrp [data-sort]').forEach(b=>b.dataset.active='false');btn.dataset.active='true';state.sort=btn.dataset.sort;renderGrid();}));
+        }
+
+        // ========= Filters Panel toggle (in-flow) =========
+        function wireFilters(){
+            $('#btnFilters').addEventListener('click',()=>$('#filtersPanel').classList.toggle('hidden'));
+        }
+
+        // ========= Promo UI =========
+        function toggleCollapse(box,open){
+            if(open===undefined)open=!(box.dataset.open==='true');
+            box.dataset.open=open?'true':'false';
+            box.style.maxHeight=open?box.scrollHeight+'px':'0px';
+            box.style.opacity=open?1:0;
+        }
+        function wirePromo(scope=''){
+            const id=x=>scope?`#${scope}${x}`:`#${x}`;
+            const t=$(id('promoToggle')),
+                box=$(id('promoBox')),
+                input=$(id('promoInput')),
+                apply=$(id('promoApply')),
+                cancel=$(id('promoCancel')),
+                msg=$(id('promoMsg'));
+            if(!t||!box) return;
+            t.addEventListener('click',()=>toggleCollapse(box));
+            apply?.addEventListener('click',()=>{const res=applyPromo(input.value);if(res.ok){state.promo=res;store.set('promo',state.promo);msg.textContent=`(${res.code}) اعمال شد`;toggleCollapse(box,false);drawCart();if(state.view==='checkout')drawCheckout();}else{msg.textContent=res.msg}});
+            cancel?.addEventListener('click',()=>{clearPromo();msg.textContent='';input.value='';drawCart();if(state.view==='checkout')drawCheckout();toggleCollapse(box,false);});
+        }
+
+        // ========= Login (phone + code) =========
+        function wireLogin(){
+            const sheet=$('#loginSheet');
+            $('#btnLogin').addEventListener('click',()=>sheet.classList.remove('hidden'));
+            $$('#loginSheet [data-close]').forEach(el=>el.addEventListener('click',()=>sheet.classList.add('hidden')));
+
+            const phone=$('#loginPhone'), send=$('#sendCode'), vbtn=$('#verifyCode');
+            send.addEventListener('click',()=>{
+                const val=(phone.value||'').trim();
+                if(!/^09\d{9}$/.test(val)) return toast('شماره معتبر وارد کنید');
+                $('#loginStep1').classList.add('hidden');
+                $('#loginStep2').classList.remove('hidden');
+                $('.codeInput', $('#loginStep2'))?.focus?.();
+            });
+
+            $$('#loginStep2 .codeInput').forEach((inp,idx,arr)=>{
+                inp.addEventListener('input',()=>{ if(inp.value && idx<arr.length-1) arr[idx+1].focus(); });
+                inp.addEventListener('keydown',(e)=>{ if(e.key==='Backspace' && !inp.value && idx>0) arr[idx-1].focus(); });
+            });
+
+            vbtn.addEventListener('click',()=>{
+                const code=$$('#loginStep2 .codeInput').map(i=>i.value).join('');
+                if(code.length<6) return toast('کد تایید را کامل وارد کنید');
+                sheet.classList.add('hidden');
+                toast('با موفقیت وارد شدید');
+            });
+        }
+
+        // ========= JSON-LD =========
+        function injectLDJSON(){
+            const head=document.head;
+            MENU.filter(p=>p.brand!=='accessory').forEach(p=>{
+                const offerPrice=newPrice(p);
+                const data={"@context":"https://schema.org","@type":"Product","name":p.title,"sku":p.id,"brand":p.brand,"image":p.gallery?.[0]||p.img,"description":p.desc||"","offers":{"@type":"Offer","priceCurrency":"IRR","price":offerPrice,"availability":"https://schema.org/InStock"}};
+                const s=document.createElement('script'); s.type='application/ld+json'; s.text=JSON.stringify(data); head.appendChild(s);
+            });
+        }
+
+        // ========= Boot =========
+        (function(){
+            renderCats();
+            renderFilters();
+            renderGrid();
+            drawCart();
+            bindSortAndSearch();
+            wireFilters();
+            wirePromo(''); // Main cart promo
+            wirePromo('co'); // Checkout promo
+            wireLogin();
+            injectLDJSON();
+            switchTabs(); // This line is corrected to run once
+
+            // mobile cart
+            $('#mobileCartBtn').addEventListener('click',()=>$('#mCart').classList.remove('hidden'));
+            $$('#mCart [data-close]').forEach(el=>el.addEventListener('click',()=>$('#mCart').classList.add('hidden')));
+
+            // clear cart button fix
+            $('#clearCart').addEventListener('click', clearCart);
+
+            // checkout
+            $('#goCheckout').addEventListener('click',openCheckout);
+            $('#mGoCheckout').addEventListener('click',openCheckout);
+            $('#backToMenu').addEventListener('click',backToMenu);
+            $$('.delivery-btn').forEach(b=>b.addEventListener('click',()=>{
+                $$('.delivery-btn').forEach(x=>x.dataset.active='false');b.dataset.active='true';
+                state.delivery=b.id==='dBike'?'bike':'pickup';
+                drawCheckout();
+            }));
+
+            // lightbox & keyboard
+            $$('#lightbox [data-close]').forEach(el=>el.addEventListener('click',closeLightbox));
+            $('#lbClose')?.addEventListener('click',closeLightbox);
+            document.addEventListener('keydown',e=>{if(e.key==='Escape'){ closeLightbox(); }});
+
+            // Add-to-cart from lightbox
+            $('#lbAdd').addEventListener('click',()=>{
+                const base = MENU.find(m=>m.id===state.lbId); if(!base) return;
+                const rom = state.lbVariant?.rom || base.rom;
+                const color = state.lbColor?.label || '';
+                const basePrice = state.lbVariant?.price ?? base.price;
+                const varId = `var|${base.id}|${rom}|${state.lbColor?.code||'default'}`;
+                let varItem = MENU.find(x=>x.id===varId);
+                if(!varItem){
+                    varItem = {...base, id:varId, title:`${base.title} — ${rom}GB${color?(' — '+color):''}`, price:basePrice, variantLabel:`${rom}GB`, colorLabel:color};
+                    MENU.push(varItem);
+                }
+                addToCart(varId,1);
+                [...state.lbAddonSel].forEach(id=> addToCart(id,1));
+                closeLightbox();
+            });
+
+            updateCheckoutCTA();
+        })();
+
+        // ========= Expose =========
+        window.openLightbox=openLightbox;
+        window.addToCart=addToCart;
+        window.changeQty=changeQty;
+    </script>
+</body>
+</html>
