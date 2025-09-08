@@ -3,525 +3,294 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>یابنده آسمانی – جهت‌یاب ماهواره‌های تلویزیونی</title>
+  <title>یابنده آسمانی – موبایل</title>
   <meta name="theme-color" content="#0b0f17">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0b0f17;        /* smokey night */
-      --card:#121826;      /* deep slate */
-      --ink:#e8eefc;       /* off-white */
-      --muted:#aeb8d4;     /* soft bluegray */
-      --accent:#4ad6ff;    /* cyan */
-      --accent-2:#7dfc8a;  /* green */
-      --danger:#ff4a4a;    /* red */
-      --ok:#27d17c;        /* success green */
-      --warn:#ffd166;      /* amber */
-      --ring: 0 0 0 2px color-mix(in hsl, var(--accent) 40%, transparent);
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { vazir: ['Vazirmatn','system-ui','sans-serif'] },
+          colors: {
+            ink: '#e8eefc', muted: '#aeb8d4',
+            base: '#0b0f17', card: '#101623', accent: '#4ad6ff', ok:'#27d17c', warn:'#ffd166', danger:'#ff4a4a'
+          },
+          boxShadow:{ glass:'0 10px 30px rgba(0,0,0,.45)'}
+        }
+      }
     }
-
-    * { box-sizing: border-box; }
-    html, body { height:100%; }
-    body{
-      margin:0; font-family:"Vazirmatn", system-ui, sans-serif;
-      background: radial-gradient(1200px 800px at 50% -10%, #121826 0%, #0b0f17 60% 100%);
-      color:var(--ink);
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* ====== Layout ====== */
-    .wrap{ max-width:720px; margin-inline:auto; padding:16px 14px 28px; }
-    header.top{
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding:8px 0 14px; position:sticky; top:0; background:linear-gradient(180deg, rgba(11,15,23,.95), rgba(11,15,23,.65) 60%, transparent);
-      z-index:5; backdrop-filter: blur(6px);
-    }
-    header .ttl{ font-weight:800; letter-spacing:.2px; font-size:20px; display:flex; align-items:center; gap:8px; }
-    .pill{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.05); color:var(--muted); font-size:12px; }
-    .dot{ width:8px; height:8px; border-radius:50%; background:var(--warn); box-shadow:0 0 0 3px rgba(255,209,102,.1); }
-    .dot.ok{ background:var(--ok); box-shadow:0 0 0 3px rgba(39,209,124,.12); }
-    .dot.err{ background:var(--danger); box-shadow:0 0 0 3px rgba(255,74,74,.12); }
-
-    .card{ background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; box-shadow:0 6px 24px rgba(0,0,0,.35); }
-
-    .row{ display:grid; grid-template-columns:1fr; gap:12px; }
-    @media (min-width:560px){ .row.cols-2{ grid-template-columns:1fr 1fr; } }
-
-    /* ===== Controls ===== */
-    label{ font-size:12px; color:var(--muted); margin-bottom:6px; display:block; }
-    .ctrl{ display:grid; gap:8px; }
-    select, input[type="text"], input[type="number"], button{ width:100%; padding:12px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0f1522; color:var(--ink); outline:none; }
-    select:focus, input:focus{ box-shadow: var(--ring); border-color: color-mix(in hsl, var(--accent) 45%, transparent); }
-    button{ background:linear-gradient(180deg, color-mix(in hsl, var(--accent) 35%, #0f1522), #0f1522); font-weight:600; letter-spacing:.2px; cursor:pointer; }
-    button.secondary{ background:#0f1522; }
-    button.ghost{ background:transparent; border-color:rgba(255,255,255,.14); }
-
-    .inline { display:flex; gap:8px; align-items:center; }
-    .inline > * { flex:1; }
-
-    .hint{ font-size:12px; color:var(--muted); line-height:1.7; }
-
-    /* ===== Compass ===== */
-    .viz{ display:grid; gap:14px; }
-    .compass{
-      position:relative; width:100%; aspect-ratio:1/1; max-width:540px; margin:0 auto; border-radius:50%;
-      background:radial-gradient(40% 40% at 50% 50%, rgba(122,144,187,.15), transparent 60%), conic-gradient(from 0deg, rgba(255,255,255,.05) 0 100%);
-      border:1px solid rgba(255,255,255,.12); box-shadow: inset 0 0 0 2px rgba(255,255,255,.04), 0 20px 50px rgba(0,0,0,.45);
-    }
-    .ticks{ position:absolute; inset:12px; border-radius:50%; }
-    .tick{ position:absolute; left:50%; top:50%; width:2px; height:10px; background:rgba(255,255,255,.25); transform-origin:50% calc(50% - 43%); opacity:.7; }
-    .tick.big{ height:16px; background:rgba(255,255,255,.5); }
-    .label{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); text-align:center; }
-    .azval{ font-size:40px; font-weight:800; letter-spacing:.3px; }
-    .sub{ font-size:12px; color:var(--muted); }
-
-    .needle{ position:absolute; left:50%; top:50%; width:2px; height:45%; background:var(--accent); transform-origin:50% 100%; box-shadow:0 0 12px color-mix(in hsl, var(--accent) 70%, transparent); }
-    .needle::after{ content:""; position:absolute; inset:auto -6px -10px -6px; height:12px; background:var(--accent); border-radius:0 0 8px 8px; filter:blur(.3px); }
-
-    .target{ position:absolute; left:50%; top:50%; width:4px; height:50%; transform-origin:50% 100%; }
-    .target::before{ content:""; position:absolute; inset:auto -10px -12px -10px; height:14px; background:var(--accent-2); border-radius:0 0 12px 12px; box-shadow:0 0 0 2px rgba(125,252,138,.25), 0 0 22px rgba(125,252,138,.35); }
-    .window{ position:absolute; left:50%; top:50%; width:8px; height:54%; transform-origin:50% 100%; background:linear-gradient(180deg, rgba(125,252,138,.18), transparent 75%); filter:saturate(1.2); }
-
-    .ringGlow{ position:absolute; inset:-8px; border-radius:50%; pointer-events:none; box-shadow:0 0 0 0 rgba(39,209,124,.0); transition: box-shadow .25s ease; }
-    .locked .ringGlow{ box-shadow: 0 0 0 6px rgba(39,209,124,.18), 0 0 60px 8px rgba(39,209,124,.35); }
-
-    /* ===== Elevation meter ===== */
-    .elev{
-      position:relative; width:100%; max-width:520px; height:140px; margin:0 auto; border-radius:16px; border:1px solid rgba(255,255,255,.08);
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-    }
-    .elev svg{ width:100%; height:100%; display:block; }
-    .chiprow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:space-between; align-items:center; }
-    .chip{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); padding:6px 10px; border-radius:999px; font-size:12px; color:var(--muted); }
-
-    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .kv{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; }
-    .kv b{ font-size:13px; color:var(--muted); }
-    .kv .v{ font-size:18px; font-weight:700; }
-    .kv.ok{ border-color:rgba(125,252,138,.35); box-shadow: inset 0 0 0 1px rgba(125,252,138,.25); }
-
-    footer{ margin-top:18px; color:var(--muted); font-size:12px; line-height:1.8; }
-    .sep{ opacity:.4; margin-inline:4px; }
-
-    .danger{ color:var(--danger); }
-    .okTxt{ color:var(--ok); }
-
-    .hidden{ display:none !important; }
-  </style>
+  </script>
+  <style> html,body{height:100%} body{background:radial-gradient(1200px 800px at 50% -10%, #101623 0%, #0b0f17 60% 100%);} *{ -webkit-tap-highlight-color:transparent } </style>
 </head>
-<body>
-  <div class="wrap">
-    <header class="top">
-      <div class="ttl">📡 یابنده آسمانی</div>
-      <div class="inline" style="justify-content:flex-end; gap:6px;">
-        <span class="pill" id="gps-pill"><span class="dot" id="gps-dot"></span> GPS</span>
-        <span class="pill" id="sens-pill"><span class="dot" id="sens-dot"></span> سنسورها</span>
+<body class="font-vazir text-ink bg-base">
+  <!-- Safe top -->
+  <div class="px-4 pb-28 pt-[max(env(safe-area-inset-top),16px)] max-w-md mx-auto">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-20 -mx-4 px-4 pt-3 pb-2 bg-base/70 backdrop-blur border-b border-white/5">
+      <div class="flex items-center justify-between">
+        <h1 class="text-lg font-extrabold tracking-tight flex items-center gap-2">📡 یابنده آسمانی</h1>
+        <div class="flex items-center gap-2 text-xs">
+          <span id="gps-pill" class="flex items-center gap-1 rounded-full border border-white/10 px-2 py-1 text-muted"><span id="gps-dot" class="inline-block w-2 h-2 rounded-full bg-warn shadow-[0_0_0_3px_rgba(255,209,102,.15)]"></span>GPS</span>
+          <span id="sens-pill" class="flex items-center gap-1 rounded-full border border-white/10 px-2 py-1 text-muted"><span id="sens-dot" class="inline-block w-2 h-2 rounded-full bg-warn shadow-[0_0_0_3px_rgba(255,209,102,.15)]"></span>سنسورها</span>
+        </div>
       </div>
     </header>
 
-    <section class="card ctrl" aria-label="انتخاب ماهواره">
-      <label for="satSel">ماهواره</label>
-      <div class="inline">
-        <input id="satFilter" placeholder="جستجو: نام یا طول جغرافیایی (مثلاً 13E)" inputmode="search" />
-        <select id="satSel" aria-label="فهرست ماهواره ها"></select>
+    <!-- Controls Card -->
+    <section class="mt-3 rounded-2xl border border-white/10 bg-card/70 shadow-glass p-3">
+      <div class="space-y-3">
+        <!-- Satellite Search/Select -->
+        <div>
+          <label class="text-[12px] text-muted mb-1 block">ماهواره</label>
+          <div class="flex gap-2">
+            <input id="satFilter" placeholder="جستجو یا 13E / 7W" inputmode="search" class="flex-1 rounded-xl bg-base border border-white/10 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"/>
+            <select id="satSel" class="w-40 rounded-xl bg-base border border-white/10 px-2.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"></select>
+          </div>
+        </div>
+        <!-- Actions -->
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btnMyLoc" class="rounded-xl bg-gradient-to-b from-accent/40 to-base border border-white/10 py-2.5 font-semibold">📍 موقعیت من</button>
+          <button id="btnSensors" class="rounded-xl bg-base border border-white/10 py-2.5 font-semibold">🎛️ فعال‌سازی سنسورها</button>
+        </div>
+        <!-- Tuning row -->
+        <div class="flex items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-1 text-muted">
+            تلرانس: <span id="tol-read" class="font-bold text-ink">±2°</span>
+          </div>
+          <div class="flex gap-1">
+            <button data-tol="1" class="tol rounded-full border border-white/10 px-2.5 py-1">±1°</button>
+            <button data-tol="2" class="tol rounded-full border border-white/10 px-2.5 py-1 ring-1 ring-accent/40">±2°</button>
+            <button data-tol="3" class="tol rounded-full border border-white/10 px-2.5 py-1">±3°</button>
+            <button id="tolMore" class="rounded-full border border-white/10 px-2.5 py-1">سفارشی</button>
+          </div>
+        </div>
+        <div id="tolCustom" class="hidden items-center gap-3 text-xs text-muted">
+          <span>±</span>
+          <input id="tolAz" type="range" min="1" max="10" value="2" class="w-full accent-cyan-300">
+          <span>° سمت</span>
+          <input id="tolEl" type="range" min="1" max="10" value="2" class="w-full accent-cyan-300">
+          <span>° ارتفاع</span>
+        </div>
+        <!-- Sound / Declination -->
+        <div class="flex items-center justify-between text-xs">
+          <label class="flex items-center gap-2"><input id="soundToggle" type="checkbox" class="accent-cyan-300"/> صدای قفل به‌جای ویبره</label>
+          <label class="flex items-center gap-2"><input id="declToggle" type="checkbox" class="accent-cyan-300"/> اصلاح شمال مغناطیسی</label>
+        </div>
+        <div id="declBox" class="hidden flex items-center gap-2 text-xs text-muted">
+          <span>انحراف (°±):</span>
+          <input id="declInput" type="number" step="0.1" value="0" class="w-24 rounded-lg bg-base border border-white/10 px-2 py-1"/>
+          <span class="text-[11px]">(در صورت نیاز برای منطقه‌تان وارد کنید)</span>
+        </div>
       </div>
-      <div class="row cols-2">
-        <button id="btnMyLoc">📍 موقعیت من</button>
-        <button id="btnSensors" class="secondary">🎛️ فعال‌سازی سنسورها</button>
-      </div>
-      <div class="hint">راهنما: یک ماهواره را انتخاب کنید (یا طول جغرافیایی را دستی وارد کنید)، موقعیت خود را بگیرید، سپس گوشی را بچرخانید و کج کنید تا سوزن‌ها هم‌راستا شوند. هنگام قفل روی هدف، لرزش/اعلان دریافت می‌کنید.</div>
     </section>
 
-    <section class="viz" style="margin-top:14px;">
-      <div class="card compass" id="compass">
-        <div class="ringGlow"></div>
-        <div class="ticks" id="ticks"></div>
-        <div class="needle" id="needle" title="سمت فعلی"></div>
-        <div class="target" id="target" title="سمت ماهواره"></div>
-        <div class="window" id="winAz"></div>
-        <div class="label">
-          <div class="azval" id="azRead">—°</div>
-          <div class="sub"><span id="azDiff">—</span> از هدف · سمت (° از شمال)</div>
+    <!-- Visualization -->
+    <section class="mt-3 space-y-3">
+      <!-- Compass -->
+      <div id="compass" class="relative rounded-full aspect-square max-w-[420px] mx-auto border border-white/10 bg-[radial-gradient(40%_40%_at_50%_50%,rgba(122,144,187,.18),transparent_60%),conic-gradient(from_0deg,rgba(255,255,255,.05)_0_100%)] shadow-glass">
+        <div class="absolute inset-2 rounded-full pointer-events-none" id="ringGlow"></div>
+        <!-- ticks -->
+        <div id="ticks" class="absolute inset-3 rounded-full"></div>
+        <!-- target wedge -->
+        <div id="winAz" class="absolute left-1/2 top-1/2 w-1.5 h-[54%] origin-bottom -translate-x-1/2 -translate-y-full bg-gradient-to-b from-ok/25 to-transparent"></div>
+        <!-- target needle -->
+        <div id="target" class="absolute left-1/2 top-1/2 w-[5px] h-1/2 origin-bottom -translate-x-1/2 -translate-y-full">
+          <div class="absolute -inset-x-2 -bottom-3 h-3 rounded-b-xl bg-ok shadow-[0_0_0_2px_rgba(125,252,138,.35),0_0_22px_rgba(125,252,138,.35)]"></div>
+        </div>
+        <!-- current needle -->
+        <div id="needle" class="absolute left-1/2 top-1/2 w-[3px] h-[45%] origin-bottom -translate-x-1/2 -translate-y-full bg-accent shadow-[0_0_12px_rgba(74,214,255,.7)]">
+          <div class="absolute -inset-x-1 -bottom-2 h-2 rounded-b-md bg-accent"></div>
+        </div>
+        <!-- center label -->
+        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center select-none">
+          <div id="azRead" class="text-4xl font-extrabold">—°</div>
+          <div class="text-[12px] text-muted"><span id="azDiff">—</span> از هدف · سمت</div>
         </div>
       </div>
 
-      <div class="card elev" id="elevCard">
-        <!-- Elevation Arc -->
-        <svg viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <linearGradient id="gOk" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stop-opacity=".8"/>
-              <stop offset="100%" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <!-- grid -->
+      <!-- Elevation -->
+      <div id="elevCard" class="rounded-2xl border border-white/10 bg-card/70 shadow-glass p-3">
+        <svg viewBox="0 0 1000 300" class="w-full h-[140px]">
           <g opacity=".25">
             <line x1="50" x2="950" y1="240" y2="240" stroke="rgba(255,255,255,.2)"/>
             <line x1="50" x2="950" y1="170" y2="170" stroke="rgba(255,255,255,.12)"/>
             <line x1="50" x2="950" y1="100" y2="100" stroke="rgba(255,255,255,.08)"/>
           </g>
-          <!-- target elev window -->
           <path id="elevWindow" d="" fill="rgba(125,252,138,.18)" stroke="rgba(125,252,138,.3)" stroke-width="2" />
-          <!-- current elev pointer -->
-          <circle id="elevDot" cx="50" cy="240" r="10" fill="var(--accent)"/>
+          <circle id="elevDot" cx="50" cy="240" r="10" fill="#4ad6ff"/>
         </svg>
-        <div class="chiprow">
-          <span class="chip">زاویه‌بالا (Elevation): <b id="elevTarget">—°</b></span>
-          <span class="chip">شیب گوشی: <b id="tiltNow">—°</b></span>
-          <span class="chip">اختلاف: <b id="elevDiff">—°</b></span>
+        <div class="flex items-center justify-between gap-2 text-[12px] text-muted">
+          <span>زاویه‌بالا: <b id="elevTarget" class="text-ink">—°</b></span>
+          <span>شیب گوشی: <b id="tiltNow" class="text-ink">—°</b></span>
+          <span>اختلاف: <b id="elevDiff" class="text-ink">—°</b></span>
         </div>
       </div>
 
-      <div class="row cols-2">
-        <div class="kv"><b>آزیموت هدف</b><div class="v" id="azTarget">—°</div></div>
-        <div class="kv"><b>چرخش LNB (اسکیو)</b><div class="v" id="skew">—°</div></div>
-        <div class="kv"><b>عرض/طول من</b><div class="v" id="myloc">—</div></div>
-        <div class="kv"><b>طول ماهواره</b><div class="v" id="satlon">—</div></div>
+      <!-- Stats -->
+      <div class="grid grid-cols-2 gap-2">
+        <div class="rounded-xl border border-white/10 bg-card/60 p-3"><div class="text-[12px] text-muted">آزیموت هدف</div><div id="azTarget" class="text-lg font-bold">—°</div></div>
+        <div class="rounded-xl border border-white/10 bg-card/60 p-3"><div class="text-[12px] text-muted">چرخش LNB</div><div id="skew" class="text-lg font-bold">—°</div></div>
+        <div class="rounded-xl border border-white/10 bg-card/60 p-3"><div class="text-[12px] text-muted">عرض/طول من</div><div id="myloc" class="text-lg font-bold">—</div></div>
+        <div class="rounded-xl border border-white/10 bg-card/60 p-3"><div class="text-[12px] text-muted">طول ماهواره</div><div id="satlon" class="text-lg font-bold">—</div></div>
       </div>
     </section>
 
-    <footer>
-      <div>⚠️ دقت قطب‌نما به کالیبراسیون، کیس آهنی و میدان‌های مغناطیسی اطراف حساس است. چند بار شکل ۸ حرکت دهید و دور از فلزات سنگین بایستید.</div>
-      <div><span class="sep">•</span> آزیموت از «شمال حقیقی» سنجیده می‌شود. در iOS مقدار <code>webkitCompassHeading</code> معمولاً حقیقی است. در اندروید ممکن است مغناطیسی باشد.</div>
-      <div><span class="sep">•</span> قفل زمانی فعال می‌شود که هر دو زاویه‌ی سمت و ارتفاع در بازه‌ی تعیین‌شده قرار بگیرند.</div>
+    <!-- Footer -->
+    <footer class="mt-3 text-[12px] text-muted leading-6">
+      <p>⚠️ دقت قطب‌نما به کالیبراسیون و میدان‌های مغناطیسی اطراف حساس است. چند بار شکل ۸ حرکت دهید و دور از فلزات سنگین بایستید. آزیموت از شمال حقیقی سنجیده می‌شود؛ در iOS معمولاً حقیقی است، در اندروید ممکن است مغناطیسی باشد (از «اصلاح شمال مغناطیسی» استفاده کنید).</p>
     </footer>
   </div>
 
-<script>
-/* ==========================
-   SkyFinder – Persian, mobile-first
-   No frameworks. Single file. 
-   ========================== */
-(function(){
-  const d = document;
-  const $ = sel => d.querySelector(sel);
-  const $$ = sel => Array.from(d.querySelectorAll(sel));
-  const toRad = deg => deg * Math.PI / 180;
-  const toDeg = rad => rad * 180 / Math.PI;
-  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  <!-- Bottom action bar (iOS friendly) -->
+  <div class="fixed inset-x-0 bottom-0 z-30 bg-base/80 backdrop-blur border-t border-white/10 p-[max(env(safe-area-inset-bottom),10px)]">
+    <div class="max-w-md mx-auto flex items-center justify-between gap-2">
+      <button id="calibBtn" class="flex-1 rounded-xl bg-base border border-white/10 py-2 text-sm">🧭 کالیبراسیون</button>
+      <button id="helpBtn" class="flex-1 rounded-xl bg-base border border-white/10 py-2 text-sm">❓راهنما</button>
+      <button id="lockBtn" class="flex-1 rounded-xl bg-gradient-to-b from-ok/30 to-base border border-white/10 py-2 font-bold">✅ قفل</button>
+    </div>
+  </div>
 
-  // ====== Satellite Catalog (نام + طول جغرافیایی بر حسب درجه شرق؛ غرب = مقدار منفی) ======
-  const SATS_RAW = [
-    // Popular in IR/ME/Europe
-    {name:"هاتبرد 13E (Eutelsat Hotbird)", lon: 13.0},
-    {name:"ترک‌ست 42E (Turksat)", lon: 42.0},
-    {name:"یاه‌ست 52.5E (Al Yah 1)", lon: 52.5},
-    {name:"عرب‌ست بدر 26E (Arabsat Badr)", lon: 26.0},
-    {name:"نایل‌ست 7W (Nilesat)", lon: -7.0},
-    {name:"یوتل‌ست 8W (Eutelsat 8 West)", lon: -8.0},
-    {name:"یوتل‌ست 7E", lon: 7.0},
-    {name:"هلاس‌ست 39E", lon: 39.0},
-    {name:"آسترا 19.2E", lon: 19.2},
-    {name:"آسترا 23.5E", lon: 23.5},
-    {name:"آسترا 28.2E", lon: 28.2},
-    {name:"سایریس/آسترا 4A 4.8E", lon: 4.8},
-    {name:"یوتل‌ست 16E", lon: 16.0},
-    {name:"یوتل‌ست 36E / اکسپرس AMU1", lon: 36.0},
-    {name:"آموس 4W", lon: -4.0},
-    {name:"ثور/انتلسَت 1W", lon: -1.0},
-    // Intelsat common positions
-    {name:"اینتل‌ست 20 (68.5E)", lon: 68.5},
-    {name:"اینتل‌ست 17 (66E)", lon: 66.0},
-    {name:"اینتل‌ست 39 (62E)", lon: 62.0},
-    {name:"اینتل‌ست 10-02 (1W)", lon: -1.0},
-    // Regionals
-    {name:"آذرسپیس/ترک‌ست 46E", lon: 46.0},
-    {name:"هِیسپاسات 30W", lon: -30.0},
-    {name:"یوتل‌ست 5W", lon: -5.0},
-    {name:"ABS 3A (3W)", lon: -3.0},
-    {name:"Express AMU7 (145E) – دور", lon: 145.0},
-    {name:"Express AM6 (53E)", lon: 53.0},
-    {name:"KazSat 48.5E", lon: 48.5},
-    {name:"PakSat 38E", lon: 38.0},
-    {name:"ChinaSat 12 (87.5E)", lon: 87.5},
-    {name:"AsiaSat 7 (105.5E)", lon: 105.5}
+<script>
+(function(){
+  const d = document;const $=s=>d.querySelector(s);const $$=s=>Array.from(d.querySelectorAll(s));
+  const toRad = deg => deg*Math.PI/180, toDeg = rad => rad*180/Math.PI;
+  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+
+  // ===== Expanded Satellite List (MENA/Europe focused) =====
+  const SATS = [
+    {name:'هاتبرد 13E (Eutelsat Hotbird)',lon:13},{name:'ترک‌ست 42E (Turksat)',lon:42},{name:'ترک‌ست 50E',lon:50},{name:'آذرسپیس/ترک‌ست 46E',lon:46},
+    {name:'یاه‌ست 52.5E (Al Yah 1)',lon:52.5},{name:'Express AM6 53E',lon:53},{name:'اینتل‌ست 62E',lon:62},{name:'اینتل‌ست 66E',lon:66},{name:'اینتل‌ست 68.5E',lon:68.5},
+    {name:'عرب‌ست بدر 26E',lon:26},{name:'نایل‌ست 7W',lon:-7},{name:'یوتل‌ست 8W',lon:-8},{name:'یوتل‌ست 5W',lon:-5},{name:'آموس 4W',lon:-4},{name:'ABS 3W',lon:-3},{name:'Thor/Intelsat 1W',lon:-1},
+    {name:'سایریس/آسترا 4A 4.8E',lon:4.8},{name:'یوتل‌ست 7E',lon:7},{name:'آسترا 19.2E',lon:19.2},{name:'آسترا 23.5E',lon:23.5},{name:'آسترا 28.2E',lon:28.2},{name:'یوتل‌ست 16E',lon:16},
+    {name:'یوتل‌ست 36E / Express AMU1',lon:36},{name:'هلاس‌ست 39E',lon:39},{name:'پک‌ست 38E',lon:38},{name:'کازست 48.5E',lon:48.5},
+    {name:'هیسپاسات 30W',lon:-30},{name:'Galaxy 19 97W (دور از ایران)',lon:-97},
+    {name:'ChinaSat 12 87.5E',lon:87.5},{name:'Asiasat 7 105.5E',lon:105.5},{name:'Express AMU7 145E',lon:145},
   ];
 
-  // Also allow manual entry via filter field (e.g., "13E", "7W", or degrees)
+  // DOM refs
+  const satSel=$('#satSel'), satFilter=$('#satFilter');
+  const ticks=$('#ticks'), needle=$('#needle'), target=$('#target'), winAz=$('#winAz');
+  const azRead=$('#azRead'), azDiff=$('#azDiff'), azTarget=$('#azTarget');
+  const elevTarget=$('#elevTarget'), elevDiff=$('#elevDiff'), tiltn=$('#tiltNow');
+  const elevDot=$('#elevDot'), elevWindow=$('#elevWindow');
+  const myloc=$('#myloc'), satlonEl=$('#satlon');
+  const gpsDot=$('#gps-dot'), sensDot=$('#sens-dot');
+  const tolRead=$('#tol-read');
+  const tolMore=$('#tolMore'), tolBox=$('#tolCustom');
+  const tolAz=$('#tolAz'), tolEl=$('#tolEl');
+  const soundToggle=$('#soundToggle');
+  const declToggle=$('#declToggle'), declBox=$('#declBox'), declInput=$('#declInput');
+  const ringGlow=$('#ringGlow');
 
-  // ====== State ======
-  const state = {
-    lat: null, lon: null,
-    satLon: 13.0,
-    target: { az: null, el: null, skew: null },
-    heading: null,  // device heading from north (deg)
-    pitch: 0,       // phone tilt (deg up)
-    lock: false,
-    tolAz: 3,       // deg
-    tolEl: 3,
-    lastBuzz: 0
-  };
+  // State
+  const S={ lat:null, lon:null, satLon:13, target:{az:null,el:null,skew:null}, heading:null, pitch:0, tolAz:2, tolEl:2, lastBuzz:0, decl:0 };
 
-  // ====== DOM refs ======
-  const satSel = $('#satSel');
-  const satFilter = $('#satFilter');
-  const ticks = $('#ticks');
-  const needle = $('#needle');
-  const target = $('#target');
-  const winAz = $('#winAz');
-  const azRead = $('#azRead');
-  const azDiff = $('#azDiff');
-  const azTarget = $('#azTarget');
-  const elevTarget = $('#elevTarget');
-  const elevDiff = $('#elevDiff');
-  const tiltn = $('#tiltNow');
-  const elevDot = $('#elevDot');
-  const elevWindow = $('#elevWindow');
-  const myloc = $('#myloc');
-  const satlonEl = $('#satlon');
-  const compassCard = $('#compass');
-  const gpsDot = $('#gps-dot');
-  const sensDot = $('#sens-dot');
-
-  // ====== Build compass ticks ======
-  for(let i=0;i<360;i+=5){
-    const x = d.createElement('div');
-    x.className = 'tick' + (i%30===0?' big':'');
-    x.style.transform = `translate(-50%,-50%) rotate(${i}deg)`;
-    ticks.appendChild(x);
+  // Build ticks (every 10°, larger every 30°)
+  for(let i=0;i<360;i+=10){
+    const div=d.createElement('div');
+    div.className='absolute left-1/2 top-1/2 w-[2px] bg-white/30 '+(i%30===0?'h-5':'h-3');
+    div.style.transform='translate(-50%,-50%) rotate('+i+'deg) translateY(-43%)';
+    ticks.appendChild(div);
   }
 
-  // ====== Populate satellites ======
-  function fmtLon(v){ return (v>=0? v.toFixed(1)+"°E" : Math.abs(v).toFixed(1)+"°W"); }
-  function renderSatList(list){
-    satSel.innerHTML = '';
-    list.forEach((s,idx)=>{
-      const opt = d.createElement('option');
-      opt.value = String(s.lon);
-      opt.textContent = `${s.name} · ${fmtLon(s.lon)}`;
-      satSel.appendChild(opt);
-    });
-  }
-  renderSatList(SATS_RAW);
+  // Fill satellite list
+  function fmtLon(v){return (v>=0? v.toFixed(1)+'°E' : Math.abs(v).toFixed(1)+'°W');}
+  function renderSatList(list){ satSel.innerHTML=''; list.forEach(s=>{ const o=d.createElement('option'); o.value=s.lon; o.textContent=s.name+' · '+fmtLon(s.lon); satSel.appendChild(o); }); }
+  renderSatList(SATS);
 
-  // Filter + manual longitude support
-  satFilter.addEventListener('input', ()=>{
-    const q = satFilter.value.trim();
-    // Try to parse manual longitude like "13E" / "7W" / plain number
-    const m = q.match(/^(-?\d+(?:\.\d+)?)(?:\s*[eEwW])?$/);
-    const m2 = q.match(/^(\d+(?:\.\d+)?)\s*([eEwW])$/);
-    if(m2){
-      state.satLon = (m2[2].toUpperCase()==='W'? -1: 1) * parseFloat(m2[1]);
-      updateCalcs();
-    } else if(m){
-      state.satLon = parseFloat(m[1]);
-      updateCalcs();
-    }
-    const filtered = SATS_RAW.filter(s=> s.name.toLowerCase().includes(q.toLowerCase()) || fmtLon(s.lon).toLowerCase().includes(q.toLowerCase()));
-    renderSatList(filtered.length? filtered : SATS_RAW);
+  satFilter.addEventListener('input',()=>{
+    const q=satFilter.value.trim();
+    const m2=q.match(/^(\d+(?:\.\d+)?)\s*([eEwW])$/); const m=q.match(/^(-?\d+(?:\.\d+)?)/);
+    if(m2){ S.satLon=(m2[2].toUpperCase()==='W'?-1:1)*parseFloat(m2[1]); calc(); }
+    else if(m){ S.satLon=parseFloat(m[1]); calc(); }
+    const list=SATS.filter(s=> s.name.includes(q) || fmtLon(s.lon).toLowerCase().includes(q.toLowerCase()));
+    renderSatList(list.length?list:SATS);
   });
+  satSel.addEventListener('change',()=>{ S.satLon=parseFloat(satSel.value); calc(); });
 
-  satSel.addEventListener('change', ()=>{
-    state.satLon = parseFloat(satSel.value);
-    updateCalcs();
-  });
-
-  // ====== Geodesy: compute azimuth, elevation, skew ======
-  function computePointing(lat, lon, satLon){
-    // lat, lon, satLon in degrees (east positive)
-    const phi = toRad(lat);
-    const dlon = toRad(satLon - lon);
-    const cospsi = Math.cos(phi) * Math.cos(dlon);
-    const psi = Math.acos(cospsi);
-    const Re_Rs = 6378.137 / 42164.0; // ≈ 0.15127
-    const el = Math.atan( (Math.cos(psi) - Re_Rs) / Math.sin(psi) ); // radians
-
-    // Bearing (azimuth from true north, clockwise 0..360)
-    // Initial bearing to subsatellite point (lat=0, lon=satLon)
-    const y = Math.sin(dlon);
-    const x = - Math.sin(phi) * Math.cos(dlon);
-    let az = Math.atan2(y, x); // radians in -π..π relative to north
-    az = (toDeg(az) + 360) % 360;
-
-    // LNB skew (positive = ساعتگرد وقتی روبه‌روی دیش ایستاده‌اید)
-    // Common approximation:
-    const skew = toDeg(Math.atan( Math.tan(dlon) / Math.sin(phi) ));
-
+  // Geodesy
+  function computePointing(lat,lon,satLon){
+    const phi=toRad(lat), dlon=toRad(satLon-lon);
+    const cospsi=Math.cos(phi)*Math.cos(dlon); const psi=Math.acos(cospsi);
+    const Re_Rs=6378.137/42164.0; const el=Math.atan((Math.cos(psi)-Re_Rs)/Math.sin(psi));
+    const y=Math.sin(dlon), x=-Math.sin(phi)*Math.cos(dlon);
+    let az=toDeg(Math.atan2(y,x)); az=(az+360)%360; // true bearing
+    const skew=toDeg(Math.atan(Math.tan(dlon)/Math.sin(phi)));
     return { az, el: toDeg(el), skew };
   }
 
-  function updateCalcs(){
-    if(state.lat==null || state.lon==null) return;
-    state.target = computePointing(state.lat, state.lon, state.satLon);
-    azTarget.textContent = state.target.az.toFixed(1) + '°';
-    elevTarget.textContent = state.target.el.toFixed(1) + '°';
-    satlonEl.textContent = fmtLon(state.satLon);
-    // Elevation window arc ± tol
-    const el0 = clamp(state.target.el, 0, 90);
-    const elA = clamp(el0 - state.tolEl, 0, 90);
-    const elB = clamp(el0 + state.tolEl, 0, 90);
-    elevWindow.setAttribute('d', arcPath(elA, elB));
-    renderTargetAzWindow();
-  }
+  function arcXY(el){ const x=50+(el/90)*900; const y=240-(Math.sin(toRad(el))*120); return [x,y]; }
+  function arcPath(a,b){ const a1=clamp(a,0,90), b1=clamp(b,0,90); const x1=50+(a1/90)*900, y1=240-(Math.sin(toRad(a1))*120); const x2=50+(b1/90)*900, y2=240-(Math.sin(toRad(b1))*120); const mid=(a1+b1)/2, xm=50+(mid/90)*900, ym=240-(Math.sin(toRad(mid))*120); const c1x=(x1+xm)/2, c1y=y1-0.7*(y1-ym); const c2x=(x2+xm)/2, c2y=y2-0.7*(y2-ym); return 'M '+x1+' '+y1+' C '+c1x+' '+c1y+', '+c2x+' '+c2y+', '+x2+' '+y2; }
 
-  // ====== Elevation arc geometry ======
-  // Arc from 0..90 deg across 900px (x:50->950) and y decreasing for higher elevation
-  function arcXY(el){
-    const x = 50 + (el/90)*900; // linear spread for simplicity
-    const y = 240 - (Math.sin(toRad(el)) * 120); // nicer curve (nonlinear height)
-    return [x,y];
-  }
-  function arcPath(a,b){
-    const [x1,y1] = arcXY(a), [x2,y2] = arcXY(b);
-    // Approximate arc with cubic Bézier by sampling mid
-    const mid = (a+b)/2; const [xm,ym] = arcXY(mid);
-    const c1x = (x1 + xm)/2, c1y = y1 - 0.7*(y1-ym);
-    const c2x = (x2 + xm)/2, c2y = y2 - 0.7*(y2-ym);
-    return `M ${x1} ${y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x2} ${y2}`;
-  }
+  function calc(){ if(S.lat==null||S.lon==null) return; S.target=computePointing(S.lat,S.lon,S.satLon); azTarget.textContent=S.target.az.toFixed(1)+'°'; elevTarget.textContent=S.target.el.toFixed(1)+'°'; satlonEl.textContent=fmtLon(S.satLon);
+    const el0=clamp(S.target.el,0,90); const elA=clamp(el0-S.tolEl,0,90), elB=clamp(el0+S.tolEl,0,90); elevWindow.setAttribute('d',arcPath(elA,elB));
+    target.style.transform='translate(-50%,-100%) rotate('+S.target.az+'deg)'; winAz.style.transform='translate(-50%,-100%) rotate('+S.target.az+'deg)'; }
 
-  // ====== Render azimuth target window & needles ======
-  function renderTargetAzWindow(){
-    if(state.target.az==null) return;
-    const w = state.tolAz;
-    const a = (state.target.az - w + 360) % 360;
-    const b = (state.target.az + w) % 360;
-    target.style.transform = `translate(-50%,-100%) rotate(${state.target.az}deg)`;
-    winAz.style.transform = `translate(-50%,-100%) rotate(${state.target.az}deg)`;
-  }
-
-  // ====== Geolocation ======
-  function setGPSStatus(ok){ gpsDot.classList.toggle('ok', !!ok); }
-  function setSensorsStatus(ok){ sensDot.classList.toggle('ok', !!ok); }
-
-  $('#btnMyLoc').addEventListener('click', ()=>{
-    if(!('geolocation' in navigator)) return alert('این دستگاه از موقعیت‌یاب پشتیبانی نمی‌کند.');
-    navigator.geolocation.getCurrentPosition(pos=>{
-      const {latitude, longitude} = pos.coords;
-      state.lat = latitude; state.lon = longitude;
-      myloc.textContent = latitude.toFixed(5) + ', ' + longitude.toFixed(5);
-      setGPSStatus(true);
-      updateCalcs();
-    }, err=>{
-      setGPSStatus(false);
-      alert('عدم دسترسی به GPS: ' + err.message);
-    }, {enableHighAccuracy:true, maximumAge: 10000, timeout: 10000});
+  // GPS
+  $('#btnMyLoc').addEventListener('click',()=>{
+    if(!('geolocation' in navigator)) return alert('این دستگاه GPS ندارد.');
+    navigator.geolocation.getCurrentPosition(pos=>{ const {latitude,longitude}=pos.coords; S.lat=latitude;S.lon=longitude; myloc.textContent=latitude.toFixed(5)+', '+longitude.toFixed(5); $('#gps-dot').classList.remove('bg-warn'); $('#gps-dot').classList.add('bg-ok'); calc(); }, err=>{ alert('GPS در دسترس نیست: '+err.message); }, {enableHighAccuracy:true, maximumAge:10000, timeout:10000});
   });
 
-  // ====== Sensors (DeviceOrientation) ======
-  let useTrueHeading = false;
+  // Sensors
+  $('#btnSensors').addEventListener('click',requestSensors);
   function requestSensors(){
-    function onGranted(){
-      setSensorsStatus(true);
-      window.addEventListener('deviceorientation', handleDO, true);
-    }
-    if(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function'){
-      // iOS: must be triggered by user gesture
-      DeviceOrientationEvent.requestPermission().then(state=>{
-        if(state==='granted') onGranted(); else alert('اجازهٔ دسترسی به سنسورها رد شد.');
-      }).catch(()=> alert('عدم دسترسی به سنسورها.'));
-    } else if('ondeviceorientation' in window){
-      onGranted();
-    } else {
-      alert('این دستگاه از سنسور جهت‌نما پشتیبانی نمی‌کند.');
-    }
-  }
-  $('#btnSensors').addEventListener('click', requestSensors);
-
-  // Smoothers
-  let smoothHead = null, smoothPitch = null;
-  function lp(prev, next, a){ return prev==null? next : prev*(1-a) + next*a; }
-
-  function handleDO(ev){
-    // iOS Safari offers true heading
-    let heading = null;
-    if(typeof ev.webkitCompassHeading === 'number' && !isNaN(ev.webkitCompassHeading)){
-      heading = ev.webkitCompassHeading; // 0..360 true north
-      useTrueHeading = true;
-    } else if(typeof ev.alpha === 'number'){
-      // alpha is rotation around Z (0..360). If absolute, may be from true north.
-      // We'll just use alpha as a compass proxy; may need local declination.
-      heading = 360 - ev.alpha; // invert to match compass clockwise from north
-      useTrueHeading = !!ev.absolute;
-    }
-
-    // Pitch (front-back tilt). In portrait, beta ~ [-180,180] (forward tilt positive)
-    let pitch = typeof ev.beta === 'number' ? ev.beta : 0; // deg
-    // Normalize: looking forward with slight tilt up gives ~20..40
-    pitch = clamp(pitch, -90, 90);
-
-    if(heading!=null){ smoothHead = lp(smoothHead, (heading+360)%360, 0.25); }
-    smoothPitch = lp(smoothPitch, pitch, 0.25);
-
-    state.heading = smoothHead;
-    state.pitch = smoothPitch;
-    renderSensors();
+    const onGranted=()=>{ $('#sens-dot').classList.remove('bg-warn'); $('#sens-dot').classList.add('bg-ok'); window.addEventListener('deviceorientation',onDO,true); animate(); };
+    if(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission==='function'){
+      DeviceOrientationEvent.requestPermission().then(s=>{ if(s==='granted') onGranted(); else alert('دسترسی به سنسورها رد شد.'); }).catch(()=>alert('عدم دسترسی به سنسورها'));
+    } else if('ondeviceorientation' in window){ onGranted(); } else { alert('این دستگاه از سنسور جهت‌نما پشتیبانی نمی‌کند.'); }
   }
 
-  function shortestDeltaDeg(a,b){
-    // returns a-b wrapped to [-180,180]
-    let d = (a - b + 540) % 360 - 180;
-    return d;
+  let smoothHead=null, smoothPitch=null; const ALPHA=0.18; // smoother
+  function lp(prev,next,a){ return prev==null? next : prev*(1-a)+next*a; }
+
+  function onDO(ev){
+    let heading=null; if(typeof ev.webkitCompassHeading==='number'&&!isNaN(ev.webkitCompassHeading)){ heading=ev.webkitCompassHeading; }
+    else if(typeof ev.alpha==='number'){ heading=360-ev.alpha; if(!ev.absolute) heading += S.decl; }
+    let pitch= typeof ev.beta==='number'? ev.beta : 0; pitch=clamp(pitch,-90,90);
+    if(heading!=null) smoothHead=lp(smoothHead,(heading+360)%360,ALPHA); smoothPitch=lp(smoothPitch,pitch,ALPHA);
+    S.heading=smoothHead; S.pitch=smoothPitch;
   }
 
-  function renderSensors(){
-    if(state.heading!=null){
-      needle.style.transform = `translate(-50%,-100%) rotate(${state.heading.toFixed(1)}deg)`;
-      azRead.textContent = `${(state.heading).toFixed(1)}°`;
-    }
-    if(state.target.az!=null && state.heading!=null){
-      const diff = shortestDeltaDeg(state.target.az, state.heading);
-      azDiff.textContent = (diff>0? '+':'') + diff.toFixed(1) + '°';
-    }
-    if(state.pitch!=null){
-      tiltn.textContent = `${state.pitch.toFixed(1)}°`;
-      // Map pitch to dot position along arc (approximate): we assume phone pitch ~ target elevation when screen faces user
-      const el = clamp(state.pitch, 0, 90);
-      const [x,y] = arcXY(el);
-      elevDot.setAttribute('cx', x);
-      elevDot.setAttribute('cy', y);
-    }
+  // Render loop via rAF (fast & smooth)
+  function animate(){
+    if(S.heading!=null){ $('#needle').style.transform='translate(-50%,-100%) rotate('+S.heading.toFixed(1)+'deg)'; azRead.textContent=S.heading.toFixed(1)+'°'; }
+    if(S.target.az!=null && S.heading!=null){ const diff=shortestDelta(S.target.az, S.heading); azDiff.textContent=(diff>0?'+':'')+diff.toFixed(1)+'°'; }
+    if(S.pitch!=null){ tiltn.textContent=S.pitch.toFixed(1)+'°'; const el=clamp(S.pitch,0,90); const xy=arcXY(el); elevDot.setAttribute('cx',xy[0]); elevDot.setAttribute('cy',xy[1]); }
     checkLock();
+    requestAnimationFrame(animate);
   }
+  function shortestDelta(a,b){ let d=(a-b+540)%360-180; return d; }
 
-  function checkLock(){
-    if(state.target.az==null || state.heading==null || state.pitch==null) return;
-    const dAz = Math.abs(shortestDeltaDeg(state.target.az, state.heading));
-    const dEl = Math.abs(clamp(state.pitch,0,90) - clamp(state.target.el,0,90));
-    const azOK = dAz <= state.tolAz;
-    const elOK = dEl <= state.tolEl;
-    elevDiff.textContent = (elOK? '✅ ' : '') + (dEl>0? (dEl.toFixed(1)+'°'):'0°');
+  // Lock feedback
+  function checkLock(){ if(S.target.az==null||S.heading==null||S.pitch==null) return; const dAz=Math.abs(shortestDelta(S.target.az,S.heading)); const dEl=Math.abs(clamp(S.pitch,0,90)-clamp(S.target.el,0,90)); const ok = dAz<=S.tolAz && dEl<=S.tolEl; elevDiff.textContent=(ok? '✅ ' : '')+ (dEl>0? dEl.toFixed(1)+'°':'0°'); ringGlow.style.boxShadow = ok? '0 0 0 8px rgba(39,209,124,.18), 0 0 60px 8px rgba(39,209,124,.35)': 'none'; if(ok){ const now=performance.now(); if(now-S.lastBuzz>1200){ S.lastBuzz=now; lockBuzz(); toast('✅ هدف پیدا شد!'); } } }
 
-    compassCard.classList.toggle('locked', azOK && elOK);
+  // Sound / Vibrate
+  let audioCtx=null; function beep(){ try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.value=880; g.gain.setValueAtTime(0.0001,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.22,audioCtx.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.2); o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+0.22);}catch(e){} }
+  function lockBuzz(){ if(soundToggle.checked) beep(); else{ try{ navigator.vibrate && navigator.vibrate([90,40,90]); }catch{} } }
 
-    if(azOK && elOK){
-      const now = performance.now();
-      if(now - state.lastBuzz > 1600){
-        state.lastBuzz = now;
-        try{ navigator.vibrate && navigator.vibrate([80,50,80]); }catch{}
-        flashOK();
-        toast('✅ هدف پیدا شد!');
-      }
-    }
-  }
+  // UI helpers
+  function toast(txt){ let el=d.getElementById('toast'); if(!el){ el=d.createElement('div'); el.id='toast'; el.className='fixed left-1/2 -translate-x-1/2 bottom-20 bg-black/70 border border-white/10 backdrop-blur px-3 py-2 rounded-xl text-sm font-semibold z-50'; d.body.appendChild(el);} el.textContent=txt; el.style.opacity='1'; clearTimeout(window.__t); window.__t=setTimeout(function(){el.style.opacity='0'},1400); }
 
-  function flashOK(){
-    compassCard.animate([
-      { filter:'brightness(1.0)' },
-      { filter:'brightness(1.6)' },
-      { filter:'brightness(1.0)' }
-    ], { duration: 600, easing:'ease-out' });
-  }
+  // Tolerance chips
+  $$('.tol').forEach(function(btn){ btn.addEventListener('click',function(){ const v=parseInt(btn.getAttribute('data-tol'),10); S.tolAz=S.tolEl=v; tolAz.value=v; tolEl.value=v; tolRead.textContent='±'+v+'°'; $$('.tol').forEach(function(b){ b.classList.remove('ring-1','ring-accent/40') }); btn.classList.add('ring-1','ring-accent/40'); calc(); })});
+  tolMore.addEventListener('click',function(){ tolBox.classList.toggle('hidden') });
+  tolAz.addEventListener('input',function(){ S.tolAz=parseInt(tolAz.value,10); tolRead.textContent='±'+S.tolAz+'°'; calc(); });
+  tolEl.addEventListener('input',function(){ S.tolEl=parseInt(tolEl.value,10); calc(); });
 
-  // Tiny toast
-  let toastEl = null, toastTO = 0;
-  function toast(txt){
-    if(!toastEl){
-      toastEl = d.createElement('div');
-      toastEl.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(0,0,0,.7);padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);z-index:99;font-weight:600;';
-      d.body.appendChild(toastEl);
-    }
-    toastEl.textContent = txt; toastEl.style.opacity = '1';
-    clearTimeout(toastTO);
-    toastTO = setTimeout(()=> toastEl.style.opacity = '0', 1600);
-  }
+  // Declination correction
+  declToggle.addEventListener('change',function(){ declBox.classList.toggle('hidden', !declToggle.checked); S.decl = declToggle.checked? parseFloat(declInput.value||0): 0; });
+  declInput.addEventListener('input',function(){ if(declToggle.checked){ S.decl=parseFloat(declInput.value||0); }});
 
-  // ====== Init ======
-  updateCalcs();
+  // Calib/Help
+  $('#calibBtn').addEventListener('click',function(){ toast('گوشی را به شکل ۸ در هوا حرکت دهید. از فلزات دور شوید.') });
+  $('#helpBtn').addEventListener('click',function(){ alert('راهنما:\n1) 📍 موقعیت را بگیرید.\n2) ماهواره را انتخاب کنید.\n3) 🎛️ سنسورها را فعال کنید.\n4) گوشی را بچرخانید/کج کنید تا سوزن‌ها هم‌راستا شوند.\n5) با قفل، ویبره/صدا و افکت سبز می‌بینید.') });
+  $('#lockBtn').addEventListener('click',function(){ toast('برای قفل، هر دو زاویه داخل تلرانس باشند.') });
 
-  // Prefill: try IP-less geolocation via browser prompt when user clicks later.
-
+  // Init
+  calc();
 })();
 </script>
 </body>
