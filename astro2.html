@@ -16,6 +16,7 @@
             --text-color: #e5e7eb;
             --text-muted-color: #9ca3af;
             --success-color: #4ade80;
+            --warn-color: #facc15; /* yellow-400 */
         }
 
         body {
@@ -25,99 +26,121 @@
             overscroll-behavior: none;
         }
         
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg-color);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 3px;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 3px; }
 
         .glassmorphism {
-            background: rgba(31, 41, 55, 0.5); /* card-color with opacity */
+            background: rgba(31, 41, 55, 0.5);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        #finder-ui {
-            aspect-ratio: 1 / 1;
+        /* New Visual Finder Styles */
+        #compass {
+            width: 250px;
+            height: 250px;
             border-radius: 50%;
-            border: 2px solid var(--primary-color);
+            border: 2px solid var(--text-muted-color);
             position: relative;
             transition: all 0.3s ease;
-            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .crosshair {
-            position: absolute;
-            background-color: var(--text-muted-color);
-            opacity: 0.3;
-        }
-        .crosshair-h {
+        
+        #compass-ring {
             width: 100%;
-            height: 1px;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-        }
-        .crosshair-v {
-            width: 1px;
             height: 100%;
+            position: absolute;
+            transition: transform 0.2s linear;
+        }
+
+        .compass-marker {
+            position: absolute;
+            top: 5px;
             left: 50%;
-            top: 0;
+            transform-origin: center 123px; /* half of width */
+        }
+        
+        #compass-target-marker {
+            position: absolute;
+            top: -5px;
+            left: 50%;
             transform: translateX(-50%);
+            font-size: 2rem;
+            color: var(--primary-color);
+            transition: color 0.3s;
         }
-
-        #target-dot {
+        
+        #phone-direction-indicator {
             position: absolute;
-            width: 24px;
-            height: 24px;
-            background-color: var(--success-color);
-            border-radius: 50%;
-            border: 2px solid white;
-            transform: translate(-50%, -50%);
-            transition: transform 0.2s linear, opacity 0.3s;
-            opacity: 0;
-            box-shadow: 0 0 15px var(--success-color);
-        }
-
-        #phone-pointer {
-            position: absolute;
-            width: 40px;
-            height: 40px;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background-color: rgba(56, 189, 248, 0.8);
-            border: 2px solid white;
-            transition: all 0.3s ease;
-        }
-        #phone-pointer::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -100%);
             width: 0;
             height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-bottom: 12px solid white;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 20px solid var(--primary-color);
+            transition: border-color 0.3s;
         }
         
-        .found #finder-ui {
+        #elevation-meter {
+            width: 20px;
+            height: 200px;
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            position: relative;
+            border: 1px solid var(--text-muted-color);
+            overflow: hidden;
+        }
+        
+        #elevation-target-line {
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            left: 0;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+        
+        #elevation-current-level {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--primary-color);
+            opacity: 0.5;
+            transition: all 0.2s linear;
+        }
+
+        .feedback-arrow {
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 1.5rem;
+            color: var(--warn-color);
+        }
+        .feedback-arrow.visible {
+            opacity: 1;
+        }
+        
+        /* State Changes */
+        .azimuth-aligned #compass, .azimuth-aligned #phone-direction-indicator {
             border-color: var(--success-color);
-            box-shadow: 0 0 30px var(--success-color);
+            border-bottom-color: var(--success-color);
         }
-        
-        .found #phone-pointer {
+        .azimuth-aligned #compass-target-marker {
+            color: var(--success-color);
+        }
+
+        .elevation-aligned #elevation-meter {
+            border-color: var(--success-color);
+        }
+        .elevation-aligned #elevation-target-line, .elevation-aligned #elevation-current-level {
             background-color: var(--success-color);
+            box-shadow: 0 0 10px var(--success-color);
         }
 
     </style>
@@ -149,35 +172,57 @@
 
             <main class="flex-grow flex flex-col justify-around items-center my-4 overflow-hidden">
                 <!-- Data Display -->
-                <div class="w-full grid grid-cols-3 gap-2 text-center text-sm mb-4">
+                 <div class="w-full grid grid-cols-2 gap-2 text-center text-sm mb-4">
                     <div class="glassmorphism rounded-lg p-2">
-                        <span class="block text-xs text-slate-400">زاویه افقی (Azimuth)</span>
+                        <span class="block text-xs text-slate-400">زاویه افقی هدف</span>
                         <span id="azimuth-val" class="text-lg font-bold">-°</span>
                     </div>
                     <div class="glassmorphism rounded-lg p-2">
-                        <span class="block text-xs text-slate-400">زاویه عمودی (Elevation)</span>
+                        <span class="block text-xs text-slate-400">زاویه عمودی هدف</span>
                         <span id="elevation-val" class="text-lg font-bold">-°</span>
                     </div>
+                     <div class="glassmorphism rounded-lg p-2">
+                        <span class="block text-xs text-slate-400">زاویه افقی فعلی</span>
+                        <span id="current-azimuth-val" class="text-lg font-bold">-°</span>
+                    </div>
                     <div class="glassmorphism rounded-lg p-2">
-                        <span class="block text-xs text-slate-400">چرخش LNB (Skew)</span>
-                        <span id="skew-val" class="text-lg font-bold">-°</span>
+                        <span class="block text-xs text-slate-400">زاویه عمودی فعلی</span>
+                        <span id="current-elevation-val" class="text-lg font-bold">-°</span>
                     </div>
                 </div>
 
                 <!-- Visual Finder -->
-                <div id="finder-container" class="w-full max-w-[300px] flex items-center justify-center">
-                    <div id="finder-ui">
-                        <div class="crosshair crosshair-h"></div>
-                        <div class="crosshair crosshair-v"></div>
-                        <div id="target-dot"></div>
-                        <div id="phone-pointer"></div>
+                <div class="w-full flex items-center justify-center space-x-4 rtl:space-x-reverse">
+                    <div id="compass-container" class="flex flex-col items-center space-y-2">
+                        <div id="compass">
+                            <div id="compass-ring">
+                                <!-- Markers will be added by JS -->
+                            </div>
+                            <div id="compass-target-marker">🛰️</div>
+                            <div id="phone-direction-indicator"></div>
+                        </div>
+                        <div class="flex items-center justify-center space-x-4 w-full">
+                            <span id="left-arrow" class="feedback-arrow">→</span>
+                            <span id="horizontal-feedback-text" class="text-lg font-medium"></span>
+                            <span id="right-arrow" class="feedback-arrow">←</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center space-y-2">
+                        <div id="elevation-meter">
+                            <div id="elevation-target-line"></div>
+                            <div id="elevation-current-level"></div>
+                        </div>
+                        <div class="flex flex-col items-center justify-center h-12">
+                            <span id="up-arrow" class="feedback-arrow">↑</span>
+                             <span id="down-arrow" class="feedback-arrow">↓</span>
+                        </div>
                     </div>
                 </div>
             </main>
 
             <footer class="flex-shrink-0">
                 <div id="status-box" class="w-full h-16 glassmorphism rounded-lg p-3 text-center flex items-center justify-center transition-colors duration-300">
-                    <p id="status-text" class="text-lg">لطفاً گوشی را به سمت آسمان بگیرید و بچرخانید.</p>
+                    <p id="status-text" class="text-lg">برای شروع، گوشی را صاف نگه دارید.</p>
                 </div>
             </footer>
         </div>
@@ -186,25 +231,39 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Element Cache
             const permissionScreen = document.getElementById('permission-screen');
             const permissionBtn = document.getElementById('permission-btn');
             const permissionStatus = document.getElementById('permission-status');
             const mainApp = document.getElementById('main-app');
             const satelliteSelect = document.getElementById('satellite-select');
+            
             const azimuthVal = document.getElementById('azimuth-val');
             const elevationVal = document.getElementById('elevation-val');
-            const skewVal = document.getElementById('skew-val');
+            const currentAzimuthVal = document.getElementById('current-azimuth-val');
+            const currentElevationVal = document.getElementById('current-elevation-val');
+            
             const statusText = document.getElementById('status-text');
             const statusBox = document.getElementById('status-box');
-            const finderUI = document.getElementById('finder-ui');
-            const targetDot = document.getElementById('target-dot');
-            const phonePointer = document.getElementById('phone-pointer');
+            
+            const compass = document.getElementById('compass');
+            const compassRing = document.getElementById('compass-ring');
+            const compassTargetMarker = document.getElementById('compass-target-marker');
+            
+            const elevationMeter = document.getElementById('elevation-meter');
+            const elevationTargetLine = document.getElementById('elevation-target-line');
+            const elevationCurrentLevel = document.getElementById('elevation-current-level');
 
-            let userLat = 0;
-            let userLon = 0;
-            let targetAzimuth = 0;
-            let targetElevation = 0;
-            let isFound = false;
+            const leftArrow = document.getElementById('left-arrow');
+            const rightArrow = document.getElementById('right-arrow');
+            const upArrow = document.getElementById('up-arrow');
+            const downArrow = document.getElementById('down-arrow');
+            const horizontalFeedbackText = document.getElementById('horizontal-feedback-text');
+
+            // State
+            let userLat = 0, userLon = 0;
+            let targetAzimuth = 0, targetElevation = 0;
+            let azimuthAligned = false, elevationAligned = false;
 
             const satellites = [
                 { name: 'Türksat 4A/5A/5B (42°E)', lon: 42.0 },
@@ -222,28 +281,26 @@
             ];
             
             satellites.sort((a, b) => a.lon - b.lon);
-
-            // Populate satellite dropdown
             satellites.forEach(sat => {
                 const option = document.createElement('option');
                 option.value = sat.lon;
                 option.textContent = sat.name;
                 satelliteSelect.appendChild(option);
             });
-            // Set a default popular satellite
             satelliteSelect.value = 42.0; 
 
-            // --- Event Listeners ---
+            // --- Init ---
             permissionBtn.addEventListener('click', requestPermissions);
             satelliteSelect.addEventListener('change', calculateAndDisplay);
+            createCompassMarkers();
 
             async function requestPermissions() {
+                // ... (Permission logic remains the same as previous version)
                 permissionBtn.disabled = true;
                 permissionBtn.textContent = 'کمی صبر کنید...';
                 
                 let orientationGranted = false;
                 
-                // 1. Request Device Orientation first
                 permissionStatus.textContent = 'در حال درخواست دسترسی به سنسور...';
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     try {
@@ -271,7 +328,6 @@
 
                 if (!orientationGranted) return;
 
-                // 2. Request Geolocation
                 permissionStatus.textContent = 'در حال دریافت موقعیت مکانی (GPS)...';
                 if ('geolocation' in navigator) {
                     navigator.geolocation.getCurrentPosition(
@@ -299,7 +355,6 @@
                 permissionScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
                 mainApp.classList.add('flex');
-                // Use a small timeout to ensure the UI is rendered before calculating sizes
                 setTimeout(calculateAndDisplay, 100);
             }
 
@@ -310,123 +365,104 @@
                 targetAzimuth = result.azimuth;
                 targetElevation = result.elevation;
 
-                azimuthVal.textContent = `${result.azimuth.toFixed(1)}°`;
-                elevationVal.textContent = `${result.elevation.toFixed(1)}°`;
-                skewVal.textContent = `${result.skew.toFixed(1)}°`;
+                azimuthVal.textContent = `${targetAzimuth.toFixed(1)}°`;
+                elevationVal.textContent = `${targetElevation.toFixed(1)}°`;
                 
-                // Reset found state
-                isFound = false;
-                finderUI.classList.remove('found');
-                statusBox.classList.remove('bg-green-500/50');
-                statusText.textContent = "گوشی را به سمت آسمان بگیرید و بچرخانید.";
+                // Update target UI elements
+                compassRing.style.transform = `rotate(${-targetAzimuth}deg)`;
+                const elevationPercent = (targetElevation / 90) * 100;
+                elevationTargetLine.style.bottom = `calc(${elevationPercent}% - 1px)`;
                 
-                // Update target dot position on the finder UI
-                updateTargetDot();
+                // Reset state
+                azimuthAligned = elevationAligned = false;
+                updateAlignmentState();
             }
 
             function handleOrientation(event) {
-                if (!event.alpha || !event.beta || !event.gamma) {
-                    statusText.textContent = "سنسورهای حرکتی یافت نشد.";
-                    return;
-                }
+                if (!event.alpha) return;
                 
-                // Use webkitCompassHeading as a fallback for iOS
                 const currentAzimuth = event.webkitCompassHeading || event.alpha;
-                
-                // Beta: front-back tilt (elevation)
-                // Correcting the elevation calculation for portrait mode
-                // 90 (horizon) -> 0 degrees elevation, 0 (sky) -> 90 degrees elevation
-                const currentElevation = 90 - event.beta;
-                
-                updatePhonePointer(currentAzimuth, currentElevation);
-                
-                // Handle the 360-degree wrap-around for azimuth difference
-                const azimuthDiffRaw = Math.abs(currentAzimuth - targetAzimuth);
-                const azimuthDiff = Math.min(azimuthDiffRaw, 360 - azimuthDiffRaw);
-                const elevationDiff = Math.abs(currentElevation - targetElevation);
-                
-                const tolerance = 2.5; // Slightly increased tolerance for usability
+                const currentElevation = 90 - event.beta; // 90(horizon)=0, 0(sky)=90
 
-                if (azimuthDiff < tolerance && elevationDiff < tolerance) {
-                    if (!isFound) {
-                        isFound = true;
-                        statusText.textContent = "پیدا شد! گوشی را ثابت نگه دارید.";
-                        statusBox.classList.add('bg-green-500/50');
-                        finderUI.classList.add('found');
+                currentAzimuthVal.textContent = `${currentAzimuth.toFixed(1)}°`;
+                currentElevationVal.textContent = `${currentElevation.toFixed(1)}°`;
+                
+                // Update phone UI elements
+                compass.style.transform = `rotate(${currentAzimuth}deg)`;
+                const currentElevationPercent = (currentElevation / 90) * 100;
+                elevationCurrentLevel.style.height = `${currentElevationPercent}%`;
 
-                        if ('vibrate' in navigator) {
-                            navigator.vibrate([200, 100, 200]); // Vibrate pattern
-                        }
+                // --- Feedback Logic ---
+                const tolerance = 2.5;
+                
+                // Azimuth feedback
+                const azimDiffRaw = (targetAzimuth - currentAzimuth + 360) % 360;
+                const azimDiff = azimDiffRaw > 180 ? azimDiffRaw - 360 : azimDiffRaw;
+
+                azimuthAligned = Math.abs(azimDiff) < tolerance;
+                horizontalFeedbackText.textContent = `${Math.abs(azimDiff).toFixed(0)}°`;
+                leftArrow.classList.toggle('visible', azimDiff > tolerance);
+                rightArrow.classList.toggle('visible', azimDiff < -tolerance);
+                
+                // Elevation feedback
+                const elevDiff = targetElevation - currentElevation;
+                elevationAligned = Math.abs(elevDiff) < tolerance;
+                upArrow.classList.toggle('visible', elevDiff > tolerance);
+                downArrow.classList.toggle('visible', elevDiff < -tolerance);
+                
+                updateAlignmentState();
+            }
+            
+            function updateAlignmentState() {
+                compass.classList.toggle('azimuth-aligned', azimuthAligned);
+                elevationMeter.classList.toggle('elevation-aligned', elevationAligned);
+                
+                if (azimuthAligned && elevationAligned) {
+                    statusText.textContent = "پیدا شد! گوشی را ثابت نگه دارید.";
+                    statusBox.style.backgroundColor = 'var(--success-color)';
+                     if (!document.body.classList.contains('found')) { // Vibrate only once
+                        if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+                        document.body.classList.add('found');
                     }
+                } else if (azimuthAligned) {
+                    statusText.textContent = "جهت افقی صحیح است، حالا زاویه عمودی را تنظیم کنید.";
+                    statusBox.style.backgroundColor = 'var(--warn-color)';
+                    document.body.classList.remove('found');
+                } else if (elevationAligned) {
+                     statusText.textContent = "زاویه عمودی صحیح است، حالا جهت افقی را پیدا کنید.";
+                     statusBox.style.backgroundColor = 'var(--warn-color)';
+                     document.body.classList.remove('found');
                 } else {
-                    if (isFound) {
-                        isFound = false;
-                        finderUI.classList.remove('found');
-                        statusBox.classList.remove('bg-green-500/50');
-                        statusText.textContent = "گوشی را به سمت آسمان بگیرید و بچرخانید.";
-                    }
+                    statusText.textContent = "برای پیدا کردن ماهواره، گوشی را بچرخانید و کج کنید.";
+                    statusBox.style.backgroundColor = '';
+                    document.body.classList.remove('found');
                 }
             }
-            
-            function updateTargetDot() {
-                const finderRadius = finderUI.offsetWidth / 2;
-                
-                // Map azimuth (0-360) to angle and elevation (0-90) to radius
-                const angleRad = (targetAzimuth - 90) * (Math.PI / 180); // Adjusting so 0=East
-                const radius = (1 - (targetElevation / 90)) * finderRadius;
 
-                const x = finderRadius + radius * Math.cos(angleRad);
-                const y = finderRadius + radius * Math.sin(angleRad);
-
-                targetDot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-                targetDot.style.opacity = '1';
-            }
-            
-            function updatePhonePointer(currentAzimuth, currentElevation) {
-                 const finderRadius = finderUI.offsetWidth / 2;
-                 
-                 const angleRad = (currentAzimuth - 90) * (Math.PI / 180);
-                 const radius = (1 - (Math.abs(currentElevation) / 90)) * finderRadius;
-                 
-                 const x = finderRadius + radius * Math.cos(angleRad);
-                 const y = finderRadius + radius * Math.sin(angleRad);
-                 
-                 phonePointer.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) rotate(${currentAzimuth}deg)`;
+            function createCompassMarkers() {
+                const directions = {'ش': 0, 'ش ق': 45, 'ق': 90, 'ج ق': 135, 'ج': 180, 'ج ش': 225, 'ش': 270, 'ش ج': 315};
+                for (const [dir, angle] of Object.entries(directions)) {
+                    const marker = document.createElement('div');
+                    marker.className = 'compass-marker';
+                    marker.textContent = dir;
+                    marker.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                    compassRing.appendChild(marker);
+                }
             }
 
-            // --- Calculation Logic ---
             function calculateSatelliteAngles(lat, lon, satLon) {
+                // ... (Calculation logic remains the same)
                 const toRad = Math.PI / 180;
-                lat = lat * toRad;
-                lon = lon * toRad;
-                satLon = satLon * toRad;
-
+                lat *= toRad; lon *= toRad; satLon *= toRad;
                 const g = lon - satLon;
-
-                // Azimuth Calculation
                 let azimuth = Math.PI + Math.atan(Math.tan(g) / Math.sin(lat));
-                if (lat < 0) {
-                    azimuth += Math.PI;
-                }
-                if (azimuth < 0) {
-                    azimuth += 2 * Math.PI;
-                }
-                
-                // Elevation Calculation
+                if (lat < 0) azimuth += Math.PI;
+                if (azimuth < 0) azimuth += 2 * Math.PI;
                 const elevation = Math.atan((Math.cos(g) * Math.cos(lat) - 0.1512) / Math.sqrt(1 - Math.pow(Math.cos(g) * Math.cos(lat), 2)));
-
-                // Skew Calculation
-                const skew = Math.atan(Math.sin(g) / Math.tan(lat));
-
-                return {
-                    azimuth: azimuth / toRad,
-                    elevation: elevation / toRad,
-                    skew: skew / toRad
-                };
+                return { azimuth: azimuth / toRad, elevation: elevation / toRad };
             }
         });
     </script>
 </body>
 </html>
-
 
