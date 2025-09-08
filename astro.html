@@ -5,22 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>یابنده آسمانی</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+
         :root {
-            --bg-color-red: #0d0000;
-            --card-color-red: #1a0505;
+            --bg-color-red: #0a0000;
+            --card-color-red: rgba(26, 5, 5, 0.5);
             --text-color-red: #f0c0c0;
-            --highlight-color-red: #ff4a4a;
-            --accent-color-red: #ffa04a;
+            --highlight-color-red: #ff3a3a;
+            --accent-color-red: #ff704a;
             --border-color-red: rgba(255, 74, 74, 0.2);
-            --bg-color-green: #001a00;
-            --card-color-green: #052a05;
+            --glow-color-red: rgba(255, 58, 58, 0.3);
+
+            --bg-color-green: #000a00;
+            --card-color-green: rgba(5, 26, 5, 0.5);
             --text-color-green: #c0f0c0;
-            --highlight-color-green: #4aff4a;
-            --accent-color-green: #a0ff4a;
+            --highlight-color-green: #3aff3a;
+            --accent-color-green: #4aff70;
             --border-color-green: rgba(74, 255, 74, 0.2);
+            --glow-color-green: rgba(58, 255, 58, 0.3);
         }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color-red);
             color: var(--text-color-red);
             display: flex;
@@ -28,87 +34,124 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 20px 10px;
             overflow-x: hidden;
-            background-image: radial-gradient(circle, #2a0505 1px, transparent 1px);
+            background-image: radial-gradient(circle, var(--card-color-red) 1px, transparent 1px);
             background-size: 30px 30px;
-            transition: background-color 0.5s ease;
+            transition: background-color 0.8s ease;
         }
+
         .container {
             width: 100%;
-            max-width: 650px;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            animation: fadeIn 1s ease-in-out;
+            gap: 15px;
+            animation: fadeIn 1.2s ease-in-out;
         }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         body.aligned {
             background-color: var(--bg-color-green);
-            background-image: radial-gradient(circle, #0f3a0f 1px, transparent 1px);
+            background-image: radial-gradient(circle, var(--card-color-green) 1px, transparent 1px);
         }
+
         body.aligned .card {
             background-color: var(--card-color-green);
             border-color: var(--border-color-green);
-            box-shadow: 0 0 40px rgba(74, 255, 74, 0.5);
+            box-shadow: 0 0 40px var(--glow-color-green);
         }
+
         body.aligned h1, body.aligned h2 {
             color: var(--highlight-color-green);
-            text-shadow: 0 0 10px rgba(74, 255, 74, 0.5);
+            text-shadow: 0 0 10px var(--glow-color-green);
         }
-        body.aligned .location-info span, body.aligned .gyro-values span, body.aligned .guidance-values {
+
+        body.aligned .highlight-text {
             color: var(--highlight-color-green);
         }
-        body.aligned .sky-object-item {
-            background-color: rgba(74, 255, 74, 0.05);
-            border-color: rgba(74, 255, 74, 0.1);
-        }
-        body.aligned .sky-object-item:hover {
-            background-color: rgba(74, 255, 74, 0.15);
-        }
-        body.aligned .card-title {
-            color: var(--highlight-color-green);
-        }
-        body.aligned #compass::before, body.aligned #compass::after, body.aligned #compass-center, body.aligned #direction-text {
+
+        body.aligned .accent-text {
             color: var(--accent-color-green);
         }
-        body.aligned #compass {
-            border-color: var(--highlight-color-green);
+
+        body.aligned #compass-container .label {
+            color: var(--accent-color-green);
         }
-        body.aligned #pitch-roll-box {
-            border-color: var(--highlight-color-green);
-            background-color: rgba(74, 255, 74, 0.1);
-            text-shadow: 0 0 5px rgba(74, 255, 74, 0.5);
-            box-shadow: 0 0 20px rgba(74, 255, 74, 0.3);
-        }
-        body.aligned .alert {
+
+        body.aligned .status-alert {
             background-color: var(--highlight-color-green);
         }
-        body.aligned #elev-meter-display {
-            border-color: var(--highlight-color-green);
+
+        body.aligned .progress-bar {
+            background-color: var(--border-color-green);
         }
-        .card.aligned {
-            box-shadow: 0 0 40px var(--highlight-color-green), 0 0 20px var(--highlight-color-green) inset;
-            border-color: var(--highlight-color-green);
-            animation: pulse-green 1.5s infinite;
+
+        body.aligned .progress-fill {
+            background-color: var(--highlight-color-green);
         }
+
+        body.aligned .guidance-message, body.aligned .guidance-subtext {
+            color: var(--text-color-green);
+        }
+
+        body.aligned .guidance-value {
+            color: var(--highlight-color-green);
+        }
+
         h1, h2 {
             color: var(--highlight-color-red);
             text-align: center;
+            text-shadow: 0 0 10px var(--glow-color-red);
             margin: 0;
         }
-        h1 {
-            font-size: 2.5em;
-            text-shadow: 0 0 10px rgba(255, 74, 74, 0.5);
-            margin-bottom: 20px;
+
+        h1 { font-size: 2.2em; margin-bottom: 20px; }
+        h2 { font-size: 1.6em; margin-top: 0; margin-bottom: 10px; }
+
+        .card {
+            background-color: var(--card-color-red);
+            border-radius: 20px;
+            padding: 25px 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color-red);
+            backdrop-filter: blur(10px);
+            transition: all 0.5s ease;
         }
+
+        .status-alert {
+            background-color: var(--highlight-color-red);
+            color: black;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+            transition: background-color 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 58, 58, 0.5); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(255, 58, 58, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 58, 58, 0); }
+        }
+
+        body.aligned .status-alert { animation-name: pulse-green; }
+        @keyframes pulse-green {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(58, 255, 58, 0.5); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(58, 255, 58, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(58, 255, 58, 0); }
+        }
+
         #permission-prompt {
             text-align: center;
             padding: 20px;
         }
+
         #permission-button {
             background-color: var(--highlight-color-red);
             color: black;
@@ -116,356 +159,272 @@
             padding: 15px 30px;
             font-size: 1.2em;
             font-weight: bold;
-            border-radius: 10px;
+            border-radius: 50px;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 5px 15px rgba(255, 58, 58, 0.3);
         }
+
         #permission-button:hover {
-            background-color: #ff7070;
+            background-color: #ff5050;
             transform: translateY(-2px);
         }
-        .card {
-            background-color: var(--card-color-red);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color-red);
-            backdrop-filter: blur(5px);
-            transition: background-color 0.5s ease, border-color 0.5s ease, transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-        }
-        #status {
-            text-align: center;
-            font-style: italic;
-            color: var(--accent-color-red);
-            font-weight: bold;
-        }
-        .error-message {
-            color: var(--highlight-color-red);
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .location-info p {
-            margin: 5px 0;
-            font-size: 1.1em;
+
+        .info-row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+            padding: 5px 0;
         }
-        .location-info span {
+
+        .highlight-text {
             font-weight: bold;
             color: var(--highlight-color-red);
         }
-        #compass-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+
+        .accent-text {
+            color: var(--accent-color-red);
         }
-        #compass-container {
-            width: 250px;
-            height: 250px;
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 20px 12px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color-red);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-color-red);
+            font-size: 1em;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%20viewBox%3D%220%200%20292.4%20292.4%22%3E%3Cpath%20fill%3D%22%23ff3a3a%22%20d%3D%22M287%20114.5L146.2%20255.3%205.4%20114.5h281.6z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: left 10px center;
+            background-size: 10px auto;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--highlight-color-red);
+            box-shadow: 0 0 0 2px var(--glow-color-red);
+        }
+
+        #guidance-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .guidance-message {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--text-color-red);
+            margin-bottom: 5px;
+        }
+
+        .guidance-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--highlight-color-red);
+            display: block;
+        }
+
+        .guidance-subtext {
+            font-size: 1em;
+            opacity: 0.8;
+            color: var(--text-color-red);
+        }
+
+        .guidance-meter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .meter-label {
+            font-size: 1em;
+            white-space: nowrap;
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 8px;
+            background-color: var(--border-color-red);
+            border-radius: 4px;
+            overflow: hidden;
             position: relative;
-            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--highlight-color-red);
+            transition: width 0.3s ease;
+        }
+
+        #compass-container {
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            margin: 20px 0;
         }
+
         #compass {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 50%;
             background: conic-gradient(
                 #0f3a0f 0deg, #0f3a0f 1deg,
                 transparent 1deg, transparent 9deg
             );
             background-size: 10% 100%;
+            border-radius: 50%;
             border: 2px solid var(--highlight-color-red);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-            position: relative;
             transition: border-color 0.5s ease;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
         }
-        #compass::before {
-            content: 'ش';
+
+        #compass::before, #compass::after {
+            content: '';
             position: absolute;
-            top: 5px;
-            font-size: 2em;
-            color: var(--accent-color-red);
-            z-index: 1;
-            transition: color 0.5s ease;
-        }
-        #compass::after {
-            content: 'ج';
-            position: absolute;
-            bottom: 5px;
-            font-size: 2em;
-            color: var(--text-color-red);
-            z-index: 1;
-        }
-        #compass-needle {
             width: 4px;
-            height: 90%;
-            position: absolute;
-            transform-origin: 50% 50%;
-            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            z-index: 1;
-        }
-        #needle-north {
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 120px solid var(--accent-color-red);
-            position: absolute;
-            bottom: 50%;
+            height: 50%;
             left: 50%;
             transform: translateX(-50%);
-            filter: drop-shadow(0 0 5px rgba(255, 160, 74, 0.8));
-            transition: border-bottom-color 0.5s ease, filter 0.5s ease;
         }
+
+        #compass::before { top: 0; background-color: var(--accent-color-red); }
+        #compass::after { bottom: 0; background-color: var(--text-color-red); }
+
+        #compass-center {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--card-color-red);
+            border: 1px solid var(--highlight-color-red);
+            border-radius: 50%;
+            z-index: 10;
+        }
+        
+        #compass-container .label {
+            position: absolute;
+            font-size: 2em;
+            font-weight: bold;
+            transition: color 0.5s ease;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        #compass-container .label.n { top: 10px; color: var(--accent-color-red); }
+        #compass-container .label.s { bottom: 10px; color: var(--text-color-red); }
+        #compass-container .label.e { right: 10px; color: var(--text-color-red); }
+        #compass-container .label.w { left: 10px; color: var(--text-color-red); }
+
         #direction-text {
             font-size: 1.5em;
             font-weight: bold;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            color: var(--accent-color-red);
             margin-top: 10px;
-            color: var(--accent-color-red);
-            transition: color 0.5s ease;
-        }
-        #angle-meter-card {
-            padding-bottom: 10px;
-        }
-        #elev-meter-display {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 2px solid var(--highlight-color-red);
-            margin: 20px auto 10px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-            background-color: rgba(255, 74, 74, 0.05);
-            transition: background-color 0.5s ease, border-color 0.5s ease;
-        }
-        #elev-meter-line {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background-color: var(--accent-color-red);
-            transform-origin: center center;
-            transition: transform 0.1s linear, background-color 0.5s ease;
-        }
-        #elev-meter-value {
-            position: absolute;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--highlight-color-red);
-            text-shadow: 0 0 5px rgba(255, 74, 74, 0.5);
-            z-index: 2;
-            transition: color 0.5s ease, text-shadow 0.5s ease;
-        }
-        .sky-finder-card .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .sky-finder-card label {
-            font-weight: bold;
-            color: var(--text-color-red);
-        }
-        .sky-finder-card select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color-red);
-            background-color: rgba(0, 0, 0, 0.3);
-            color: var(--text-color-red);
-            font-size: 1em;
-            appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%20viewBox%3D%220%200%20292.4%20292.4%22%3E%3Cpath%20fill%3D%22%23ff4a4a%22%20d%3D%22M287%20114.5L146.2%20255.3%205.4%20114.5h281.6z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: left 10px top 50%;
-            background-size: 12px auto;
-            padding-left: 30px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .sky-finder-card select:focus {
-            outline: none;
-            border-color: var(--highlight-color-red);
-            box-shadow: 0 0 0 2px rgba(255, 74, 74, 0.3);
-        }
-        #target-guidance {
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
             text-align: center;
-            font-size: 1.1em;
-            margin-top: 15px;
-            color: var(--accent-color-red);
-            font-weight: bold;
-            transition: color 0.5s ease;
         }
-        .guidance-values {
-            font-size: 1.3em;
-            color: var(--highlight-color-red);
-            margin-top: 5px;
-            display: block;
-            transition: color 0.5s ease;
-        }
-        .alert {
-            background-color: var(--highlight-color-red);
-            color: black;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
+
+        #nearby-objects-container {
             text-align: center;
-            font-weight: bold;
-            animation: pulse 1.5s infinite;
-            transition: background-color 0.5s ease;
         }
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 74, 74, 0.4); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255, 74, 74, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 74, 74, 0); }
-        }
-        .aligned .alert {
-            animation-name: pulse-green;
-        }
-        @keyframes pulse-green {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 255, 74, 0.4); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(74, 255, 74, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 255, 74, 0); }
-        }
-        #guidance-messages-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-            text-align: center;
-            min-height: 80px;
-        }
-        .guidance-message {
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-        .guidance-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--highlight-color-red);
-            margin: 5px 0;
-            display: block;
-        }
-        .guidance-subtext {
-            font-size: 0.9em;
-            color: var(--text-color-red);
-            opacity: 0.8;
-        }
-        .guidance-container {
-            border: 1px solid var(--border-color-red);
-            border-radius: 10px;
-            padding: 15px;
-            transition: all 0.5s ease;
-        }
-        .guidance-container.aligned {
-            background-color: var(--card-color-green);
-            border-color: var(--border-color-green);
-            box-shadow: 0 0 10px rgba(74, 255, 74, 0.3);
-        }
-        .guidance-container.aligned .guidance-value {
-            color: var(--highlight-color-green);
-        }
-        .aligned .guidance-container {
-            border-color: var(--border-color-green);
-        }
+
         #sky-objects-list {
             list-style: none;
             padding: 0;
             margin-top: 15px;
         }
+
         .sky-object-item {
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .sky-object-item:hover {
+            padding: 15px;
+            margin-bottom: 8px;
+            border-radius: 10px;
             background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: right;
         }
+
+        .sky-object-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
         .sky-object-name {
             font-size: 1.2em;
             font-weight: bold;
         }
+
         .sky-object-info {
             font-size: 0.9em;
             color: rgba(240, 192, 192, 0.7);
-        }
-        .visibility-note {
-            font-weight: bold;
-            font-size: 1em;
             margin-top: 5px;
         }
+        
+        .visibility-note {
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
         .visible {
             color: var(--highlight-color-green);
         }
+        
         .not-visible {
             color: var(--accent-color-red);
-        }
-        /* New Styles for better Mobile UI */
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-            h1 {
-                font-size: 2em;
-            }
-            .card {
-                padding: 20px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>یابنده آسمانی پیشرفته 🔭</h1>
-        <div id="status">در حال بررسی مجوزها...</div>
-        <div id="error-message" class="error-message" style="display:none;"></div>
+        <h1>یابنده آسمانی 🔭</h1>
+        <div class="status-alert" id="status">در حال بررسی مجوزها...</div>
         <div id="permission-prompt">
-            <button id="permission-button" aria-label="فعال‌سازی حسگرها و موقعیت">فعال‌سازی حسگرها و موقعیت</button>
+            <button id="permission-button">فعال‌سازی حسگرها</button>
         </div>
+
         <div id="app-content" style="display:none;">
-            <div class="card" id="location-card">
+            <div class="card">
                 <h2>موقعیت شما</h2>
-                <div class="location-info">
-                    <p>عرض جغرافیایی: <span id="latitude">--</span></p>
-                    <p>طول جغرافیایی: <span id="longitude">--</span></p>
-                    <p>ارتفاع: <span id="altitude">--</span></p>
+                <div class="info-row">
+                    <span>عرض جغرافیایی:</span>
+                    <span id="latitude" class="highlight-text">--</span>
+                </div>
+                <div class="info-row">
+                    <span>طول جغرافیایی:</span>
+                    <span id="longitude" class="highlight-text">--</span>
                 </div>
             </div>
-            <div class="card" id="compass-card">
-                <h2>قطب‌نما</h2>
+
+            <div class="card">
+                <h2>قطب‌نمای زنده</h2>
                 <div id="compass-container">
                     <div id="compass">
-                        <div id="compass-needle">
-                            <div id="needle-north"></div>
-                        </div>
-                        <div id="compass-center"></div>
+                        <span class="label n">ش</span>
+                        <span class="label e">خ</span>
+                        <span class="label w">غ</span>
+                        <span class="label s">ج</span>
                     </div>
                 </div>
                 <p id="direction-text">--</p>
             </div>
-            <div class="card" id="elev-meter-card">
-                <h2>ارتفاع‌سنج (شیب)</h2>
-                <div id="elev-meter-display">
-                    <div id="elev-meter-line"></div>
-                    <span id="elev-meter-value">0°</span>
-                </div>
-                <p>شیب دستگاه شما نسبت به افق</p>
-            </div>
-            <div class="card sky-finder-card" id="sky-finder-card">
+
+            <div class="card">
                 <h2>یابنده اجرام آسمانی</h2>
                 <div class="input-group">
                     <label for="sky-object-select">انتخاب جرم:</label>
@@ -479,589 +438,465 @@
                             <option value="jupiter">مشتری</option>
                             <option value="saturn">زحل</option>
                         </optgroup>
-                        <optgroup label="ستاره‌های درخشان">
+                        <optgroup label="ستاره‌ها و سحابی‌ها">
                             <option value="sirius">شباهنگ (Sirius)</option>
                             <option value="canopus">سهیل (Canopus)</option>
-                            <option value="alpha_centauri">آلفا قنطورس (Alpha Centauri)</option>
-                            <option value="vega">نسر واقع (Vega)</option>
                             <option value="polaris">ستاره قطبی (Polaris)</option>
-                        </optgroup>
-                        <optgroup label="سحابی‌ها و کهکشان‌ها">
                             <option value="andromeda">کهکشان آندرومدا (M31)</option>
                             <option value="orion_nebula">سحابی جبار (M42)</option>
                         </optgroup>
                         <optgroup label="ماهواره‌ها">
-                            <option value="iss">ایستگاه فضایی بین‌المللی (ISS)</option>
+                            <option value="iss">ایستگاه فضایی (ISS)</option>
                             <option value="starlink">استارلینک (Starlink)</option>
                         </optgroup>
                     </select>
                 </div>
-                <div id="target-guidance">
-                    <p>سمت هدف: <span class="guidance-values" id="target-azimuth">--</span></p>
-                    <p>ارتفاع هدف: <span class="guidance-values" id="target-elevation">--</span></p>
-                    <div id="guidance-messages-container">
-                        <div class="guidance-container">
-                            <span class="guidance-message" id="azimuth-message">جهت‌یابی:</span>
-                            <span class="guidance-value" id="azimuth-value">--</span>
-                            <span class="guidance-subtext" id="azimuth-subtext"></span>
-                        </div>
-                        <div class="guidance-container">
-                            <span class="guidance-message" id="elevation-message">شیب:</span>
-                            <span class="guidance-value" id="elevation-value">--</span>
-                            <span class="guidance-subtext" id="elevation-subtext"></span>
-                        </div>
-                        <p id="visibility-note" class="visibility-note"></p>
+
+                <div id="guidance-container">
+                    <div id="target-info">
+                        <div class="guidance-message">سمت هدف: <span id="target-azimuth" class="guidance-value">--</span></div>
+                        <div class="guidance-message">ارتفاع هدف: <span id="target-elevation" class="guidance-value">--</span></div>
                     </div>
+
+                    <div id="guidance-messages-container">
+                        <div class="status-alert">
+                            یک جرم آسمانی را انتخاب کنید.
+                        </div>
+                    </div>
+                    
+                    <div id="azimuth-guidance-meter" class="guidance-meter" style="display: none;">
+                        <span class="meter-label">سمت:</span>
+                        <div class="progress-bar"><div class="progress-fill" id="azimuth-progress"></div></div>
+                        <span id="azimuth-subtext" class="guidance-subtext"></span>
+                    </div>
+
+                    <div id="elevation-guidance-meter" class="guidance-meter" style="display: none;">
+                        <span class="meter-label">شیب:</span>
+                        <div class="progress-bar"><div class="progress-fill" id="elevation-progress"></div></div>
+                        <span id="elevation-subtext" class="guidance-subtext"></span>
+                    </div>
+                    
+                    <p id="visibility-note" class="visibility-note"></p>
                 </div>
             </div>
-            <div class="card sky-finder-card" id="satellite-finder-card">
-                <h2>یابنده ماهواره</h2>
-                <div class="input-group">
-                    <label for="satellite-select">انتخاب ماهواره:</label>
-                    <select id="satellite-select" aria-label="انتخاب ماهواره">
-                        <option value="">-- انتخاب کنید --</option>
-                        <option value="astra28">Astra 28.2°E</option>
-                        <option value="hotbird13">Hotbird 13°E</option>
-                        <option value="eutelsat16">Eutelsat 16°E</option>
-                        <option value="yahsat52">Yahsat 52.5°E</option>
-                        <option value="turksat42">Turksat 42°E</option>
-                        <option value="intelsat68">Intelsat 68.5°E</option>
-                        <option value="badr26">Badr 26°E</option>
-                        <option value="monacosat52">MonacoSat (TurkmenÄlem) 52°E</option>
-                        <option value="express53">Express-AM6 53°E</option>
-                        <option value="nilesat7">Nilesat 7°W</option>
-                        <option value="galaxy19">Galaxy 19 97°W</option>
-                        <option value="asia3s105">AsiaSat 3S 105.5°E</option>
-                        <option value="intelsat2068">Intelsat 20 68.5°E</option>
-                        <option value="eutelsat7">Eutelsat 7°E</option>
-                        <option value="eutelsat9">Eutelsat 9°E</option>
-                    </select>
-                </div>
-                <div id="target-guidance-sat">
-                    <p>سمت هدف: <span class="guidance-values" id="target-azimuth-sat">--</span></p>
-                    <p>ارتفاع هدف: <span class="guidance-values" id="target-elevation-sat">--</span></p>
-                </div>
-            </div>
-            <div class="card sky-finder-card" id="auto-finder-card">
+            
+            <div class="card" id="nearby-objects-container">
                 <h2>اجرام در نزدیکی شما</h2>
                 <ul id="sky-objects-list">
                     <li style="text-align: center; color: #aaa;">در حال جستجوی اجرام آسمانی...</li>
                 </ul>
             </div>
+
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.min.js"></script>
+
+    <script src="https://unpkg.com/astronomy-engine@2.1.19/astronomy.min.js" defer></script>
     <script>
-        const translations = {
-            'N': 'ش', 'NNE': 'ش‌ش‌خ', 'NE': 'ش‌خ', 'ENE': 'خ‌ش‌ش', 'E': 'خ', 'ESE': 'خ‌ج‌ج', 'SE': 'خ‌ج', 'SSE': 'ج‌ج‌خ',
-            'S': 'ج', 'SSW': 'ج‌ج‌غ', 'SW': 'ج‌غ', 'WSW': 'غ‌ج‌ج', 'W': 'غ', 'WNW': 'غ‌ش‌ش', 'NW': 'غ‌ش', 'NNW': 'ش‌ش‌غ',
-            'Your Position': 'موقعیت شما',
-            'Latitude': 'عرض جغرافیایی',
-            'Longitude': 'طول جغرافیایی',
-            'Altitude': 'ارتفاع',
-            'Live Compass': 'قطب‌نما',
-            'Elev Meter (Tilt)': 'ارتفاع‌سنج (شیب)',
-            'Device tilt relative to horizon': 'شیب دستگاه شما نسبت به افق',
-            'Celestial Object Finder': 'یابنده اجرام آسمانی',
-            'Select Object:': 'انتخاب جرم:',
-            'Target Azimuth': 'سمت هدف',
-            'Target Elevation': 'ارتفاع هدف',
-            'Object is below the horizon.': 'جرم آسمانی زیر افق است.',
-            'Point your device towards the target!': 'دستگاه خود را به سمت هدف بگیرید!',
-            'Turn Left': 'به چپ بچرخید',
-            'Turn Right': 'به راست بچرخید',
-            'Heading aligned!': 'جهت‌یابی صحیح است!',
-            'Select a celestial object and ensure location is active.': 'یک جرم آسمانی انتخاب کنید و از فعال بودن موقعیت خود مطمئن شوید.',
-            '-- Select --': '-- انتخاب کنید --',
-            'Enable Sensors and Location': 'فعال‌سازی حسگرها و موقعیت',
-            'Motion sensor access is restricted in PWA mode on iOS. Please open this app directly in Safari to use the compass and 3D angle meter.': 'دسترسی به حسگر حرکتی در حالت PWA در iOS محدود است. لطفاً این برنامه را مستقیماً در مرورگر سافاری باز کنید تا از قطب‌نما و زاویه‌سنج استفاده کنید.',
-            'Open in Safari': 'باز کردن در سافاری',
-            'Tap the button to enable sensors and get started!': 'برای فعال‌سازی حسگرها و شروع، دکمه را لمس کنید!',
-            'Requesting permissions...': 'در حال درخواست مجوزها...',
-            'Motion sensor permission granted. Getting location...': 'مجوز حسگر حرکتی اعطا شد. در حال دریافت موقعیت...',
-            'Motion sensor permission denied. Tap to retry.': 'مجوز حسگر حرکتی رد شد. برای امتحان مجدد لمس کنید.',
-            'Error requesting motion sensor permission. Tap to retry.': 'خطا در درخواست مجوز حسگر حرکتی. برای امتحان مجدد لمس کنید.',
-            'Motion sensor permission not required. Getting location...': 'مجوز حسگر حرکتی مورد نیاز نیست. در حال دریافت موقعیت...',
-            'Geolocation not supported by this browser.': 'موقعیت‌یابی توسط این مرورگر پشتیبانی نمی‌شود.',
-            'Geolocation Error: ': 'خطای موقعیت‌یابی: ',
-            'HTTPS is required for location on many devices.': 'پروتکل HTTPS برای موقعیت‌یابی در بسیاری از دستگاه‌ها مورد نیاز است.',
-            'Location updated.': 'موقعیت به‌روز شد.',
-            'Tilt Up': 'شیب به بالا',
-            'Tilt Down': 'شیب به پایین',
-            'Correct Tilt': 'شیب صحیح',
-            'Phone aligned!': 'دستگاه هم‌راستا شد!',
-            'N/A': 'نامشخص',
-            'Azimuth': 'سمت',
-            'Elevation': 'ارتفاع',
-            'Move your device up': 'نوک گوشی را کمی به سمت بالاتر ببرین',
-            'Move your device down': 'نوک گوشی را کمی به سمت پایین‌تر خم کنین',
-            'You can see this object with the naked eye.': 'با چشم غیرمسلح قابل مشاهده است. 👀',
-            'You cannot see this object with the naked eye.': 'با چشم غیرمسلح قابل مشاهده نیست. 🔭',
-            'In Constellation': 'در صورت فلکی',
-            'Looking for objects...': 'در حال جستجوی اجرام آسمانی...',
-            'No objects found near your view.': 'جرم آسمانی در نزدیکی دید شما پیدا نشد.',
-            'Azimuth:': 'سمت:',
-            'Elevation:': 'ارتفاع:',
-            'Satellite Finder': 'یابنده ماهواره',
-            'Select Satellite:': 'انتخاب ماهواره:',
-            'Target Azimuth:': 'سمت هدف:',
-            'Target Elevation:': 'ارتفاع هدف:',
-        };
-        function translate(key) {
-            return translations[key] || key;
-        }
-        const SATELLITE_DATA = {
-            'astra28': { name: 'Astra 28.2°E', longitude: 28.2 },
-            'hotbird13': { name: 'Hotbird 13°E', longitude: 13.0 },
-            'eutelsat16': { name: 'Eutelsat 16°E', longitude: 16.0 },
-            'yahsat52': { name: 'Yahsat 52.5°E', longitude: 52.5 },
-            'turksat42': { name: 'Turksat 42°E', longitude: 42.0 },
-            'intelsat68': { name: 'Intelsat 68.5°E', longitude: 68.5 },
-            'badr26': { name: 'Badr 26°E', longitude: 26.0 },
-            'monacosat52': { name: 'MonacoSat (TurkmenÄlem) 52°E', longitude: 52.0 },
-            'express53': { name: 'Express-AM6 53°E', longitude: 53.0 },
-            'nilesat7': { name: 'Nilesat 7°W', longitude: -7.0 },
-            'galaxy19': { name: 'Galaxy 19 97°W', longitude: -97.0 },
-            'asia3s105': { name: 'AsiaSat 3S 105.5°E', longitude: 105.5 },
-            'intelsat2068': { name: 'Intelsat 20 68.5°E', longitude: 68.5 },
-            'eutelsat7': { name: 'Eutelsat 7°E', longitude: 7.0 },
-            'eutelsat9': { name: 'Eutelsat 9°E', longitude: 9.0 },
-        };
-        const SKY_OBJECTS = {
-            'moon': { name: 'ماه', type: 'planet', visibility: 'naked_eye' },
-            'mercury': { name: 'عطارد', type: 'planet', visibility: 'naked_eye' },
-            'venus': { name: 'زهره', type: 'planet', visibility: 'naked_eye' },
-            'mars': { name: 'مریخ', type: 'planet', visibility: 'naked_eye' },
-            'jupiter': { name: 'مشتری', type: 'planet', visibility: 'naked_eye' },
-            'saturn': { name: 'زحل', type: 'planet', visibility: 'naked_eye' },
-            'sirius': { name: 'شباهنگ (Sirius)', type: 'star', starId: 'Sirius', visibility: 'naked_eye' },
-            'canopus': { name: 'سهیل (Canopus)', type: 'star', starId: 'Canopus', visibility: 'naked_eye' },
-            'alpha_centauri': { name: 'آلفا قنطورس (Alpha Centauri)', type: 'star', starId: 'AlphaCentauri', visibility: 'naked_eye' },
-            'vega': { name: 'نسر واقع (Vega)', type: 'star', starId: 'Vega', visibility: 'naked_eye' },
-            'polaris': { name: 'ستاره قطبی (Polaris)', type: 'star', starId: 'Polaris', visibility: 'naked_eye' },
-            'andromeda': { name: 'کهکشان آندرومدا (M31)', type: 'dso', dsoId: 'M31', visibility: 'naked_eye' },
-            'orion_nebula': { name: 'سحابی جبار (M42)', type: 'dso', dsoId: 'M42', visibility: 'naked_eye' },
-            'iss': { name: 'ایستگاه فضایی بین‌المللی (ISS)', type: 'satellite', tle: ['1 25544U 98067A   20138.72895663  .00000851  00000-0  23062-4 0  9990', '2 25544  51.6441 332.2285 0001090 273.9664  86.1118 15.49202525227787'], visibility: 'naked_eye' },
-            'starlink': { name: 'استارلینک (Starlink)', type: 'satellite', visibility: 'naked_eye' },
-        };
-        const statusEl = document.getElementById('status');
-        const errorMessageEl = document.getElementById('error-message');
-        const latitudeEl = document.getElementById('latitude');
-        const longitudeEl = document.getElementById('longitude');
-        const altitudeEl = document.getElementById('altitude');
-        const compassNeedle = document.getElementById('compass-needle');
-        const directionText = document.getElementById('direction-text');
-        const elevMeterLine = document.getElementById('elev-meter-line');
-        const elevMeterValue = document.getElementById('elev-meter-value');
-        const permissionButton = document.getElementById('permission-button');
-        const appContent = document.getElementById('app-content');
-        const permissionPrompt = document.getElementById('permission-prompt');
-        const skyObjectSelect = document.getElementById('sky-object-select');
-        const targetAzimuthEl = document.getElementById('target-azimuth');
-        const targetElevationEl = document.getElementById('target-elevation');
-        const guidanceMessagesContainer = document.getElementById('guidance-messages-container');
-        const visibilityNoteEl = document.getElementById('visibility-note');
-        const skyObjectsListEl = document.getElementById('sky-objects-list');
-        const satelliteSelect = document.getElementById('satellite-select');
-        const targetAzimuthSatEl = document.getElementById('target-azimuth-sat');
-        const targetElevationSatEl = document.getElementById('target-elevation-sat');
-        let userLat = null;
-        let userLon = null;
-        let userAlt = 0;
-        let currentHeading = 0;
-        let currentPitch = 0;
-        let selectedObject = null;
-        let selectedSatellite = null;
-        let targetAzimuth = null;
-        let targetElevation = null;
-        let lastVibrated = false;
-        let isCelestialMode = true;
-        const observer = new astronomy.Observer();
-        function toRadians(degrees) { return degrees * Math.PI / 180; }
-        function toDegrees(radians) { return radians * 180 / Math.PI; }
-        function showErrorMessage(message) {
-            errorMessageEl.textContent = message;
-            errorMessageEl.style.display = 'block';
-        }
-        function hideErrorMessage() {
-            errorMessageEl.style.display = 'none';
-        }
-        permissionButton.addEventListener('click', requestPermissionsAndInit);
-        skyObjectSelect.addEventListener('change', (event) => {
-            const objectId = event.target.value;
-            if (objectId) {
-                isCelestialMode = true;
-                satelliteSelect.value = '';
-                selectedObject = SKY_OBJECTS[objectId];
-                if (userLat !== null && userLon !== null) {
-                    updateTargetPosition();
-                } else {
-                    resetGuidance();
-                }
-            }
-        });
-        satelliteSelect.addEventListener('change', (event) => {
-            const satId = event.target.value;
-            if (satId) {
-                isCelestialMode = false;
-                skyObjectSelect.value = '';
-                selectedSatellite = SATELLITE_DATA[satId];
-                if (userLat !== null && userLon !== null) {
-                    updateTargetPosition();
-                } else {
-                    resetGuidance();
-                }
-            }
-        });
         document.addEventListener('DOMContentLoaded', () => {
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            const isIOSPWA = window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && navigator.standalone);
-            if (isIOS && isIOSPWA) {
-                statusEl.textContent = translate('Motion sensor access is restricted in PWA mode on iOS. Please open this app directly in Safari to use the compass and 3D angle meter.');
-                permissionButton.textContent = translate('Open in Safari');
-                permissionButton.onclick = () => {
-                    showErrorMessage(translate("Please open this app's URL directly in Safari for full functionality (sensors are blocked in PWA mode)."));
-                };
-            } else {
-                statusEl.textContent = translate('Tap the button to enable sensors and get started!');
-                permissionButton.onclick = requestPermissionsAndInit;
+            const translations = {
+                'N': 'ش', 'NNE': 'ش‌ش‌خ', 'NE': 'ش‌خ', 'ENE': 'خ‌ش‌ش', 'E': 'خ', 'ESE': 'خ‌ج‌ج', 'SE': 'خ‌ج', 'SSE': 'ج‌ج‌خ',
+                'S': 'ج', 'SSW': 'ج‌ج‌غ', 'SW': 'ج‌غ', 'WSW': 'غ‌ج‌ج', 'W': 'غ', 'WNW': 'غ‌ش‌ش', 'NW': 'غ‌ش', 'NNW': 'ش‌ش‌غ',
+                'Enable Sensors': 'فعال‌سازی حسگرها',
+                'Requesting permissions...': 'در حال درخواست مجوزها...',
+                'Motion sensor permission granted. Getting location...': 'مجوز حسگر حرکتی اعطا شد. در حال دریافت موقعیت...',
+                'Motion sensor permission denied. Tap to retry.': 'مجوز حسگر حرکتی رد شد. برای امتحان مجدد لمس کنید.',
+                'Error requesting motion sensor permission. Tap to retry.': 'خطا در درخواست مجوز حسگر حرکتی. برای امتحان مجدد لمس کنید.',
+                'Geolocation not supported by this browser.': 'موقعیت‌یابی توسط این مرورگر پشتیبانی نمی‌شود.',
+                'Geolocation Error: ': 'خطای موقعیت‌یابی: ',
+                'HTTPS is required for location on many devices.': 'پروتکل HTTPS برای موقعیت‌یابی در بسیاری از دستگاه‌ها مورد نیاز است.',
+                'Location updated.': 'موقعیت به‌روز شد.',
+                'Object is below the horizon.': 'جرم آسمانی زیر افق است.',
+                'Turn Left': 'به چپ بچرخید',
+                'Turn Right': 'به راست بچرخید',
+                'Tilt Up': 'شیب به بالا',
+                'Tilt Down': 'شیب به پایین',
+                'Correct Tilt': 'شیب صحیح',
+                'Aligned!': 'هم‌راستا شد!',
+                'You can see this object with the naked eye.': 'با چشم غیرمسلح قابل مشاهده است. 👀',
+                'You cannot see this object with the naked eye.': 'با چشم غیرمسلح قابل مشاهده نیست. 🔭',
+                'Azimuth:': 'سمت:',
+                'Elevation:': 'ارتفاع:',
+                'Looking for objects...': 'در حال جستجوی اجرام آسمانی...',
+                'No objects found near your view.': 'جرم آسمانی در نزدیکی دید شما پیدا نشد.',
+                'Select a celestial object to begin.': 'یک جرم آسمانی را انتخاب کنید.',
+                'Fetching TLE data...': 'در حال دریافت اطلاعات ماهواره...',
+                'Error fetching satellite data.': 'خطا در دریافت اطلاعات ماهواره.',
+            };
+
+            function translate(key) {
+                return translations[key] || key;
             }
-        });
-        function requestPermissionsAndInit() {
-            permissionPrompt.style.display = 'none';
-            statusEl.textContent = translate('Requesting permissions...');
-            hideErrorMessage();
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            statusEl.textContent = translate('Motion sensor permission granted. Getting location...');
-                            setupSensors();
-                            getLocation();
-                            appContent.style.display = 'flex';
-                        } else {
-                            statusEl.textContent = translate('Motion sensor permission denied. Tap to retry.');
-                            permissionPrompt.style.display = 'block';
-                        }
-                    })
-                    .catch(error => {
-                        statusEl.textContent = translate('Error requesting motion sensor permission. Tap to retry.');
-                        permissionPrompt.style.display = 'block';
-                        showErrorMessage(error.message);
-                        console.error(error);
-                    });
-            } else {
-                statusEl.textContent = translate('Motion sensor permission not required. Getting location...');
-                setupSensors();
-                getLocation();
-                appContent.style.display = 'flex';
-            }
-        }
-        function getLocation() {
-            if (!navigator.geolocation) {
-                statusEl.textContent = translate('Geolocation not supported by this browser.');
-                showErrorMessage(translate('Geolocation not supported by this browser.'));
-                return;
-            }
-            navigator.geolocation.watchPosition(
-                (position) => {
-                    userLat = position.coords.latitude;
-                    userLon = position.coords.longitude;
-                    userAlt = position.coords.altitude || 0;
-                    observer.latitude = userLat;
-                    observer.longitude = userLon;
-                    observer.elevation = userAlt;
-                    latitudeEl.textContent = userLat.toFixed(4);
-                    longitudeEl.textContent = userLon.toFixed(4);
-                    altitudeEl.textContent = userAlt ? userAlt.toFixed(2) + ' m' : translate('N/A');
-                    statusEl.textContent = translate('Location updated.');
-                    hideErrorMessage();
-                    updateTargetPosition();
-                    updateNearbyObjects();
-                },
-                (error) => {
-                    let errorMsg = translate('Geolocation Error: ') + error.message + '.';
-                    if (window.location.protocol === 'http:') {
-                        errorMsg += ' ' + translate('HTTPS is required for location on many devices.');
-                    }
-                    statusEl.textContent = errorMsg;
-                    showErrorMessage(errorMsg);
-                    console.error(error);
-                },
-                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-            );
-        }
-        function setupSensors() {
-            if (window.DeviceOrientationEvent) {
-                window.addEventListener('deviceorientation', handleDeviceOrientation);
-            } else {
-                showErrorMessage("حسگرهای جهت‌گیری دستگاه پشتیبانی نمی‌شوند.");
-            }
-        }
-        function handleDeviceOrientation(e) {
-            let heading = e.webkitCompassHeading || (e.alpha !== null ? (e.absolute ? e.alpha : (360 - e.alpha + 360) % 360) : null);
-            if (heading === null) {
-                heading = 360 - e.alpha;
-            }
-            let screenOrientation = window.orientation || 0;
-            if (screenOrientation === 90) heading += 90;
-            if (screenOrientation === -90) heading -= 90;
-            if (screenOrientation === 180) heading += 180;
-            currentHeading = (heading + 360) % 360;
-            compassNeedle.style.transform = `rotate(${currentHeading}deg)`;
-            const persianDirections = ["ش", "ش‌ش‌خ", "ش‌خ", "خ‌ش‌ش", "خ", "خ‌ج‌ج", "خ‌ج", "ج‌ج‌خ", "ج", "ج‌ج‌غ", "ج‌غ", "غ‌ج‌ج", "غ", "غ‌ش‌ش", "غ‌ش", "ش‌ش‌غ"];
-            const index = Math.round(currentHeading / 22.5) % 16;
-            directionText.textContent = `${persianDirections[index]} (${currentHeading.toFixed(0)}°)`;
-            currentPitch = e.beta;
-            currentPitch = Math.max(-90, Math.min(90, currentPitch));
-            elevMeterLine.style.transform = `rotate(${currentPitch}deg)`;
-            elevMeterValue.textContent = `${currentPitch.toFixed(0)}°`;
-            updateGuidance();
-            updateNearbyObjects();
-        }
-        function updateTargetPosition() {
-            if (isCelestialMode) {
-                calculateCelestialPosition();
-            } else {
-                calculateSatellitePosition();
-            }
-        }
-        function calculateCelestialPosition() {
-            if (!selectedObject || userLat === null) {
-                resetGuidance();
-                return;
-            }
-            const today = new Date();
-            let pos;
-            try {
-                if (selectedObject.type === 'planet') {
-                    pos = astronomy.Equator(selectedObject.name.toLowerCase(), today, observer, true);
-                } else if (selectedObject.type === 'star') {
-                    pos = astronomy.Equator(selectedObject.starId, today, observer, true);
-                } else if (selectedObject.type === 'dso') {
-                    pos = astronomy.Equator(selectedObject.dsoId, today, observer, true);
-                } else if (selectedObject.type === 'satellite') {
-                     if (selectedObject.name === 'ایستگاه فضایی بین‌المللی (ISS)') {
-                         const tle = new astronomy.Tle(
-                            '1 25544U 98067A   20138.72895663  .00000851  00000-0  23062-4 0  9990',
-                            '2 25544  51.6441 332.2285 0001090 273.9664  86.1118 15.49202525227787'
-                        );
-                        pos = astronomy.Equator(tle, today, observer, true);
-                    } else {
-                        resetGuidance();
-                        return;
-                    }
+
+            const SKY_OBJECTS = {
+                'moon': { name: 'ماه', type: 'planet', visibility: 'naked_eye' },
+                'mercury': { name: 'عطارد', type: 'planet', visibility: 'naked_eye' },
+                'venus': { name: 'زهره', type: 'planet', visibility: 'naked_eye' },
+                'mars': { name: 'مریخ', type: 'planet', visibility: 'naked_eye' },
+                'jupiter': { name: 'مشتری', type: 'planet', visibility: 'naked_eye' },
+                'saturn': { name: 'زحل', type: 'planet', visibility: 'naked_eye' },
+                'sirius': { name: 'شباهنگ (Sirius)', type: 'star', starId: 'Sirius', visibility: 'naked_eye' },
+                'canopus': { name: 'سهیل (Canopus)', type: 'star', starId: 'Canopus', visibility: 'naked_eye' },
+                'polaris': { name: 'ستاره قطبی (Polaris)', type: 'star', starId: 'Polaris', visibility: 'naked_eye' },
+                'andromeda': { name: 'کهکشان آندرومدا (M31)', type: 'dso', dsoId: 'M31', visibility: 'naked_eye' },
+                'orion_nebula': { name: 'سحابی جبار (M42)', type: 'dso', dsoId: 'M42', visibility: 'naked_eye' },
+                'iss': { name: 'ایستگاه فضایی (ISS)', type: 'satellite', visibility: 'naked_eye' },
+                'starlink': { name: 'استارلینک (Starlink)', type: 'satellite', visibility: 'naked_eye' },
+            };
+
+            const statusEl = document.getElementById('status');
+            const permissionButton = document.getElementById('permission-button');
+            const appContent = document.getElementById('app-content');
+            const latitudeEl = document.getElementById('latitude');
+            const longitudeEl = document.getElementById('longitude');
+            const directionText = document.getElementById('direction-text');
+            const skyObjectSelect = document.getElementById('sky-object-select');
+            const targetAzimuthEl = document.getElementById('target-azimuth');
+            const targetElevationEl = document.getElementById('target-elevation');
+            const guidanceMessagesContainer = document.getElementById('guidance-messages-container');
+            const visibilityNoteEl = document.getElementById('visibility-note');
+            const skyObjectsListEl = document.getElementById('sky-objects-list');
+            const azimuthProgress = document.getElementById('azimuth-progress');
+            const elevationProgress = document.getElementById('elevation-progress');
+            const azimuthSubtextEl = document.getElementById('azimuth-subtext');
+            const elevationSubtextEl = document.getElementById('elevation-subtext');
+            const azimuthMeter = document.getElementById('azimuth-guidance-meter');
+            const elevationMeter = document.getElementById('elevation-guidance-meter');
+            const targetInfo = document.getElementById('target-info');
+
+            let userLat = null;
+            let userLon = null;
+            let currentHeading = 0;
+            let currentPitch = 0;
+            let selectedObject = null;
+            let targetAzimuth = null;
+            let targetElevation = null;
+            let lastVibrated = false;
+            let tleCache = {};
+
+            const observer = new Astronomy.Observer();
+
+            function toRadians(degrees) { return degrees * Math.PI / 180; }
+            function showStatus(message) { statusEl.textContent = message; }
+            function hideStatus() { statusEl.textContent = ''; }
+
+            permissionButton.addEventListener('click', () => {
+                document.getElementById('permission-prompt').style.display = 'none';
+                showStatus(translate('Requesting permissions...'));
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                showStatus(translate('Motion sensor permission granted. Getting location...'));
+                                setupSensors();
+                                getLocation();
+                                appContent.style.display = 'flex';
+                            } else {
+                                showStatus(translate('Motion sensor permission denied. Tap to retry.'));
+                                document.getElementById('permission-prompt').style.display = 'block';
+                            }
+                        })
+                        .catch(error => {
+                            showStatus(translate('Error requesting motion sensor permission. Tap to retry.'));
+                            document.getElementById('permission-prompt').style.display = 'block';
+                            console.error(error);
+                        });
                 } else {
+                    showStatus(translate('Motion sensor permission not required. Getting location...'));
+                    setupSensors();
+                    getLocation();
+                    appContent.style.display = 'flex';
+                }
+            });
+
+            function getLocation() {
+                if (!navigator.geolocation) {
+                    showStatus(translate('Geolocation not supported by this browser.'));
+                    return;
+                }
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        userLat = position.coords.latitude;
+                        userLon = position.coords.longitude;
+                        observer.latitude = userLat;
+                        observer.longitude = userLon;
+                        latitudeEl.textContent = userLat.toFixed(4);
+                        longitudeEl.textContent = userLon.toFixed(4);
+                        showStatus(translate('Location updated.'));
+                        updateTargetPosition();
+                        updateNearbyObjects();
+                    },
+                    (error) => {
+                        let errorMsg = translate('Geolocation Error: ') + error.message;
+                        if (window.location.protocol === 'http:') {
+                            errorMsg += '. ' + translate('HTTPS is required for location on many devices.');
+                        }
+                        showStatus(errorMsg);
+                        console.error(error);
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            }
+
+            function setupSensors() {
+                if (window.DeviceOrientationEvent) {
+                    window.addEventListener('deviceorientation', handleDeviceOrientation);
+                } else {
+                    showStatus("حسگرهای جهت‌گیری دستگاه پشتیبانی نمی‌شوند.");
+                }
+            }
+
+            function handleDeviceOrientation(e) {
+                let heading = e.webkitCompassHeading || (e.alpha !== null ? (e.absolute ? e.alpha : (360 - e.alpha + 360) % 360) : null);
+                if (heading === null) {
+                    heading = 360 - e.alpha;
+                }
+                let screenOrientation = window.orientation || 0;
+                if (screenOrientation === 90) heading += 90;
+                if (screenOrientation === -90) heading -= 90;
+                if (screenOrientation === 180) heading += 180;
+                currentHeading = (heading + 360) % 360;
+                
+                document.getElementById('compass').style.transform = `rotate(${360 - currentHeading}deg)`;
+                const persianDirections = ["ش", "ش‌ش‌خ", "ش‌خ", "خ‌ش‌ش", "خ", "خ‌ج‌ج", "خ‌ج", "ج‌ج‌خ", "ج", "ج‌ج‌غ", "ج‌غ", "غ‌ج‌ج", "غ", "غ‌ش‌ش", "غ‌ش", "ش‌ش‌غ"];
+                const index = Math.round(currentHeading / 22.5) % 16;
+                directionText.textContent = `${persianDirections[index]} (${currentHeading.toFixed(0)}°)`;
+                
+                currentPitch = e.beta;
+                currentPitch = Math.max(-90, Math.min(90, currentPitch));
+
+                updateGuidance();
+                updateNearbyObjects();
+            }
+
+            async function fetchTle(object) {
+                if (object.type !== 'satellite' || !['iss', 'starlink'].includes(object.id)) return null;
+                const satId = (object.id === 'iss') ? '25544' : '44783'; // Use a representative Starlink TLE ID
+                const cacheKey = `tle_${satId}`;
+
+                if (tleCache[cacheKey] && (Date.now() - tleCache[cacheKey].timestamp) < 3600000) { // Cache for 1 hour
+                    return tleCache[cacheKey].data;
+                }
+
+                try {
+                    const response = await fetch(`https://api.wheretheiss.at/v1/satellites/${satId}/tles`);
+                    const data = await response.json();
+                    if (!data || !data.line1 || !data.line2) throw new Error('Invalid TLE data');
+                    const tleLines = [data.name, data.line1, data.line2];
+                    tleCache[cacheKey] = { data: tleLines, timestamp: Date.now() };
+                    return tleLines;
+                } catch (e) {
+                    console.error('Error fetching TLE data:', e);
+                    return null;
+                }
+            }
+
+            async function updateTargetPosition() {
+                if (!selectedObject || userLat === null) {
                     resetGuidance();
                     return;
                 }
-                const horizontalPos = astronomy.Horizon(today, observer, pos.ra, pos.dec);
-                targetAzimuth = horizontalPos.azimuth;
-                targetElevation = horizontalPos.altitude;
-                targetAzimuthEl.textContent = `${targetAzimuth.toFixed(1)}°`;
-                targetElevationEl.textContent = `${targetElevation.toFixed(1)}°`;
-                if (targetElevation <= 0) {
-                    guidanceMessagesContainer.innerHTML = `<div class="alert">${translate('Object is below the horizon.')}</div>`;
-                    visibilityNoteEl.textContent = '';
-                } else {
-                    updateGuidance();
-                }
-                const mag = (selectedObject.type === 'star') ? astronomy.Star(selectedObject.starId).mag :
-                            (selectedObject.type === 'dso' ? astronomy.Dso(selectedObject.dsoId).mag : null);
-                if (selectedObject.visibility === 'naked_eye' || (mag && mag <= 6)) {
-                    visibilityNoteEl.textContent = translate('You can see this object with the naked eye.');
-                    visibilityNoteEl.classList.add('visible');
-                    visibilityNoteEl.classList.remove('not-visible');
-                } else {
-                    visibilityNoteEl.textContent = translate('You cannot see this object with the naked eye.');
-                    visibilityNoteEl.classList.add('not-visible');
-                    visibilityNoteEl.classList.remove('visible');
-                }
-            } catch (e) {
-                resetGuidance();
-                console.error("Error calculating object position:", e);
-            }
-        }
-        function calculateSatellitePosition() {
-            if (!selectedSatellite || userLat === null) {
-                targetAzimuthSatEl.textContent = '--';
-                targetElevationSatEl.textContent = '--';
-                return;
-            }
-            const obsLatR = toRadians(userLat);
-            const obsLonR = toRadians(userLon);
-            const satLonR = toRadians(selectedSatellite.longitude);
-            const G = toRadians(selectedSatellite.longitude - userLon);
-            const Re = 6378.137;
-            const Rs = 42164;
-            const sinEl = (Math.cos(obsLatR) * Math.cos(G) - (Re / Rs)) / (Math.sqrt(1 - 2 * (Re / Rs) * Math.cos(obsLatR) * Math.cos(G) + Math.pow(Re / Rs, 2)));
-            let elevation = toDegrees(Math.asin(sinEl));
-            let azimuth = toDegrees(Math.atan2(-Math.sin(G), Math.tan(obsLatR) * Math.cos(G) - Math.sin(obsLatR) / Math.cos(G)));
-            azimuth = (azimuth + 360) % 360;
-            if (isNaN(elevation) || elevation <= 0) {
-                elevation = 0;
-                azimuth = '--';
-                document.getElementById('target-guidance-sat').innerHTML = `<div class="alert">${translate('Object is below the horizon.')}</div>`;
-                return;
-            }
-            targetAzimuth = azimuth;
-            targetElevation = elevation;
-            targetAzimuthSatEl.textContent = `${targetAzimuth.toFixed(1)}°`;
-            targetElevationSatEl.textContent = `${targetElevation.toFixed(1)}°`;
-            updateGuidance();
-        }
-        function resetGuidance() {
-            targetAzimuthEl.textContent = '--';
-            targetElevationEl.textContent = '--';
-            guidanceMessagesContainer.innerHTML = `<div class="guidance-container"><span class="guidance-message">${translate('Select a celestial object and ensure location is active.')}</span></div>`;
-            document.body.classList.remove('aligned');
-            visibilityNoteEl.textContent = '';
-            lastVibrated = false;
-        }
-        function updateGuidance() {
-            const azTolerance = 5;
-            const elTolerance = 5;
-            if (targetAzimuth === null || targetElevation === null || targetElevation <= 0) {
-                document.body.classList.remove('aligned');
-                document.getElementById('sky-finder-card').classList.remove('aligned');
-                lastVibrated = false;
-                return;
-            }
-            const diffAzimuth = Math.abs((targetAzimuth - currentHeading + 360) % 360);
-            const diffPitch = Math.abs(currentPitch - targetElevation);
-            const isAzimuthAligned = diffAzimuth < azTolerance || diffAzimuth > 360 - azTolerance;
-            const isPitchAligned = diffPitch < elTolerance;
-            const isAligned = isAzimuthAligned && isPitchAligned;
-            const azimuthGuidanceBox = document.querySelector('#guidance-messages-container .guidance-container:nth-of-type(1)');
-            const elevationGuidanceBox = document.querySelector('#guidance-messages-container .guidance-container:nth-of-type(2)');
-            const azimuthSubtextEl = azimuthGuidanceBox.querySelector('.guidance-subtext');
-            const elevationSubtextEl = elevationGuidanceBox.querySelector('.guidance-subtext');
-            if (isAligned) {
-                document.body.classList.add('aligned');
-                document.getElementById('sky-finder-card').classList.add('aligned');
-                guidanceMessagesContainer.innerHTML = `<div class="alert">${translate('Phone aligned!')}</div>`;
-                if ('vibrate' in navigator && !lastVibrated) {
-                    navigator.vibrate(200);
-                    lastVibrated = true;
-                }
-            } else {
-                document.body.classList.remove('aligned');
-                document.getElementById('sky-finder-card').classList.remove('aligned');
-                lastVibrated = false;
-                if (guidanceMessagesContainer.childElementCount !== 2) {
-                    guidanceMessagesContainer.innerHTML = `
-                        <div class="guidance-container" id="azimuth-guidance-box">
-                            <span class="guidance-message">${translate('Azimuth')}:</span>
-                            <span class="guidance-value">${targetAzimuth.toFixed(0)}°</span>
-                            <span class="guidance-subtext"></span>
-                        </div>
-                        <div class="guidance-container" id="elevation-guidance-box">
-                            <span class="guidance-message">${translate('Elevation')}:</span>
-                            <span class="guidance-value">${targetElevation.toFixed(0)}°</span>
-                            <span class="guidance-subtext"></span>
-                        </div>`;
-                }
-                const azimuthSubtextEl = document.querySelector('#azimuth-guidance-box .guidance-subtext');
-                const elevationSubtextEl = document.querySelector('#elevation-guidance-box .guidance-subtext');
-                if (isAzimuthAligned) {
-                    document.getElementById('azimuth-guidance-box').classList.add('aligned');
-                    azimuthSubtextEl.textContent = translate('Heading aligned!');
-                } else {
-                    document.getElementById('azimuth-guidance-box').classList.remove('aligned');
-                    let turnAmount = diffAzimuth > 180 ? 360 - diffAzimuth : diffAzimuth;
-                    let turnDirection = (targetAzimuth > currentHeading && diffAzimuth < 180) || (targetAzimuth < currentHeading && diffAzimuth > 180) ? translate('Turn Right') : translate('Turn Left');
-                    azimuthSubtextEl.textContent = `${turnDirection} (${turnAmount.toFixed(0)}°)`;
-                }
-                if (isPitchAligned) {
-                    document.getElementById('elevation-guidance-box').classList.add('aligned');
-                    elevationSubtextEl.textContent = translate('Correct Tilt');
-                } else {
-                    document.getElementById('elevation-guidance-box').classList.remove('aligned');
-                    let tiltInstruction = currentPitch < targetElevation ? translate('Move your device up') : translate('Move your device down');
-                    let diffEl = Math.abs(currentPitch - targetElevation).toFixed(0);
-                    elevationSubtextEl.textContent = `${tiltInstruction} (${diffEl}°)`;
-                }
-            }
-        }
-        function updateNearbyObjects() {
-            if (userLat === null || !isCelestialMode) {
-                return;
-            }
-            const now = new Date();
-            const nearbyObjects = [];
-            for (const key in SKY_OBJECTS) {
-                const obj = SKY_OBJECTS[key];
+                const today = new Date();
                 let pos;
-                let horizontalPos;
                 try {
-                    if (obj.type === 'planet') {
-                        pos = astronomy.Equator(key, now, observer, true);
-                    } else if (obj.type === 'star') {
-                        pos = astronomy.Equator(obj.starId, now, observer, true);
-                    } else if (obj.type === 'dso') {
-                        pos = astronomy.Equator(obj.dsoId, now, observer, true);
-                    } else if (obj.type === 'satellite') {
-                        if (obj.name === 'ایستگاه فضایی بین‌المللی (ISS)') {
-                            const tle = new astronomy.Tle(
-                                '1 25544U 98067A   20138.72895663  .00000851  00000-0  23062-4 0  9990',
-                                '2 25544  51.6441 332.2285 0001090 273.9664  86.1118 15.49202525227787'
-                            );
-                            pos = astronomy.Equator(tle, now, observer, true);
-                        } else {
-                            continue;
+                    if (selectedObject.type === 'satellite') {
+                        showStatus(translate('Fetching TLE data...'));
+                        const tle = await fetchTle(selectedObject);
+                        hideStatus();
+                        if (!tle) {
+                            showStatus(translate('Error fetching satellite data.'));
+                            resetGuidance();
+                            return;
                         }
+                        pos = Astronomy.Equator(new Astronomy.Tle(tle[1], tle[2]), today, observer, true);
                     } else {
-                        continue;
+                        pos = Astronomy.Equator(selectedObject.starId || selectedObject.dsoId || selectedObject.name.toLowerCase(), today, observer, true);
                     }
-                    horizontalPos = astronomy.Horizon(now, observer, pos.ra, pos.dec);
-                    if (horizontalPos.altitude > 0) {
-                        const diffAzimuth = Math.abs((horizontalPos.azimuth - currentHeading + 360) % 360);
-                        const diffPitch = Math.abs(currentPitch - horizontalPos.altitude);
-                        const distance = Math.sqrt(Math.pow(diffAzimuth, 2) + Math.pow(diffPitch, 2));
-                        if (distance < 30) {
-                            nearbyObjects.push({
-                                id: key,
-                                name: obj.name,
-                                distance: distance,
-                                azimuth: horizontalPos.azimuth,
-                                elevation: horizontalPos.altitude,
-                                visibility: obj.visibility
-                            });
-                        }
+                    const horizontalPos = Astronomy.Horizon(today, observer, pos.ra, pos.dec);
+                    targetAzimuth = horizontalPos.azimuth;
+                    targetElevation = horizontalPos.altitude;
+                    
+                    targetAzimuthEl.textContent = `${targetAzimuth.toFixed(0)}°`;
+                    targetElevationEl.textContent = `${targetElevation.toFixed(0)}°`;
+
+                    if (targetElevation <= 0) {
+                        guidanceMessagesContainer.innerHTML = `<div class="status-alert">${translate('Object is below the horizon.')}</div>`;
+                        azimuthMeter.style.display = 'none';
+                        elevationMeter.style.display = 'none';
+                        targetInfo.style.display = 'flex';
+                        visibilityNoteEl.textContent = '';
+                    } else {
+                        updateGuidance();
                     }
+
+                    const isVisibleToNakedEye = selectedObject.visibility === 'naked_eye';
+                    const mag = (selectedObject.type === 'star') ? Astronomy.Star(selectedObject.starId).mag :
+                               (selectedObject.type === 'dso' ? Astronomy.Dso(selectedObject.dsoId).mag : null);
+
+                    if (isVisibleToNakedEye || (mag !== null && mag <= 6)) {
+                        visibilityNoteEl.textContent = translate('You can see this object with the naked eye.');
+                        visibilityNoteEl.className = 'visibility-note visible';
+                    } else {
+                        visibilityNoteEl.textContent = translate('You cannot see this object with the naked eye.');
+                        visibilityNoteEl.className = 'visibility-note not-visible';
+                    }
+
                 } catch (e) {
-                    console.error(`Error for object ${obj.name}:`, e);
+                    resetGuidance();
+                    console.error("Error calculating object position:", e);
+                    showStatus("خطا در محاسبه موقعیت جرم آسمانی.");
                 }
             }
-            nearbyObjects.sort((a, b) => a.distance - b.distance);
-            let listHtml = '';
-            if (nearbyObjects.length > 0) {
-                nearbyObjects.forEach(obj => {
-                    const visibilityClass = (obj.visibility === 'naked_eye') ? 'visible' : 'not-visible';
-                    const visibilityText = (obj.visibility === 'naked_eye') ? translate('You can see this object with the naked eye.') : translate('You cannot see this object with the naked eye.');
-                    listHtml += `<li class="sky-object-item" data-id="${obj.id}">
-                        <div class="sky-object-name">${obj.name}</div>
-                        <div class="sky-object-info">
-                            <span>${translate('Azimuth:')} ${obj.azimuth.toFixed(0)}°</span> |
-                            <span>${translate('Elevation:')} ${obj.elevation.toFixed(0)}°</span>
-                        </div>
-                        <div class="visibility-note ${visibilityClass}">${visibilityText}</div>
-                    </li>`;
-                });
-            } else {
-                listHtml = `<li style="text-align: center; color: #aaa;">${translate('No objects found near your view.')}</li>`;
+            
+            function resetGuidance() {
+                targetAzimuth = null;
+                targetElevation = null;
+                targetAzimuthEl.textContent = '--';
+                targetElevationEl.textContent = '--';
+                guidanceMessagesContainer.innerHTML = `<div class="status-alert">${translate('Select a celestial object to begin.')}</div>`;
+                azimuthMeter.style.display = 'none';
+                elevationMeter.style.display = 'none';
+                visibilityNoteEl.textContent = '';
+                document.body.classList.remove('aligned');
+                lastVibrated = false;
             }
-            skyObjectsListEl.innerHTML = listHtml;
-            document.querySelectorAll('.sky-object-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    const id = e.currentTarget.getAttribute('data-id');
-                    skyObjectSelect.value = id;
-                    isCelestialMode = true;
-                    selectedObject = SKY_OBJECTS[id];
-                    updateTargetPosition();
+            
+            function updateGuidance() {
+                if (targetAzimuth === null || targetElevation === null || targetElevation <= 0) return;
+
+                const azTolerance = 5;
+                const elTolerance = 5;
+
+                const diffAzimuth = Math.abs((targetAzimuth - currentHeading + 360) % 360);
+                const normalizedDiffAzimuth = Math.min(diffAzimuth, 360 - diffAzimuth);
+                const diffPitch = Math.abs(currentPitch - targetElevation);
+                
+                const isAzimuthAligned = normalizedDiffAzimuth < azTolerance;
+                const isPitchAligned = diffPitch < elTolerance;
+                const isAligned = isAzimuthAligned && isPitchAligned;
+                
+                if (isAligned) {
+                    document.body.classList.add('aligned');
+                    guidanceMessagesContainer.innerHTML = `<div class="status-alert">${translate('Aligned!')}</div>`;
+                    if ('vibrate' in navigator && !lastVibrated) {
+                        navigator.vibrate(200);
+                        lastVibrated = true;
+                    }
+                } else {
+                    document.body.classList.remove('aligned');
+                    lastVibrated = false;
+                    guidanceMessagesContainer.innerHTML = '';
+                    azimuthMeter.style.display = 'flex';
+                    elevationMeter.style.display = 'flex';
+
+                    // Azimuth
+                    if (isAzimuthAligned) {
+                        azimuthProgress.style.width = '100%';
+                        azimuthSubtextEl.textContent = ` ${translate('Turn Right')}`; // Changed this
+                    } else {
+                        const progress = 100 - (normalizedDiffAzimuth / 180) * 100;
+                        azimuthProgress.style.width = `${progress.toFixed(0)}%`;
+                        const turnDirection = diffAzimuth > 180 ? translate('Turn Left') : translate('Turn Right');
+                        azimuthSubtextEl.textContent = `${turnDirection} (${normalizedDiffAzimuth.toFixed(0)}°)`;
+                    }
+                    
+                    // Elevation
+                    if (isPitchAligned) {
+                        elevationProgress.style.width = '100%';
+                        elevationSubtextEl.textContent = translate('Correct Tilt');
+                    } else {
+                        const progress = 100 - (Math.abs(diffPitch) / 90) * 100;
+                        elevationProgress.style.width = `${progress.toFixed(0)}%`;
+                        const tiltDirection = currentPitch < targetElevation ? translate('Tilt Up') : translate('Tilt Down');
+                        elevationSubtextEl.textContent = `${tiltDirection} (${diffPitch.toFixed(0)}°)`;
+                    }
+                }
+            }
+
+            async function updateNearbyObjects() {
+                if (userLat === null) {
+                    return;
+                }
+                const now = new Date();
+                const nearbyObjects = [];
+                for (const key in SKY_OBJECTS) {
+                    const obj = SKY_OBJECTS[key];
+                    let pos;
+                    let horizontalPos;
+                    try {
+                        if (obj.type === 'satellite') {
+                            const tle = await fetchTle(obj);
+                            if (!tle) continue;
+                            pos = Astronomy.Equator(new Astronomy.Tle(tle[1], tle[2]), now, observer, true);
+                        } else {
+                            pos = Astronomy.Equator(obj.starId || obj.dsoId || key, now, observer, true);
+                        }
+                        horizontalPos = Astronomy.Horizon(now, observer, pos.ra, pos.dec);
+
+                        if (horizontalPos.altitude > 0) {
+                            const diffAzimuth = Math.abs((horizontalPos.azimuth - currentHeading + 360) % 360);
+                            const normalizedDiffAzimuth = Math.min(diffAzimuth, 360 - diffAzimuth);
+                            const diffPitch = Math.abs(currentPitch - horizontalPos.altitude);
+                            const distance = Math.sqrt(Math.pow(normalizedDiffAzimuth, 2) + Math.pow(diffPitch, 2));
+
+                            if (distance < 30) {
+                                nearbyObjects.push({
+                                    id: key,
+                                    name: obj.name,
+                                    distance: distance,
+                                    azimuth: horizontalPos.azimuth,
+                                    elevation: horizontalPos.altitude,
+                                    visibility: obj.visibility
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.error(`Error for object ${obj.name}:`, e);
+                    }
+                }
+
+                nearbyObjects.sort((a, b) => a.distance - b.distance);
+                let listHtml = '';
+                if (nearbyObjects.length > 0) {
+                    nearbyObjects.forEach(obj => {
+                        const visibilityClass = (obj.visibility === 'naked_eye') ? 'visible' : 'not-visible';
+                        const visibilityText = (obj.visibility === 'naked_eye') ? translate('You can see this object with the naked eye.') : translate('You cannot see this object with the naked eye.');
+                        listHtml += `<li class="sky-object-item" data-id="${obj.id}">
+                            <div class="sky-object-name">${obj.name}</div>
+                            <div class="sky-object-info">
+                                <span>${translate('Azimuth:')} ${obj.azimuth.toFixed(0)}°</span> |
+                                <span>${translate('Elevation:')} ${obj.elevation.toFixed(0)}°</span>
+                            </div>
+                            <div class="visibility-note ${visibilityClass}">${visibilityText}</div>
+                        </li>`;
+                    });
+                } else {
+                    listHtml = `<li style="text-align: center; color: #aaa;">${translate('No objects found near your view.')}</li>`;
+                }
+                skyObjectsListEl.innerHTML = listHtml;
+                document.querySelectorAll('.sky-object-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        skyObjectSelect.value = id;
+                        selectedObject = SKY_OBJECTS[id];
+                        updateTargetPosition();
+                    });
                 });
+            }
+
+            skyObjectSelect.addEventListener('change', (event) => {
+                const objectId = event.target.value;
+                if (objectId) {
+                    selectedObject = SKY_OBJECTS[objectId];
+                    if (userLat !== null && userLon !== null) {
+                        updateTargetPosition();
+                    } else {
+                        resetGuidance();
+                    }
+                } else {
+                    resetGuidance();
+                }
             });
-        }
+        });
     </script>
 </body>
 </html>
