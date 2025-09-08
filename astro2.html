@@ -131,9 +131,10 @@
         <div id="permission-screen" class="flex flex-col items-center justify-center h-full space-y-6">
             <h1 class="text-3xl font-bold">ردیاب ماهواره</h1>
             <p class="text-lg text-slate-300">برای یافتن ماهواره، نیاز به دسترسی به موقعیت مکانی (GPS) و سنسورهای حرکتی گوشی شما داریم.</p>
-            <button id="permission-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+            <button id="permission-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 w-64">
                 شروع و اعطای دسترسی
             </button>
+            <p id="permission-status" class="text-md text-sky-300 h-6"></p>
             <p class="text-sm text-slate-500 mt-4">هیچ اطلاعاتی ذخیره یا به اشتراک گذاشته نمی‌شود.</p>
         </div>
 
@@ -187,6 +188,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const permissionScreen = document.getElementById('permission-screen');
             const permissionBtn = document.getElementById('permission-btn');
+            const permissionStatus = document.getElementById('permission-status');
             const mainApp = document.getElementById('main-app');
             const satelliteSelect = document.getElementById('satellite-select');
             const azimuthVal = document.getElementById('azimuth-val');
@@ -235,42 +237,61 @@
             permissionBtn.addEventListener('click', requestPermissions);
             satelliteSelect.addEventListener('change', calculateAndDisplay);
 
-            function requestPermissions() {
-                // 1. Request Geolocation
+            async function requestPermissions() {
+                permissionBtn.disabled = true;
+                permissionBtn.textContent = 'کمی صبر کنید...';
+                
+                let orientationGranted = false;
+                
+                // 1. Request Device Orientation first
+                permissionStatus.textContent = 'در حال درخواست دسترسی به سنسور...';
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    try {
+                        const permissionState = await DeviceOrientationEvent.requestPermission();
+                        if (permissionState === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation, true);
+                            orientationGranted = true;
+                        } else {
+                            permissionStatus.textContent = 'دسترسی به سنسور رد شد.';
+                            permissionBtn.disabled = false;
+                            permissionBtn.textContent = 'دوباره تلاش کنید';
+                            return;
+                        }
+                    } catch (error) {
+                        console.error("DeviceOrientation permission error:", error);
+                        permissionStatus.textContent = 'خطا در دسترسی به سنسور.';
+                        permissionBtn.disabled = false;
+                        permissionBtn.textContent = 'دوباره تلاش کنید';
+                        return;
+                    }
+                } else {
+                    window.addEventListener('deviceorientation', handleOrientation, true);
+                    orientationGranted = true;
+                }
+
+                if (!orientationGranted) return;
+
+                // 2. Request Geolocation
+                permissionStatus.textContent = 'در حال دریافت موقعیت مکانی (GPS)...';
                 if ('geolocation' in navigator) {
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
                             userLat = position.coords.latitude;
                             userLon = position.coords.longitude;
-                            console.log(`Location found: Lat ${userLat}, Lon ${userLon}`);
-                            
-                            // 2. Request Device Orientation
-                            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                                // iOS 13+
-                                DeviceOrientationEvent.requestPermission()
-                                    .then(permissionState => {
-                                        if (permissionState === 'granted') {
-                                            window.addEventListener('deviceorientation', handleOrientation);
-                                            initializeApp();
-                                        } else {
-                                            alert('دسترسی به سنسورهای حرکتی برای کارکرد برنامه ضروری است.');
-                                        }
-                                    })
-                                    .catch(console.error);
-                            } else {
-                                // Non-iOS 13+
-                                window.addEventListener('deviceorientation', handleOrientation);
-                                initializeApp();
-                            }
+                            initializeApp();
                         },
                         (error) => {
-                            alert('خطا در دریافت موقعیت مکانی. لطفاً GPS را فعال کنید و دوباره تلاش کنید.');
+                            permissionStatus.textContent = 'خطا در GPS. لطفاً آن را فعال کنید.';
                             console.error("Geolocation error:", error);
+                            permissionBtn.disabled = false;
+                            permissionBtn.textContent = 'دوباره تلاش کنید';
                         },
-                        { enableHighAccuracy: true }
+                        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
                     );
                 } else {
-                    alert('مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند.');
+                    permissionStatus.textContent = 'موقعیت مکانی در این مرورگر پشتیبانی نمی‌شود.';
+                    permissionBtn.disabled = false;
+                    permissionBtn.textContent = 'شروع و اعطای دسترسی';
                 }
             }
             
@@ -278,7 +299,8 @@
                 permissionScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
                 mainApp.classList.add('flex');
-                calculateAndDisplay();
+                // Use a small timeout to ensure the UI is rendered before calculating sizes
+                setTimeout(calculateAndDisplay, 100);
             }
 
             function calculateAndDisplay() {
@@ -308,18 +330,22 @@
                     return;
                 }
                 
-                // Alpha: compass direction (0-360, 0 = North)
-                const currentAzimuth = event.alpha;
+                // Use webkitCompassHeading as a fallback for iOS
+                const currentAzimuth = event.webkitCompassHeading || event.alpha;
+                
                 // Beta: front-back tilt (elevation)
-                // We need to adjust based on portrait orientation. -90 (sky) to 90 (ground)
-                const currentElevation = event.beta - 90;
+                // Correcting the elevation calculation for portrait mode
+                // 90 (horizon) -> 0 degrees elevation, 0 (sky) -> 90 degrees elevation
+                const currentElevation = 90 - event.beta;
                 
                 updatePhonePointer(currentAzimuth, currentElevation);
                 
-                const azimuthDiff = Math.abs(currentAzimuth - targetAzimuth);
+                // Handle the 360-degree wrap-around for azimuth difference
+                const azimuthDiffRaw = Math.abs(currentAzimuth - targetAzimuth);
+                const azimuthDiff = Math.min(azimuthDiffRaw, 360 - azimuthDiffRaw);
                 const elevationDiff = Math.abs(currentElevation - targetElevation);
                 
-                const tolerance = 2.0; // 2 degree tolerance
+                const tolerance = 2.5; // Slightly increased tolerance for usability
 
                 if (azimuthDiff < tolerance && elevationDiff < tolerance) {
                     if (!isFound) {
@@ -402,3 +428,5 @@
     </script>
 </body>
 </html>
+
+
