@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Hidden Camera Finder — v0.2</title>
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: [ 'Inter', 'system-ui', 'SF Pro Text', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif' ] },
+          colors: { bg: '#0b1220' }
+        }
+      }
+    }
+  </script>
+  <style>
+    html, body { height: 100%; background: radial-gradient(1200px 800px at 50% -10%, #0b1220 0%, #050914 55%, #02050d 100%) }
+    .glass { background: rgba(255,255,255,.06); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.14); }
+    .btn { border-radius: 12px; padding: .6rem .9rem; font-weight: 700; font-size: .9rem; transition: .15s transform; }
+    .btn:active { transform: scale(.98) }
+    .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,.2); color: #fff }
+    .btn-primary { background: rgba(255,255,255,.9); color: #000 }
+    .badge { display:inline-block; padding:.15rem .45rem; border-radius:.4rem; font-size:11px; font-weight:700 }
+    .badge-ok{ background:rgba(16,185,129,.2); color:#a7f3d0; border:1px solid rgba(16,185,129,.35) }
+    .badge-warn{ background:rgba(245,158,11,.2); color:#fde68a; border:1px solid rgba(245,158,11,.35) }
+    .badge-error{ background:rgba(239,68,68,.2); color:#fecaca; border:1px solid rgba(239,68,68,.35) }
+    video { -webkit-transform: scaleX(-1); transform: scaleX(-1); } /* mirror */
+    canvas.overlay { pointer-events: none; }
+  </style>
+</head>
+<body class="text-white font-sans">
+  <main class="max-w-xl mx-auto px-4 py-6 space-y-4">
+    <!-- Header -->
+    <header class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-extrabold tracking-tight">Hidden Camera Finder <span class="text-white/50 text-sm">v0.2</span></h1>
+        <p class="text-white/60 text-sm">Web demo — camera glint + torch blink, motion aid, and compass-based magnetic estimate*</p>
+      </div>
+      <div class="text-right text-xs">
+        <div id="supportCamera" class="badge">cam?</div>
+        <div id="supportTorch"  class="badge mt-1">torch?</div>
+        <div id="supportMotion" class="badge mt-1">motion?</div>
+        <div id="supportCompass" class="badge mt-1">compass?</div>
+      </div>
+    </header>
+
+    <!-- Live view card -->
+    <section class="glass rounded-2xl p-3 relative overflow-hidden">
+      <div class="aspect-[9/16] w-full rounded-xl overflow-hidden bg-black/50 relative">
+        <video id="video" playsinline autoplay muted class="w-full h-full object-cover"></video>
+        <canvas id="overlay" class="overlay absolute inset-0"></canvas>
+      </div>
+
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <button id="btnStart" class="btn btn-primary">▶ Start Scan</button>
+        <button id="btnStop" class="btn btn-ghost">■ Stop</button>
+        <button id="btnTorch" class="btn btn-ghost col-span-2">💡 Toggle Torch</button>
+        <button id="btnBlink" class="btn btn-ghost col-span-2">✨ Torch Blink Test (1s)</button>
+        <button id="btnMotion" class="btn btn-ghost">📳 Enable Motion</button>
+        <button id="btnCompass" class="btn btn-ghost">🧭 Enable Compass*</button>
+      </div>
+
+      <p class="mt-3 text-xs text-white/70">Sweep slowly. Torch blink briefly toggles the flashlight and looks for retro‑reflective spikes on tracked dots.</p>
+    </section>
+
+    <!-- Indicators -->
+    <section class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div class="glass rounded-xl p-3"><div class="text-[11px] text-white/60">Glint score</div><div id="score" class="text-xl font-bold">0</div></div>
+      <div class="glass rounded-xl p-3"><div class="text-[11px] text-white/60">Tracks</div><div id="tracks" class="text-xl font-bold">0</div></div>
+      <div class="glass rounded-xl p-3"><div class="text-[11px] text-white/60">Motion</div><div id="motionV" class="text-xl font-bold">0.0</div></div>
+      <div class="glass rounded-xl p-3"><div class="text-[11px] text-white/60">Mag anomaly*</div><div id="mag" class="text-xl font-bold">—</div></div>
+    </section>
+
+    <!-- How-to & Limits -->
+    <section class="glass rounded-2xl p-4 space-y-2">
+      <h2 class="font-bold">Tips</h2>
+      <ul class="list-disc pl-5 text-white/80 text-sm space-y-1">
+        <li>Dim the lights, enable the torch, and sweep at shallow angles. Lenses appear as tiny bright dots that persist.</li>
+        <li>Check outlets, smoke detectors, clocks, frames, vents, mirrors, and glossy screws.</li>
+        <li>Use <em>Torch Blink</em> near suspicious spots to see if dots brighten in sync.</li>
+      </ul>
+      <h2 class="font-bold pt-2">Limits (iOS Safari)</h2>
+      <ul class="list-disc pl-5 text-white/70 text-xs space-y-1">
+        <li>*Web cannot access raw magnetometer or Wi‑Fi scans on iOS. The compass‑based "Mag anomaly" is an approximation from orientation data.</li>
+        <li>For <strong>reliable magnetometer + local‑network discovery (Bonjour/UPnP)</strong>, package this as a native app (Capacitor) — see README in chat below.</li>
+      </ul>
+    </section>
+
+    <footer class="text-center text-[11px] text-white/40 pt-2">Web demo — camera/torch/motion/compass (approx). For full sensors, use the native build.</footer>
+  </main>
+
+  <script>
+  ;(() => {
+    const els = {
+      video: document.getElementById('video'),
+      overlay: document.getElementById('overlay'),
+      btnStart: document.getElementById('btnStart'),
+      btnStop: document.getElementById('btnStop'),
+      btnTorch: document.getElementById('btnTorch'),
+      btnBlink: document.getElementById('btnBlink'),
+      btnMotion: document.getElementById('btnMotion'),
+      btnCompass: document.getElementById('btnCompass'),
+      score: document.getElementById('score'),
+      tracks: document.getElementById('tracks'),
+      motionV: document.getElementById('motionV'),
+      mag: document.getElementById('mag'),
+      supportCamera: document.getElementById('supportCamera'),
+      supportTorch: document.getElementById('supportTorch'),
+      supportMotion: document.getElementById('supportMotion'),
+      supportCompass: document.getElementById('supportCompass'),
+    }
+
+    let stream = null, track = null, rafId = null, processing = false
+    let motionMag = 0, torchOn = false
+
+    // Torch helpers
+    async function toggleTorch(force) {
+      if (!track) return alert('Start the camera first.')
+      const caps = track.getCapabilities ? track.getCapabilities() : {}
+      if (!caps.torch) { markTorch('no'); return alert('Torch control not supported on this device.') }
+      try {
+        torchOn = (typeof force === 'boolean') ? force : !torchOn
+        await track.applyConstraints({ advanced: [{ torch: torchOn }] })
+        els.btnTorch.textContent = torchOn ? '💡 Torch: ON' : '💡 Toggle Torch'
+      } catch (e) { console.error(e) }
+    }
+
+    // Badges
+    function markTorch(state){
+      els.supportTorch.className = 'badge ' + (state==='ok'?'badge-ok':state==='no'?'badge-warn':'badge-warn')
+      els.supportTorch.textContent = 'torch: ' + state
+    }
+    function updateSupportBadges(){
+      const camOK = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+      els.supportCamera.className = 'badge ' + (camOK ? 'badge-ok' : 'badge-error')
+      els.supportCamera.textContent = 'cam: ' + (camOK ? 'ok' : 'no')
+      markTorch('?')
+      const motionOK = 'DeviceMotionEvent' in window
+      els.supportMotion.className = 'badge ' + (motionOK ? 'badge-warn' : 'badge-error')
+      els.supportMotion.textContent = 'motion: ' + (motionOK ? 'ask' : 'no')
+      els.supportCompass.className = 'badge badge-warn'
+      els.supportCompass.textContent = 'compass: ask'
+    }
+
+    async function startCamera(){
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment', width:{ideal:1280}, height:{ideal:720} }, audio:false })
+        els.video.srcObject = stream
+        track = stream.getVideoTracks()[0]
+        const caps = track.getCapabilities ? track.getCapabilities() : {}
+        markTorch(caps.torch ? 'ok' : 'no')
+        resizeOverlay(); window.addEventListener('resize', resizeOverlay)
+        processing = true; loop()
+      } catch(e){ console.error(e); alert('Camera permission failed or HTTPS not used.') }
+    }
+    function stopCamera(){ processing=false; if(rafId) cancelAnimationFrame(rafId); rafId=null; if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; track=null } const c=els.overlay.getContext('2d'); c&&c.clearRect(0,0,els.overlay.width,els.overlay.height); els.btnTorch.textContent='💡 Toggle Torch' }
+    function resizeOverlay(){ const r = els.video.getBoundingClientRect(); els.overlay.width = Math.round(r.width); els.overlay.height = Math.round(r.height) }
+
+    // Motion
+    async function enableMotion(){
+      try{
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+          const res = await DeviceMotionEvent.requestPermission(); if(res!=='granted') throw new Error('denied')
+        }
+        window.addEventListener('devicemotion', e=>{
+          const rr = e.rotationRate || {alpha:0,beta:0,gamma:0}
+          const a = e.accelerationIncludingGravity || {x:0,y:0,z:0}
+          motionMag = Math.hypot(rr.alpha||0, rr.beta||0, rr.gamma||0) * .6 + Math.hypot(a.x||0,a.y||0,a.z||0) * .2
+        })
+        els.supportMotion.className='badge badge-ok'; els.supportMotion.textContent='motion: on'; els.btnMotion.textContent='📳 Motion: ON'
+      }catch(e){ els.supportMotion.className='badge badge-error'; els.supportMotion.textContent='motion: no'; alert('Motion not available or permission denied.') }
+    }
+
+    // Compass (approx — orientation heading jitter index)
+    let compassEnabled=false, lastHeading=null, headingJitter=0, headingSMA=[]
+    async function enableCompass(){
+      try{
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+          const res = await DeviceOrientationEvent.requestPermission(); if(res!=='granted') throw new Error('denied')
+        }
+        window.addEventListener('deviceorientationabsolute', onHeading, true)
+        window.addEventListener('deviceorientation', onHeading, true)
+        els.supportCompass.className='badge badge-ok'; els.supportCompass.textContent='compass: on'; els.btnCompass.textContent='🧭 Compass: ON'
+        compassEnabled=true
+      }catch(e){ els.supportCompass.className='badge badge-error'; els.supportCompass.textContent='compass: no'; alert('Compass not available on this browser.') }
+    }
+    function onHeading(e){
+      const h = (typeof e.webkitCompassHeading==='number') ? e.webkitCompassHeading : (e.absolute? (360-(e.alpha||0))%360 : null)
+      if (h==null) return
+      if (lastHeading==null) lastHeading=h
+      let d = Math.abs(h - lastHeading); if(d>180) d=360-d; lastHeading=h
+      headingSMA.push(d); if(headingSMA.length>20) headingSMA.shift()
+      const avg = headingSMA.reduce((a,b)=>a+b,0)/headingSMA.length
+      // Heuristic: jitter >> gyro motion implies magnetic disturbance nearby
+      const anomaly = Math.max(0, (avg - Math.min(8, motionMag*0.8)))
+      headingJitter = anomaly
+      els.mag.textContent = anomaly.toFixed(1)
+    }
+
+    // Beep
+    let audioCtx=null; function beep(){ try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.frequency.value=1200; g.gain.value=.0001; o.connect(g).connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(.2, audioCtx.currentTime+.02); g.gain.exponentialRampToValueAtTime(.00001, audioCtx.currentTime+.22); o.stop(audioCtx.currentTime+.24) }catch{} }
+
+    // Tracking
+    const tracks=[]
+    function updateTracks(points){ const now=performance.now(); for(const t of tracks) if(now-t.last>800) t.strength*=.5; points.forEach(p=>{ let best=null,bestD=999; for(const t of tracks){ const dx=t.x-p.x, dy=t.y-p.y, d=Math.hypot(dx,dy); if(d<bestD){bestD=d; best=t} } if(best && bestD<40){ best.x=.6*best.x+.4*p.x; best.y=.6*best.y+.4*p.y; best.strength=Math.min(1,best.strength+.15); best.last=now } else { tracks.push({x:p.x,y:p.y,strength:.3,last:now,blinkBoost:0}) } }); for(let i=tracks.length-1;i>=0;i--){ if(tracks[i].strength<.15 || now-tracks[i].last>2500) tracks.splice(i,1) } els.tracks.textContent=tracks.length }
+
+    const workCanvas=document.createElement('canvas'), workCtx=workCanvas.getContext('2d',{ willReadFrequently:true })
+
+    let blinkMode=false, blinkPhase=false, blinkUntil=0
+    async function torchBlinkTest(){ if(!track) return alert('Start the camera first.'); const caps=track.getCapabilities?track.getCapabilities():{}; if(!caps.torch){ return alert('Torch control not supported here.') } blinkMode=true; blinkUntil=performance.now()+1000 }
+
+    function loop(){ if(!processing) return; rafId=requestAnimationFrame(loop); const v=els.video; if(!v.videoWidth) return; const W=320, H=Math.round(W*(v.videoHeight/v.videoWidth)); workCanvas.width=W; workCanvas.height=H; workCtx.drawImage(v,0,0,W,H); const img=workCtx.getImageData(0,0,W,H); const data=img.data; const BRIGHT=235, SAT=.25; const tile=8, tw=(W/tile)|0, th=(H/tile)|0; const tileSum=new Uint16Array(tw*th); for(let y=0;y<H;y++){ for(let x=0;x<W;x++){ const i=(y*W+x)*4, r=data[i], g=data[i+1], b=data[i+2]; const max=Math.max(r,g,b), min=Math.min(r,g,b); const s=max? (max-min)/max : 0; if(max>=BRIGHT && s<=SAT){ const tx=(x/tile)|0, ty=(y/tile)|0; tileSum[ty*tw+tx]++ } } }
+      const points=[]; const TH_TILE=Math.max(4,(tile*tile)*.22); for(let ty=0;ty<th;ty++){ for(let tx=0;tx<tw;tx++){ const n=tileSum[ty*tw+tx]; if(n>=TH_TILE) points.push({x:(tx+.5)*tile, y:(ty+.5)*tile, n}) } }
+      updateTracks(points)
+
+      // Torch blink: flip torch every ~120ms for 1s and measure brightening around tracks
+      if (blinkMode){ const now=performance.now(); if(now>=blinkUntil){ blinkMode=false; toggleTorch(false); } else if(!blinkPhase || now%240<120){ if(!blinkPhase){ blinkPhase=true; toggleTorch(true) } } else { if(blinkPhase){ blinkPhase=false; toggleTorch(false) } } }
+
+      const ctx=els.overlay.getContext('2d'); ctx.clearRect(0,0,els.overlay.width,els.overlay.height)
+      const r=v.getBoundingClientRect(), sx=r.width/W, sy=r.height/H
+
+      let score=0
+      tracks.forEach(t=>{ const x=t.x*sx, y=t.y*sy; const rad=14+t.strength*8; ctx.beginPath(); ctx.arc(x,y,rad,0,Math.PI*2); ctx.strokeStyle=`rgba(255,255,255,${0.25+0.5*t.strength})`; ctx.lineWidth=2; ctx.stroke(); ctx.beginPath(); ctx.arc(x,y,2+t.strength*3,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,.9)'; ctx.fill(); score+=t.strength + (t.blinkBoost||0) })
+
+      // Motion & compass factors
+      const motionFactor=Math.min(2, motionMag/20)
+      const compFactor = Math.min(1.5, (headingJitter||0)/10)
+      const finalScore=Math.round(score*(1+motionFactor*.8 + compFactor*.2)*10)
+      els.score.textContent=finalScore; els.motionV.textContent=motionMag.toFixed(1)
+      if(finalScore>12) beep()
+    }
+
+    // Wire-up
+    els.btnStart.addEventListener('click', startCamera)
+    els.btnStop.addEventListener('click', stopCamera)
+    els.btnTorch.addEventListener('click', ()=>toggleTorch())
+    els.btnBlink.addEventListener('click', torchBlinkTest)
+    els.btnMotion.addEventListener('click', enableMotion)
+    els.btnCompass.addEventListener('click', enableCompass)
+
+    updateSupportBadges()
+    document.querySelector('section').addEventListener('click', (e)=>{ if(!stream && e.target.closest('section')) startCamera() }, { once:true })
+  })()
+  </script>
+</body>
+</html>
