@@ -147,6 +147,17 @@
                      <h2 class="text-xl font-bold text-center text-white mb-2" data-lang="en:Sun Position|fa:موقعیت خورشید"></h2>
                      <div id="sun-position-container" class="w-full h-[calc(100%-2.5rem)]"><canvas id="sun-position-canvas"></canvas></div>
                 </div>
+                 <div class="info-card p-6">
+                    <h2 class="text-xl font-bold text-center text-white mb-4" data-lang="en:Today's Light Cycle|fa:چرخه نور امروز"></h2>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Civil Dawn|fa:فجر مدنی"></h3><p id="civil-dawn" class="text-lg font-bold text-white"></p></div>
+                        <div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Sunrise|fa:طلوع آفتاب"></h3><p id="sunrise" class="text-lg font-bold text-white"></p></div>
+                        <div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Golden Hour AM End|fa:پایان ساعت طلایی صبح"></h3><p id="golden-hour-am" class="text-lg font-bold text-white"></p></div>
+                        <div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Golden Hour PM Start|fa:شروع ساعت طلایی عصر"></h3><p id="golden-hour-pm" class="text-lg font-bold text-white"></p></div>
+                        <div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Sunset|fa:غروب آفتاب"></h3><p id="sunset" class="text-lg font-bold text-white"></p></div>
+                        <div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Civil Dusk|fa:شفق مدنی"></h3><p id="civil-dusk" class="text-lg font-bold text-white"></p></div>
+                    </div>
+                </div>
             </div>
             
             <!-- Middle Column -->
@@ -218,7 +229,7 @@
         // --- DOM ELEMENTS & STATE ---
         const dom = {};
         // Populate dom object
-        for (const id of ['loading-overlay', 'location-display', 'city-input', 'search-btn', 'gps-btn', 'phase-name', 'moon-shadow', 'illumination', 'distance', 'moon-age', 'moonrise', 'moonset', 'visibility', 'gravity-pull', 'gravity-comparison', 'tidal-force-desc', 'insight-title', 'insight-content', 'zodiac', 'apogee-perigee', 'lang-en', 'lang-fa', 'lunar-eclipse-date', 'lunar-eclipse-countdown', 'lunar-eclipse-visibility', 'solar-eclipse-date', 'solar-eclipse-countdown', 'solar-eclipse-visibility']) {
+        for (const id of ['loading-overlay', 'location-display', 'city-input', 'search-btn', 'gps-btn', 'phase-name', 'moon-shadow', 'illumination', 'distance', 'moon-age', 'moonrise', 'moonset', 'visibility', 'gravity-pull', 'gravity-comparison', 'tidal-force-desc', 'insight-title', 'insight-content', 'zodiac', 'apogee-perigee', 'lang-en', 'lang-fa', 'lunar-eclipse-date', 'lunar-eclipse-countdown', 'lunar-eclipse-visibility', 'solar-eclipse-date', 'solar-eclipse-countdown', 'solar-eclipse-visibility', 'civil-dawn', 'sunrise', 'golden-hour-am', 'golden-hour-pm', 'sunset', 'civil-dusk']) {
             dom[id.replace(/-(\w)/g, (m, g) => g.toUpperCase())] = document.getElementById(id);
         }
         
@@ -578,6 +589,7 @@
             try {
                 const moonIllum = SunCalc.getMoonIllumination(now);
                 const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
+                const sunTimes = SunCalc.getTimes(now, lat, lon);
                 const moonPos = SunCalc.getMoonPosition(now, lat, lon);
                 const dayOfYear = (Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(now.getFullYear(), 0, 0)) / 86400000;
                 const moonZodiac = zodiacSigns.slice().sort((a,b)=>a.start-b.start).filter(s => s.start <= dayOfYear).pop() || zodiacSigns[9];
@@ -592,6 +604,14 @@
                 dom.moonset.textContent = formatTime(moonTimes.set);
                 dom.zodiac.textContent = moonZodiac.name[currentLang];
                 dom.apogeePerigee.textContent = moonPos.distance < 384400 ? (currentLang === 'fa' ? 'نزدیک حضیض' : 'Near Perigee') : (currentLang === 'fa' ? 'نزدیک اوج' : 'Near Apogee');
+                
+                dom.civilDawn.textContent = formatTime(sunTimes.dawn);
+                dom.sunrise.textContent = formatTime(sunTimes.sunrise);
+                dom.goldenHourAm.textContent = formatTime(sunTimes.goldenHourEnd);
+                dom.goldenHourPm.textContent = formatTime(sunTimes.goldenHour);
+                dom.sunset.textContent = formatTime(sunTimes.sunset);
+                dom.civilDusk.textContent = formatTime(sunTimes.dusk);
+
                 const altitudeDegrees = (moonPos.altitude * 180 / Math.PI).toFixed(1);
                 if (moonPos.altitude > 0) { dom.visibility.textContent = `${currentLang === 'fa' ? 'قابل رویت' : 'Visible'} (${altitudeDegrees}°)`; dom.visibility.className = 'text-xl md:text-2xl font-bold text-green-400';
                 } else { dom.visibility.textContent = `${currentLang === 'fa' ? 'زیر افق' : 'Below Horizon'} (${altitudeDegrees}°)`; dom.visibility.className = 'text-xl md:text-2xl font-bold text-gray-400'; }

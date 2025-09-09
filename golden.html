@@ -55,7 +55,7 @@
   input[type="number"],input[type="date"],input[type="text"]{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;border-radius:12px;padding:.6rem .8rem;outline:none;width:100%}
   input::placeholder{color:rgba(255,255,255,.55)}
 
-  /* Hamburger sheet */
+  /* Bottom sheet */
   .sheet{position:fixed;inset:0;display:none} .sheet.show{display:block}
   .sheet-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
   .sheet-panel{position:absolute;inset-inline:0;bottom:0;background:rgba(20,26,45,.92);backdrop-filter:blur(18px) saturate(150%);border-top-left-radius:22px;border-top-right-radius:22px;border-top:1px solid rgba(255,255,255,.25)}
@@ -218,12 +218,9 @@ function computeSun(date,lat,lon){
   return {sunrise:sun.rise,sunset:sun.set,civilDawn:civ.rise,civilDusk:civ.set,goldAmEnd:six.rise,goldPmStart:six.set,altNowDeg:altNow}
 }
 
-/* ---------- Precise Sun & Moon (Meeus-lite) ---------- */
-function sunCoords(d){ // returns {ra, dec, L}
-  const M=solarMeanAnomaly(d),L=eclipticLongitude(M);
-  return {ra:rightAscension(L,0), dec:declination(L,0), L};
-}
-function moonCoords(d){ // geocentric ecliptic lon/lat/dist (km), then RA/Dec
+/* ---------- Sun & Moon coords (Meeus-lite) ---------- */
+function sunCoords(d){ const M=solarMeanAnomaly(d),L=eclipticLongitude(M); return {ra:rightAscension(L,0), dec:declination(L,0), L}; }
+function moonCoords(d){
   const L = rad*(218.316 + 13.176396*d);
   const M = rad*(134.963 + 13.064993*d);
   const F = rad*(93.272  + 13.229350*d);
@@ -234,29 +231,105 @@ function moonCoords(d){ // geocentric ecliptic lon/lat/dist (km), then RA/Dec
   const dec = declination(lon,lat);
   return {ra,dec,lon,lat,dist};
 }
+
+/* ---------- Precise illumination & bright-limb PA ---------- */
 function moonIllumination(date){
-  const d=toDays(date);
-  const sc=sunCoords(d), mc=moonCoords(d);
-  const phi = Math.acos( sin(sc.dec)*sin(mc.dec) + cos(sc.dec)*cos(mc.dec)*cos(sc.ra-mc.ra) ); // Sun–Moon elongation
-  const inc = Math.atan2(1.0*sin(phi), (mc.dist/149597870.7) - 1.0*cos(phi)); // ratio AU≈1
-  const fraction = (1+Math.cos(inc))/2;
-  const angle = Math.atan2( cos(sc.dec)*sin(sc.ra-mc.ra),
-                            sin(sc.dec)*cos(mc.dec)-cos(sc.dec)*sin(mc.dec)*cos(sc.ra-mc.ra) ); // bright limb PA
-  // Synodic phase 0..1 (New→New)
+  const d = toDays(date);
+  const sc = sunCoords(d);
+  const mc = moonCoords(d);
+
+  // Sun–Moon elongation
+  const phi = Math.acos(
+    Math.sin(sc.dec)*Math.sin(mc.dec) +
+    Math.cos(sc.dec)*Math.cos(mc.dec)*Math.cos(sc.ra - mc.ra)
+  );
+
+  // Illuminated fraction
+  const fraction = (1 + Math.cos(phi)) / 2;
+
+  // Bright-limb position angle (north-up, CCW)
+  const pa = Math.atan2(
+    Math.cos(sc.dec)*Math.sin(sc.ra - mc.ra),
+    Math.sin(sc.dec)*Math.cos(mc.dec) - Math.cos(sc.dec)*Math.sin(mc.dec)*Math.cos(sc.ra - mc.ra)
+  );
+
+  // Synodic age (for label)
   const syn=29.530588853, ref=new Date(Date.UTC(2000,0,6,18,14,0));
-  const age=(((date-ref)/dayMs)%syn+syn)%syn, phase=age/syn;
-  return {fraction, phase, angle, ageDays:age, elong:phi, sunL:sc.L, moonLon:mc.lon, moonDistKm:mc.dist};
+  const age=(((date-ref)/dayMs)%syn+syn)%syn;
+
+  // Waxing/waning
+  const waxing = Math.sin(mc.lon - sc.L) > 0;
+
+  return { fraction, pa, ageDays:age, waxing, elong:phi, moonDistKm:mc.dist, moonLon:mc.lon, sunLon:sc.L };
 }
 
-/* ---------- UI helpers ---------- */
+/* ---------- Two-arc Moon disc with correct limb orientation ---------- */
+function drawMoonDisc(ctx, cx, cy, R, fraction, pa){
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Map sky PA to canvas (Y down)
+  const angleScreen = -pa;
+  ctx.rotate(angleScreen);
+
+  // Base disc
+  const grd=ctx.createRadialGradient(-R*0.35,-R*0.35,R*0.2, 0,0,R*1.05);
+  grd.addColorStop(0,'#ffffff'); grd.addColorStop(1,'#c2c2c2');
+  ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fill();
+
+  // Speckle
+  ctx.save(); ctx.globalAlpha=0.07; ctx.fillStyle='#000';
+  for(let i=0;i<1200;i++){const a=Math.random()*Math.PI*2, r=R*Math.sqrt(Math.random()); ctx.fillRect(Math.cos(a)*r,Math.sin(a)*r,1,1)}
+  ctx.restore();
+
+  // Two-arc mask
+  let k = 2*fraction - 1; if (Math.abs(k)<1e-3) k = (k<0?-1:1)*1e-3;
+  ctx.globalCompositeOperation='destination-in';
+  ctx.beginPath();
+  ctx.arc(0,0,R,0.5*Math.PI,1.5*Math.PI,true); // left semicircle
+  ctx.save(); ctx.scale(k,1); ctx.arc(0,0,R,1.5*Math.PI,0.5*Math.PI,true); ctx.restore();
+  ctx.closePath(); ctx.fillStyle='#fff'; ctx.fill();
+
+  // Rim
+  ctx.globalCompositeOperation='source-over';
+  ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.stroke();
+
+  // Dark limb dusk
+  ctx.globalAlpha=0.18;
+  const dusk=ctx.createLinearGradient(-R,0,R,0);
+  dusk.addColorStop(0,'rgba(0,0,0,.9)'); dusk.addColorStop(0.5,'rgba(0,0,0,.2)'); dusk.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=dusk; ctx.fillRect(-R,-R,2*R,2*R);
+  ctx.globalAlpha=1;
+
+  ctx.restore();
+}
+
+/* ---------- Moon canvas (precise) ---------- */
+function drawMoonPrecise(){
+  const c=document.getElementById('moonCanvas'),ctx=c.getContext('2d'); const w=c.width,h=c.height; const R=100, cx=w/2, cy=h/2;
+  ctx.clearRect(0,0,w,h);
+  const mi=moonIllumination(new Date());
+  drawMoonDisc(ctx,cx,cy,R,mi.fraction,mi.pa);
+
+  const pct=Math.round(mi.fraction*100);
+  const f=mi.fraction;
+  const name = (f<0.03)?'New' :
+               (f<0.25)? (mi.waxing?'Waxing crescent':'Waning crescent') :
+               (Math.abs(f-0.5)<0.02)? (mi.waxing?'Full':'Full') :
+               (f<0.5)?  (mi.waxing?'Waxing crescent+':'Waning crescent+') :
+               (f<0.75)? (mi.waxing?'Waxing gibbous':'Waning gibbous') :
+               (f<0.97)? (mi.waxing?'Waxing gibbous+':'Waning gibbous') : 'New';
+  document.getElementById('moonMeta').textContent = `${pct}% • ${name} • age ${mi.ageDays.toFixed(1)} d`;
+}
+
+/* ---------- 24h Timeline ---------- */
 const $=s=>document.querySelector(s), nf2=new Intl.NumberFormat(undefined,{minimumIntegerDigits:2});
 const fmt=t=>t? t.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false}) : '—';
 function labelTZ(){const z=Intl.DateTimeFormat().resolvedOptions().timeZone||'Local';const off=-new Date().getTimezoneOffset(),s=off>=0?'+':'-';const hh=nf2.format(Math.floor(Math.abs(off)/60)),mm=nf2.format(Math.abs(off)%60);return `${z} (UTC${s}${hh}:${mm})`}
 
-/* ---------- App state ---------- */
 const state={lat:52.52,lon:13.405,date:new Date(),times:null,timer:null};
 
-/* ---------- Timeline ---------- */
 function buildTimeline(t){
   const el=$('#tl'); el.innerHTML='';
   const D0=new Date(state.date.getFullYear(),state.date.getMonth(),state.date.getDate());
@@ -293,18 +366,6 @@ function eventsList(t){return[{k:'civilDawn',t:t.civilDawn,title:'Civil dawn'},{
 function nextEvent(t){const now=new Date();const f=eventsList(t).filter(x=>x.t>now).sort((a,b)=>a.t-b.t);if(f.length)return f[0];const d2=new Date(state.date.getFullYear(),state.date.getMonth(),state.date.getDate()+1);const t2=computeSun(d2,state.lat,state.lon);return eventsList(t2)[0]||null}
 function startTicker(){if(state.timer)clearInterval(state.timer);state.timer=setInterval(()=>{if(!state.times)return;const nx=nextEvent(state.times);if(!nx){$('#nextTitle').textContent='—';$('#count').textContent='—';$('#nextAt').textContent='';return}$('#nextTitle').textContent=nx.title;$('#nextAt').textContent=fmt(nx.t);const ms=Math.max(0,nx.t-new Date());const s=Math.floor(ms/1000)%60,m=Math.floor(ms/60000)%60,h=Math.floor(ms/3600000);$('#count').textContent=`${nf2.format(h)}:${nf2.format(m)}:${nf2.format(s)}`;buildTimeline(state.times);drawSunPath(state.times)},1000)}
 
-/* ---------- Render all ---------- */
-function renderAll(){
-  const d=new Date(state.date.getFullYear(),state.date.getMonth(),state.date.getDate());
-  const t=computeSun(d,state.lat,state.lon); state.times=t;
-  $('#civilDawn').textContent=fmt(t.civilDawn); $('#sunrise').textContent=fmt(t.sunrise);
-  $('#goldAmEnd').textContent=fmt(t.goldAmEnd); $('#goldPmStart').textContent=fmt(t.goldPmStart);
-  $('#sunset').textContent=fmt(t.sunset); $('#civilDusk').textContent=fmt(t.civilDusk);
-  buildTimeline(t); drawSunPath(t);
-  const nx=nextEvent(t); if(nx){$('#nextTitle').textContent=nx.title;$('#nextAt').textContent=fmt(nx.t)} else {$('#nextTitle').textContent='—';$('#nextAt').textContent='';$('#count').textContent='—'}
-  startTicker();
-}
-
 /* ---------- City search ---------- */
 const CITY_DB=[["Tehran, Iran",35.6892,51.3890],["Berlin, Germany",52.5200,13.4050],["Istanbul, Türkiye",41.0082,28.9784],["London, UK",51.5074,-0.1278],["Paris, France",48.8566,2.3522],["Rome, Italy",41.9028,12.4964],["Madrid, Spain",40.4168,-3.7038],["Milan, Italy",45.4642,9.1900],["Vienna, Austria",48.2082,16.3738],["New York, USA",40.7128,-74.0060],["Los Angeles, USA",34.0522,-118.2437],["Toronto, Canada",43.6532,-79.3832],["Dubai, UAE",25.2048,55.2708],["Riyadh, Saudi Arabia",24.7136,46.6753],["Mumbai, India",19.0760,72.8777],["Tokyo, Japan",35.6762,139.6503]];
 function fillCityDatalist(){const dl=$('#citylist');dl.innerHTML='';CITY_DB.forEach(([n])=>{const o=document.createElement('option');o.value=n;dl.appendChild(o)})}
@@ -326,41 +387,23 @@ const SS={planets:[
   {name:'Neptune',a:30.1104,e:0.008988,i:1.770,O:131.784,wbar:44.971,L0:304.880,P:60189.0,color:'#7aa5ff',r:3.4}
 ],epoch:Date.UTC(2000,0,1,12,0,0)};
 
-function keplerE(M,e){
-  let E=M,d=1,it=0;
-  while(Math.abs(d)>1e-6 && it++<20){ d=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E)); E-=d; }
-  return E;
-}
+function keplerE(M,e){let E=M,d=1,it=0;while(Math.abs(d)>1e-6 && it++<20){d=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));E-=d}return E}
 function planetXY(p,tDays){
-  const n=2*Math.PI/p.P;
-  const M=((p.L0-p.wbar)*Math.PI/180)+n*tDays;
-  const E=keplerE(M,p.e);
-  const nu=2*Math.atan(Math.sqrt((1+p.e)/(1-p.e))*Math.tan(E/2));
-  const r=p.a*(1-p.e*Math.cos(E));
+  const n=2*Math.PI/p.P, M=((p.L0-p.wbar)*Math.PI/180)+n*tDays, E=keplerE(M,p.e);
+  const nu=2*Math.atan(Math.sqrt((1+p.e)/(1-p.e))*Math.tan(E/2)), r=p.a*(1-p.e*Math.cos(E));
   const w=(p.wbar-p.O)*Math.PI/180, O=p.O*Math.PI/180, i=p.i*Math.PI/180;
   const x1=r*Math.cos(nu), y1=r*Math.sin(nu);
-  const cw=Math.cos(w), sw=Math.sin(w), cO=Math.cos(O), sO=Math.sin(O), ci=Math.cos(i), si=Math.sin(i);
+  const cw=Math.cos(w), sw=Math.sin(w), cO=Math.cos(O), sO=Math.sin(O), ci=Math.cos(i);
   const xx=x1*cw - y1*sw, yy=x1*sw + y1*cw;
-  const x =  xx*cO - yy*sO;
-  const y =  xx*sO + yy*cO;
-  const z =  yy*si;
+  const x =  xx*cO - yy*sO, y = xx*sO + yy*cO, z = yy*Math.sin(i);
   return {x,y,z,r,nu};
 }
 
-/* integrator with 1× default */
-let warp=1;
-let simDays=(Date.now()-SS.epoch)/dayMs;
-let last=performance.now();
-function setWarp(w){ warp=w; document.querySelectorAll('.speed').forEach(b=>b.classList.toggle('active',+b.dataset.speed===warp)); }
+let warp=1, simDays=(Date.now()-SS.epoch)/dayMs, last=performance.now();
+function setWarp(w){warp=w;document.querySelectorAll('.speed').forEach(b=>b.classList.toggle('active',+b.dataset.speed===warp))}
 document.querySelectorAll('.speed').forEach(b=>b.addEventListener('click',()=>setWarp(+b.dataset.speed)));
 
-function tickSim(){
-  const now=performance.now();
-  const dt=(now-last)/1000;
-  last=now;
-  simDays += dt * (warp/86400);
-  $('#ssTime').textContent=`${new Date(SS.epoch+simDays*dayMs).toLocaleString()} • ${warp.toLocaleString()}×`;
-}
+function tickSim(){const now=performance.now();const dt=(now-last)/1000;last=now;simDays += dt * (warp/86400);$('#ssTime').textContent=`${new Date(SS.epoch+simDays*dayMs).toLocaleString()} • ${warp.toLocaleString()}×`}
 
 function drawSolarSystem(){
   tickSim();
@@ -369,27 +412,20 @@ function drawSolarSystem(){
   const bg=ctx.createRadialGradient(cx,cy,10,cx,cy,Math.max(w,h)/2); bg.addColorStop(0,'rgba(255,255,255,.06)'); bg.addColorStop(1,'rgba(255,255,255,.02)'); ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
   const SCALE=7.2;
 
-  // Orbits
-  SS.planets.forEach(p=>{ctx.save();ctx.translate(cx,cy);ctx.strokeStyle='rgba(255,255,255,.12)';ctx.beginPath();ctx.arc(0,0,p.a*SCALE,0,Math.PI*2);ctx.stroke();ctx.restore();});
-
-  // Sun
+  SS.planets.forEach(p=>{ctx.save();ctx.translate(cx,cy);ctx.strokeStyle='rgba(255,255,255,.12)';ctx.beginPath();ctx.arc(0,0,p.a*SCALE,0,Math.PI*2);ctx.stroke();ctx.restore()});
   ctx.save();ctx.translate(cx,cy);ctx.fillStyle='#ffcc33';ctx.shadowColor='#ffcc33';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(0,0,7,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.restore();
 
-  // Planets + remember Earth
   let Epos=null;
   SS.planets.forEach(p=>{
-    const pos=planetXY(p,simDays);
-    const x=cx+pos.x*SCALE, y=cy+pos.y*SCALE;
-    const pos2=planetXY(p,simDays-2);
+    const pos=planetXY(p,simDays), x=cx+pos.x*SCALE, y=cy+pos.y*SCALE, pos2=planetXY(p,simDays-2);
     ctx.strokeStyle=p.color+'66'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(cx+pos2.x*SCALE,cy+pos2.y*SCALE); ctx.lineTo(x,y); ctx.stroke();
     ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(x,y,p.r,0,Math.PI*2); ctx.fill();
     if(p.name==='Earth') Epos={x,y,vec:{x:pos.x,y:pos.y}};
   });
 
-  // Inset Earth–Moon around Earth (visual)
   if(Epos){
     const ex=Epos.x, ey=Epos.y;
-    ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke(); // Sun→Earth line
+    ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
     ctx.fillStyle='#76b6ff'; ctx.beginPath(); ctx.arc(ex,ey,4,0,Math.PI*2); ctx.fill();
 
     const Rvis=0.00257*SCALE*15;
@@ -399,102 +435,46 @@ function drawSolarSystem(){
     ctx.fillStyle='#ddd'; ctx.beginPath(); ctx.arc(mx,my,2.2,0,Math.PI*2); ctx.fill();
   }
 
-  // Precise Moon (real-time) shading on dedicated canvas + EMS diagram
   drawMoonPrecise();
   drawEMS();
 
   requestAnimationFrame(drawSolarSystem);
 }
 
-/* ---------- Photoreal Moon (precise fraction + correct bright-limb angle) ---------- */
-function drawMoonDisc(ctx,cx,cy,R,fraction,angle){
-  // Base disc
-  const grd=ctx.createRadialGradient(cx-R*0.35,cy-R*0.35, R*0.2, cx,cy, R*1.05);
-  grd.addColorStop(0,'#ffffff'); grd.addColorStop(1,'#c2c2c2');
-  ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fill();
-
-  // subtle texture
-  ctx.save(); ctx.globalAlpha=0.07; ctx.fillStyle='#000';
-  for(let i=0;i<1200;i++){const a=Math.random()*Math.PI*2, r=R*Math.sqrt(Math.random()); ctx.fillRect(cx+Math.cos(a)*r,cy+Math.sin(a)*r,1,1)}
-  ctx.restore();
-
-  const k = 2*fraction - 1; // -1..+1
-  const d = k*R;
-
-  // Shade by limb orientation
-  ctx.save();
-  ctx.translate(cx,cy);
-  ctx.rotate(-angle); // align X toward Sun (bright limb)
-
-  // atmospheric dusk over dark limb
-  ctx.globalCompositeOperation='source-atop';
-  const dusk=ctx.createLinearGradient(-R,0,R,0);
-  dusk.addColorStop(0,'rgba(0,0,0,.85)'); dusk.addColorStop(0.5,'rgba(0,0,0,.25)'); dusk.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=dusk; ctx.fillRect(-R,-R,2*R,2*R);
-
-  // Terminator (exact by offset circle)
-  ctx.globalCompositeOperation='destination-out';
-  ctx.beginPath(); ctx.arc(d,0,R,0,Math.PI*2); ctx.fill();
-
-  ctx.restore();
-
-  // Rim
-  ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
-}
-
-function drawMoonPrecise(){
-  const c=document.getElementById('moonCanvas'),ctx=c.getContext('2d'); const w=c.width,h=c.height; const R=100, cx=w/2, cy=h/2;
-  ctx.clearRect(0,0,w,h);
-
-  const mi=moonIllumination(new Date());
-  drawMoonDisc(ctx,cx,cy,R,mi.fraction,mi.angle);
-
-  const pct=Math.round(mi.fraction*100);
-  const p=mi.phase;
-  const name=(p<0.03||p>0.97)?'New':p<0.22?'Waxing crescent':p<0.28?'First quarter':p<0.47?'Waxing gibbous':p<0.53?'Full':p<0.72?'Waning gibbous':p<0.78?'Last quarter':'Waning crescent';
-  $('#moonMeta').textContent = `${pct}% • ${name} • age ${mi.ageDays.toFixed(1)} d`;
-}
-
-/* ---------- Earth–Moon–Sun top-down diagram (ecliptic plane) ---------- */
+/* ---------- Earth–Moon–Sun top-down diagram ---------- */
 function drawEMS(){
   const cvs=$('#emsCanvas'),ctx=cvs.getContext('2d'); const w=cvs.width,h=cvs.height, cx=w/2, cy=h/2;
   ctx.clearRect(0,0,w,h);
-
-  // background
   const bg=ctx.createLinearGradient(0,0,0,h); bg.addColorStop(0,'rgba(255,255,255,.06)'); bg.addColorStop(1,'rgba(255,255,255,.02)');
   ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
 
-  // Real-time Sun & Moon longitudes
   const d=toDays(new Date());
   const sunL=eclipticLongitude(solarMeanAnomaly(d)); // radians
   const mc=moonCoords(d);
   const mi=moonIllumination(new Date());
 
-  // Vectors on unit circle (ecliptic)
+  // Unit vectors on ecliptic
   const sunV={x:Math.cos(sunL), y:Math.sin(sunL)};
   const moonV={x:Math.cos(mc.lon), y:Math.sin(mc.lon)};
 
-  // Scales
-  const Rm=90; // moon orbit visual radius (not to scale)
-  const sunR=10, earthR=10, moonR=6;
+  const Rm=90, sunR=10, earthR=10, moonR=6;
 
-  // Earth at center
+  // Earth
   ctx.fillStyle='#76b6ff'; ctx.beginPath(); ctx.arc(cx,cy,earthR,0,Math.PI*2); ctx.fill();
   ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.arc(cx,cy,Rm,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
 
-  // Sun ray
+  // Sun ray + Sun
   ctx.strokeStyle='rgba(255,215,70,.55)'; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+sunV.x*(w/2-24), cy+sunV.y*(h/2-24)); ctx.stroke();
-  // Sun disc
   ctx.fillStyle='#ffd34d'; ctx.shadowColor='#ffd34d'; ctx.shadowBlur=12;
   ctx.beginPath(); ctx.arc(cx+sunV.x*(w/2-30), cy+sunV.y*(h/2-30), sunR, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
 
   // Moon on orbit
   const mx=cx+moonV.x*Rm, my=cy+moonV.y*Rm;
-
-  // Draw moon disc with correct illuminated limb pointing to Sun
-  const chi = Math.atan2( (cy+sunV.y*(h/2-24)) - my, (cx+sunV.x*(w/2-24)) - mx ); // Moon→Sun angle
-  drawMoonDisc(ctx,mx,my,moonR,mi.fraction,chi);
+  // Angle from Moon to Sun in canvas coords
+  const chi = Math.atan2((cy+sunV.y*(h/2-24)) - my, (cx+sunV.x*(w/2-24)) - mx);
+  // Reuse disc with PA-like parameter (pass -chi so inside draw we rotate by -pa => +chi)
+  drawMoonDisc(ctx,mx,my,moonR,mi.fraction,-chi);
 
   // Labels
   ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='12px system-ui';
@@ -502,9 +482,9 @@ function drawEMS(){
   ctx.fillText('Sun', cx+sunV.x*(w/2-30)+12, cy+sunV.y*(h/2-30));
   ctx.fillText('Moon', mx+10, my-8);
 
-  // Meta
-  const elongDeg = (mi.elong*180/Math.PI).toFixed(1);
-  $('#emsMeta').textContent = `elong ${elongDeg}° • dist ${Math.round(mc.dist/1000)}×10³ km`;
+  const elongDeg=(mi.elong*180/Math.PI).toFixed(1);
+  const distKm=Math.round(mi.moonDistKm).toLocaleString();
+  $('#emsMeta').textContent = `elong ${elongDeg}° • dist ${distKm} km`;
 }
 
 /* ---------- Sheet / Inputs ---------- */
@@ -527,7 +507,18 @@ document.getElementById('apply').addEventListener('click',()=>{
 });
 $('#city').addEventListener('change',e=>applyCity(e.target.value));
 
-/* ---------- Init ---------- */
+/* ---------- Render & animate ---------- */
+function renderAll(){
+  const d=new Date(state.date.getFullYear(),state.date.getMonth(),state.date.getDate());
+  const t=computeSun(d,state.lat,state.lon); state.times=t;
+  $('#civilDawn').textContent=fmt(t.civilDawn); $('#sunrise').textContent=fmt(t.sunrise);
+  $('#goldAmEnd').textContent=fmt(t.goldAmEnd); $('#goldPmStart').textContent=fmt(t.goldPmStart);
+  $('#sunset').textContent=fmt(t.sunset); $('#civilDusk').textContent=fmt(t.civilDusk);
+  buildTimeline(t); drawSunPath(t);
+  const nx=nextEvent(t); if(nx){$('#nextTitle').textContent=nx.title;$('#nextAt').textContent=fmt(nx.t)} else {$('#nextTitle').textContent='—';$('#nextAt').textContent='';$('#count').textContent='—'}
+  startTicker();
+}
+
 function init(){fillCityDatalist();fillInputs();renderAll();setWarp(1);drawSolarSystem()}
 init();
 </script>
