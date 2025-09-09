@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>یابنده آسمانی • نسخه نهایی</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;800&display=swap" rel="stylesheet" />
+  
+  <style>
+    :root {
+      --bg-color: #0A0607;
+      --card-color: rgba(26, 5, 5, 0.5);
+      --text-color: #f0c0c0;
+      --text-muted-color: #a08080;
+      --highlight-color: #ff4545;
+      --accent-color: #ff7a57;
+      --border-color: rgba(255, 74, 74, 0.25);
+      --glow-color: rgba(255, 58, 58, 0.25);
+      --focus-ring-color: rgba(255, 113, 113, 0.5);
+      --btn-text-color: #1b0a0a;
+      --status-text-color: #160606;
+    }
+
+    [data-theme="aligned"] {
+      --bg-color: #020b05;
+      --card-color: rgba(5, 26, 10, 0.5);
+      --text-color: #c9f7d0;
+      --text-muted-color: #80a08f;
+      --highlight-color: #29ff5a;
+      --accent-color: #57ff9a;
+      --border-color: rgba(74, 255, 74, 0.25);
+      --glow-color: rgba(58, 255, 58, 0.25);
+      --focus-ring-color: rgba(41, 255, 90, 0.5);
+      --btn-text-color: #001b08;
+      --status-text-color: #001b08;
+    }
+
+    body {
+      font-family: "Vazirmatn", system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.6s ease;
+    }
+
+    .bg-grid {
+      background-image: radial-gradient(circle, var(--card-color) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    
+    .compass-dial {
+      background: conic-gradient(var(--highlight-color) 0deg, var(--highlight-color) 1deg, transparent 1deg, transparent 9deg);
+      background-size: 10% 100%;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      animation: fadeIn 800ms ease both;
+    }
+  </style>
+</head>
+<body class="bg-grid">
+  <div class="min-h-screen w-full flex items-start justify-center p-3 sm:p-4" style="padding-top: calc(1rem + env(safe-area-inset-top)); padding-bottom: calc(1rem + env(safe-area-inset-bottom));">
+    <div class="w-full max-w-md mx-auto space-y-4 fade-in">
+      
+      <h1 id="main-title" class="text-3xl font-bold text-center transition-colors duration-500" style="color: var(--highlight-color); text-shadow: 0 0 15px var(--glow-color);">
+        یابنده آسمانی 🔭
+      </h1>
+
+      <div id="status" class="p-3 rounded-lg text-center font-bold transition-colors duration-500" style="background-color: var(--highlight-color); color: var(--status-text-color);">
+        برای شروع، اجازهٔ حسگر/موقعیت را بدهید.
+      </div>
+      
+      <div id="permission-cta" class="text-center space-y-2">
+        <button id="btn-perm" class="w-full py-3 px-6 rounded-full font-bold text-lg transition-all duration-300 active:scale-[0.98] focus:outline-none" style="background-color: var(--highlight-color); color: var(--btn-text-color); box-shadow: 0 6px 20px var(--glow-color), 0 0 0 0px var(--focus-ring-color); ">
+          فعال‌سازی حسگرها
+        </button>
+        <small class="opacity-70">بهتر است صفحه روی HTTPS باشد.</small>
+      </div>
+      
+      <section id="app" style="display:none;" class="space-y-4" aria-live="polite">
+        
+        <div class="card-base">
+          <h2 class="section-title">موقعیت شما</h2>
+          <div class="divide-y" style="border-color: var(--border-color);">
+            <div class="flex justify-between items-center py-2 text-sm">
+              <span style="color: var(--text-muted-color);">عرض جغرافیایی</span>
+              <strong id="lat" class="font-mono">--</strong>
+            </div>
+            <div class="flex justify-between items-center py-2 text-sm">
+              <span style="color: var(--text-muted-color);">طول جغرافیایی</span>
+              <strong id="lon" class="font-mono">--</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-base">
+          <h2 class="section-title">قطب‌نمای زنده</h2>
+          <div class="relative w-full max-w-[250px] mx-auto aspect-square mt-4">
+            <div id="compass" class="absolute inset-0 border-2 rounded-full compass-dial transition-transform duration-100 linear" style="border-color: var(--highlight-color);">
+              <div class="absolute top-0 left-1/2 -translate-x-1/2 h-1/2 w-1 origin-bottom" style="background-color: var(--accent-color);"></div>
+              <div class="absolute bottom-0 left-1/2 -translate-x-1/2 h-1/2 w-1 origin-top" style="background-color: var(--text-color);"></div>
+            </div>
+            <div class="text-xl sm:text-2xl font-bold">
+              <span class="absolute top-2 left-1/2 -translate-x-1/2" style="color: var(--accent-color);">ش</span>
+              <span class="absolute bottom-2 left-1/2 -translate-x-1/2">ج</span>
+              <span class="absolute top-1/2 -translate-y-1/2 right-2">خ</span>
+              <span class="absolute top-1/2 -translate-y-1/2 left-2">غ</span>
+            </div>
+          </div>
+          <div class="divide-y" style="border-color: var(--border-color);">
+              <div class="flex justify-between items-center pt-4 pb-2 text-sm">
+                <span style="color: var(--text-muted-color);">جهت فعلی</span>
+                <strong id="headingText" class="text-lg font-mono">--</strong>
+              </div>
+              <div class="flex justify-between items-center py-2 text-sm">
+                <span style="color: var(--text-muted-color);">ارتفاع فعلی</span>
+                <strong id="pitchText" class="text-lg font-mono">--</strong>
+              </div>
+          </div>
+        </div>
+
+        <div class="card-base">
+          <h2 class="section-title">یابندهٔ اجرام</h2>
+          <div class="mt-3">
+            <label for="sel" class="block mb-1 text-sm font-medium" style="color: var(--text-muted-color);">انتخاب جرم</label>
+            <div class="relative">
+              <select id="sel" class="w-full py-2.5 px-3 pr-10 appearance-none rounded-lg border text-base transition focus:outline-none" style="background-color: rgba(0,0,0,0.2); border-color: var(--border-color); box-shadow: 0 0 0 0px var(--focus-ring-color);">
+                <option value="">-- انتخاب کنید --</option>
+                <optgroup label="سیارات و ماه">
+                  <option value="moon">ماه</option>
+                  <option value="mercury">عطارد</option>
+                  <option value="venus">زهره</option>
+                  <option value="mars">مریخ</option>
+                  <option value="jupiter">مشتری</option>
+                  <option value="saturn">زحل</option>
+                </optgroup>
+                <optgroup label="ستاره‌های درخشان">
+                  <option value="sirius">شباهنگ (Sirius)</option>
+                  <option value="canopus">سهیل (Canopus)</option>
+                  <option value="polaris">ستاره قطبی (Polaris)</option>
+                  <option value="vega">نسر واقع (Vega)</option>
+                  <option value="altair">نسر طایر (Altair)</option>
+                  <option value="antares">قلب‌العقرب (Antares)</option>
+                  <option value="aldebaran">دبران (Aldebaran)</option>
+                </optgroup>
+                <optgroup label="خوشه‌ها و سحابی‌ها">
+                  <option value="pleiades">خوشه پروین (M45)</option>
+                  <option value="andromeda">کهکشان آندرومدا (M31)</option>
+                  <option value="orion_nebula">سحابی جبار (M42)</option>
+                  <option value="triangulum">کهکشان سه‌تکه (M33)</option>
+                  <option value="praesepe">خوشه کندو (M44)</option>
+                  <option value="ring_nebula">سحابی حلقه (M57)</option>
+                </optgroup>
+                <optgroup label="ماهواره‌ها (به‌زودی)">
+                  <option disabled>ISS</option>
+                  <option disabled>Starlink</option>
+                </optgroup>
+              </select>
+              <div class="absolute inset-y-0 left-0 flex items-center px-3 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 opacity-50"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L11 6.06V14.25a.75.75 0 01-1.5 0V6.06l-1.7 1.71a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3z" clip-rule="evenodd" /></svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <div class="chip-base">
+              <b class="chip-label">سمت هدف</b>
+              <div id="azVal" class="chip-value">--</div>
+            </div>
+            <div class="chip-base">
+              <b class="chip-label">ارتفاع هدف</b>
+              <div id="elVal" class="chip-value">--</div>
+            </div>
+          </div>
+          
+          <div id="meters" class="mt-4 space-y-3">
+             <div id="mAz" class="meter-base" style="display:none;">
+               <div class="meter-label">سمت</div>
+               <div class="meter-bar"><div id="azFill" class="meter-fill"></div></div>
+               <div id="azSub" class="meter-sub"></div>
+             </div>
+             <div id="mEl" class="meter-base" style="display:none;">
+               <div class="meter-label">شیب</div>
+               <div class="meter-bar"><div id="elFill" class="meter-fill"></div></div>
+               <div id="elSub" class="meter-sub"></div>
+             </div>
+          </div>
+          
+          <p id="note" class="text-center mt-3 text-sm font-bold"></p>
+          <div id="callout" class="p-3 mt-3 rounded-lg text-center font-bold transition-colors duration-500" style="background-color: var(--highlight-color); color: var(--status-text-color);">
+            یک جرم آسمانی را انتخاب کنید.
+          </div>
+        </div>
+
+        <div class="card-base">
+          <h2 class="section-title">نمودار آسمان زنده</h2>
+          <canvas id="sky-chart" class="w-full aspect-square mt-3 rounded-lg"></canvas>
+        </div>
+
+        <div class="card-base">
+          <h2 class="section-title">اجرام نزدیک دید شما</h2>
+          <ul id="list" class="mt-3 space-y-2">
+            <li class="list-item-base opacity-70">در حال جستجو…</li>
+          </ul>
+        </div>
+        
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+  
+  <script>
+    (function() {
+      const $ = (id) => document.getElementById(id);
+      
+      const applyTailwindClasses = () => {
+        const style = document.createElement('style');
+        style.textContent = `
+          .card-base { background-color: var(--card-color); border: 1px solid var(--border-color); border-radius: 1.25rem; padding: 1rem; backdrop-filter: blur(12px); box-shadow: 0 8px 30px rgba(0,0,0,0.5); transition: border-color 0.5s ease, background-color 0.5s ease; }
+          .section-title { font-size: 1.25rem; font-weight: 700; transition: color 0.5s ease; color: var(--highlight-color); }
+          .chip-base { border: 1px solid var(--border-color); background-color: rgba(0,0,0,0.2); border-radius: 0.75rem; padding: 0.5rem; text-align: center; transition: border-color 0.5s ease; }
+          .chip-label { font-size: 0.8rem; opacity: 0.85; }
+          .chip-value { font-size: 1.5rem; font-weight: 800; font-family: ui-monospace, monospace; }
+          .meter-base { display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; }
+          .meter-label { white-space: nowrap; opacity: 0.85; width: 3rem; }
+          .meter-bar { flex-grow: 1; height: 0.6rem; background-color: var(--border-color); border-radius: 999px; overflow: hidden; transition: background-color 0.5s ease; }
+          .meter-fill { height: 100%; width: 0%; background-color: var(--highlight-color); transition: width 200ms linear, background-color 0.5s ease; }
+          .meter-sub { font-size: 0.75rem; opacity: 0.8; width: 6rem; text-align: left; }
+          .list-item-base { border: 1px solid var(--border-color); background-color: rgba(0,0,0,0.2); border-radius: 0.75rem; padding: 0.75rem; cursor: pointer; transition: background-color 0.2s, border-color 0.5s; }
+          .list-item-base:hover { background-color: rgba(255,255,255,0.1); }
+          .list-header { font-weight: 700; color: var(--accent-color); padding-top: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem; margin-bottom: 0.25rem; }
+          select:focus, button:focus { box-shadow: 0 0 0 3px var(--focus-ring-color); }
+          .note-visible { color: #57ff9a; }
+          .note-not-visible { color: #ff7a57; }
+        `;
+        document.head.appendChild(style);
+      };
+      applyTailwindClasses();
+
+      const statusEl = $("status"), permBtn = $("btn-perm"), permCta = $("permission-cta"), app = $("app"), latEl = $("lat"), lonEl = $("lon"), compassEl = $("compass"), headingText = $("headingText"), pitchText = $("pitchText"), sel = $("sel"), azVal = $("azVal"), elVal = $("elVal"), mAz = $("mAz"), mEl = $("mEl"), azFill = $("azFill"), elFill = $("elFill"), azSub = $("azSub"), elSub = $("elSub"), callout = $("callout"), list = $("list"), note = $("note"), skyChartCanvas = $("sky-chart"), skyChartCtx = skyChartCanvas.getContext("2d");
+
+      const BODY = Astronomy.Body;
+      const BODY_MAP = { moon: BODY.Moon, mercury: BODY.Mercury, venus: BODY.Venus, mars: BODY.Mars, jupiter: BODY.Jupiter, saturn: BODY.Saturn, sun: BODY.Sun };
+      const SKY = { 
+        sun:{name:'خورشید',type:'planet',body:'sun',visibility:'naked_eye'}, 
+        moon:{name:'ماه',type:'planet',body:'moon',visibility:'naked_eye'}, 
+        mercury:{name:'عطارد',type:'planet',body:'mercury',visibility:'naked_eye'}, 
+        venus:{name:'زهره',type:'planet',body:'venus',visibility:'naked_eye'}, 
+        mars:{name:'مریخ',type:'planet',body:'mars',visibility:'naked_eye'}, 
+        jupiter:{name:'مشتری',type:'planet',body:'jupiter',visibility:'naked_eye'}, 
+        saturn:{name:'زحل',type:'planet',body:'saturn',visibility:'naked_eye'}, 
+        sirius:{name:'شباهنگ (Sirius)',type:'star',starId:'Sirius',visibility:'naked_eye'}, 
+        canopus:{name:'سهیل (Canopus)',type:'star',starId:'Canopus',visibility:'naked_eye'}, 
+        polaris:{name:'ستاره قطبی (Polaris)',type:'star',starId:'Polaris',visibility:'naked_eye'},
+        vega:{name:'نسر واقع (Vega)',type:'star',starId:'Vega',visibility:'naked_eye'},
+        altair:{name:'نسر طایر (Altair)',type:'star',starId:'Altair',visibility:'naked_eye'},
+        antares:{name:'قلب‌العقرب (Antares)',type:'star',starId:'Antares',visibility:'naked_eye'},
+        aldebaran:{name:'دبران (Aldebaran)',type:'star',starId:'Aldebaran',visibility:'naked_eye'},
+        pleiades:{name:'خوشه پروین (M45)',type:'dso',dsoId:'M45',visibility:'naked_eye'},
+        andromeda:{name:'کهکشان آندرومدا (M31)',type:'dso',dsoId:'M31',visibility:'naked_eye'}, 
+        orion_nebula:{name:'سحابی جبار (M42)',type:'dso',dsoId:'M42',visibility:'naked_eye'},
+        praesepe:{name:'خوشه کندو (M44)',type:'dso',dsoId:'M44',visibility:'naked_eye'},
+        triangulum:{name:'کهکشان سه‌تکه (M33)',type:'dso',dsoId:'M33',visibility:'telescope'},
+        ring_nebula:{name:'سحابی حلقه (M57)',type:'dso',dsoId:'M57',visibility:'telescope'},
+      };
+
+      let userLat = null, userLon = null, heading = 0, pitch = 0, observer = null, selected = null, targetAz = null, targetEl = null, vibrated = false, throttler = null, chartThrottler = null;
+
+      const show = (el) => el.style.display = 'flex';
+      const hide = (el) => el.style.display = 'none';
+      const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+      const ndeg = (x) => (x % 360 + 360) % 360;
+      const sdiff = (a, b) => { let d = ndeg(a - b); if (d > 180) d -= 360; return d; };
+      const setStatus = (msg, ms=2500) => { statusEl.textContent = msg; statusEl.style.display = 'block'; if (ms>0) { clearTimeout(setStatus._t); setStatus._t = setTimeout(()=>statusEl.style.display='none', ms); } };
+
+      const setTheme = (isAligned) => {
+        document.body.dataset.theme = isAligned ? 'aligned' : 'default';
+        if(observer) drawSkyChart();
+      };
+
+      permBtn.addEventListener('click', async () => {
+        setStatus('در حال درخواست مجوزها…', 0);
+        const DOE = window.DeviceOrientationEvent;
+        const canReq = !!(DOE && typeof DOE.requestPermission === 'function');
+        try {
+          if (canReq) {
+            const state = await DOE.requestPermission();
+            if (state !== 'granted') throw new Error('motion-permission-denied');
+          }
+          setupSensors(); startGeo();
+          app.style.display = 'grid'; permCta.style.display = 'none';
+          setStatus('مجوز حسگر/موقعیت فعال شد.');
+        } catch (e) {
+          console.error(e); setStatus('مجوز حسگر رد شد. دوباره تلاش کنید.');
+          permCta.style.display = 'grid';
+        }
+      });
+
+      function setupSensors(){
+        if ('ondeviceorientation' in window) {
+          window.addEventListener('deviceorientation', onOrientation, { passive: true });
+        } else { setStatus('این دستگاه حسگر جهت‌گیری ندارد.'); }
+      }
+
+      function onOrientation(e){
+        let h = e.webkitCompassHeading;
+        if (h == null && typeof e.alpha === 'number') h = e.absolute ? e.alpha : (360 - e.alpha);
+        const ang = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : 0;
+        if (ang === 90) h += 90; else if (ang === 180) h += 180; else if (ang === 270) h -= 90;
+        heading = ndeg(h || 0); pitch = clamp(typeof e.beta === 'number' ? e.beta : 0, -90, 90);
+        compassEl.style.transform = `rotate(${-heading}deg)`;
+        headingText.textContent = `${heading.toFixed(0)}°`;
+        pitchText.textContent = `${pitch.toFixed(0)}°`;
+        updateGuidance();
+        if (!chartThrottler) { chartThrottler = setTimeout(() => { if (observer) drawSkyChart(); chartThrottler = null; }, 150); }
+        if (!throttler) { throttler = setTimeout(()=>{ updateNearby(); throttler = null; }, 900); }
+      }
+
+      function startGeo(){
+        if (!navigator.geolocation) { setStatus('موقعیت‌یابی در این مرورگر پشتیبانی نمی‌شود.'); return; }
+        navigator.geolocation.watchPosition(pos => {
+          userLat = pos.coords.latitude; userLon = pos.coords.longitude;
+          latEl.textContent = userLat.toFixed(4); lonEl.textContent = userLon.toFixed(4);
+          observer = new Astronomy.Observer(userLat, userLon, 0);
+          updateTarget(); updateNearby(); drawSkyChart();
+        }, err => {
+          let msg = 'خطای موقعیت‌یابی: ' + err.message;
+          if (location.protocol === 'http:') msg += ' · بسیاری از دستگاه‌ها به HTTPS نیاز دارند';
+          setStatus(msg, 5000); console.error(err);
+        }, { enableHighAccuracy: true, timeout: 9000, maximumAge: 0 });
+      }
+
+      sel.addEventListener('change', () => {
+        const id = sel.value; selected = id ? { ...SKY[id], id } : null; updateTarget();
+      });
+
+      function updateTarget(){
+        if (!observer || !selected) { resetGuidance(); return; }
+        const now = new Date();
+        try {
+          let ra, dec;
+          if (selected.type === 'planet') { const equ = Astronomy.Equator(BODY_MAP[selected.body], now, observer, true, true); ra = equ.ra; dec = equ.dec; } 
+          else if (selected.type === 'star') { const s = Astronomy.Star(selected.starId); ra = s.ra; dec = s.dec; } 
+          else if (selected.type === 'dso') { const d = Astronomy.Dso(selected.dsoId); ra = d.ra; dec = d.dec; } 
+          else { return; }
+          const hor = Astronomy.Horizon(now, observer, ra, dec, 'normal');
+          targetAz = ndeg(hor.azimuth); targetEl = hor.altitude;
+          azVal.textContent = `${targetAz.toFixed(0)}°`; elVal.textContent = `${targetEl.toFixed(0)}°`;
+          if (targetEl <= 0) {
+            callout.textContent = 'جرم انتخابی زیر افق است.'; hide(mAz); hide(mEl); note.textContent = '';
+          } else {
+            callout.textContent = 'با سمت و شیب راهنمایی شوید.';
+            updateGuidance();
+            note.textContent = selected.visibility === 'naked_eye' ? '👀 قابل مشاهده با چشم غیرمسلح' : '🔭 نیاز به ابزار اپتیکی';
+            note.className = 'text-center mt-3 text-sm font-bold ' + (selected.visibility === 'naked_eye' ? 'note-visible' : 'note-not-visible');
+          }
+        } catch (e) { console.error(`Error calculating position for ${selected.id}:`, e); setStatus('خطا در محاسبهٔ موقعیت جرم.'); resetGuidance(); }
+      }
+
+      function resetGuidance(){
+        targetAz = targetEl = null; azVal.textContent = elVal.textContent = '--';
+        callout.textContent = 'یک جرم آسمانی را انتخاب کنید.'; hide(mAz); hide(mEl); note.textContent = '';
+        setTheme(false); vibrated = false;
+      }
+
+      function updateGuidance(){
+        if (targetAz == null || targetEl == null || targetEl <= 0) return;
+        const azTol = 5, elTol = 5;
+        const dAz = sdiff(targetAz, heading); const dEl = targetEl - pitch;
+        const okAz = Math.abs(dAz) < azTol; const okEl = Math.abs(dEl) < elTol;
+        const aligned = okAz && okEl;
+        setTheme(aligned);
+        if (aligned) {
+          callout.textContent = 'هم‌راستا شد!'; hide(mAz); hide(mEl);
+          if ('vibrate' in navigator && !vibrated) { navigator.vibrate(180); vibrated = true; }
+          return;
+        }
+        vibrated = false; show(mAz); show(mEl);
+        const pAz = 100 - (Math.min(180, Math.abs(dAz)) / 180) * 100;
+        const pEl = 100 - (Math.min(90, Math.abs(dEl)) / 90) * 100;
+        azFill.style.width = `${pAz.toFixed(0)}%`; elFill.style.width = `${pEl.toFixed(0)}%`;
+        azSub.textContent = dAz > 0 ? 'به راست بچرخید' : 'به چپ بچرخید';
+        elSub.textContent = dEl > 0 ? 'شیب به بالا' : 'شیب به پایین';
+      }
+      
+      function drawSkyChart() {
+          if (!observer) return;
+          const cs = getComputedStyle(document.documentElement);
+          const colors = { bg: 'rgba(10, 0, 0, 0.6)', horizon: cs.getPropertyValue('--border-color'), cardinal: cs.getPropertyValue('--accent-color'), text: cs.getPropertyValue('--text-color'), sun: '#ffd700', moon: '#ffffff', viewfinder: cs.getPropertyValue('--highlight-color') };
+          const canvas = skyChartCanvas, rect = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+          canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+          const ctx = skyChartCtx; ctx.scale(dpr, dpr);
+          const width = rect.width, height = rect.height, centerX = width / 2, centerY = height / 2, radius = Math.min(width, height) / 2 * 0.9, now = new Date();
+          ctx.fillStyle = colors.bg; ctx.fillRect(0, 0, width, height);
+          ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI); ctx.strokeStyle = colors.horizon; ctx.lineWidth = 1; ctx.stroke();
+          const cardinalPoints = { 'ش': 0, 'خ': 90, 'ج': 180, 'غ': 270 };
+          ctx.font = 'bold 16px Vazirmatn'; ctx.fillStyle = colors.cardinal; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          for (const [label, angle] of Object.entries(cardinalPoints)) { const rad = (angle - 90) * Math.PI / 180; ctx.fillText(label, centerX + (radius + 15) * Math.cos(rad), centerY + (radius + 15) * Math.sin(rad)); }
+          const bodiesToDraw = Object.keys(SKY);
+          for (const id of bodiesToDraw) {
+            const obj = SKY[id]; if (!obj) continue;
+            try {
+              let ra, dec;
+              if (obj.type === 'planet'){ const eq = Astronomy.Equator(BODY_MAP[obj.body], now, observer, true, true); ra = eq.ra; dec = eq.dec; }
+              else if (obj.type === 'star'){ const s = Astronomy.Star(obj.starId); ra = s.ra; dec = s.dec; }
+              else { const d = Astronomy.Dso(obj.dsoId); ra = d.ra; dec = d.dec; }
+              const hor = Astronomy.Horizon(now, observer, ra, dec, 'normal');
+              if (hor.altitude > 0) {
+                const alt_rad = (1 - hor.altitude / 90) * radius; const az_rad = (hor.azimuth - 90) * Math.PI / 180;
+                const x = centerX + alt_rad * Math.cos(az_rad); const y = centerY + alt_rad * Math.sin(az_rad);
+                ctx.beginPath(); ctx.arc(x, y, id === 'sun' ? 4 : (obj.type === 'planet' ? 3 : 2), 0, 2 * Math.PI);
+                ctx.fillStyle = id === 'sun' ? colors.sun : (id === 'moon' ? colors.moon : colors.text); ctx.fill();
+                ctx.font = '10px Vazirmatn'; ctx.fillText(obj.name.split(' ')[0], x, y - 8);
+              }
+            } catch (e) {}
+          }
+          const view_alt_rad = (1 - (pitch / 90)) * radius; const view_az_rad = (heading - 90) * Math.PI / 180;
+          const vx = centerX + view_alt_rad * Math.cos(view_az_rad); const vy = centerY + view_alt_rad * Math.sin(view_az_rad);
+          ctx.strokeStyle = colors.viewfinder; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(vx, vy, 15, 0, 2 * Math.PI); ctx.stroke();
+          const crosshairSize = 6; ctx.beginPath(); ctx.moveTo(vx - crosshairSize, vy); ctx.lineTo(vx + crosshairSize, vy); ctx.moveTo(vx, vy - crosshairSize); ctx.lineTo(vx, vy + crosshairSize); ctx.stroke();
+      }
+
+      function createListItem(o){
+        const li = document.createElement('li'); li.className = 'list-item-base';
+        li.innerHTML = `<h4 class="font-bold text-base">${o.name}</h4> <div class="flex gap-4 text-sm mt-1 opacity-80"><span>سمت: ${o.az.toFixed(0)}°</span><span>ارتفاع: ${o.el.toFixed(0)}°</span></div> <div class="mt-1.5 text-xs font-bold ${o.visibility==='naked_eye'?'note-visible':'note-not-visible'}">${o.visibility==='naked_eye'?'👀 با چشم غیرمسلح':'🔭 نیاز به ابزار'}</div>`;
+        li.addEventListener('click', () => { sel.value = o.id; selected = { ...SKY[o.id], id: o.id }; updateTarget(); window.scrollTo({top: 0, behavior: 'smooth'}); });
+        return li;
+      }
+      
+      function createListHeader(title) {
+          const li = document.createElement('li');
+          li.className = 'list-header';
+          li.textContent = title;
+          return li;
+      }
+
+      function updateNearby(){
+        if (!observer) return;
+        const now = new Date();
+        const ids = Object.keys(SKY);
+        const nakedEyeItems = [];
+        const telescopeItems = [];
+        for (const id of ids){
+          if(id === 'sun') continue; // Don't show Sun in nearby list at night
+          const obj = SKY[id];
+          try {
+            let ra, dec;
+            if (obj.type === 'planet'){ const eq = Astronomy.Equator(BODY_MAP[obj.body], now, observer, true, true); ra = eq.ra; dec = eq.dec; }
+            else if (obj.type === 'star'){ const s = Astronomy.Star(obj.starId); ra = s.ra; dec = s.dec; }
+            else { const d = Astronomy.Dso(obj.dsoId); ra = d.ra; dec = d.dec; }
+            const hor = Astronomy.Horizon(now, observer, ra, dec, 'normal');
+            if (hor.altitude > 0){
+              const dAz = sdiff(hor.azimuth, heading); const dEl = hor.altitude - pitch; const dist = Math.hypot(dAz, dEl);
+              const item = { id, name: obj.name, az: hor.azimuth, el: hor.altitude, visibility: obj.visibility, dist };
+              if(obj.visibility === 'naked_eye') {
+                nakedEyeItems.push(item);
+              } else {
+                telescopeItems.push(item);
+              }
+            }
+          } catch (e) { console.warn('nearby error for', id, e); }
+        }
+        
+        nakedEyeItems.sort((a,b)=>a.dist-b.dist);
+        telescopeItems.sort((a,b)=>a.dist-b.dist);
+        
+        list.innerHTML = '';
+        const frag = document.createDocumentFragment();
+
+        if (nakedEyeItems.length > 0) {
+            frag.appendChild(createListHeader('👀 قابل مشاهده با چشم غیرمسلح'));
+            nakedEyeItems.forEach(o => frag.appendChild(createListItem(o)));
+        }
+
+        if (telescopeItems.length > 0) {
+            frag.appendChild(createListHeader('🔭 نیازمند ابزار اپتیکی'));
+            telescopeItems.forEach(o => frag.appendChild(createListItem(o)));
+        }
+
+        if (frag.children.length === 0) {
+            list.innerHTML = '<li class="list-item-base opacity-70">هیچ جرمی در حال حاضر بالای افق نیست.</li>';
+        } else {
+            list.appendChild(frag);
+        }
+      }
+
+      if (!('ontouchstart' in window)) setStatus('اگر حسگر جهت‌گیری ندارید، فقط «موقعیت» کار می‌کند.');
+      
+      setTheme(false);
+    })();
+  </script>
+</body>
+</html>
