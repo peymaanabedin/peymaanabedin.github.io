@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LunaLog: A Scientific Moon Tracker</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Three.js and SunCalc.js Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/suncalc@1.8.0/suncalc.min.js"></script>
+
+    <style>
+        /* Custom styles for the app */
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0a18;
+            color: #e0e0e0;
+            background-image: radial-gradient(circle at 50% 0%, rgba(17, 24, 39, 0.8) 0%, rgba(12, 10, 24, 1) 70%);
+        }
+        
+        /* Custom scrollbar for a better aesthetic */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a2e; }
+        ::-webkit-scrollbar-thumb { background: #4a4a6a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6a6a8a; }
+
+        /* Styling for the 3D Orrery canvas */
+        #orrery-canvas, #sun-position-canvas, #moon-phase-canvas { display: block; width: 100%; height: 100%; }
+
+        /* Custom animation for fading in elements */
+        .fade-in { animation: fadeInAnimation 0.8s ease-in-out forwards; opacity: 0; }
+        @keyframes fadeInAnimation {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card styles for a consistent look */
+        .info-card {
+            background-color: rgba(17, 20, 35, 0.6);
+            border: 1px solid rgba(74, 74, 106, 0.4);
+            border-radius: 1.25rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+        .info-card:hover {
+            border-color: rgba(129, 140, 248, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        /* Moon visualization styles */
+        #moon-visual {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: white; /* The bright illuminated base */
+            box-shadow: 0 0 40px rgba(220, 220, 255, 0.8), 0 0 80px rgba(255, 255, 255, 0.6); /* Enhanced glow */
+            overflow: hidden;
+        }
+        #moon-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/172905/moon-texture.jpg');
+            background-size: cover;
+            mix-blend-mode: multiply; /* This darkens the white base with the texture */
+            z-index: 1;
+        }
+        #moon-shadow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #000; /* Fully opaque shadow */
+            transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 2;
+        }
+
+        /* Custom glow for buttons */
+        .btn-glow { box-shadow: 0 0 5px rgba(59, 130, 246, 0.4); }
+        .btn-glow:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
+        
+        /* Language switcher style */
+        .lang-btn {
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(74, 74, 106, 0.4);
+        }
+        .lang-btn.active { background-color: #4f46e5; color: white; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex items-center justify-center p-2">
+
+    <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex flex-col items-center justify-center z-50 transition-opacity duration-500">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-400"></div>
+        <p class="mt-4 text-indigo-300 text-lg" data-lang="en:Calculating cosmic coordinates...|fa:در حال محاسبه مختصات کیهانی..."></p>
+    </div>
+    
+    <main id="app-container" class="w-full max-w-7xl mx-auto p-2 md:p-4">
+        <!-- Header Section -->
+        <header class="text-center mb-6 fade-in">
+             <div class="flex justify-center mb-4"><div class="flex rounded-lg p-1 bg-gray-800/50">
+                <button id="lang-en" class="lang-btn px-4 py-1 rounded-md text-sm font-semibold transition active">EN</button>
+                <button id="lang-fa" class="lang-btn px-4 py-1 rounded-md text-sm font-semibold transition">FA</button>
+            </div></div>
+            <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter">LunaLog</h1>
+            <p id="location-display" class="text-lg text-indigo-300 mt-1"></p>
+        </header>
+
+        <!-- Location Input Section -->
+        <div class="flex flex-col sm:flex-row gap-2 mb-6 max-w-lg mx-auto fade-in" style="animation-delay: 0.1s;">
+            <input type="text" id="city-input" data-lang-placeholder="en:Enter a city name...|fa:نام شهر را وارد کنید..." class="flex-grow bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+            <div class="flex gap-2">
+                <button id="search-btn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-lg transition btn-glow" data-lang="en:Search|fa:جستجو"></button>
+                <button id="gps-btn" aria-label="Use GPS location" class="w-full sm:w-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
+                    <span data-lang="en:Use GPS|fa:GPS"></span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-6">
+            <!-- Left Column -->
+            <div class="flex flex-col gap-4 lg:gap-6 fade-in" style="animation-delay: 0.2s;">
+                <div class="info-card p-6 flex flex-col items-center justify-center text-center">
+                    <h2 id="phase-name" class="text-2xl font-bold mb-4 text-white"></h2>
+                    <div id="moon-visual" class="mb-4"><div id="moon-shadow"></div></div>
+                    <p id="illumination" class="text-lg font-light"></p>
+                </div>
+                 <div class="info-card p-4 h-72">
+                     <h2 class="text-xl font-bold text-center text-white mb-2" data-lang="en:Sun Position|fa:موقعیت خورشید"></h2>
+                     <div id="sun-position-container" class="w-full h-[calc(100%-2.5rem)]"><canvas id="sun-position-canvas"></canvas></div>
+                </div>
+            </div>
+            
+            <!-- Middle Column -->
+            <div class="flex flex-col gap-4 lg:gap-6 fade-in" style="animation-delay: 0.3s;">
+                <div class="info-card p-6 grid grid-cols-2 gap-x-4 gap-y-6">
+                     <div class="flex items-center gap-3"><svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg><div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Distance|fa:فاصله"></h3><p id="distance" class="text-xl md:text-2xl font-bold text-white"></p></div></div>
+                    <div class="flex items-center gap-3"><svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg><div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Age|fa:سن"></h3><p id="moon-age" class="text-xl md:text-2xl font-bold text-white"></p></div></div>
+                    <div class="flex items-center gap-3"><svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg><div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Moonrise|fa:طلوع ماه"></h3><p id="moonrise" class="text-xl md:text-2xl font-bold text-white"></p></div></div>
+                    <div class="flex items-center gap-3"><svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg><div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Moonset|fa:غروب ماه"></h3><p id="moonset" class="text-xl md:text-2xl font-bold text-white"></p></div></div>
+                    <div class="flex items-center gap-3"><svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" /></svg><div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Zodiac|fa:منطقه البروج"></h3><p id="zodiac" class="text-xl md:text-2xl font-bold text-white"></p></div></div>
+                    <div class="flex items-center gap-3"><svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg><div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Apogee/Perigee|fa:اوج/حضیض"></h3><p id="apogee-perigee" class="text-xl md:text-2xl font-bold text-white"></p></div></div>
+                    <div class="col-span-2 flex items-center gap-3"><svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg><div><h3 class="text-sm font-medium text-gray-400" data-lang="en:Visibility|fa:قابلیت رویت"></h3><p id="visibility" class="text-xl md:text-2xl font-bold"></p></div></div>
+                </div>
+                <div class="info-card p-6">
+                    <h2 class="text-2xl font-bold text-white mb-4" data-lang="en:Your Physical Connection|fa:ارتباط فیزیکی شما"></h2>
+                    <div class="space-y-5">
+                        <div>
+                            <h3 class="font-semibold text-indigo-300" data-lang="en:Gravitational Pull on You|fa:کشش گرانشی بر شما"></h3>
+                            <p id="gravity-pull" class="text-lg"></p>
+                            <p id="gravity-comparison" class="text-sm text-gray-400"></p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-indigo-300" data-lang="en:Tidal Force on You|fa:نیروی جزر و مدی بر شما"></h3>
+                            <p class="text-lg" data-lang="en:Effectively Zero|fa:عملا صفر"></p>
+                            <p id="tidal-force-desc" class="text-sm text-gray-400"></p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="info-card p-4 h-72">
+                     <h2 class="text-xl font-bold text-center text-white mb-2" data-lang="en:Moon Phase Diagram|fa:نمودار فاز ماه"></h2>
+                     <div id="moon-phase-container" class="w-full h-[calc(100%-2.5rem)]"><canvas id="moon-phase-canvas"></canvas></div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="flex flex-col gap-4 lg:gap-6 fade-in" style="animation-delay: 0.4s;">
+                 <div class="info-card p-4 h-80">
+                     <h2 class="text-xl font-bold text-center text-white mb-2" data-lang="en:Solar System View|fa:نمای منظومه شمسی"></h2>
+                     <div id="orrery-container" class="w-full h-[calc(100%-2.5rem)] rounded-lg overflow-hidden"><canvas id="orrery-canvas"></canvas></div>
+                </div>
+                <div class="info-card p-6">
+                    <h2 class="text-2xl font-bold text-white mb-4" data-lang="en:Upcoming Eclipses|fa:گرفتگی‌های پیش رو"></h2>
+                    <div class="space-y-5">
+                        <div>
+                            <h3 class="font-semibold text-indigo-300" data-lang="en:Next Total Lunar Eclipse|fa:خسوف کلی بعدی"></h3>
+                            <p id="lunar-eclipse-date" class="text-lg font-bold text-white"></p>
+                            <p id="lunar-eclipse-countdown" class="text-sm text-gray-300"></p>
+                            <p id="lunar-eclipse-visibility" class="text-sm text-gray-400 mt-1"></p>
+                        </div>
+                        <hr class="border-gray-700">
+                        <div>
+                            <h3 class="font-semibold text-indigo-300" data-lang="en:Next Total Solar Eclipse|fa:کسوف کلی بعدی"></h3>
+                            <p id="solar-eclipse-date" class="text-lg font-bold text-white"></p>
+                            <p id="solar-eclipse-countdown" class="text-sm text-gray-300"></p>
+                            <p id="solar-eclipse-visibility" class="text-sm text-gray-400 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+                <div id="insight-card" class="info-card p-6 flex-grow">
+                    <h2 id="insight-title" class="text-2xl font-bold text-white mb-3"></h2>
+                    <div id="insight-content" class="prose prose-invert max-w-none text-gray-300"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM ELEMENTS & STATE ---
+        const dom = {};
+        // Populate dom object
+        for (const id of ['loading-overlay', 'location-display', 'city-input', 'search-btn', 'gps-btn', 'phase-name', 'moon-shadow', 'illumination', 'distance', 'moon-age', 'moonrise', 'moonset', 'visibility', 'gravity-pull', 'gravity-comparison', 'tidal-force-desc', 'insight-title', 'insight-content', 'zodiac', 'apogee-perigee', 'lang-en', 'lang-fa', 'lunar-eclipse-date', 'lunar-eclipse-countdown', 'lunar-eclipse-visibility', 'solar-eclipse-date', 'solar-eclipse-countdown', 'solar-eclipse-visibility']) {
+            dom[id.replace(/-(\w)/g, (m, g) => g.toUpperCase())] = document.getElementById(id);
+        }
+        
+        let currentLang = 'en';
+        let eclipseInterval;
+        const G = 6.67430e-11, MOON_MASS = 7.342e22, USER_MASS = 70;
+        let currentLocation = { lat: 52.52, lon: 13.40, name: "Berlin, Germany" };
+
+        const translations = {
+            'Tonight\'s Moon for': { en: 'Tonight\'s Moon for', fa: 'ماه امشب برای' },
+            'Your Location': { en: 'Your Location', fa: 'مکان شما' },
+        };
+
+        const insights = {
+            light: { 
+                en: { 
+                    title: "Daily Insight: Full Moon & Your Sleep 💡", 
+                    content: `<p>Tonight's full moon bathes the night in more light than at any other time of the month. Before the invention of widespread artificial light, this was significant, turning night into a usable twilight and allowing for extended activity. It's a scientific fact that our internal clocks (circadian rhythms) are heavily influenced by light, which suppresses the sleep-hormone melatonin.</p><p class="mt-2">Some modern studies suggest a faint echo of our ancestral past remains. In controlled experiments, participants sometimes take a few minutes longer to fall asleep and experience slightly less deep sleep during the full moon, even in dark rooms. It's not a powerful force that causes madness, but a fascinating, subtle link to the natural rhythms that governed life for millennia.</p>` 
+                }, 
+                fa: { 
+                    title: "بینش روزانه: ماه کامل و خواب شما 💡", 
+                    content: `<p>ماه کامل امشب، شب را بیش از هر زمان دیگری در ماه روشن می‌کند. قبل از اختراع نور مصنوعی گسترده، این موضوع اهمیت زیادی داشت و شب را به یک گرگ و میش قابل استفاده تبدیل می‌کرد و امکان فعالیت طولانی‌تری را فراهم می‌نمود. این یک واقعیت علمی است که ساعت‌های داخلی ما (ریتم‌های شبانه‌روزی) به شدت تحت تأثیر نور هستند که هورمون خواب ملاتونین را سرکوب می‌کند.</p><p class="mt-2">برخی مطالعات مدرن نشان می‌دهند که پژواک ضعیفی از گذشته اجدادی ما باقی مانده است. در آزمایش‌های کنترل‌شده، شرکت‌کنندگان گاهی اوقات چند دقیقه بیشتر طول می‌کشد تا به خواب بروند و در طول ماه کامل، حتی در اتاق‌های تاریک، خواب عمیق کمتری را تجربه می‌کنند. این یک نیروی قدرتمند که باعث جنون شود نیست، بلکه یک پیوند شگفت‌انگیز و نامحسوس با ریتم‌های طبیعی است که برای هزاران سال بر زندگی حاکم بود.</p>` 
+                } 
+            },
+            awe: { 
+                en: { 
+                    title: "Daily Insight: New Moon & The Stars ✨", 
+                    content: `<p>With the new moon's light absent from the sky, tonight is a perfect opportunity for a different kind of influence: awe. Without moonlight washing out the sky, the vastness of the cosmos is revealed. Fainter stars, constellations, and even the milky river of our own galaxy become visible from dark locations.</p><p class="mt-2">The experience of witnessing something so immense is scientifically shown to have tangible psychological benefits. It can reduce stress, increase feelings of connectedness, and shift our perspective, making personal worries seem smaller. The most profound influence tonight isn't a force from the moon, but the perspective granted by its temporary absence.</p>` 
+                }, 
+                fa: { 
+                    title: "بینش روزانه: ماه نو و ستارگان ✨", 
+                    content: `<p>با غیبت نور ماه نو از آسمان، امشب فرصتی عالی برای نوع دیگری از تأثیر است: شگفتی. بدون نور ماه که آسمان را روشن کند، وسعت کیهان آشکار می‌شود. ستارگان کم‌نورتر، صورت‌های فلکی، و حتی رودخانه شیری کهکشان خودمان از مکان‌های تاریک قابل مشاهده می‌شوند.</p><p class="mt-2">تجربه مشاهده چیزی به این عظمت، از نظر علمی ثابت شده است که مزایای روانی ملموسی دارد. می‌تواند استرس را کاهش دهد، احساس ارتباط را افزایش دهد، و دیدگاه ما را تغییر دهد، و باعث شود نگرانی‌های شخصی کوچکتر به نظر برسند. عمیق‌ترین تأثیر امشب، نیرویی از ماه نیست، بلکه چشم‌اندازی است که با غیبت موقت آن به دست می‌آید.</p>` 
+                } 
+            },
+            perigee: { 
+                en: { 
+                    title: "Daily Insight: A Closer Moon (Perigee) 🔭", 
+                    content: `<p>The moon is currently near its perigee, its closest point to Earth in its elliptical orbit. This proximity makes it appear about 14% larger in diameter and 30% brighter than when it's at its furthest point (apogee). When this coincides with a full moon, it's popularly called a "Supermoon".</p><p class="mt-2">While this makes for a spectacular sight, it's important to note the physical effects on you are nonexistent. The change in its gravitational pull is minuscule and has no bearing on your biology or mood. Its only significant terrestrial effect is creating slightly higher and lower tides than usual, known as perigean spring tides.</p>` 
+                }, 
+                fa: { 
+                    title: "بینش روزانه: ماه نزدیکتر (حضیض) 🔭", 
+                    content: `<p>ماه در حال حاضر نزدیک به حضیض خود، یعنی نزدیکترین نقطه به زمین در مدار بیضوی خود قرار دارد. این نزدیکی باعث می‌شود که قطر آن حدود ۱۴٪ بزرگتر و ۳۰٪ روشن‌تر از زمانی که در دورترین نقطه خود (اوج) قرار دارد، به نظر برسد. هنگامی که این پدیده با ماه کامل همزمان می‌شود، به طور عامیانه "ابرماه" نامیده می‌شود.</p><p class="mt-2">در حالی که این منظره‌ای تماشایی ایجاد می‌کند، مهم است توجه داشته باشید که اثرات فیزیکی آن بر شما وجود ندارد. تغییر در کشش گرانشی آن بسیار ناچیز است و هیچ تأثیری بر زیست‌شناسی یا خلق و خوی شما ندارد. تنها اثر زمینی قابل توجه آن، ایجاد جزر و مدهای کمی بلندتر و کوتاه‌تر از حد معمول است که به نام جزر و مدهای بهاری حضیضی شناخته می‌شوند.</p>` 
+                } 
+            },
+            visible: { 
+                en: { 
+                    title: "Daily Insight: An Invitation to Look Up ⬆️", 
+                    content: `<p>The moon is currently visible in your sky. This presents a simple yet profound opportunity. Take a moment to step outside and observe it. Notice its phase, its brightness, and if you can, spot the dark patches known as maria (ancient volcanic plains) and the brighter, cratered highlands.</p><p class="mt-2">This act of observation is a form of mindfulness. It connects us to the predictable, clockwork nature of the solar system and provides a tangible link to a world beyond our own. This grounding experience and sense of perspective is a real, scientifically-supported psychological benefit that costs nothing but a moment of your time.</p>` 
+                }, 
+                fa: { 
+                    title: "بینش روزانه: دعوتی برای نگاه به بالا ⬆️", 
+                    content: `<p>ماه در حال حاضر در آسمان شما قابل مشاهده است. این یک فرصت ساده اما عمیق را فراهم می‌کند. لحظه‌ای وقت بگذارید و بیرون بروید و آن را مشاهده کنید. به فاز آن، روشنایی آن توجه کنید، و اگر می‌توانید، لکه‌های تاریک معروف به ماریا (دشت‌های آتشفشانی باستانی) و مناطق مرتفع روشن‌تر و پر از دهانه را تشخیص دهید.</p><p class="mt-2">این عمل مشاهده، نوعی ذهن‌آگاهی است. ما را به طبیعت قابل پیش‌بینی و ساعت‌وار منظومه شمسی متصل می‌کند و پیوندی ملموس با دنیایی فراتر از دنیای خودمان فراهم می‌کند. این تجربه زمینه‌ساز و حس دیدگاه، یک مزیت روانی واقعی و مورد حمایت علمی است که هیچ هزینه‌ای جز یک لحظه از وقت شما ندارد.</p>` 
+                } 
+            },
+            generic: { 
+                en: { 
+                    title: "Debunked: The 'Lunar Effect' 🧐", 
+                    content: `<p>It's a common belief that the moon's phase influences human behavior, a theory often called the 'Lunar Effect'. However, dozens of scientific studies over decades have rigorously tested this claim. The overwhelming consensus is that there is <strong>no statistical correlation</strong> between the moon's phase and events like crime rates, hospital admissions, or psychological episodes.</p><p class="mt-2">This persistent belief is a classic example of cognitive biases at work, specifically <strong>'Confirmation Bias'</strong> (remembering events that fit our belief) and <strong>'Illusory Correlation'</strong> (perceiving a relationship where none exists). We simply notice and remember strange events more when they happen to coincide with a memorable full moon.</p>` 
+                }, 
+                fa: { 
+                    title: "رد شده: 'اثر ماه' 🧐", 
+                    content: `<p>این یک باور رایج است که فاز ماه بر رفتار انسان تأثیر می‌گذارد، نظریه‌ای که اغلب "اثر ماه" نامیده می‌شود. با این حال، ده‌ها مطالعه علمی در طول دهه‌ها این ادعا را به طور جدی آزمایش کرده‌اند. اجماع قاطع این است که <strong>هیچ همبستگی آماری</strong> بین فاز ماه و رویدادهایی مانند نرخ جرم و جنایت، پذیرش در بیمارستان‌ها، یا اپیزودهای روانی وجود ندارد.</p><p class="mt-2">این باور پایدار، یک مثال کلاسیک از کارکرد سوگیری‌های شناختی است، به ویژه <strong>"سوگیری تأییدی"</strong> (به خاطر سپردن رویدادهایی که با باور ما مطابقت دارند) و <strong>"همبستگی خیالی"</strong> (درک رابطه‌ای که وجود ندارد). ما صرفاً رویدادهای عجیب را بیشتر زمانی که با یک ماه کامل به یاد ماندنی همزمان می‌شوند، متوجه می‌شویم و به خاطر می‌سپاریم.</p>` 
+                } 
+            }
+        };
+
+
+        const zodiacSigns = [
+            { name: { en: 'Aries', fa: 'حمل' }, start: 79 }, { name: { en: 'Taurus', fa: 'ثور' }, start: 110 },
+            { name: { en: 'Gemini', fa: 'جوزا' }, start: 141 }, { name: { en: 'Cancer', fa: 'سرطان' }, start: 172 },
+            { name: { en: 'Leo', fa: 'اسد' }, start: 203 }, { name: { en: 'Virgo', fa: 'سنبله' }, start: 234 },
+            { name: { en: 'Libra', fa: 'میزان' }, start: 265 }, { name: { en: 'Scorpio', fa: 'عقرب' }, start: 296 },
+            { name: { en: 'Sagittarius', fa: 'قوس' }, start: 327 }, { name: { en: 'Capricorn', fa: 'جدی' }, start: 356 },
+            { name: { en: 'Aquarius', fa: 'دلو' }, start: 21 }, { name: { en: 'Pisces', fa: 'حوت' }, start: 50 }
+        ];
+
+        // --- VISUALIZATIONS ---
+        let orreryScene, orreryCamera, orreryRenderer, planets = {};
+        let sunPosCtx, sunPosCanvas, moonPhaseCtx, moonPhaseCanvas;
+
+        function initVisualizations() {
+            // Orrery
+            const orreryContainer = document.getElementById('orrery-container');
+            orreryScene = new THREE.Scene();
+            orreryCamera = new THREE.PerspectiveCamera(60, orreryContainer.clientWidth / orreryContainer.clientHeight, 0.1, 1000);
+            orreryCamera.position.set(0, 15, 0);
+            orreryCamera.lookAt(0, 0, 0);
+            orreryRenderer = new THREE.WebGLRenderer({ canvas: document.getElementById('orrery-canvas'), antialias: true, alpha: true });
+            orreryRenderer.setSize(orreryContainer.clientWidth, orreryContainer.clientHeight);
+            orreryRenderer.setClearColor(0x000000, 0);
+            const sun = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffcc00, map: createProceduralTexture('#ffcc00', '#ff8800') }));
+            orreryScene.add(sun);
+            orreryScene.add(new THREE.PointLight(0xffffff, 1.5, 100));
+            const planetData = [['mercury', 0x999999, 0.2, 2.5, 4.15], ['venus', 0xcc9966, 0.4, 4, 1.62], ['earth', 0x4d96ff, 0.5, 6, 1], ['mars', 0xff6633, 0.3, 8, 0.53]];
+            planetData.forEach(([name, color, size, dist, speed]) => {
+                const planet = new THREE.Mesh(new THREE.SphereGeometry(size, 16, 16), new THREE.MeshPhongMaterial({ color }));
+                planets[name] = { mesh: planet, dist, speed };
+                orreryScene.add(planet);
+                const orbit = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(new THREE.Path().absarc(0, 0, dist, 0, Math.PI * 2, false).getSpacedPoints(128)), new THREE.LineBasicMaterial({ color: 0x333333 }));
+                orbit.rotation.x = Math.PI / 2;
+                orreryScene.add(orbit);
+            });
+            planets['moon'] = { mesh: new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), new THREE.MeshPhongMaterial({ color: 0xcccccc })) };
+            orreryScene.add(planets.moon.mesh);
+            new ResizeObserver(() => { orreryCamera.aspect = orreryContainer.clientWidth/orreryContainer.clientHeight; orreryCamera.updateProjectionMatrix(); orreryRenderer.setSize(orreryContainer.clientWidth, orreryContainer.clientHeight); }).observe(orreryContainer);
+            
+            // Sun Position
+            const sunPosContainer = document.getElementById('sun-position-container');
+            sunPosCanvas = document.getElementById('sun-position-canvas');
+            sunPosCtx = sunPosCanvas.getContext('2d');
+            new ResizeObserver(() => { sunPosCanvas.width = sunPosContainer.clientWidth * devicePixelRatio; sunPosCanvas.height = sunPosContainer.clientHeight * devicePixelRatio; sunPosCanvas.style.width = `${sunPosContainer.clientWidth}px`; sunPosCanvas.style.height = `${sunPosContainer.clientHeight}px`; drawSunPosition(currentLocation.lat, currentLocation.lon); }).observe(sunPosContainer);
+
+            // Moon Phase Diagram
+            const moonPhaseContainer = document.getElementById('moon-phase-container');
+            moonPhaseCanvas = document.getElementById('moon-phase-canvas');
+            moonPhaseCtx = moonPhaseCanvas.getContext('2d');
+            new ResizeObserver(() => { moonPhaseCanvas.width = moonPhaseContainer.clientWidth * devicePixelRatio; moonPhaseCanvas.height = moonPhaseContainer.clientHeight * devicePixelRatio; moonPhaseCanvas.style.width = `${moonPhaseContainer.clientWidth}px`; moonPhaseCanvas.style.height = `${moonPhaseContainer.clientHeight}px`; drawMoonPhaseDiagram(SunCalc.getMoonIllumination(new Date())); }).observe(moonPhaseContainer);
+
+            animateVisualizations();
+        }
+
+        function animateVisualizations() {
+            requestAnimationFrame(animateVisualizations);
+            const time = Date.now() * 0.0001;
+            Object.values(planets).forEach(p => { if(p.dist) { p.mesh.position.x = Math.cos(time * p.speed) * p.dist; p.mesh.position.z = Math.sin(time * p.speed) * p.dist; }});
+            planets.moon.mesh.position.set(planets.earth.mesh.position.x + Math.cos(time * 12) * 0.8, 0, planets.earth.mesh.position.z + Math.sin(time * 12) * 0.8);
+            orreryRenderer.render(orreryScene, orreryCamera);
+        }
+
+        function drawSunPosition(lat, lon) {
+            const w = sunPosCanvas.width, h = sunPosCanvas.height, ctx = sunPosCtx;
+            ctx.clearRect(0,0,w,h);
+            const now = new Date(), sunTimes = SunCalc.getTimes(now, lat, lon);
+            const start = sunTimes.sunrise.getTime(), end = sunTimes.sunset.getTime();
+            const progress = Math.max(0, Math.min(1, (now.getTime() - start) / (end - start)));
+            ctx.strokeStyle = '#4a4a6a'; ctx.lineWidth = 2 * devicePixelRatio;
+            ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+            const pathRadiusX = Math.max(0, w/2 - 20 * devicePixelRatio), pathRadiusY = Math.max(0, h/2 - 20 * devicePixelRatio);
+            ctx.beginPath(); ctx.arc(w/2, h/2, pathRadiusX, Math.PI, 0); ctx.stroke();
+            const sunX = w/2 - Math.cos(progress * Math.PI) * pathRadiusX;
+            const sunY = h/2 - Math.sin(progress * Math.PI) * pathRadiusY;
+            const sunGradient = ctx.createRadialGradient(sunX, sunY, 5, sunX, sunY, 20*devicePixelRatio);
+            sunGradient.addColorStop(0, 'rgba(255,220,150,1)'); sunGradient.addColorStop(1, 'rgba(255,180,50,0)');
+            ctx.fillStyle = sunGradient; ctx.beginPath(); ctx.arc(sunX, sunY, 20*devicePixelRatio, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle='white';ctx.beginPath();ctx.arc(sunX,sunY,5*devicePixelRatio,0,Math.PI*2);ctx.fill();
+        }
+
+        function drawMoonPhaseDiagram(moonIllum) {
+            const w = moonPhaseCanvas.width, h = moonPhaseCanvas.height, ctx = moonPhaseCtx;
+            ctx.clearRect(0,0,w,h);
+            const centerX = w / 2, centerY = h / 2;
+            const orbitRadius = Math.min(w, h) * 0.35;
+            const earthRadius = orbitRadius * 0.3;
+            const moonRadius = earthRadius * 0.27;
+
+            // Draw Sun and rays
+            const sunRadius = 20 * devicePixelRatio;
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath(); ctx.arc(w + sunRadius - (30 * devicePixelRatio), centerY, sunRadius, 0, 2*Math.PI); ctx.fill();
+            for(let i=0; i<10; i++) {
+                const y = (i / 9) * h;
+                ctx.beginPath(); ctx.moveTo(w, y); ctx.lineTo(w - (60 * devicePixelRatio), y);
+                ctx.strokeStyle = `rgba(255, 220, 150, ${1 - Math.abs(i-4.5)/4.5 * 0.7})`;
+                ctx.lineWidth = 1 * devicePixelRatio;
+                ctx.stroke();
+            }
+
+            // Draw orbit
+            ctx.strokeStyle = 'rgba(100, 116, 139, 0.5)';
+            ctx.lineWidth = 1 * devicePixelRatio;
+            ctx.beginPath(); ctx.arc(centerX, centerY, orbitRadius, 0, 2*Math.PI); ctx.stroke();
+
+            // Draw Earth
+            const earthGradient = ctx.createRadialGradient(centerX-earthRadius*0.2, centerY-earthRadius*0.2, earthRadius*0.1, centerX, centerY, earthRadius);
+            earthGradient.addColorStop(0, '#87ceeb'); earthGradient.addColorStop(1, '#00008b');
+            ctx.fillStyle = earthGradient;
+            ctx.beginPath(); ctx.arc(centerX, centerY, earthRadius, 0, 2*Math.PI); ctx.fill();
+
+            // Draw Moon in its orbit
+            const angle = moonIllum.angle + Math.PI;
+            const moonX = centerX + Math.cos(angle) * orbitRadius;
+            const moonY = centerY + Math.sin(angle) * orbitRadius;
+            
+            // This logic correctly draws the moon phase by layering three shapes.
+            const phase = moonIllum.phase;
+            
+            // 1. Draw the base shape: either the dark side or light side semi-circle.
+            if (phase < 0.5) { // Waxing (grows from right to left)
+                // Base is the dark left side
+                ctx.fillStyle = '#444';
+                ctx.beginPath();
+                ctx.arc(moonX, moonY, moonRadius, Math.PI/2, -Math.PI/2, false);
+                ctx.fill();
+            } else { // Waning (shrinks from right to left)
+                // Base is the light left side
+                ctx.fillStyle = '#ccc';
+                ctx.beginPath();
+                ctx.arc(moonX, moonY, moonRadius, Math.PI/2, -Math.PI/2, false);
+                ctx.fill();
+            }
+
+            // 2. Draw the other semi-circle
+             if (phase < 0.5) {
+                ctx.fillStyle = '#ccc';
+                ctx.beginPath();
+                ctx.arc(moonX, moonY, moonRadius, -Math.PI/2, Math.PI/2, false);
+                ctx.fill();
+            } else {
+                ctx.fillStyle = '#444';
+                ctx.beginPath();
+                ctx.arc(moonX, moonY, moonRadius, -Math.PI/2, Math.PI/2, false);
+                ctx.fill();
+            }
+
+            // 3. Draw the terminator ellipse on top to create the phase shape
+            const bulge = Math.cos(phase * 2 * Math.PI);
+            const bulgeRadius = Math.abs(moonRadius * bulge);
+            
+            // If waxing, draw light ellipse on dark side. If waning, draw dark ellipse on light side.
+            ctx.fillStyle = phase < 0.5 ? '#ccc' : '#444';
+            ctx.beginPath();
+            ctx.ellipse(moonX, moonY, bulgeRadius, moonRadius, 0, -Math.PI/2, Math.PI/2, false);
+            ctx.fill();
+        }
+        
+        // --- LANGUAGE & TRANSLATION ---
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+
+            dom.langEn.classList.toggle('active', lang === 'en');
+            dom.langFa.classList.toggle('active', lang === 'fa');
+
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.dataset.lang;
+                const parts = key.split('|').map(p => p.split(':'));
+                const translation = parts.find(p => p[0] === lang)[1];
+                if (el.tagName === 'SPAN' || el.tagName === 'P' || el.tagName === 'BUTTON' || el.tagName === 'H2' || el.tagName === 'H3') {
+                    el.textContent = translation;
+                }
+            });
+            document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+                 const key = el.dataset.langPlaceholder;
+                const parts = key.split('|').map(p => p.split(':'));
+                const translation = parts.find(p => p[0] === lang)[1];
+                el.placeholder = translation;
+            });
+            
+            updateMoonData(currentLocation.lat, currentLocation.lon, currentLocation.name);
+            updateEclipseData();
+        }
+        
+        // --- CORE FUNCTIONS ---
+        const showLoading = (show) => { dom.loadingOverlay.style.opacity = show ? '1' : '0'; dom.loadingOverlay.style.pointerEvents = show ? 'auto' : 'none'; };
+        const formatTime = (date) => (!date || isNaN(date)) ? 'N/A' : date.toLocaleTimeString(currentLang === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        function getPhaseName(phase) { 
+            const phases = {
+                en: ["New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous", "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent"],
+                fa: ["ماه نو", "هلال فزاینده", "تربیع اول", "کوژ فزاینده", "ماه کامل", "کوژ کاهنده", "تربیع آخر", "هلال کاهنده"]
+            };
+            if (phase < 0.03 || phase > 0.97) return phases[currentLang][0]; if (phase < 0.23) return phases[currentLang][1]; if (phase < 0.27) return phases[currentLang][2]; if (phase < 0.48) return phases[currentLang][3]; if (phase < 0.52) return phases[currentLang][4]; if (phase < 0.73) return phases[currentLang][5]; if (phase < 0.77) return phases[currentLang][6]; return phases[currentLang][7];
+        }
+        function updateMoonVisual(phase) {
+            const isWaning = phase > 0.5; let p = (phase <= 0.5) ? (phase / 0.5) : ((1 - phase) / 0.5); let s = Math.cos(p * Math.PI / 2); let t = (1 - s) * 50; dom.moonShadow.style.transform = isWaning ? `translateX(${t}%) scaleX(${s})` : `translateX(-${t}%) scaleX(${s})`;
+        }
+
+        function getDailyInsight(moonIllum, moonPos) {
+            if (moonIllum.fraction > 0.95) return insights.light[currentLang];
+            if (moonIllum.fraction < 0.05) return insights.awe[currentLang];
+            if (moonPos.distance < 370000) return insights.perigee[currentLang]; // Perigee is closer than avg
+            if (moonPos.altitude > 0) { // Check if it's night
+                const now = new Date();
+                const times = SunCalc.getTimes(now, currentLocation.lat, currentLocation.lon);
+                if (now > times.sunset || now < times.sunrise) {
+                    return insights.visible[currentLang];
+                }
+            }
+            return insights.generic[currentLang];
+        }
+
+        function updateEclipseData() {
+            const now = new Date();
+            const lunarEclipseDate = new Date(Date.UTC(2026, 2, 3, 11, 33)); // March 3, 2026, 11:33 UTC
+            const solarEclipseDate = new Date(Date.UTC(2026, 7, 12, 17, 47)); // August 12, 2026, 17:47 UTC
+
+            // --- Lunar Eclipse ---
+            dom.lunarEclipseDate.textContent = lunarEclipseDate.toLocaleDateString(currentLang === 'fa' ? 'fa-IR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            // Visibility (simplified bounding box)
+            const { lat, lon } = currentLocation;
+            let lunarVisibility = {
+                en: "Visible from your location as a Total Eclipse! Look for it during your local night time.",
+                fa: "از مکان شما به صورت خسوف کلی قابل مشاهده است! در طول شب محلی خود به دنبال آن باشید."
+            };
+            // This eclipse is visible from Asia, Australia, Pacific, Americas. Not Europe/Africa.
+            if (lon > -30 && lon < 60) {
+                 lunarVisibility = { en: "Not visible from your location (occurs during your daytime).", fa: "از مکان شما قابل مشاهده نیست (در طول روز شما رخ می دهد)." };
+            }
+            dom.lunarEclipseVisibility.textContent = lunarVisibility[currentLang];
+
+            // --- Solar Eclipse ---
+            dom.solarEclipseDate.textContent = solarEclipseDate.toLocaleDateString(currentLang === 'fa' ? 'fa-IR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            let solarVisibility = {
+                en: "Visible as a Partial Eclipse from your location. The path of totality crosses Greenland, Iceland, and Spain.",
+                fa: "از مکان شما به صورت کسوف جزئی قابل مشاهده است. مسیر کلی در گرینلند، ایسلند و اسپانیا خواهد بود."
+            };
+            if (lat < 20 || lon < -100 || lon > 60) { // Rough check for outside Europe/N.America
+                solarVisibility = { en: "Not visible from your location.", fa: "از مکان شما قابل مشاهده نیست." };
+            }
+            dom.solarEclipseVisibility.textContent = solarVisibility[currentLang];
+
+
+            // --- Countdown Timer ---
+            if(eclipseInterval) clearInterval(eclipseInterval);
+            eclipseInterval = setInterval(() => {
+                const now = new Date();
+                const format = (t, d, h, m, s) => currentLang === 'fa' ? `${t.d} ${d} و ${t.h} ${h} و ${t.m} ${m} و ${t.s} ${s}` : `${t.d} ${d}, ${t.h} ${h}, ${t.m} ${m}, ${t.s} ${s}`;
+                const labels = {
+                    d: {en: 'd', fa: 'روز'}, h: {en: 'h', fa: 'ساعت'}, m: {en: 'm', fa: 'دقیقه'}, s: {en: 's', fa: 'ثانیه'}
+                };
+                
+                // Lunar
+                let lunarDiff = lunarEclipseDate - now;
+                if (lunarDiff > 0) {
+                    let ld = Math.floor(lunarDiff / (1000 * 60 * 60 * 24));
+                    let lh = Math.floor((lunarDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let lm = Math.floor((lunarDiff % (1000 * 60 * 60)) / (1000 * 60));
+                    let ls = Math.floor((lunarDiff % (1000 * 60)) / 1000);
+                    dom.lunarEclipseCountdown.textContent = format({d:ld, h:lh, m:lm, s:ls}, labels.d[currentLang], labels.h[currentLang], labels.m[currentLang], labels.s[currentLang]);
+                } else {
+                    dom.lunarEclipseCountdown.textContent = currentLang === 'fa' ? 'این رویداد گذشته است' : 'This event has passed';
+                }
+                
+                // Solar
+                let solarDiff = solarEclipseDate - now;
+                 if (solarDiff > 0) {
+                    let sd = Math.floor(solarDiff / (1000 * 60 * 60 * 24));
+                    let sh = Math.floor((solarDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let sm = Math.floor((solarDiff % (1000 * 60 * 60)) / (1000 * 60));
+                    let ss = Math.floor((solarDiff % (1000 * 60)) / 1000);
+                    dom.solarEclipseCountdown.textContent = format({d:sd, h:sh, m:sm, s:ss}, labels.d[currentLang], labels.h[currentLang], labels.m[currentLang], labels.s[currentLang]);
+                } else {
+                    dom.solarEclipseCountdown.textContent = currentLang === 'fa' ? 'این رویداد گذشته است' : 'This event has passed';
+                }
+
+            }, 1000);
+        }
+
+        async function updateMoonData(lat, lon, name) {
+            showLoading(true);
+            const locName = name.includes('Location') ? translations['Your Location'][currentLang] : name;
+            dom.locationDisplay.textContent = `${translations['Tonight\'s Moon for'][currentLang]} ${locName}`;
+            
+            const now = new Date();
+            try {
+                const moonIllum = SunCalc.getMoonIllumination(now);
+                const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
+                const moonPos = SunCalc.getMoonPosition(now, lat, lon);
+                const dayOfYear = (Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(now.getFullYear(), 0, 0)) / 86400000;
+                const moonZodiac = zodiacSigns.slice().sort((a,b)=>a.start-b.start).filter(s => s.start <= dayOfYear).pop() || zodiacSigns[9];
+
+                // Update UI elements
+                dom.phaseName.textContent = getPhaseName(moonIllum.phase);
+                dom.illumination.textContent = `${(moonIllum.fraction * 100).toFixed(1)}${currentLang === 'en' ? '% Illuminated' : '% روشن'}`;
+                updateMoonVisual(moonIllum.phase);
+                dom.distance.textContent = `${Math.round(moonPos.distance).toLocaleString(currentLang === 'fa' ? 'fa-IR' : 'en-US')} km`;
+                dom.moonAge.textContent = `${(moonIllum.phase * 29.53).toLocaleString(currentLang === 'fa' ? 'fa-IR' : 'en-US', {maximumFractionDigits: 1})} ${currentLang === 'en' ? 'days' : 'روز'}`;
+                dom.moonrise.textContent = formatTime(moonTimes.rise);
+                dom.moonset.textContent = formatTime(moonTimes.set);
+                dom.zodiac.textContent = moonZodiac.name[currentLang];
+                dom.apogeePerigee.textContent = moonPos.distance < 384400 ? (currentLang === 'fa' ? 'نزدیک حضیض' : 'Near Perigee') : (currentLang === 'fa' ? 'نزدیک اوج' : 'Near Apogee');
+                const altitudeDegrees = (moonPos.altitude * 180 / Math.PI).toFixed(1);
+                if (moonPos.altitude > 0) { dom.visibility.textContent = `${currentLang === 'fa' ? 'قابل رویت' : 'Visible'} (${altitudeDegrees}°)`; dom.visibility.className = 'text-xl md:text-2xl font-bold text-green-400';
+                } else { dom.visibility.textContent = `${currentLang === 'fa' ? 'زیر افق' : 'Below Horizon'} (${altitudeDegrees}°)`; dom.visibility.className = 'text-xl md:text-2xl font-bold text-gray-400'; }
+
+                const force = G * (MOON_MASS * USER_MASS) / ((moonPos.distance * 1000) ** 2);
+                dom.gravityPull.textContent = `≈ ${force.toFixed(4)} N`;
+                dom.gravityComparison.textContent = currentLang === 'fa' ? 'قابل مقایسه با وزن یک پر روی دست شما.' : 'Comparable to the weight of a feather on your hand.';
+                dom.tidalForceDesc.textContent = currentLang === 'fa' ? 'گرانش ماه بدن شما را تقریباً یکنواخت می‌کشد و هیچ اثر کششی یا جزر و مدی قابل تشخیصی ایجاد نمی‌کند.' : 'The Moon\'s gravity pulls on your body almost uniformly, creating no discernible "stretching" or tidal effect.';
+                
+                const insight = getDailyInsight(moonIllum, moonPos);
+                dom.insightTitle.innerHTML = insight.title;
+                dom.insightContent.innerHTML = insight.content;
+
+                drawSunPosition(lat, lon);
+                drawMoonPhaseDiagram(moonIllum);
+
+            } catch (error) {
+                console.error("Error fetching moon data:", error);
+                alert("Could not fetch moon data.");
+            } finally {
+                setTimeout(() => showLoading(false), 500);
+            }
+        }
+        
+        async function searchCity() { 
+            const city = dom.cityInput.value.trim(); if (!city) return; showLoading(true);
+            try { const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1&language=en&format=json`); const data = await res.json(); if (data.results && data.results.length > 0) { const { latitude, longitude, name, admin1, country } = data.results[0]; currentLocation = { lat: latitude, lon: longitude, name: `${name}, ${admin1 || country}` }; updateMoonData(currentLocation.lat, currentLocation.lon, currentLocation.name); updateEclipseData(); } else { alert('City not found.'); showLoading(false); } } catch (error) { alert('Failed to search for city.'); showLoading(false); }
+        }
+
+        function useGPS() { 
+            if (!navigator.geolocation) return alert("Geolocation is not supported."); showLoading(true);
+            navigator.geolocation.getCurrentPosition( async (position) => { const { latitude, longitude } = position.coords; let name = "Your Location"; try { const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`); const data = await res.json(); name = data.display_name || "Your Location"; } catch (e) { console.warn("Reverse geocoding failed."); } currentLocation = { lat: latitude, lon: longitude, name: name.split(',').slice(0,3).join(',') }; updateMoonData(latitude, longitude, currentLocation.name); updateEclipseData(); }, () => { alert("Unable to retrieve location."); showLoading(false); });
+        }
+        
+        // --- EVENT LISTENERS & INITIALIZATION ---
+        dom.searchBtn.addEventListener('click', searchCity);
+        dom.cityInput.addEventListener('keypress', (e) => e.key === 'Enter' && searchCity());
+        dom.gpsBtn.addEventListener('click', useGPS);
+        dom.langEn.addEventListener('click', () => setLanguage('en'));
+        dom.langFa.addEventListener('click', () => setLanguage('fa'));
+        function createProceduralTexture(c1,c2){const cvs=document.createElement('canvas');cvs.width=128;cvs.height=128;const ctx=cvs.getContext('2d');const grd=ctx.createLinearGradient(0,0,0,128);grd.addColorStop(0,c1);grd.addColorStop(1,c2);ctx.fillStyle=grd;ctx.fillRect(0,0,128,128);return new THREE.CanvasTexture(cvs);}
+        
+        initVisualizations();
+        setLanguage('en');
+    });
+    </script>
+</body>
+</html>
+
