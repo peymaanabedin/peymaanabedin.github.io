@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>ماهینا | Mahina</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D98BAA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ماهینا">
+  <link rel="apple-touch-icon" href="https://i.postimg.cc/WbCF8vNk/luna-app.png">
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/WbCF8vNk/luna-app.png">
+
+  <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --font-family:'Vazirmatn',sans-serif; --ease-out-quart:cubic-bezier(0.25,1,0.5,1);
+      --bg-main-light:#FEFBFB; --card-bg-light:#ffffff; --text-main-light:#332C33; --text-subtle-light:#7E787E; --border-color-light:#F3EAEB; --shadow-light:0 10px 30px rgba(180,150,160,0.1); --selector-highlight-light:rgba(217,139,170,0.1);
+      --bg-main-dark:#2A2428; --card-bg-dark:#3D3539; --text-main-dark:#F5F1F2; --text-subtle-dark:#A8A1A4; --border-color-dark:#524A4E; --shadow-dark:0 10px 30px rgba(0,0,0,0.2); --selector-highlight-dark:rgba(217,139,170,0.15);
+      --c-menstrual:#EAA2A2; --c-follicular:#F8C8A8; --c-ovulation:#C5B0E0; --c-luteal:#F3B396; --c-pms:#B4A0C2; --c-theme-main:#D98BAA;
+      --phase-theme-color:var(--c-theme-main);
+    }
+    html{ --bg-main:var(--bg-main-light); --card-bg:var(--card-bg-light); --text-main:var(--text-main-light); --text-subtle:var(--text-subtle-light); --border-color:var(--border-color-light); --shadow:var(--shadow-light); --selector-highlight-bg:var(--selector-highlight-light); background-color:var(--bg-main); color:var(--text-main); transition:background-color .4s,color .4s; scroll-behavior:smooth;}
+    html.dark-mode{ --bg-main:var(--bg-main-dark); --card-bg:var(--card-bg-dark); --text-main:var(--text-main-dark); --text-subtle:var(--text-subtle-dark); --border-color:var(--border-color-dark); --shadow:var(--shadow-dark); --selector-highlight-bg:var(--selector-highlight-dark); }
+    *,*::before,*::after{ box-sizing:border-box; }
+    body{ font-family:var(--font-family); margin:0; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+
+    .app-container,.page-view{ max-width:480px; margin:0 auto; padding:15px; min-height:100vh; }
+    .page-view{ display:none; }
+
+    .app-header{ display:flex; justify-content:space-between; align-items:center; padding:20px 10px;}
+    .app-title{ font-size:1.8rem; font-weight:800; color:var(--phase-theme-color); transition:color .5s var(--ease-out-quart); }
+    .header-actions{ display:flex; align-items:center; gap:20px; }
+    .settings-btn{ background:none; border:none; font-size:1.5rem; color:var(--phase-theme-color); cursor:pointer; opacity:.8; transition:opacity .2s, color .5s var(--ease-out-quart);}    
+    .settings-btn:hover{ opacity:1; }
+    .card-base{ background:var(--card-bg); padding:25px; border-radius:24px; box-shadow:var(--shadow); transition:background-color .4s, box-shadow .4s; }
+    .main-btn{ width:100%; padding:18px; font-size:1.1rem; font-weight:700; color:#fff; border:none; border-radius:16px; cursor:pointer; transition:all .2s ease; font-family:var(--font-family); }
+    .main-btn.pink{ background-color:var(--c-theme-main); }
+    .input-group{ margin-bottom:25px; text-align:right; }
+    .input-group label{ font-size:1rem; font-weight:500; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+    .input-field{ width:100%; padding:16px; font-size:1rem; border-radius:14px; font-family:var(--font-family); background:var(--bg-main); border:1px solid var(--border-color); color:var(--text-main); transition:all .4s; }
+    .input-field[readonly]{ cursor:pointer; }
+
+    @keyframes fadeIn{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+
+    /* Launch */
+    #launch-screen{ position:fixed; inset:0; z-index:10000; background-color:#FEFBFB; display:flex; align-items:center; justify-content:center; transition:opacity .5s ease-out, visibility .5s; visibility:visible; opacity:1;}
+    #launch-screen.hidden{ opacity:0; visibility:hidden; }
+    .launch-content{text-align:center}
+    .launch-logo{ width:100px; height:100px; border-radius:22px;}
+    .launch-title{ color:#B4A0C2; font-weight:500; font-size:1rem; margin-top:15px;}
+    .loader{ position:absolute; bottom:50px; left:50%; width:40px; height:40px; border:3px solid #F3EAEB; border-bottom-color:#D98BAA; border-radius:50%; box-sizing:border-box; animation:rotation 1s linear infinite;}
+    @keyframes rotation{ 0%{ transform:translateX(-50%) rotate(0deg)} 100%{ transform:translateX(-50%) rotate(360deg)} }
+    html.dark-mode #launch-screen{ background-color:#2A2428;}
+    html.dark-mode .launch-title{ color:#A8A1A4;}
+    html.dark-mode .loader{ border:3px solid #524A4E; border-bottom-color:#D98BAA;}
+
+    .theme-switch{ position:relative; display:inline-block; width:50px; height:28px; }
+    .theme-switch input{ opacity:0; width:0; height:0; }
+    .slider{ position:absolute; inset:0; cursor:pointer; background-color:var(--border-color); transition:.4s; border-radius:28px; }
+    .slider:before{ content:""; position:absolute; height:20px; width:20px; left:4px; bottom:4px; background:#fff; transition:.4s; border-radius:50%;}
+    input:checked + .slider{ background-color:var(--c-ovulation); }
+    input:checked + .slider:before{ transform:translateX(22px); }
+
+    .setup-view{ padding:20px; text-align:center; animation:fadeIn .5s; }
+    .setup-view h1{ font-size:1.8rem; margin-bottom:15px; color:var(--c-theme-main); }
+    .setup-view p{ font-size:1.1rem; color:var(--text-subtle); margin-bottom:40px; }
+    .about-logo{ width:80px; height:80px; border-radius:20px; margin-bottom:15px; box-shadow:var(--shadow); }
+    #startTrackingBtn{ background:linear-gradient(135deg, var(--c-theme-main), #EAA2A2); }
+
+    .tracker-view{ display:flex; flex-direction:column; gap:20px; animation:fadeIn .5s; }
+    .special-banner,.period-alert-card{ padding:15px 20px; border-radius:18px; font-weight:600; animation:fadeIn .5s; display:flex; align-items:center; gap:12px; color:#fff; }
+    .special-banner.ovulation{ background-color:var(--c-ovulation);}    
+    .special-banner.pms{ background-color:var(--c-pms);}    
+    .period-alert-card{ background-color:var(--c-menstrual); }
+    .progress-card{ display:flex; flex-direction:column; align-items:center; gap:20px;}
+    .progress-display{ position:relative; width:220px; height:220px;}
+    .progress-svg{ transform:rotate(-90deg); }
+    .progress-circle{ transition:stroke .5s var(--ease-out-quart), stroke-dashoffset .8s var(--ease-out-quart); }
+    .progress-text{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center;}
+    .day-number{ font-size:4.5rem; font-weight:800; line-height:1; }
+    .day-label{ font-size:1.1rem; font-weight:500; color:var(--text-subtle);}
+    .phase-info{ display:flex; flex-direction:column; align-items:center; gap:8px;}
+    #phaseIcon{ font-size:1.8rem; transition:color .5s var(--ease-out-quart); }
+    .phase-title{ font-size:1.4rem; font-weight:600;}
+    .day-navigation{ width:100%; display:flex; flex-direction:column; align-items:center; gap:15px; margin-top:15px; padding-top:15px; border-top:1px solid var(--border-color);}
+    .day-nav-buttons{ display:flex; justify-content:space-between; align-items:center; width:100%;}
+    .center-nav-group{ display:flex; align-items:center; gap:10px;}
+    .nav-btn{ background:none; border:none; font-size:1.5rem; color:var(--text-subtle); cursor:pointer; padding:10px;}
+    .displayed-date{ font-weight:500; color:var(--text-subtle); font-size:.9rem;}
+    .secondary-nav-btn{ font-size:.9rem; font-weight:600; border-radius:12px; padding:8px 16px; cursor:pointer; transition:all .2s ease; background-color:var(--bg-main); border:1px solid var(--border-color); color:var(--text-subtle); font-family:var(--font-family);} 
+    .secondary-nav-btn:hover{ transform:scale(1.05); color:var(--text-main); border-color:var(--text-subtle);} 
+    #logPeriodBtn{ background-color:var(--c-menstrual); color:#fff; border-color:var(--c-menstrual);} 
+    #logPeriodBtn:hover{ background-color:#d18a8a; color:#fff; border-color:#d18a8a;}
+    .details-grid{ display:grid; grid-template-columns:1fr; gap:15px;}
+    .detail-card-header{ display:flex; align-items:center; gap:12px; margin-bottom:15px;}
+    .detail-card-icon{ font-size:1rem; width:32px; height:32px; border-radius:8px; display:grid; place-items:center; color:var(--phase-theme-color); background-color:var(--bg-main); border:1px solid var(--border-color); transition:color .5s, background-color .4s, border-color .4s;}
+    .detail-card-title{ font-size:1.1rem; font-weight:600; margin:0; color:var(--phase-theme-color); transition:color .5s var(--ease-out-quart);} 
+    .detail-card-content p{ margin:0; color:var(--text-subtle); line-height:1.7;}
+    .stats-grid{ display:grid; grid-template-columns:1fr 1fr; gap:15px 20px;}
+    .stat-item .progress-bar-container{ width:100%; height:8px; background-color:var(--border-color); border-radius:4px; overflow:hidden; margin-top:8px;}
+    .stat-item .progress-bar{ height:100%; background:var(--text-subtle); border-radius:4px; transition:width .5s ease-out;}
+    .stat-item .stat-label{ display:flex; justify-content:space-between; align-items:center; font-weight:500; font-size:.9rem;}
+
+    .settings-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.5); opacity:0; visibility:hidden; transition:opacity .3s; z-index:999;}
+    .settings-overlay.active{ opacity:1; visibility:visible; }
+    .settings-panel{ position:fixed; bottom:0; left:0; right:0; background:var(--bg-main); padding:20px; border-radius:28px 28px 0 0; box-shadow:0 -10px 40px rgba(0,0,0,.15); transform:translateY(100%); transition:transform .4s var(--ease-out-quart), background-color .4s; z-index:1000; text-align:center;}
+    .settings-panel.active{ transform:translateY(0); }
+    .settings-buttons{ display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:20px;}
+    #cancelSettingsBtn{ background-color:var(--border-color); color:var(--text-main);} 
+    #saveSettingsBtn{ background-color:var(--c-theme-main); }
+    #closeAboutBtn{ background-color:var(--phase-theme-color); transition:background-color .5s var(--ease-out-quart);}   
+
+    .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:opacity .3s, visibility .3s; z-index:1001;}
+    .modal-overlay.visible{ opacity:1; visibility:visible; }
+    .modal-content{ background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); max-width:480px; text-align:center; transition:all .3s ease-out; will-change:transform,opacity; }
+    #datePickerModal .modal-content,#cycleLengthPickerModal .modal-content,#historyDurationPickerModal .modal-content{ border-radius:16px 16px 0 0; width:100%; box-shadow:0 -5px 25px rgba(0,0,0,.1); transform:translateY(100%); align-self:flex-end; }
+    #datePickerModal.visible .modal-content,#cycleLengthPickerModal.visible .modal-content,#historyDurationPickerModal.visible .modal-content{ transform:translateY(0); }
+    .modal-header{ padding:12px 20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; }
+    #warningModal .modal-content,#confirmPeriodModal .modal-content{ border-radius:24px; width:90%; transform:translateY(20px) scale(.95); opacity:0; }
+    #warningModal.visible .modal-content,#confirmPeriodModal.visible .modal-content{ transform:translateY(0) scale(1); opacity:1; }
+    #confirmPeriodModal #confirmNewPeriodBtn{ background-color:var(--c-menstrual); }
+    #confirmPeriodModal #cancelNewPeriodBtn{ background-color:var(--border-color); color:var(--text-main); }
+
+    .selectors-container{ display:flex; justify-content:center; gap:0; padding:20px; direction:ltr;}
+    .selector-column{ flex:1; height:220px; overflow:hidden; position:relative; -webkit-mask-image:linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); mask-image:linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);}
+    .selector-list{ position:absolute; width:100%; list-style:none; padding:0; margin:0; text-align:center;}
+    .selector-item{ font-size:1.25rem; line-height:44px; height:44px; color:var(--text-subtle); user-select:none; transition:color .3s, font-weight .3s;}
+    .selector-item.selected{ color:var(--text-main); font-weight:600;}
+    .selector-highlight{ position:absolute; top:50%; left:10px; right:10px; height:44px; transform:translateY(-50%); background-color:var(--selector-highlight-bg); border-radius:8px; pointer-events:none; }
+    .btn{ background:none; border:none; padding:12px 20px; cursor:pointer; font-family:var(--font-family); font-size:1rem; font-weight:500; border-radius:8px;}
+    .btn-confirm{ color:var(--c-theme-main); font-weight:600;}
+    .btn-close{ color:var(--text-subtle); }
+
+    #historyListContainer{ padding-top:10px; }
+    .history-item{ display:flex; justify-content:space-between; align-items:center; background:var(--card-bg); margin-bottom:15px; padding:15px 20px; border-radius:18px; box-shadow:var(--shadow); animation:fadeIn .4s; }
+    .item-info{ display:flex; flex-direction:column; align-items:flex-start; gap:5px;}
+    .item-date{ font-weight:600; font-size:1.1rem; color:var(--text-main); }
+    .item-duration{ color:var(--text-subtle); font-size:.9rem; }
+    .item-actions button{ background:none; border:none; color:var(--text-subtle); cursor:pointer; font-size:1rem; padding:5px 8px;}
+    .item-actions button:hover{ color:var(--text-main);}
+    .history-placeholder{ text-align:center; color:var(--text-subtle); padding:50px 20px;}
+
+    /* Toast */
+    .toast{
+      position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
+      background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color);
+      border-radius:16px; padding:12px 16px; box-shadow:var(--shadow);
+      opacity:0; pointer-events:none; z-index:20000; transition:opacity .3s, transform .3s;
+      display:flex; align-items:center; gap:10px;
+    }
+    .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+    .toast.success{ border-color:#49c26f33; }
+    .toast.error{ border-color:#e04b5b33; }
+
+    /* تاریخچه: دکمه ذخیره صورتی */
+    #saveHistoryEditBtn{ background-color:var(--c-theme-main); }
+  </style>
+</head>
+<body>
+
+  <div id="launch-screen">
+    <div class="launch-content">
+      <img src="https://i.postimg.cc/WbCF8vNk/luna-app.png" alt="لوگوی ماهینا" class="launch-logo">
+      <p class="launch-title">مدیریت سلامت زنان ماهینا</p>
+    </div>
+    <span class="loader"></span>
+  </div>
+
+  <div class="app-container" id="appContainer">
+    <header class="app-header">
+      <h1 class="app-title">ماهینا</h1>
+      <div class="header-actions">
+        <button class="settings-btn" id="aboutBtn" title="درباره"><i class="fa-solid fa-circle-info"></i></button>
+        <label class="theme-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label>
+        <button class="settings-btn" id="openSettingsBtn" title="تنظیمات"><i class="fa-solid fa-gear"></i></button>
+      </div>
+    </header>
+    <main id="mainContent"></main>
+  </div>
+
+  <div class="page-view" id="historyView">
+    <header class="app-header">
+      <div class="header-actions">
+        <button class="settings-btn" id="addHistoryEntryBtn" title="افزودن چرخه"><i class="fa-solid fa-plus"></i></button>
+      </div>
+      <h1 class="app-title" style="color: var(--text-main);">تاریخچه</h1>
+      <div class="header-actions">
+        <button class="settings-btn" id="backToTrackerBtn" title="بازگشت"><i class="fa-solid fa-chevron-left"></i></button>
+      </div>
+    </header>
+    <main id="historyListContainer"></main>
+  </div>
+
+  <div class="settings-overlay" id="settingsOverlay"></div>
+  <div class="settings-panel" id="settingsPanel">
+    <h2>تنظیمات</h2>
+    <div class="input-group">
+      <label for="settingsPeriodDate"><i class="fa-solid fa-calendar-day"></i> تاریخ شروع آخرین پریود</label>
+      <input type="text" id="settingsPeriodDate" class="input-field" readonly/>
+    </div>
+    <div class="input-group">
+      <label for="settingsCycleLength"><i class="fa-solid fa-arrows-rotate"></i> طول معمول چرخه</label>
+      <input type="text" id="settingsCycleLength" class="input-field" readonly />
+    </div>
+    <div class="settings-buttons" style="grid-template-columns: 1fr; margin: 0 0 15px 0;">
+      <button id="viewHistoryBtn" class="main-btn" style="background-color: var(--text-subtle);">تاریخچه چرخه‌ها</button>
+    </div>
+    <div class="settings-buttons">
+      <button id="cancelSettingsBtn" class="main-btn">انصراف</button>
+      <button id="saveSettingsBtn" class="main-btn">ذخیره</button>
+    </div>
+  </div>
+
+  <div class="settings-overlay" id="aboutOverlay"></div>
+  <div class="settings-panel" id="aboutPanel">
+    <img src="https://i.postimg.cc/WbCF8vNk/luna-app.png" alt="لوگوی ماهینا" class="about-logo">
+    <h2>درباره ماهینا</h2>
+    <div style="text-align:right; line-height:1.8; padding:0 15px; color:var(--text-subtle);">
+      <p>اپلیکیشن <b>ماهینا</b>، همراه هوشمند شما برای درک و پیگیری چرخه قاعدگی است.</p>
+      <p style="color: var(--text-main);"><strong>ویژگی‌ها:</strong></p>
+      <ul style="padding-right:35px; margin-top:-10px;">
+        <li>نمایش روز و فاز فعلی چرخه</li>
+        <li>توضیحات روزانه درباره وضعیت جسمی و روحی</li>
+        <li>نمودارهای انرژی، میل جنسی و باروری</li>
+        <li>پشتیبانی از حالت تاریک و روشن</li>
+      </ul>
+      <p style="color: var(--text-main);"><strong>توسعه: پیمان عابدین پور © 1404</strong></p>
+    </div>
+    <div class="settings-buttons" style="grid-template-columns:1fr;">
+      <button id="closeAboutBtn" class="main-btn">بستن</button>
+    </div>
+  </div>
+
+  <!-- Date picker -->
+  <div id="datePickerModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="btn btn-close" id="closeDateModal">انصراف</button>
+        <button class="btn btn-confirm" id="confirmDate">تایید</button>
+      </div>
+      <div class="selectors-container">
+        <div id="pdp-year" class="selector-column"></div>
+        <div id="pdp-month" class="selector-column"></div>
+        <div id="pdp-day" class="selector-column"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wheel: cycleLength -->
+  <div id="cycleLengthPickerModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="btn btn-close" id="closeCycleModal">انصراف</button>
+        <button class="btn btn-confirm" id="confirmCycle">تایید</button>
+      </div>
+      <div class="selectors-container">
+        <div id="cycle-length-column" class="selector-column"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wheel: history duration -->
+  <div id="historyDurationPickerModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="btn btn-close" id="closeHistoryDurationModal">انصراف</button>
+        <button class="btn btn-confirm" id="confirmHistoryDuration">تایید</button>
+      </div>
+      <div class="selectors-container">
+        <div id="history-duration-column" class="selector-column"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="warningModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header"><h3>توجه</h3></div>
+      <p>شما در روز اول چرخه قرار دارید و نمی‌توانید به عقب‌تر بروید.</p>
+      <div style="padding:0 20px 20px;">
+        <button class="main-btn" id="closeWarningModalBtn">متوجه شدم</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm start new cycle -->
+  <div id="confirmPeriodModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header"><h3>شروع چرخه جدید</h3></div>
+      <p style="padding:15px 20px;">چرخه جدید از تاریخ <b id="confirmPeriodDateText"></b> شروع شود؟</p>
+      <div class="settings-buttons" style="padding:0 20px 20px;">
+        <button class="main-btn" id="cancelNewPeriodBtn">انصراف</button>
+        <button class="main-btn" id="confirmNewPeriodBtn">تایید</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- تاریخچه: افزودن/ویرایش -->
+  <div class="settings-overlay" id="editHistoryModalOverlay"></div>
+  <div class="settings-panel" id="editHistoryPanel">
+    <h2 id="editHistoryTitle">افزودن چرخه</h2>
+    <input type="hidden" id="editHistoryIndex">
+    <div class="input-group">
+      <label for="historyPeriodDate"><i class="fa-solid fa-calendar-day"></i> تاریخ شروع پریود</label>
+      <input type="text" id="historyPeriodDate" class="input-field" readonly placeholder="انتخاب تاریخ"/>
+    </div>
+    <div class="input-group">
+      <label for="historyCycleLength"><i class="fa-solid fa-arrows-rotate"></i> طول چرخه (روز)</label>
+      <input type="text" id="historyCycleLength" class="input-field" readonly placeholder="مثلا ۲۸" />
+    </div>
+    <div class="settings-buttons">
+      <button id="cancelHistoryEditBtn" class="main-btn">انصراف</button>
+      <button id="saveHistoryEditBtn" class="main-btn">ذخیره</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"><i class="icon fa-solid fa-circle-check"></i><span id="toastText"></span></div>
+
+  <script>
+    /* ---------- Utils ---------- */
+    const toPersian = str => str?.toString().replace(/[0-9]/g, w => '۰۱۲۳۴۵۶۷۸۹'[w]);
+    const toEnglishDigits = s => String(s ?? '')
+      .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+      .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    const safeParseInt = s => { const n = parseInt(toEnglishDigits(s), 10); return Number.isFinite(n) ? n : NaN; };
+
+    /* ---------- Toast ---------- */
+    const toastEl = document.getElementById('toast');
+    const toastText = document.getElementById('toastText');
+    const showToast = (msg, type='success', icon=type==='error'?'fa-triangle-exclamation':'fa-circle-check')=>{
+      toastEl.classList.remove('error','success');
+      toastEl.classList.add(type);
+      toastEl.querySelector('.icon').className = `icon fa-solid ${icon}`;
+      toastText.textContent = msg;
+      toastEl.classList.add('show');
+      setTimeout(()=>toastEl.classList.remove('show'), 2400);
+    };
+
+    /* ---------- Launch fade ---------- */
+    const launchScreen = document.getElementById('launch-screen');
+    window.onload = () => { setTimeout(() => launchScreen.classList.add('hidden'), 500); };
+
+    /* ---------- Templates ---------- */
+    const setupViewHTML = `
+      <div id="setupView" class="setup-view card-base">
+        <img src="https://i.postimg.cc/WbCF8vNk/luna-app.png" alt="لوگوی ماهینا" class="about-logo">
+        <h1>به ماهینا خوش آمدید!</h1>
+        <p>برای شروع، تاریخ آخرین پریود و طول معمول دوره خود را وارد کنید.</p>
+        <div class="input-group">
+          <label for="lastPeriodDate"><i class="fa-solid fa-calendar-day"></i> تاریخ شروع آخرین پریود</label>
+          <input type="text" id="lastPeriodDate" class="input-field" placeholder="انتخاب تاریخ" readonly/>
+        </div>
+        <div class="input-group">
+          <label for="cycleLength"><i class="fa-solid fa-arrows-rotate"></i> طول معمول چرخه</label>
+          <input type="text" id="cycleLength" class="input-field" value="۲۸ روز" readonly />
+        </div>
+        <button id="startTrackingBtn" class="main-btn">شروع ردیابی</button>
+      </div>`;
+
+    const trackerViewHTML = `
+      <div id="trackerView" class="tracker-view">
+        <div id="periodAlertCard" class="period-alert-card" style="display:none;"></div>
+        <div id="specialDayBanner" class="special-banner" style="display:none;"></div>
+        <div class="progress-card card-base">
+          <div class="progress-display">
+            <svg class="progress-svg" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border-color)" stroke-width="8"></circle>
+              <circle id="progress-circle-fg" class="progress-circle" cx="50" cy="50" r="45" fill="none" stroke="var(--c-follicular)" stroke-width="8" stroke-linecap="round"></circle>
+            </svg>
+            <div class="progress-text">
+              <span id="progressDayNumber" class="day-number"></span>
+              <span class="day-label">روز از چرخه</span>
+            </div>
+          </div>
+          <div class="phase-info">
+            <i id="phaseIcon" class="fa-solid fa-leaf"></i>
+            <h2 id="cyclePhaseTitle" class="phase-title"></h2>
+          </div>
+          <div class="day-navigation">
+            <div class="day-nav-buttons">
+              <button class="nav-btn" id="nextDayBtn" title="روز بعد"><i class="fa-solid fa-chevron-right"></i></button>
+              <div class="center-nav-group">
+                <button id="startOfCycleBtn" class="secondary-nav-btn">ابتدای چرخه</button>
+                <button id="todayBtn" class="secondary-nav-btn">امروز</button>
+                <button id="logPeriodBtn" class="secondary-nav-btn">من پریود شدم</button>
+              </div>
+              <button class="nav-btn" id="prevDayBtn" title="روز قبل"><i class="fa-solid fa-chevron-left"></i></button>
+            </div>
+            <div id="displayedJalaliDate" class="displayed-date"></div>
+          </div>
+        </div>
+        <div id="detailsGrid" class="details-grid"></div>
+      </div>`;
+
+    /* ---------- Cycle text data ---------- */
+   /* ---------- Cycle Data (full) ---------- */
+
+/* ---------- Cycle Data (31 days, refined & ~2× longer texts, same format) ---------- */
+
+/* ---------- Cycle Data (full, friendly tone + unified "لوتئال") ---------- */
+/* ---------- Cycle Data (full, friendly tone + unified "لوتئال", ~3× longer texts) ---------- */
+const cycleData=[{},
+{day:1,phase:"قاعدگی",icon:"fa-droplet",color:"var(--c-menstrual)",description:"سلام به روز اولِ یک شروع تازه! بدنت داره تمیزکاری می‌کنه و دیوارهٔ رحم رو می‌ریزه تا برای ماه جدید آماده بشه؛ این یعنی فرصتِ قشنگِ سبک شدن و شروع دوباره. امروز رو عمداً سبک بگیر، کارهای غیرضروری رو عقب بنداز و با چای گرم، پتوی نرم و لباس راحت خودت رو نوازش کن. اگر درد داری، گرمای ملایم شکم و کشش‌های خیلی آرام می‌تونه حسابی کمک کنه. زیاد از خودت انتظار نداشته باش؛ بدنت مشغول کارهای مهم پشت‌صحنه‌ست و هر استراحتی که می‌کنی یک سرمایه‌گذاریه. اگه دوست داشتی، چند خط برای خودت بنویس: الان چی لازم داری و از چی باید فاصله بگیری؟",bleeding:10,hormones:"هورمون‌های انرژی و آرامش فعلاً رو حالت کم‌صدا هستن؛ انگار بدن دکمهٔ ریست رو زده و در سکوتِ ترمیم کار می‌کنه. همه‌چیز به‌نرمی رو به بالا رفتنه، پس عجله نکن و به روند اعتماد کن. آب کافی، کمی نمک معدنی و غذاهای آهن‌دار کمک می‌کنن دوباره جون بگیری. هر علامتی که می‌بینی فقط یک پیام از بدنته: «آرام‌تر، مهربان‌تر، نرم‌تر».",mood:"طبیعیه که حوصلهٔ شلوغی نداشته باشی، زود خسته شی یا حتی بی‌دلیل اشکت دربیاد. این روزها مرزبندی طلاییه؛ «نه» گفتن به برنامه‌های اضافه یعنی «بله» گفتن به حالِ خوبِ خودت. کوچیک‌ترین مراقبت‌ها—مثل خاموش‌کردن اعلان‌ها یا چند دقیقه نفس عمیق—حس امنیت رو برمی‌گردونن. خودت رو بابت کم‌کاری سرزنش نکن؛ همین که گوش می‌دی یعنی عالی پیش می‌ری.",energy:2,libido:2,partner:"مهربونیِ بی‌توقع: یک نوشیدنی گرم، کیسهٔ آب گرم و یک بغلِ طولانی. سوالِ جادویی رو بپرس: «الان دقیقاً چی لازمتِه؟» کارهای کوچکِ خانه رو تو بردار و اگر قرارِ اجتماعی هست، لغوش کن؛ همین حضورِ امن یعنی عشق.",pregnancy:0},
+{day:2,phase:"قاعدگی",icon:"fa-droplet",color:"var(--c-menstrual)",description:"خونریزی هنوز پررنگه و بدنت هنوز مشغول پاک‌سازی و بازسازیِ قهرمانانه‌ست. امروز رو هم نرم و آرام پیش ببر: غذای ساده، کم‌نمک و سرشار از آب؛ سوپِ سبک، برنج نرم یا خوراک عدس می‌تونن نجات‌بخش باشن. اگر سردرد یا سنگینی کمر داری، نور رو کم کن، اسکرین‌تایم رو کوتاه کن و چند بار در روز کشش ملایم انجام بده. همه‌چیز داره به‌آرومی جلو می‌ره—تو فقط لازم داری همراهش باشی، نه جلوتر ازش بدوی. هرجا خسته شدی، مکث کن و نفس بکش.",bleeding:8,hormones:"بدن هنوز تو فاز استراحت و جمع‌وجوره؛ مثل یک تیم پشت‌صحنه که آرام اما دقیق کار می‌کنه. انرژی آهسته‌آهسته برمی‌گرده، پس با خودت صبور باش. نمک کم و آب کافی پُف و نفخ رو کمتر می‌کنه و حس سبکی می‌ده. به نشانه‌ها اعتماد کن؛ بدن بلده چه‌طور خودش رو تنظیم کنه.",mood:"تحریک‌پذیری یا خستگی کاملًا طبیعی‌ان؛ اگر حال نداری، هیچ چیز «اشتباه» نیست. با خودت مهربان حرف بزن: «امروز قرار نیست قهرمانِ همه‌چیز باشم؛ فقط قرارِ مهربون باشم». چند دقیقه موسیقی آرام یا دوشِ گرم می‌تونه معجزه کنه.",energy:3,libido:2,partner:"بدون نصیحت و نسخه‌پیچی؛ فقط کنارِ او بودن. برنامه‌ها و توقعات رو سبک کن، خرید یا کارهای ریز رو پوشش بده و هر از گاهی یادآوری کن که «اینجا هستم، هر وقت چیزی خواستی بگو».",pregnancy:0},
+{day:3,phase:"قاعدگی",icon:"fa-droplet",color:"var(--c-menstrual)",description:"خبر خوب: شدت خون کمتر می‌شه و کم‌کم حس می‌کنی انرژی برمی‌گرده. یک پیاده‌روی آرامِ ۱۰–۱۵ دقیقه‌ای، کششِ کمر و لگن یا فقط یک چرتِ کوتاه می‌تونه حالِ جسمت رو بهتر کنه. اگر دلت خواست، لیستِ کوچیکی از کارهای ریز و آسان بنویس و یکی‌یکی انجام بده تا حس تسلط برگرده. آب کافی، میوهٔ آبدار و خوراک‌های خون‌ساز یادت نره. امروز رو به خودت ثابت کن که لازم نیست «کامل» باشی تا «کافی» باشی.",bleeding:5,hormones:"اوضاع ذره‌ذره روشن‌تر می‌شه؛ حس می‌کنی موتورِ انرژی روشن شده اما هنوز داره گرم می‌کنه. بدن پیام می‌ده که «دارم برمی‌گردم» و تو فقط باید ریتم آرومش رو همراهی کنی. مراقبت‌های کوچک اثر بزرگ دارن—مثل خوابِ بعدازظهر یا یک لیوان آبِ بیشتر.",mood:"حس و حال بهتر می‌شه اما هنوز لطیف و حساس هستی؛ این لطافت، نقطهٔ قوته نه ضعف. با خودت رفیق باش، نه منتقد؛ هر پیشرفت کوچیکی رو ببین و جشن بگیر. اگر نیاز به خلوت داشتی، شجاعانه بهش فضا بده.",energy:4,libido:3,partner:"یک پیامِ قشنگ، یک تعریفِ صادقانه یا آوردنِ خوراکِ موردعلاقه‌اش می‌تونه تمام روزش رو نورانی کنه. پرسیدنِ «چی رو از دوشت بردارم؟» طلاییه.",pregnancy:0},
+{day:4,phase:"قاعدگی",icon:"fa-droplet",color:"var(--c-menstrual)",description:"می‌رسیم به لکه‌بینی و حس سبکیِ دلنشین. می‌تونی آروم‌آروم به ریتم معمول برگردی: تختت رو مرتب کن، پنجره رو باز کن، چند دقیقه نور بگیر و یک کار کوچک اما مهم رو تیک بزن. هنوز هم استراحت باارزشه؛ شب، خوابِ کافی رو جدی بگیر. بدنت داره از زمستونِ کوچیکش خارج می‌شه و هوای بهار رو می‌کشه توی ریه‌ها.",bleeding:2,hormones:"اوضاع رو به بهبودِ محسوسه؛ حس می‌کنی مغز و بدنت هم‌زمان روشن‌تر می‌شن. با غذاهای مقوی و نوشیدن آب، این برگشتِ انرژی رو تقویت کن. امروزها بدن بیشتر از «فشار» به «مهربانی» جواب می‌ده.",mood:"روحیه بهتر، انگیزه بیشتر و میل به دیدنِ آدم‌ها. اگر حال معاشرت داری، یک جمعِ کوچک و امن انتخاب کن. اگر هم هنوز حالِ سکوت داری، خودت رو مجبور نکن—همیشه توی این داستان، تو اولویتی.",energy:5,libido:4,partner:"یک قدم‌زدنِ کوتاهِ دونفره، یا یک فیلمِ بانمک با خوراکیِ ساده؛ همین‌های ساده خاطره می‌سازن. بپرس «امروز دوست داری بیرون بریم یا خونه بمونیم؟» و با انتخابش همراه شو.",pregnancy:1},
+{day:5,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"بهارِ بدن شروع شد! حال و هوای مثبت و ذهنِ شفاف‌تر، کم‌کم میان‌دار می‌شن. بهترین زمانه برای تنظیمِ برنامه‌های تازه، جمع‌وجور کردنِ اتاق فکرت و شروع کارهایی که عشقشون رو داری. ورزشِ سبک تا متوسط دوباره کیف می‌ده؛ بعدش ریکاوری رو جدی بگیر تا شارژ بمونی. به خودت افتخار کن که این چند روز رو با مهربانی گذروندی و الان آمادهٔ رشد تازه‌ای.",bleeding:0,hormones:"موتورِ انرژی روشن‌تر می‌شه و تن و ذهن با هم هماهنگ‌ترن. بدن ازت تشکر می‌کنه وقتی که تغذیهٔ رنگی، پروتئین کافی و آبِ به‌اندازه می‌خوری. این روزها حس می‌کنی همه‌چیز روان‌تر جلو می‌ره.",mood:"سرحال و امیدوار؛ تمرکزت برمی‌گرده و تصمیم‌گیری آسون‌تر می‌شه. یک فهرست کوتاه از «سه کار مهم اما ممکن» بنویس و با ریتمِ شاد جلو برو.",energy:6,libido:5,partner:"وقتِ هم‌فکری دونفره‌ست: دربارهٔ هدف‌های کوچک، سفرهای کوتاه یا پروژه‌های مشترک حرف بزنید. شنیدنِ ایده‌هاش و تشویق کردنش، بال‌وپر می‌ده.",pregnancy:1},
+{day:6,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"انرژی و میل بیشتر می‌شه و دنیا روشن‌تر دیده می‌شه؛ امروز می‌تونی یک کارِ جدید رو شروع کنی یا کاری که ترسناک به نظر می‌اومد رو یک لقمه کوچیک برداری. لباس‌هایی که دوست داری بپوش، موزیکِ محبوبت رو پلی کن و با خودت دستِ دوستی بده. حرکتِ بدن—هرچند کوتاه—ذهن رو برق می‌اندازه.",bleeding:0,hormones:"موجِ انرژی رو به بالاست و حسِ جذابیت و حضورِ بدنی پررنگ‌تر می‌شه. بدنت عاشقِ تعادلِ غذاهای ساده، سبزیجات رنگی و آبِ کافی‌ست. هرچه با نرمی جلو بری، بازدهی بیشتری حس می‌کنی.",mood:"مثبت، پویا و آمادهٔ تجربهٔ تازه؛ شجاعتت داره جوانه می‌زنه. اگر صدای منتقدِ درونی بلند شد، با لبخند بگو: «الان وقتِ تجربه‌ست نه کامل بودن».",energy:6,libido:6,partner:"یک فعالیتِ دونفرهٔ بامزه (قدم‌زدنِ تند، دوچرخهٔ آرام) و بعدش یک میان‌وعدهٔ خوشمزهٔ سالم. پیشنهاد بده اما فشار نیار؛ آزادیِ انتخابش رو دوست داره.",pregnancy:2},
+{day:7,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"سرزندگی هر روز بیشتر می‌شه و ارتباط گرفتن راحت‌تر از قبل. امروز برای معاشرت، عکس گرفتن، و برنامه‌های شادی‌بخش عالیه. اگر گفت‌وگویی داشتید که عقب انداخته بودی، با حالِ خوب و لحنِ مهربون سراغش برو. یک کارِ خلاقانهٔ کوچیک—نوشتن، نقاشی، آشپزیِ هیجانی—حالت رو پرنور می‌کنه.",bleeding:0,hormones:"بدن دوست داره اجتماعی‌تر باشه و تو هم آماده‌ای. سوختِ مناسب—میوهٔ آبدار، پروتئین و کمی دانهٔ روغنی—حالِ خوبت رو پایدارتر می‌کنه. ریتمِ خوابت رو هم منظم نگه دار تا این موج قشنگ حفظ بشه.",mood:"حس و حال خوب، انگیزهٔ بالا و کمی شیطنتِ دوست‌داشتنی. بامرام و پرانرژی‌ای؛ ازش لذت ببر.",energy:7,libido:6,partner:"پیک‌نیکِ جمع‌وجور، کافهٔ دنج یا شامِ دوستانه؟ هرکدومش یک خاطرهٔ تر و تازه می‌سازه. با ذوق شریکش کن و باهم انتخاب کنید.",pregnancy:2},
+{day:8,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"انرژی بالا + حالِ خوب = زمانِ درخشش! امروز ایده‌هات رو بگو، پیشنهاد بده و کارِ دلخواهت رو جلو ببر. چند دقیقه کشش یا تمرینِ قدرتیِ سبک، حسِ قوی بودن می‌ده. اگر چیزی برای گفتن داری، با صدای رسا و مهربان بگو—دنیا منتظرِ شنیدنته.",bleeding:0,hormones:"همه‌چیز به نفعِ تمرکز و خلاقیت پیش می‌ره؛ انگار چراغ‌های درون یکی‌یکی روشن می‌شن. آب کافی و تنقلاتِ سبکِ سالم کمک می‌کنن انرژی‌ات یکنواخت بمونه. امروزها «توازن» کلیدِ طلاییه.",mood:"اعتمادبه‌نفس عالی و احساسِ «از پسش برمیام». اگر کاری نیمه‌تمام داری، همین حالا تکونش بده و از نتیجه کیف کن.",energy:7,libido:7,partner:"تشویقِ جدی و شنیدنِ فعال؛ وقتی از روی دل تعریف می‌کنی برق می‌افته توی چشم‌هاش. پیشنهاد بده باهم یک کارِ دوست‌داشتنی رو جلو ببرید.",pregnancy:3},
+{day:9,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"بدنت برای اوج آماده می‌شه و جذابیتت چشمگیره. از احساسِ خوبت لذت ببر و اجازه بده بدرخشی—چه در کار، چه در جمع، چه جلوی آینهٔ خودت. امروز برای ملاقات‌ها، ثبت‌نام‌ها و تصمیم‌های شجاعانه روز خوبیه. اگر خواستی لباسی بپوش که دوستش داری و حسِ «من خودمم» می‌ده.",bleeding:0,hormones:"همهٔ نشونه‌ها خبرِ روزهای پرانرژی‌تر رو می‌دن؛ انگار بدن چراغ‌های سبزِ بیشتری روشن می‌کنه. با غذاهای سبک و منظم، حالِ خوبت طولانی‌تر می‌مونه. به تشنگی‌ات گوش بده—آب یعنی جان.",mood:"خوشحال، اجتماعی و کمی رمانتیک‌تر؛ حرف زدن روان‌تره و دل‌ها راحت‌تر نزدیک می‌شن. از این گرما برای ساختنِ ارتباط‌های قشنگ استفاده کن.",energy:8,libido:8,partner:"یک قرارِ شامِ ساده اما دلبرانه یا پیاده‌رویِ شبانه زیرِ نور چراغ‌ها… بله، همین سادگی‌هاست که می‌مونه.",pregnancy:4},
+{day:10,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"روزِ «می‌تونم!» هر کاری بخوای جلو می‌ره—از کارهای جدی بگیر تا تغییرات کوچیکِ سبک زندگی. امروز کارهای مهم رو یک پله ببَر جلو و برای خودت جایزهٔ کوچیک بذار. هرجا خسته شدی، یک وقفهٔ ریز بگیر، نفسِ عمیق و برگرد به بازی.",bleeding:0,hormones:"موجِ حالِ خوب ادامه داره و بدنت پُر از شوقه. تغذیهٔ رنگی و خوابِ به‌موقع باعث می‌شن این موج، یکنواخت و خوش‌کیفیت بمونه. اگر استرس بالا رفت، همین الان یک لیوان آب و سه نفسِ عمیق.",mood:"انگیزهٔ زیاد و نفوذ کلام؛ امروز حرفت می‌شینه و کارت می‌درخشه. از خودت قدردانی کن؛ توی مسیرِ رشد ایستادی.",energy:8,libido:8,partner:"یک سرگرمیِ جدید رو باهم امتحان کنید—از آشپزیِ دو نفره تا یک بازیِ رقابتیِ بامزه. خندهٔ مشترک، پیوند رو محکم می‌کنه.",pregnancy:5},
+{day:11,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"شمارش معکوس شروعه؛ انرژی و کششِ بدنی-عشقی بالاتره و گفت‌وگوها خیلی روان پیش می‌رن. امروز برای اظهار نظر، ثبتِ ایده‌ها و نزدیک‌تر شدن عالیه. اگر چیزی توی دلته، با زبانِ نرم و شفاف بگو؛ شنیده می‌شی.",bleeding:0,hormones:"بدن پیامِ «آماده‌ام» می‌فرسته و تو هم حسش می‌کنی. با آب کافی و خوراکِ سبک، سبکبال می‌مونی. روتینِ خواب رو حفظ کن تا فردا هم بدرخشی.",mood:"اعتمادبه‌نفسِ قشنگ، دل‌بری و حالِ خوب. از خودت عکس بگیر؛ این برقِ چشم‌ها یادگاریِ قشنگیه.",energy:9,libido:9,partner:"چند جملهٔ عاشقانه و صادقانه معجزه می‌کنه؛ یک یادداشت کوچیک توی کیفش یا پیامِ غافلگیرکننده بفرست.",pregnancy:6},
+{day:12,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"مرکزِ توجه بودن؟ امروز روزِ توئه! بذار بدرخشی، چه در کار چه در جمعِ دوستان. اگر جلسه یا قراری مهم داری، با لبخند و اطمینان برو. به دلِ خودت اعتماد کن؛ راه رو نشون می‌ده.",bleeding:0,hormones:"همه‌چیز روی موجِ اوجه و بدن آمادهٔ روزِ بزرگه. غذاهای خوش‌رنگ، آبِ فراوون و چند دقیقه استراحتِ بین کارها، کیفیتِ حال رو بالا نگه می‌دارن.",mood:"شاد، پرانرژی و اجتماعی؛ به‌طور طبیعی جذبِ جمع می‌شی و جمع هم جذبِ تو. مراقب باش بیش از حد برای همه خرج نکنی—بخشی از انرژی رو برای خودت کنار بذار.",energy:9,libido:9,partner:"با دوستای مشترک برنامه بچین؛ گفت‌وگوها گرم و خاطره‌ها رنگی می‌شن. راه بده دیده و تحسین بشه—قند توی دلش آب می‌شه.",pregnancy:7},
+{day:13,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"مثل کمانِ کشیده‌ای که آمادهٔ رها شدنه؛ جذابیتت برق می‌زنه و جسارتت دیدنیه. امروز برای معرفیِ خودت، شروعِ پروژهٔ رویا، یا یک حرکتِ شجاعانه عالیه. لباسِ محبوبت رو بپوش و به خودت بگو: «من حاضر و آماده‌ام».",bleeding:0,hormones:"بدنت در نقطهٔ «کم‌کم وقتشه» قرار گرفته و همه‌چیز هماهنگ می‌زنه. با خوردنِ منظم و نوشیدنِ آب، نور این هماهنگی بیشتر می‌شه. تو فقط اجازه بده جریان، خودش تو رو ببَره.",mood:"پرشور، قوی و متمرکز؛ ارتباط‌گیری برات مثل آب خوردنه و تاثیر می‌ذاری. از این موج برای کارهای مهم استفاده کن و بعد به خودت پاداش بده.",energy:9,libido:10,partner:"یک سورپرایز کوچولو—یادداشت، شاخهٔ گل، آهنگِ خاطره‌انگیز—دلش رو می‌بره. امروز «دیدن و تحسین کردن» اسم رمزِ عشقِ قشنگه.",pregnancy:8},
+{day:14,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"قلهٔ انرژی و میل! بهترین زمان برای نمایشِ توانایی‌هاته—با لبخند برو جلو و از صحنه لذت ببر. اگر تصمیم جسورانه‌ای داری، الان بهترین لحظه‌ست. بین کارها استراحت‌های ریز بذار تا تا شب هم سرحال بمونی.",bleeding:0,hormones:"همه‌چیز در اوجه و تو ستارهٔ صحنه‌ای. با آبِ کافی و خوراک‌های سبک، نورِ این ستاره تا آخرِ روز می‌تابه. به بدنت آفرین بگو که این‌قدر حرفه‌ای کار می‌کنه.",mood:"درخشان و آمادهٔ فتحِ دنیا! اثرگذار، مهربان و الهام‌بخشی. یک لحظه مکث کن و از خودت تشکر کن—حقته که بدرخشی.",energy:10,libido:10,partner:"با افتخار ازش تعریف کن؛ وقتی جلوی دیگران هم حمایتش می‌کنی، قلبش آب می‌شه. امشب یک جشنِ کوچیکِ دونفره بگیرید.",pregnancy:9},
+{day:15,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"اوجِ مطلق! این روزها خاطره می‌شن؛ بگذار شادی و هیجان مسیر رو روشن کنه. کاری رو که مدت‌ها عقب انداختی با یک قدمِ کوچک شروع کن و برای خودت کف بزن. یادت باشه هیجان رو با استراحت‌های کوتاه بالانس کنی.",bleeding:0,hormones:"همه‌چیز مهیاست برای قدمِ بعد؛ بدن هماهنگه و تو هم آماده‌ای. خوردنِ منظم و آب کافی کمک می‌کنن این هماهنگی شیرین تا شب بمونه.",mood:"شور، انگیزه و جذابیت بالا؛ نفوذِ کلام داری و اثر می‌ذاری. امروز خودت رو در آینه نگاه کن و بگو: «حقمه که بدرخشم».",energy:10,libido:10,partner:"یک شب رمانتیکِ دلخواه با جزئیاتِ موردعلاقه‌اش—از موزیک و نور گرفته تا خوراکی—تقدیمِ او. دیدنِ شادی‌اش شادیِ تو هم هست.",pregnancy:9},
+{day:16,phase:"فولیکولی",icon:"fa-leaf",color:"var(--c-follicular)",description:"همه‌چیز آمادهٔ جهشه! حس می‌کنی ذهن و بدنت یکی شدن و تصمیم گرفتن آسون‌تره. امروز گفت‌وگوهای مهم رو با نرمی و شفافیت پیش ببر. اگر دلت می‌خواد، لیستِ «بله‌ها و نه‌ها»ی زندگیت رو بنویس و مرزهای قشنگ بساز.",bleeding:0,hormones:"بدن چراغِ سبز نشون می‌ده و لحظهٔ بزرگ نزدیکه. با آب و میان‌وعده‌های سبک، انرژی‌ات روان و روشن می‌مونه. فشار بی‌جا لازم نیست—تو در مسیرِ درست هستی.",mood:"روشن و مصمم؛ روی ابرها راه می‌ری! حسِ صاحبِ زندگی بودن لذت‌بخشه. هر دستاوردی—even کوچیک—رو ببین و پاس بدار.",energy:10,libido:10,partner:"اگر تصمیمِ دونفره‌ای دارید، امروز ذهنش شفافه و دلش باز. با احترام به خواسته‌هاش، به یک نتیجهٔ مشترکِ خوشایند برسید.",pregnancy:10},
+{day:17,phase:"تخمک‌گذاری",special:"ovulation",icon:"fa-star",color:"var(--c-ovulation)",description:"روزِ تخمک‌گذاری! بدنت در بهترین حالتشه و حسِ جذابیت و اعتمادبه‌نفس موج می‌زنه. ممکنه کمی تیرکشیدنِ یک‌طرفهٔ شکم حس کنی که معمولاً گذرا و بی‌خطره. امروز وقتِ گفت‌وگوهای مهم، قرارهای قشنگ و کارهای رو در روئه—جایی که نورِ حضورت معلوم می‌شه. لباسِ محبوبت، عطرِ ملایم و یک لبخندِ امن؛ همین‌ها کافیه که بدرخشی.",bleeding:0,hormones:"یک جرقهٔ طبیعی زده شده و بدن تخمک رو آزاد می‌کنه؛ اوجِ این ماه همین‌جاست. مراقبتِ ساده—آب کافی و خوراکِ سبک—بهت کمک می‌کنه تا آخرِ روز همون‌قدر درخشان بمونی. بدنت رو تحسین کن؛ واقعاً هنرمنده.",mood:"خوش‌صحبت، درخشان و خیلی خواستنی؛ کلماتت می‌نشینن و نگاهت می‌خنده. امروز خودت باش و از این حضورِ زیبا لذت ببر.",energy:10,libido:10,partner:"یک قرارِ عشقولانهٔ جمع‌وجور—قدم‌زدن، کافهٔ دنج یا شامِ روشن با شمع—و گوش دادنِ واقعی به هم. دیدن و دیده‌شدن، قلب‌ها رو نزدیک‌تر می‌کنه.",pregnancy:10},
+{day:18,phase:"لوتئال",icon:"fa-moon",color:"var(--c-luteal)",description:"به «پاییز بدن» خوش اومدی؛ بعد از شورِ روزهای قبل، الان نوبتِ آرام شدن و لانه‌سازیِ نرم رسیده. شب‌ها کمی زودتر بخواب، چراغ‌ها رو کم کن و به بدنت خوراکِ مهربون بده. برنامه‌ها رو جمع‌وجورتر کن تا انرژی برای چیزهای مهم بمونه. این فاز، فازِ آغوشِ گرم و خانهٔ امنه.",bleeding:0,hormones:"حال‌وهوای بدن نرم‌تر و آرام‌تر می‌شه؛ انگار سرعت کم می‌کنی تا مناظرِ مسیر رو بهتر ببینی. با غذاهای راحتِ هضم و نوشیدنِ آب، این آرامش قشنگ‌تر می‌شه. بدنت داره برای احتمالاتِ بعدی مهیا می‌شه—تو فقط همراهش باش.",mood:"یک‌کم جمع‌وجورتر اما گرم و صمیمی. اجتماعی بودن هنوز خوشاینده ولی شاید کوتاه‌تر. دلِ خانه، موزیکِ نرم و نورِ زرد؛ همین‌ها حال رو می‌سازن.",energy:9,libido:9,partner:"حال‌وهوای خونه رو آرام و دلنشین کن؛ یک شبِ راحت با گفت‌وگوی نرم، پتو و یک فیلمِ آروم. حمایتِ بی‌سروصدا، طلاییه.",pregnancy:8},
+{day:19,phase:"لوتئال",icon:"fa-moon",color:"var(--c-luteal)",description:"ممکنه کمی نفخ یا حساسیتِ سینه حس کنی—کاملاً طبیعی و معمولاً گذرا. یک پیاده‌روی آرام، آب کافی و لباسِ راحت معجزه می‌کنه. اگر دلت کشید، دوشِ ولرم بگیر و بعد با کرمِ خوش‌بو بدن رو ماساژ بده؛ لطافت یعنی همین.",bleeding:0,hormones:"بدن هنوز در حالتِ مراقبت و انتظارِ خبرهای بعدیه و همه‌چیز رو با حوصله مدیریت می‌کنه. نظمِ خواب و میان‌وعده‌های سبک، حال رو یکنواخت نگه می‌دارن. به خودت وعده بده امروز مهربون‌تر باشی.",mood:"بی‌قراریِ ملایم میاد و می‌ره؛ با خودت آرام حرف بزن و فشارِ بی‌جا نیار. چند دقیقه دفترِ سپاسگزاری بنویس—سه چیزی که همین الآن دوستشون داری.",energy:8,libido:8,partner:"اطمینان‌بخشیِ کوتاه، بغلِ گرم و پذیراییِ ساده (چای، میوهٔ آبدار). همین حضورِ امن برایش دنیا می‌ارزد.",pregnancy:7},
+{day:20,phase:"لوتئال",icon:"fa-moon",color:"var(--c-luteal)",description:"انرژی کم‌کم آروم‌تر می‌شه. شاید دلت بخواد خونه رو مرتب کنی، کشوها رو جمع کنی و برنامه‌ها رو جمع‌وجورتر پیش ببری. امروز رو با ریتمِ نرم جلو ببر و به خودت وقت‌های «نفس تازه» بده.",bleeding:0,hormones:"بدن با آرامش جلو می‌ره و حواسش به همه‌چی هست؛ مثل مادری که بی‌صدا همه‌چیز رو چک می‌کنه. غذاهای گرماییِ دلنشین و آب کافی، حالِ دل رو نرم نگه می‌دارن.",mood:"آستانهٔ حوصله پایین‌تر؛ خلوتِ کوچیکِ روزانه خیلی می‌چسبه. به خودت اجازه بده «کمتر انجام بدی اما عمیق‌تر زندگی کنی».",energy:8,libido:7,partner:"فشارِ اجتماعی نیار؛ یک عصرِ خلوت و آرام پیشنهاد بده. کمک کن فهرستِ کارهای ریز سریع‌تر جمع بشه.",pregnancy:6},
+{day:21,phase:"لوتئال",icon:"fa-moon",color:"var(--c-luteal)",description:"انرژی روی حدِ متوسطه و شاید کم‌کم نشونه‌های قبلِ پریود رو ببینی. غذاهای ساده، کم‌نمک و آب کافی قهرمان‌های پنهانِ این روزهان. اگر حالِ ورزشِ سنگین نداری، کشش و یوگای نرم هم عالیه.",bleeding:0,hormones:"بدن منتظرِ خبرِ نهاییه؛ اگر خبری نباشه، خودش رو برای فصلِ بعدی آماده می‌کنه. تو هم با مهربونی و خوابِ کافی همراهی کن.",mood:"گاهی دل‌نازک و احساسی می‌شی—طبیعی و گذرا. خودت رو توی آینه نگاه کن و بگو: «همین‌جوری هم قشنگم».",energy:7,libido:6,partner:"گوش بده، نه لزوماً راه‌حل. یک چایِ دونفره و پرسیدنِ «می‌خوای فقط حرف بزنی یا کمک بخوای؟» معجزه می‌کنه.",pregnancy:5},
+{day:22,phase:"لوتئال",icon:"fa-moon",color:"var(--c-luteal)",description:"ریتمِ بدن پایین‌تر میاد؛ امروز کارهای سنگین رو بذار برای بعد و به خودت نمرهٔ قبولی بده حتی اگر همه‌چیز کامل نشد. چند «وقفهٔ مراقبتی» بین کارها بگذار—نفس عمیق، چند حرکت کششی، یک لیوان آب.",bleeding:0,hormones:"حالِ نرمِ بدن کمرنگ‌تر می‌شه و همه‌چیز می‌ره سمتِ جمع‌بندی. غذاهای آرامِ دل مثل سوپ یا خوراکِ ساده، تن رو آروم نگه می‌دارن.",mood:"تحریک‌پذیری محتمله؛ با خودت مهربون حرف بزن و توقعِ کمال نداشته باش. امروز «به اندازهٔ کافی خوب» واقعاً کافیه.",energy:6,libido:5,partner:"بحث‌های حساس رو عقب بنداز؛ الان زمانِ آرامشه. اگر لازم شد، نقشِ سپرِ آرامش رو بازی کن و محیط رو نرم نگه دار.",pregnancy:4},
+{day:23,phase:"لوتئال",icon:"fa-moon",color:"var(--c-luteal)",description:"ممکنه سردرد یا جوش‌های ریز سر بزنه—نترس، مهمون‌های گذران. آب، هواخوریِ کوتاه و خوابِ مرتب حسابی کمک می‌کنه. اجازه بده چند کارِ غیرضروری کاملاً حذف بشه؛ سبک کردن برنامه یعنی احترام به بدن.",bleeding:0,hormones:"بدن داره پیام می‌ده که «نزدیکِ شروعِ تازه‌ایم». با میان‌وعده‌های سبک و نوشیدنِ آب، حال ثابت‌تر می‌مونه. خودت رو تحسین کن که به نیازها گوش می‌دی.",mood:"گاهی حس می‌کنی کسی نمی‌فهمدت؛ گوشی رو کنار بذار و پنج دقیقه به سکوتِ خانه گوش بده. همین سکوت، نوازشه.",energy:6,libido:4,partner:"بارِ کارهای خانه رو بیشتر بردار، خریدهای ریز رو انجام بده و زمانِ آزاد براش بساز. این یعنی عشقِ عملی.",pregnancy:3},
+{day:24,phase:"لوتئال",special:"pms",icon:"fa-moon",color:"var(--c-luteal)",description:"سلام به هفتهٔ قبلِ پریود! نفخ، هوسِ خوردنی‌ها یا دل‌دلِ احساسی طبیعی‌ان. وعده‌های کوچیک و سبک، کم‌نمک و یک دوشِ گرم خیلی می‌چسبه. برنامه‌ها رو مینیمال کن و به بدن اجازه بده با سرعتِ خودش حرکت کنه. هیچ‌کس مثل خودت بلد نیست بهت آرامش بده—پس فرمان رو بگیر.",bleeding:0,hormones:"بالا و پایین‌های کوچیک باعث می‌شن حال و هوا سریع‌تر عوض شه—نگران نباش، رو به پایانیم. با خوابِ کافی و آبِ فراوون می‌تونی موج‌ها رو نرم‌تر کنی. بدنت داره صادقانه حرف می‌زنه؛ گوش بده.",mood:"کلافگی یا بی‌قراری میاد و می‌ره؛ تکنیکِ نفسِ عمیق، نوشتنِ احساسات و چند دقیقه نورِ آفتاب، حال رو شیرین‌تر می‌کنه. به خودت سخت نگیر.",energy:5,libido:4,partner:"بحث نکنید؛ فقط آرامش و همراهی. یک فیلمِ آروم، یک پتو و خوراکیِ محبوب—همین‌ها کافی‌ان.",pregnancy:2},
+{day:25,phase:"لوتئال",special:"pms",icon:"fa-moon",color:"var(--c-luteal)",description:"سرعت رو بیار پایین و هر روز یک «وقتِ من» کوتاه داشته باش—ده دقیقه هم که باشه طلاییه. اگر هوسِ شیرینی داری، نسخهٔ ملایم‌ترش رو انتخاب کن یا همراهش کمی مغز بخور تا حالِ بعدش بهتر باشه. امروز مهربانی با خودت رو تمرین کن: آهسته‌تر، نرم‌تر، مهربان‌تر.",bleeding:0,hormones:"حسِ نوسان‌ها بیشتره؛ با غذا و خوابِ منظم می‌شه نرمش کرد. آب کافی کمک می‌کنه سبک‌تر باشی و خلق ثابت‌تر بمونه. بدنت داره جمع‌بندی می‌کنه—تو هم برنامه‌هات رو جمع‌وجور کن.",mood:"نوسانِ خلقی شایعه؛ توقعِ کمال نداشته باش و اگر لازم شد برنامه‌ها رو جابه‌جا کن. تو دقیقاً به اندازهٔ کافی خوب هستی.",energy:5,libido:3,partner:"بپرس: «الان شکلات می‌خوای یا چای؟ یا فقط یک بغل؟» همین سؤالِ ساده یعنی دیدن و فهمیدن.",pregnancy:1},
+{day:26,phase:"لوتئال",special:"pms",icon:"fa-moon",color:"var(--c-luteal)",description:"انرژی پایینه—با صدای بلند به برنامه‌های سنگین بگو «نه». کششِ ملایم، گرمای شکم و لباسِ خیلی راحت دوستِ جونِ جونن. اگه شد، زودتر بخواب و صبح رو آرام‌تر شروع کن؛ بدن عاشقِ این نازهاست.",bleeding:0,hormones:"بدن داره آمادهٔ شروعِ تازه می‌شه و برای همین سرعت رو کم کرده. با خوراک‌های ساده و نوشیدنِ آب، همراهِ خوبی براش می‌شی. امروز هر قدمِ کوچیک هم ارزشمنده.",mood:"بالا و پایینِ احساسات طبیعیه؛ به خودت یادآوری کن «من امنم و اوضاع تحت کنترلمه». موسیقیِ ملایم گوش بده و خودت رو در آغوش بگیر.",energy:4,libido:3,partner:"حضورِ ساکت و مهربون، از هزار تا نصیحت بهتره. بگو «هر وقت چیزی خواستی صدام کن، من اینجام».",pregnancy:1},
+{day:27,phase:"لوتئال",special:"pms",icon:"fa-moon",color:"var(--c-luteal)",description:"خیلی نزدیک شدیم. امروز رو سبک کن، کارهای ضروری رو مینیمال انجام بده و برای روزهای اولِ پریود آماده شو—غذای سادهٔ آماده، نوشیدنیِ گرم و تختِ مرتب. به خودت اجازه بده فقط «باشی» نه «ثابت کنی».",bleeding:0,hormones:"بدن روی حالتِ «تقریباً رسیدیم» قرار گرفته و به نشانه‌ها گوش می‌ده. هرچه آرام‌ترش کنی، فرداها راحت‌ترن. تو استادِ مراقبتی.",mood:"دل‌نازک و لطیف؛ اشک‌های دمِ دستی هم عادی‌ان. مهربانی رو زیاد کن و از خودت قهرمان نساز—قهرمانی همین نرمیه.",energy:3,libido:2,partner:"نسخهٔ طلایی: سکوتِ مهربون + بغلِ گرم + یک «من اینجام». همین.",pregnancy:0},
+{day:28,phase:"لوتئال",special:"pms",icon:"fa-moon",color:"var(--c-luteal)",description:"فینالِ این فصل؛ حساسیت بالاست و دنیا ممکنه کمی بلندتر از همیشه به نظر بیاد. امروز از استرس دوری کن، برنامه رو ساده نگه دار و به کارهای کوچکِ خوشحال‌کننده بچسب. یک حمامِ کوتاه، چایِ گیاهی و نورِ کم می‌تونن حال رو نرم کنن.",bleeding:0,hormones:"بدن آمادهٔ فصلِ بعده؛ بالا و پایینِ حال کاملاً طبیعی و موقتیه. با خوابِ کافی و آب، موج‌ها کوتاه‌تر می‌شن و عبورشون راحت‌تره.",mood:"حساس و کم‌طاقت—اما رو به پایانیم. خودت رو در آینه چِک کن و لبخند بزن: «هرطور که هستم، دوست‌داشتنی‌ام».",energy:3,libido:2,partner:"انتظارِ زیاد نداشته باش؛ فقط محیط رو آرام نگه دار و اگر لازم شد «سپرِ مهربونی» باش. یک لیستِ پخشِ آرام بسازید و باهم گوش بدید.",pregnancy:0},
+{day:29,phase:"لوتئال",icon:"fa-moon",color:"var(--c-luteal)",description:"سکوتِ قبل از شروعِ تازه؛ امروز فقط کارهای خیلی ساده. آشپزخانهٔ کوچکِ راحت، آبرسانیِ منظم و استراحتِ حسابی. اگر امکانش هست، چند کارِ فردا رو از همین حالا ساده‌سازی کن تا شروعِ چرخه نرم‌تر باشه.",bleeding:0,hormones:"همه‌چیز مهیاست برای قدمِ بعد؛ بدن داره آخرین چک‌لیست‌ها رو می‌زنه. تو هم با مهربونی همراهی کن: آب، غذای سبک، نورِ کم و خوابِ زود.",mood:"خستگی و دل‌زدگی طبیعیِ طبیعیه؛ به خودت برچسب نزن. همین که از خودت مراقبت می‌کنی یعنی برنده‌ای.",energy:2,libido:1,partner:"مسئولیت‌ها رو تو بردار، بیرون‌رفتنی‌ها رو لغو کن و بگو «تو فقط استراحت کن». این یعنی عشقِ عملی.",pregnancy:0},
+{day:30,phase:"لوتئال",special:"pms",icon:"fa-moon",color:"var(--c-luteal)",description:"آخرین پیچِ جاده! برنامهٔ روز رو مینیمال کن و نشونه‌های شروع رو زیر نظر بگیر. موسیقیِ آروم، نورِ کم، شمعِ خوش‌بو و یک پتوی نرم—خانهٔ دل رو آمادهٔ فصلِ تازه می‌کنن. امروز به خودت قول بده که از فردا هم همین‌قدر مهربون بمونی.",bleeding:0,hormones:"بدن تا مرزِ شروعِ جدیده؛ یک کوچولو دیگه صبر. هرچی نرم‌ترش کنی، گذرِ فردا دلپذیرتر می‌شه. تو بلدی.",mood:"زودرنج و ظریف—ولی قوی و دوست‌داشتنی. ضعف نیست؛ لطافته. با خودت مثل عزیزترین آدمِ دنیا رفتار کن.",energy:2,libido:1,partner:"فقط باش؛ بدون قضاوت و بدون توقع. یک نوشیدنیِ گرم آماده کن و بگو «اگر چیزی خواستی صدام کن».",pregnancy:0},
+{day:31,phase:"لوتئال",special:"pms",icon:"fa-moon",color:"var(--c-luteal)",description:"تهِ این سفر رسیدیم! احتمالاً فردا شروعِ تازه‌ست—یک چرخهٔ نو با امیدهای نو. امشب زود بخواب، غذای راحت بخور، شلوغی‌ها رو خاموش کن و به خودت قول یک ماهِ پرانرژی بده. اگر دوست داشتی، چند خط بنویس برای فردایِ خودت: «قراره با مهربانی شروع کنیم».",bleeding:0,hormones:"همه‌چیز روی نقطهٔ شروعه و بدن آمادهٔ یک ری‌استارتِ نرم و دوست‌داشتنیه. با خوابِ خوب و آبِ کافی، صبحِ تازه دلنشین‌تره. تو با خودت تیم قوی‌ای می‌سازی.",mood:"حساس اما امیدوار—یک روز تا تولدِ دوباره. لبخند کوچیکِ قبلِ خواب رو فراموش نکن؛ همین ریزه‌کاری‌ها معجزه می‌کنن.",energy:1,libido:1,partner:"یک شامِ سادهٔ موردعلاقه، چند کلمهٔ عاشقانه و خاموش‌کردنِ دنیا برای چند ساعت؛ همین کافی‌ست تا فردا قشنگ‌تر شروع بشه.",pregnancy:0}
+];
+    /* ---------- Date utils ---------- */
+    function getDayData(d,t){const a=4,e=Math.max(10,t-14);let o;if(d<=a)o={...cycleData[d]};else if(d<e){const t=Math.round(5+(d-5)/(e-5-1)*11);o={...cycleData[Math.min(16,t)]}}else if(d===e)o={...cycleData[17]};else{const a=Math.round(18+(d-e-1)/(t-e-1)*13);o={...cycleData[Math.min(31,a)]}}return t-d<=7&&d>e&&(o.special="pms"),o}
+    function toJalali(date){const a=date.getUTCFullYear(),e=date.getUTCMonth()+1,t=date.getUTCDate();const n=[0,31,59,90,120,151,181,212,243,273,304,334],o=e>2?a+1:a;let r=355666+365*a+Math.floor((o+3)/4)-Math.floor((o+99)/100)+Math.floor((o+399)/400)+t+n[e-1];let i=-1595+33*Math.floor(r/12053);r%=12053,i+=4*Math.floor(r/1461),r%=1461,r>365&&(i+=Math.floor((r-1)/365),r=(r-1)%365);const l=r<186?1+Math.floor(r/31):7+Math.floor((r-186)/30),s=1+(r<186?r%31:(r-186)%30);return{jy:i,jm:l,jd:s}}
+    function getJalaliMonthLength(a,e){return e<=6?31:e<=11?30:((a-474)%2820+512)*682%2816<682?30:29}
+    function jalaliToDate(jalaliStr){const[jy,jm,jd]=jalaliStr.split("-").map(Number);function toGregorian(jy,jm,jd){let gy;if(jy>979){gy=1600;jy-=979}else{gy=621}let days=(365*jy)+(parseInt(jy/33)*8)+(parseInt(((jy%33)+3)/4))+78+jd+((jm<7)?(jm-1)*31:((jm-7)*30)+186);gy+=400*parseInt(days/146097);days%=146097;if(days>36524){gy+=100*parseInt(--days/36524);days%=36524;if(days>=365)days++}gy+=4*parseInt(days/1461);days%=1461;if(days>365){gy+=parseInt((days-1)/365);days=(days-1)%365}let gd=days+1;const sal_a=[0,31,(gy%4==0&&gy%100!=0||gy%400==0)?29:28,31,30,31,30,31,31,30,31,30,31];let gm;for(gm=0;gm<13;gm++){if(gd<=sal_a[gm])break;gd-=sal_a[gm]}return[gy,gm,gd]}const[gYear,gMonth,gDay]=toGregorian(jy,jm,jd);return new Date(Date.UTC(gYear,gMonth-1,gDay))}
+    const getTodayUTC = () => { const today = new Date(); return new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())); };
+    const dateDiff = (a,b) => Math.floor((b.getTime()-a.getTime())/(1000*60*60*24));
+
+    /* ---------- Wheel selector ---------- */
+    class WheelSelector{
+      constructor(a){ this.el=document.querySelector(a.el); this.source=a.source; this.itemHeight=44; this.middleIndex=2; this.onChange=a.onChange||function(){}; this._init(a.selectedIndex||0); }
+      _init(a){ this.el.innerHTML=`<ul class="selector-list">${this.source.map(x=>`<li class="selector-item">${x.text}</li>`).join("")}</ul><div class="selector-highlight"></div>`; this.list=this.el.querySelector("ul"); this.items=this.el.querySelectorAll("li"); this.select(a,false); this._attachEvents(); }
+      _indexFromTransform(){ const current=(this.list.style.transform||""); const t=parseFloat(current.replace("translateY(",""))||0; return Math.round((t - this.middleIndex*this.itemHeight)/-this.itemHeight); }
+      _attachEvents(){
+        let startY=0, startTrans=0, dragging=false;
+        const onStart = ev => {
+          ev.stopPropagation();
+          startY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+          const current = (this.list.style.transform || "");
+          startTrans = parseFloat(current.replace("translateY(","")) || 0;
+          this.list.style.transition="none";
+          dragging = true;
+        };
+        const onMove = ev => {
+          if(!dragging) return;
+          ev.preventDefault();
+          const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+          this.list.style.transform = `translateY(${startTrans + (y - startY)}px)`;
+        };
+        const onEnd = () => { if(!dragging) return; dragging=false; this._snap(); };
+
+        this.el.addEventListener("mousedown", onStart);
+        document.addEventListener("mousemove", onMove, { passive:false });
+        document.addEventListener("mouseup", onEnd);
+
+        this.el.addEventListener("touchstart", onStart, { passive:false });
+        document.addEventListener("touchmove", onMove, { passive:false });
+        document.addEventListener("touchend", onEnd);
+      }
+      _snap(){ this.select(this._indexFromTransform()); }
+      select(i, fire=true){
+        i = Math.max(0, Math.min(i, this.source.length-1));
+        const changed = this.selectedIndex !== i;
+        this.selectedIndex = i;
+        this.list.style.transition="transform .2s ease-out";
+        this.list.style.transform = `translateY(${(this.middleIndex - this.selectedIndex)*this.itemHeight}px)`;
+        this.items.forEach((li,idx)=>li.classList.toggle("selected", idx===i));
+        if(changed && fire) this.onChange(this.getValue());
+      }
+      updateSource(src){
+        this.source = src;
+        this.list.innerHTML = this.source.map(x=>`<li class="selector-item">${x.text}</li>`).join("");
+        this.items = this.el.querySelectorAll("li");
+        const keep = Math.min(this.selectedIndex ?? 0, this.source.length-1);
+        this.select(keep,false);
+      }
+      getValue(){ return this.source[this.selectedIndex].value; }
+    }
+
+    /* ---------- State & DOM ---------- */
+    const dom = {};
+    const appState = { startDate:null, cycleLength:28, currentDisplayDate:getTodayUTC(), cycleHistory:[] };
+    let activeDateInput = null;
+    dom._trackerBound = false;
+
+    /* ---------- Rendering ---------- */
+    const renderUI = () => {
+      if (!appState.startDate) return;
+
+      const dayDiff = dateDiff(appState.startDate, appState.currentDisplayDate);
+      const trackerView = document.getElementById('trackerView');
+
+      let tempCard = trackerView.querySelector('.temp-card');
+      if (tempCard) tempCard.remove();
+
+      if (dayDiff < 0) {
+        const tempMsgCard = document.createElement('div');
+        tempMsgCard.className = 'card-base temp-card';
+        tempMsgCard.style.textAlign = 'center';
+        tempMsgCard.style.color = 'var(--text-subtle)';
+        const jDate = toJalali(appState.currentDisplayDate);
+        tempMsgCard.innerHTML = `تاریخ نمایش داده شده (${toPersian(`${jDate.jy}/${jDate.jm}/${jDate.jd}`)}) قبل از شروع چرخه فعلی شماست.`;
+        trackerView.prepend(tempMsgCard);
+        document.getElementById("detailsGrid").innerHTML = '';
+        document.getElementById("displayedJalaliDate").textContent = toPersian(`${jDate.jy}/${String(jDate.jm).padStart(2,"0")}/${String(jDate.jd).padStart(2,"0")}`);
+        const logBtn = document.getElementById('logPeriodBtn');
+        if (logBtn) logBtn.style.display = 'none';
+        return;
+      }
+
+      const dayOfCycle = (dayDiff % appState.cycleLength) + 1;
+      const data = getDayData(dayOfCycle, appState.cycleLength);
+      let phaseColor = data.color, phaseIcon = data.icon;
+      document.documentElement.style.setProperty('--phase-theme-color', phaseColor);
+
+      const logBtn = document.getElementById('logPeriodBtn');
+      if (logBtn) {
+        const today = getTodayUTC();
+        const isFuture = appState.currentDisplayDate.getTime() > today.getTime();
+        logBtn.style.display = isFuture ? 'none' : 'inline-block';
+      }
+
+      const specialBanner = document.getElementById("specialDayBanner");
+      specialBanner.style.display = 'none';
+      if (data.special === 'ovulation') {
+        specialBanner.innerHTML = `<i class="fa-solid fa-star"></i> روز تخمک‌گذاری! شانس باروری در اوج است.`;
+        specialBanner.className = "special-banner ovulation";
+        specialBanner.style.display = 'flex';
+      } else if (data.special === 'pms') {
+        phaseColor = 'var(--c-pms)';
+        phaseIcon = 'fa-cloud-bolt';
+        document.documentElement.style.setProperty('--phase-theme-color', phaseColor);
+        specialBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> احتمال علائم PMS. مراقب خود باشید.`;
+        specialBanner.className = "special-banner pms";
+        specialBanner.style.display = 'flex';
+      }
+
+      const periodAlert = document.getElementById("periodAlertCard");
+      const daysRemaining = appState.cycleLength - dayOfCycle;
+      if (daysRemaining >= 0 && daysRemaining <= 2) {
+        let alertText = daysRemaining === 0 ? "پریود شما احتمالاً از <b>فردا</b> شروع می‌شود." : `پریود شما تا <b>${toPersian(daysRemaining + 1)} روز دیگر</b> شروع می‌شود.`;
+        periodAlert.innerHTML = `<i class="fa-solid fa-bell"></i>${alertText}`;
+        periodAlert.style.display = 'flex';
+      } else {
+        periodAlert.style.display = 'none';
+      }
+
+      const progressCircle = document.getElementById("progress-circle-fg");
+      const r = 45, circ = 2 * Math.PI * r;
+      progressCircle.style.stroke = phaseColor;
+      progressCircle.style.strokeDasharray = circ;
+      progressCircle.style.strokeDashoffset = circ - (dayOfCycle / appState.cycleLength) * circ;
+
+      document.getElementById("progressDayNumber").textContent = toPersian(dayOfCycle);
+      const phaseIconEl = document.getElementById("phaseIcon");
+      phaseIconEl.className = `fa-solid ${phaseIcon}`;
+      phaseIconEl.style.color = phaseColor;
+      document.getElementById("cyclePhaseTitle").textContent = data.phase;
+
+      const jDate = toJalali(appState.currentDisplayDate);
+      document.getElementById("displayedJalaliDate").textContent = toPersian(`${jDate.jy}/${String(jDate.jm).padStart(2,"0")}/${String(jDate.jd).padStart(2,"0")}`);
+
+      const renderStat = (label, value) => {
+        const txt = val => (val>=8?'بالا':val>=4?'متوسط':val>0?'کم':'—');
+        return `<div class="stat-item"><div class="stat-label"><span>${label}</span><span>${txt(value)}</span></div><div class="progress-bar-container"><div class="progress-bar" style="width:${value*10}%"></div></div></div>`;
+      };
+
+      document.getElementById("detailsGrid").innerHTML = `
+        <div class="card-base">
+          <div class="detail-card-header"><i class="detail-card-icon fa-solid fa-book-open"></i><h3 class="detail-card-title">توضیحات روز</h3></div>
+          <div class="detail-card-content"><p>${data.description}</p></div>
+        </div>
+        <div class="card-base">
+          <div class="detail-card-header"><i class="detail-card-icon fa-solid fa-face-grin-beam"></i><h3 class="detail-card-title">وضعیت احساسی</h3></div>
+          <div class="detail-card-content"><p>${data.mood}</p></div>
+        </div>
+        <div class="card-base">
+          <div class="detail-card-header"><i class="detail-card-icon fa-solid fa-heart-pulse"></i><h3 class="detail-card-title">وضعیت فیزیکی</h3></div>
+          <div class="detail-card-content">
+            <div class="stats-grid">
+              ${renderStat("سطح انرژی", data.energy)}
+              ${renderStat("میل جنسی", data.libido)}
+              ${renderStat("خونریزی", data.bleeding)}
+              ${renderStat("احتمال باروری", data.pregnancy)}
+            </div>
+          </div>
+        </div>
+        <div class="card-base">
+          <div class="detail-card-header"><i class="detail-card-icon fa-solid fa-hand-holding-heart"></i><h3 class="detail-card-title">راهنمایی</h3></div>
+          <div class="detail-card-content"><p><b>تغییرات هورمونی:</b> ${data.hormones}<br><b>توصیه به شریک:</b> ${data.partner}</p></div>
+        </div>`;
+    };
+
+    const renderHistoryList = () => {
+      dom.historyListContainer.innerHTML = '';
+      if (appState.cycleHistory.length === 0) {
+        dom.historyListContainer.innerHTML = `<p class="history-placeholder">تاریخچه‌ای برای نمایش وجود ندارد.</p>`;
+        return;
+      }
+      appState.cycleHistory.forEach((item,index)=>{
+        const itemDate = new Date(item.startDate);
+        const jDate = toJalali(itemDate);
+        const formattedDate = toPersian(`${jDate.jy}/${String(jDate.jm).padStart(2,'0')}/${String(jDate.jd).padStart(2,'0')}`);
+        const durTxt = (item.duration==null || isNaN(item.duration)) ? '—' : `${toPersian(item.duration)} روز`;
+        const el = document.createElement('div');
+        el.className='history-item';
+        el.innerHTML = `
+          <div class="item-info">
+            <span class="item-date">${formattedDate}</span>
+            <span class="item-duration">طول چرخه: ${durTxt}</span>
+          </div>
+          <div class="item-actions">
+            <button class="edit-btn" data-index="${index}" title="ویرایش"><i class="fa-solid fa-pencil"></i></button>
+            <button class="delete-btn" data-index="${index}" title="حذف"><i class="fa-solid fa-trash-can"></i></button>
+          </div>`;
+        dom.historyListContainer.appendChild(el);
+      });
+    };
+
+    /* ---------- Navigation ---------- */
+    const showPage = (page) => {
+      dom.appContainer.style.display='none';
+      dom.historyView.style.display='none';
+      if(page==='tracker'){ dom.appContainer.style.display='block'; }
+      else if(page==='history'){ renderHistoryList(); dom.historyView.style.display='block'; }
+    };
+
+    /* ---------- Toggles ---------- */
+    const togglePanel = (overlay,panel,show) => {
+      overlay.classList.toggle('active',show);
+      panel.classList.toggle('active',show);
+    };
+    const toggleModal = (modal,show) => modal.classList.toggle('visible',show);
+
+    /* ---------- Storage ---------- */
+    const saveSettings = (startDate, cycleLength) => {
+      const settings = { startDate, cycleLength:parseInt(cycleLength,10) };
+      localStorage.setItem('lunaAppSettings', JSON.stringify(settings));
+      return settings;
+    };
+    const saveHistory = () => {
+      appState.cycleHistory.sort((a,b)=>new Date(b.startDate)-new Date(a.startDate));
+      localStorage.setItem('lunaCycleHistory', JSON.stringify(appState.cycleHistory));
+    };
+
+    /* ---------- Actions ---------- */
+    const findHistoryIndexByISO = (iso) => appState.cycleHistory.findIndex(x=>x.startDate===iso);
+    const ensureHistoryPlaceholder = (iso) => {
+      if (findHistoryIndexByISO(iso) === -1) appState.cycleHistory.push({ startDate: iso, duration: null });
+    };
+    const upsertCycleDuration = (iso, duration) => {
+      const idx = findHistoryIndexByISO(iso);
+      if (idx >= 0) appState.cycleHistory[idx].duration = duration;
+      else appState.cycleHistory.push({ startDate: iso, duration });
+    };
+
+    const autoRollCycleIfNeeded = () => {
+      const today = getTodayUTC();
+      let changed = false;
+      while (appState.startDate && dateDiff(appState.startDate, today) >= appState.cycleLength) {
+        const oldStart = new Date(appState.startDate.getTime());
+        const nextStart = new Date(oldStart.getTime());
+        nextStart.setUTCDate(nextStart.getUTCDate() + appState.cycleLength);
+        const oldISO = oldStart.toISOString().split('T')[0];
+        const nextISO = nextStart.toISOString().split('T')[0];
+        const dur = dateDiff(oldStart, nextStart);
+        upsertCycleDuration(oldISO, dur);
+        ensureHistoryPlaceholder(nextISO);
+        appState.startDate = nextStart;
+        const j = toJalali(nextStart);
+        saveSettings(`${j.jy}-${j.jm}-${j.jd}`, appState.cycleLength);
+        changed = true;
+      }
+      if (changed) { saveHistory(); renderHistoryList(); showToast('چرخه به‌طور خودکار به‌روز شد و در تاریخچه ثبت گردید.'); }
+    };
+
+    const startNewCycle = () => {
+      const newStartDate = new Date(appState.currentDisplayDate.getTime());
+      const oldStartDate = appState.startDate ? new Date(appState.startDate.getTime()) : null;
+
+      // 1) تکمیل چرخه قبلی با مدت
+      if (oldStartDate) {
+        const duration = dateDiff(oldStartDate, newStartDate);
+        if (duration >= 1 && duration <= 150) {
+          const oldISO = oldStartDate.toISOString().split('T')[0];
+          upsertCycleDuration(oldISO, duration);
+        }
+      }
+
+      // 2) شروع چرخه جدید + ثبت تاریخ شروع جدید در تاریخچه (placeholder)
+      appState.startDate = newStartDate;
+      appState.currentDisplayDate = new Date(newStartDate.getTime());
+      const newISO = newStartDate.toISOString().split('T')[0];
+      ensureHistoryPlaceholder(newISO);
+
+      // ذخیره تنظیمات
+      const j = toJalali(newStartDate);
+      saveSettings(`${j.jy}-${j.jm}-${j.jd}`, appState.cycleLength);
+
+      // بستن مودال و رندر فوری
+      toggleModal(dom.confirmPeriodModal,false);
+      document.activeElement && document.activeElement.blur();
+
+      if (!dom._trackerBound) attachTrackerListeners();
+
+      saveHistory();
+      if (dom.historyView.style.display === 'block') renderHistoryList();
+      renderUI();
+      showToast('چرخه جدید ثبت شد و به «تاریخچه» اضافه گردید.','success','fa-heart');
+    };
+
+    /* ---------- Pickers ---------- */
+    const initializePickers = () => {
+      const createRange = (start,end)=>Array.from({length:end-start+1},(_,i)=>({value:start+i, text:toPersian(start+i)}));
+      const todayJ = toJalali(new Date());
+
+      const yearPicker = new WheelSelector({ el:"#pdp-year", source:createRange(1390, todayJ.jy+1), selectedIndex:todayJ.jy-1390, onChange:updateDays });
+      const monthPicker = new WheelSelector({ el:"#pdp-month", source:[{value:1,text:"فروردین"},{value:2,text:"اردیبهشت"},{value:3,text:"خرداد"},{value:4,text:"تیر"},{value:5,text:"مرداد"},{value:6,text:"شهریور"},{value:7,text:"مهر"},{value:8,text:"آبان"},{value:9,text:"آذر"},{value:10,text:"دی"},{value:11,text:"بهمن"},{value:12,text:"اسفند"}], selectedIndex:todayJ.jm-1, onChange:updateDays });
+      const dayPicker = new WheelSelector({ el:"#pdp-day", source:createRange(1, getJalaliMonthLength(todayJ.jy, todayJ.jm)), selectedIndex:todayJ.jd-1 });
+
+      function updateDays(){
+        const year = yearPicker.getValue();
+        const month = monthPicker.getValue();
+        dayPicker.updateSource(createRange(1, getJalaliMonthLength(year, month)));
+      }
+
+      dom.confirmDate.addEventListener('click', () => {
+        if (!activeDateInput) return;
+        const year = yearPicker.getValue(), month = monthPicker.getValue(), day = dayPicker.getValue();
+        const pad = n => (n<10?'0':'') + n;
+        activeDateInput.value = `${toPersian(year)}/${toPersian(pad(month))}/${toPersian(pad(day))}`;
+        activeDateInput.dataset.jalaliDate = `${year}-${month}-${day}`;
+        toggleModal(dom.datePickerModal,false);
+      });
+
+      // cycle length wheel in Settings/Setup
+      dom.cycleLengthPicker = new WheelSelector({ el:"#cycle-length-column", source:createRange(15,45), selectedIndex:28-15 });
+      dom.confirmCycle.addEventListener('click', () => {
+        const length = dom.cycleLengthPicker.getValue();
+        const setupInput = document.getElementById('cycleLength');
+        [setupInput, dom.settingsCycleLengthInput].forEach(input=>{
+          if(input){ input.value = `${toPersian(length)} روز`; input.dataset.cycleLength = length; }
+        });
+        toggleModal(dom.cycleLengthPickerModal,false);
+      });
+
+      // history duration wheel
+      dom.historyDurationPicker = new WheelSelector({ el:"#history-duration-column", source:createRange(10,120), selectedIndex:28-10 });
+      dom.confirmHistoryDuration.addEventListener('click', ()=>{
+        const len = dom.historyDurationPicker.getValue();
+        dom.historyCycleLength.value = `${toPersian(len)} روز`;
+        dom.historyCycleLength.dataset.cycleLength = String(len);
+        toggleModal(dom.historyDurationPickerModal,false);
+      });
+    };
+
+    /* ---------- Global Listeners ---------- */
+    const attachGlobalListeners = () => {
+      dom.themeToggle.addEventListener('change', ()=>{
+        const theme = dom.themeToggle.checked ? 'dark':'light';
+        document.documentElement.classList.toggle('dark-mode', theme==='dark');
+        localStorage.setItem('lunaTheme', theme);
+      });
+
+      dom.openSettingsBtn.addEventListener('click', ()=>{
+        const settings = JSON.parse(localStorage.getItem('lunaAppSettings'));
+        if(settings){
+          const [y,m,d] = settings.startDate.split('-');
+          dom.settingsPeriodDateInput.value = toPersian(`${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`);
+          dom.settingsPeriodDateInput.dataset.jalaliDate = settings.startDate;
+          dom.settingsCycleLengthInput.value = `${toPersian(settings.cycleLength)} روز`;
+          dom.settingsCycleLengthInput.dataset.cycleLength = settings.cycleLength;
+        }
+        togglePanel(dom.settingsOverlay, dom.settingsPanel, true);
+      });
+      dom.cancelSettingsBtn.addEventListener('click', ()=>togglePanel(dom.settingsOverlay, dom.settingsPanel, false));
+      dom.settingsOverlay.addEventListener('click', (e)=>{ if(e.target===dom.settingsOverlay) togglePanel(dom.settingsOverlay, dom.settingsPanel, false); });
+
+      dom.saveSettingsBtn.addEventListener('click', ()=>{
+        const startDate = dom.settingsPeriodDateInput.dataset.jalaliDate;
+        const cycleLength = dom.settingsCycleLengthInput.dataset.cycleLength || appState.cycleLength;
+        if(!startDate){ showToast('لطفا تاریخ را انتخاب کنید.','error'); return; }
+        const newSettings = saveSettings(startDate, cycleLength);
+        appState.startDate = jalaliToDate(newSettings.startDate);
+        appState.cycleLength = parseInt(newSettings.cycleLength,10);
+        renderUI();
+        togglePanel(dom.settingsOverlay, dom.settingsPanel, false);
+        showToast('تنظیمات ذخیره شد.');
+      });
+
+      dom.aboutBtn.addEventListener('click', ()=>togglePanel(dom.aboutOverlay, dom.aboutPanel, true));
+      dom.closeAboutBtn.addEventListener('click', ()=>togglePanel(dom.aboutOverlay, dom.aboutPanel, false));
+      dom.aboutOverlay.addEventListener('click', (e)=>{ if(e.target===dom.aboutOverlay) togglePanel(dom.aboutOverlay, dom.aboutPanel, false); });
+
+      dom.viewHistoryBtn.addEventListener('click', ()=>{
+        togglePanel(dom.settingsOverlay, dom.settingsPanel, false);
+        showPage('history');
+      });
+      dom.backToTrackerBtn.addEventListener('click', ()=>showPage('tracker'));
+
+      // open wheels
+      dom.settingsPeriodDateInput.addEventListener('click', (e)=>{ activeDateInput=e.target; toggleModal(dom.datePickerModal,true); });
+      dom.historyPeriodDate.addEventListener('click', (e)=>{ activeDateInput=e.target; toggleModal(dom.datePickerModal,true); });
+      dom.settingsCycleLengthInput.addEventListener('click', ()=>{
+        const current = parseInt(dom.settingsCycleLengthInput.dataset.cycleLength || appState.cycleLength || 28, 10);
+        dom.cycleLengthPicker.select(Math.max(15, Math.min(45, current))-15, false);
+        toggleModal(dom.cycleLengthPickerModal,true);
+      });
+      dom.historyCycleLength.addEventListener('click', ()=>{
+        const current = parseInt(dom.historyCycleLength.dataset.cycleLength || 28, 10);
+        dom.historyDurationPicker.select(Math.max(10, Math.min(120, current))-10, false);
+        toggleModal(dom.historyDurationPickerModal,true);
+      });
+
+      // close modals by backdrop
+      const closeBackdrop = (modal, closeBtnId) => {
+        const closeBtn = document.getElementById(closeBtnId);
+        closeBtn.addEventListener('click', ()=>toggleModal(modal,false));
+        modal.addEventListener('click', (e)=>{ if(e.target===modal) toggleModal(modal,false); });
+        modal.querySelector('.modal-content').addEventListener('click', (e)=>e.stopPropagation());
+      };
+      closeBackdrop(dom.datePickerModal, 'closeDateModal');
+      closeBackdrop(dom.cycleLengthPickerModal, 'closeCycleModal');
+      closeBackdrop(dom.historyDurationPickerModal, 'closeHistoryDurationModal');
+
+      dom.closeWarningModalBtn.addEventListener('click', ()=>toggleModal(dom.warningModal,false));
+      dom.warningModal.addEventListener('click', (e)=>{ if(e.target===dom.warningModal) toggleModal(dom.warningModal,false); });
+      dom.warningModal.querySelector('.modal-content').addEventListener('click', (e)=>e.stopPropagation());
+
+      dom.cancelNewPeriodBtn.addEventListener('click', ()=>toggleModal(dom.confirmPeriodModal,false));
+      dom.confirmNewPeriodBtn.addEventListener('click', startNewCycle);
+      dom.confirmPeriodModal.addEventListener('click', (e)=>{ if(e.target===dom.confirmPeriodModal) toggleModal(dom.confirmPeriodModal,false); });
+      dom.confirmPeriodModal.querySelector('.modal-content').addEventListener('click', (e)=>e.stopPropagation());
+
+      dom.addHistoryEntryBtn.addEventListener('click', ()=>{
+        dom.editHistoryIndex.value='';
+        dom.editHistoryTitle.textContent='افزودن چرخه';
+        dom.historyPeriodDate.value='';
+        dom.historyPeriodDate.dataset.jalaliDate='';
+        dom.historyCycleLength.value='';
+        dom.historyCycleLength.dataset.cycleLength='';
+        togglePanel(dom.editHistoryModalOverlay, dom.editHistoryPanel, true);
+      });
+      dom.cancelHistoryEditBtn.addEventListener('click', ()=>togglePanel(dom.editHistoryModalOverlay, dom.editHistoryPanel, false));
+      dom.editHistoryModalOverlay.addEventListener('click', (e)=>{ if(e.target===dom.editHistoryModalOverlay) togglePanel(dom.editHistoryModalOverlay, dom.editHistoryPanel, false); });
+      dom.editHistoryPanel.addEventListener('click', (e)=>e.stopPropagation());
+
+      dom.historyListContainer.addEventListener('click', e=>{
+        const editBtn = e.target.closest('.edit-btn');
+        const deleteBtn = e.target.closest('.delete-btn');
+        if(editBtn){
+          const index = parseInt(editBtn.dataset.index,10);
+          const entry = appState.cycleHistory[index];
+          dom.editHistoryIndex.value = index;
+          dom.editHistoryTitle.textContent = 'ویرایش چرخه';
+          const [y,m,d] = entry.startDate.split('-');
+          const j = toJalali(new Date(Date.UTC(y, m-1, d)));
+          dom.historyPeriodDate.dataset.jalaliDate = `${j.jy}-${j.jm}-${j.jd}`;
+          dom.historyPeriodDate.value = toPersian(`${j.jy}/${String(j.jm).padStart(2,'0')}/${String(j.jd).padStart(2,'0')}`);
+          dom.historyCycleLength.value = entry.duration ? `${toPersian(entry.duration)} روز` : '';
+          dom.historyCycleLength.dataset.cycleLength = entry.duration ? String(entry.duration) : '';
+          togglePanel(dom.editHistoryModalOverlay, dom.editHistoryPanel, true);
+        }
+        if(deleteBtn){
+          if(confirm('آیا از حذف این چرخه مطمئن هستید؟')){
+            const index = parseInt(deleteBtn.dataset.index,10);
+            appState.cycleHistory.splice(index,1);
+            saveHistory(); renderHistoryList();
+            showToast('چرخه حذف شد.');
+          }
+        }
+      });
+
+      dom.saveHistoryEditBtn.addEventListener('click', ()=>{
+        const index = parseInt(dom.editHistoryIndex.value,10);
+        const jalaliDateStr = dom.historyPeriodDate.dataset.jalaliDate;
+        const rawLen = (dom.historyCycleLength.dataset.cycleLength || dom.historyCycleLength.value || '').toString().trim();
+        const duration = safeParseInt(rawLen);
+
+        if(!jalaliDateStr){ showToast('لطفا تاریخ شروع را انتخاب کنید.','error'); return; }
+        if(!Number.isFinite(duration) || duration < 1 || duration > 150){ showToast('طول چرخه را بین ۱ تا ۱۵۰ روز انتخاب کنید.','error'); return; }
+
+        const gregDate = jalaliToDate(jalaliDateStr).toISOString().split('T')[0];
+        const newEntry = { startDate: gregDate, duration };
+        if(isNaN(index)) appState.cycleHistory.push(newEntry); else appState.cycleHistory[index]=newEntry;
+        saveHistory(); renderHistoryList();
+        togglePanel(dom.editHistoryModalOverlay, dom.editHistoryPanel, false);
+        showToast('چرخه ذخیره شد.');
+      });
+    };
+
+    /* ---------- Tracker listeners (arrows, today, log) ---------- */
+    const attachTrackerListeners = () => {
+      if (dom._trackerBound) return;
+      const holder = document.getElementById('trackerView');
+      if (!holder) return;
+
+      holder.addEventListener('click', e=>{
+        const button = e.target.closest('button'); if(!button) return;
+        switch(button.id){
+          case 'prevDayBtn':
+            if(dateDiff(appState.startDate, appState.currentDisplayDate) < 1){ toggleModal(dom.warningModal,true); return; }
+            appState.currentDisplayDate.setUTCDate(appState.currentDisplayDate.getUTCDate()-1); break;
+          case 'nextDayBtn':
+            appState.currentDisplayDate.setUTCDate(appState.currentDisplayDate.getUTCDate()+1); break;
+          case 'todayBtn':
+            appState.currentDisplayDate = getTodayUTC(); break;
+          case 'startOfCycleBtn':
+            if(appState.startDate) appState.currentDisplayDate = new Date(appState.startDate.getTime()); break;
+          case 'logPeriodBtn': {
+            const today = getTodayUTC();
+            if (appState.currentDisplayDate.getTime() > today.getTime()){
+              showToast('امکان ثبت در تاریخ آینده وجود ندارد.','error','fa-ban');
+              return;
+            }
+            const j = toJalali(appState.currentDisplayDate || getTodayUTC());
+            dom.confirmPeriodDateText.textContent = toPersian(`${j.jy}/${String(j.jm).padStart(2,'0')}/${String(j.jd).padStart(2,'0')}`);
+            toggleModal(dom.confirmPeriodModal,true);
+            break;
+          }
+          default: return;
+        }
+        renderUI();
+      }, { passive:false });
+
+      dom._trackerBound = true;
+    };
+
+    const showTracker = (settings)=>{
+      dom.mainContent.innerHTML = trackerViewHTML;
+      appState.startDate = jalaliToDate(settings.startDate);
+      appState.cycleLength = parseInt(settings.cycleLength,10);
+      appState.currentDisplayDate = getTodayUTC();
+
+      // قبل از بایند لیسنرها، رول خودکار اگر نیاز بود
+      autoRollCycleIfNeeded();
+
+      dom._trackerBound = false; // ensure rebinding for the new DOM
+      attachTrackerListeners();
+      renderUI();
+    };
+
+    const showSetup = ()=>{
+      dom.mainContent.innerHTML = setupViewHTML;
+      const startBtn = document.getElementById('startTrackingBtn');
+      const lastPeriodDateInput = document.getElementById('lastPeriodDate');
+      const cycleLengthInput = document.getElementById('cycleLength');
+      cycleLengthInput.dataset.cycleLength = 28;
+
+      lastPeriodDateInput.addEventListener('click', (e)=>{ e.currentTarget.blur(); activeDateInput = e.currentTarget; toggleModal(dom.datePickerModal,true); });
+      cycleLengthInput.addEventListener('click', ()=>{
+        const current = parseInt(cycleLengthInput.dataset.cycleLength || 28, 10);
+        dom.cycleLengthPicker.select(Math.max(15, Math.min(45, current))-15, false);
+        toggleModal(dom.cycleLengthPickerModal,true);
+      });
+
+      startBtn.addEventListener('click', ()=>{
+        const date = lastPeriodDateInput.dataset.jalaliDate;
+        const length = safeParseInt(cycleLengthInput.dataset.cycleLength ?? 28);
+        if(!date || !length){ showToast("لطفا تاریخ و طول چرخه را انتخاب کنید.",'error'); return; }
+        const settings = saveSettings(date, length);
+        showTracker(settings);
+        showToast('شروع شد! تنظیمات اولیه ذخیره شد.');
+      });
+    };
+
+    const loadData = ()=>{
+      // Cache DOM
+      dom.appContainer = document.getElementById('appContainer');
+      dom.mainContent = document.getElementById('mainContent');
+      dom.historyView = document.getElementById('historyView');
+      dom.historyListContainer = document.getElementById('historyListContainer');
+      dom.backToTrackerBtn = document.getElementById('backToTrackerBtn');
+      dom.addHistoryEntryBtn = document.getElementById('addHistoryEntryBtn');
+      dom.themeToggle = document.getElementById('themeToggle');
+      dom.openSettingsBtn = document.getElementById('openSettingsBtn');
+      dom.settingsOverlay = document.getElementById('settingsOverlay');
+      dom.settingsPanel = document.getElementById('settingsPanel');
+      dom.settingsPeriodDateInput = document.getElementById('settingsPeriodDate');
+      dom.settingsCycleLengthInput = document.getElementById('settingsCycleLength');
+      dom.viewHistoryBtn = document.getElementById('viewHistoryBtn');
+      dom.cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+      dom.saveSettingsBtn = document.getElementById('saveSettingsBtn');
+      dom.aboutBtn = document.getElementById('aboutBtn');
+      dom.aboutOverlay = document.getElementById('aboutOverlay');
+      dom.aboutPanel = document.getElementById('aboutPanel');
+      dom.closeAboutBtn = document.getElementById('closeAboutBtn');
+      dom.datePickerModal = document.getElementById('datePickerModal');
+      dom.closeDateModal = document.getElementById('closeDateModal');
+      dom.confirmDate = document.getElementById('confirmDate');
+      dom.cycleLengthPickerModal = document.getElementById('cycleLengthPickerModal');
+      dom.closeCycleModal = document.getElementById('closeCycleModal');
+      dom.confirmCycle = document.getElementById('confirmCycle');
+      dom.historyDurationPickerModal = document.getElementById('historyDurationPickerModal');
+      dom.closeHistoryDurationModal = document.getElementById('closeHistoryDurationModal');
+      dom.confirmHistoryDuration = document.getElementById('confirmHistoryDuration');
+      dom.warningModal = document.getElementById('warningModal');
+      dom.closeWarningModalBtn = document.getElementById('closeWarningModalBtn');
+      dom.confirmPeriodModal = document.getElementById('confirmPeriodModal');
+      dom.confirmPeriodDateText = document.getElementById('confirmPeriodDateText');
+      dom.cancelNewPeriodBtn = document.getElementById('cancelNewPeriodBtn');
+      dom.confirmNewPeriodBtn = document.getElementById('confirmNewPeriodBtn');
+      dom.editHistoryModalOverlay = document.getElementById('editHistoryModalOverlay');
+      dom.editHistoryPanel = document.getElementById('editHistoryPanel');
+      dom.editHistoryTitle = document.getElementById('editHistoryTitle');
+      dom.editHistoryIndex = document.getElementById('editHistoryIndex');
+      dom.historyPeriodDate = document.getElementById('historyPeriodDate');
+      dom.historyCycleLength = document.getElementById('historyCycleLength');
+      dom.cancelHistoryEditBtn = document.getElementById('cancelHistoryEditBtn');
+      dom.saveHistoryEditBtn = document.getElementById('saveHistoryEditBtn');
+
+      // Theme
+      const savedTheme = localStorage.getItem('lunaTheme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light');
+      document.documentElement.classList.toggle('dark-mode', savedTheme==='dark');
+      dom.themeToggle.checked = savedTheme==='dark';
+
+      // History
+      try{
+        const savedHistory = JSON.parse(localStorage.getItem('lunaCycleHistory'));
+        if(Array.isArray(savedHistory)) appState.cycleHistory = savedHistory;
+      }catch(e){ console.error('Could not parse cycle history',e); }
+
+      // Settings
+      const savedSettings = JSON.parse(localStorage.getItem('lunaAppSettings'));
+      if(savedSettings && savedSettings.startDate){ showTracker(savedSettings); } else { showSetup(); }
+
+      initializePickers();
+      attachGlobalListeners();
+    };
+
+    // Run
+    loadData();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').then(reg => {
+      // اگر SW جدیدی آماده شد، سریع جایگزین شود
+      if (reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
+      reg.addEventListener('updatefound', () => {
+        const sw = reg.installing;
+        if (!sw) return;
+        sw.addEventListener('statechange', () => {
+          if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+            // نسخه جدید نصب شد؛ فوراً فعالش کن
+            if (reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
+          }
+        });
+      });
+    }).catch(console.error);
+  });
+}
+
+  </script>
+</body>
+</html>
