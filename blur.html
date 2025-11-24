@@ -2,8 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Blur</title>
+    
+    <!-- PWA & Mobile Optimization -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Blur">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/50y5mQfJ/App-Icon-2x.png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/50y5mQfJ/App-Icon-2x.png">
+    
+    <!-- Web App Manifest (Embedded) -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQmx1ciIsImRlc2NyaXB0aW9uIjoiUHJpdmFjeSBtYWRlIGJlYXV0aWZ1bC4iLCJzaG9ydF9uYW1lIjoiQmx1ciIsImljb25zIjpbeyJzcmMiOiJodHRwczovL2kucG9zdGltZy5jYy81MHk1bVFmSi9BcHAtSWNvbi0yeC5wbmciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwMDAwMCIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCJ9">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -77,7 +92,7 @@
 <body class="h-[100dvh] flex flex-col text-white overflow-hidden">
 
     <!-- HEADER -->
-    <div id="header" class="absolute top-0 left-0 right-0 h-16 px-4 flex items-center justify-between z-30 pointer-events-none">
+    <div id="header" class="absolute top-0 left-0 right-0 h-16 px-4 flex items-center justify-between z-30 pointer-events-none pt-safe">
         <!-- JS injects content, pointer-events-auto added to buttons -->
     </div>
 
@@ -86,7 +101,7 @@
         <canvas id="main-canvas" class="block w-full h-full touch-none"></canvas>
         
         <!-- EDIT MODE TOOLS -->
-        <div id="edit-tools" class="hidden absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-40 scale-in">
+        <div id="edit-tools" class="hidden absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-40 scale-in pb-safe">
             <!-- Tool Selector Bar -->
             <div class="flex bg-gray-900/90 backdrop-blur-xl rounded-full p-1.5 shadow-2xl border border-white/10 gap-2">
                 <button id="btn-tool-select" class="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all text-gray-400 active:scale-95" onclick="setTool('select')">
@@ -112,7 +127,7 @@
         </div>
 
         <!-- CONTEXT MENU -->
-        <div id="context-menu" class="hidden absolute top-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-40 animate-in fade-in duration-200 w-max">
+        <div id="context-menu" class="hidden absolute top-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-40 animate-in fade-in duration-200 w-max pt-safe">
              <div class="bg-gray-900/90 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-white/10 flex gap-1">
                 <button id="btn-delete-shape" class="flex items-center gap-2 text-red-400 px-4 py-2 hover:bg-white/5 rounded-xl transition-colors">
                     <i data-lucide="trash-2" width="18"></i>
@@ -133,9 +148,9 @@
             <div class="absolute bottom-[-20%] right-[-20%] w-[80vw] h-[80vw] bg-purple-600/30 rounded-full blur-[120px]"></div>
             
             <div class="z-10 w-full max-w-md flex flex-col items-center gap-12 fade-in">
-              <div class="text-center space-y-4">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl mb-4">
-                    <i data-lucide="aperture" width="40" class="text-white"></i>
+              <div class="text-center space-y-4 flex flex-col items-center">
+                <div class="w-28 h-28 rounded-[22px] bg-transparent shadow-2xl mb-4 overflow-hidden">
+                    <img src="https://i.postimg.cc/50y5mQfJ/App-Icon-2x.png" alt="Blur App Icon" class="w-full h-full object-cover">
                 </div>
                 <h1 class="text-4xl font-semibold tracking-tight text-white">Blur</h1>
                 <p class="text-white/60 text-lg font-light">Privacy made beautiful.</p>
@@ -157,7 +172,7 @@
     </div>
 
     <!-- PROCESS CONTROLS -->
-    <div id="process-controls" class="hidden bg-black/80 backdrop-blur-xl border-t border-white/10 p-6 pb-10 flex flex-col gap-7 slide-up z-30 shadow-2xl rounded-t-3xl">
+    <div id="process-controls" class="hidden bg-black/80 backdrop-blur-xl border-t border-white/10 p-6 pb-10 flex flex-col gap-7 slide-up z-30 shadow-2xl rounded-t-3xl pb-safe">
         
         <!-- Header Row -->
         <div class="flex justify-between items-center px-1">
