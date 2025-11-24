@@ -308,6 +308,10 @@
         const canvas = document.getElementById('main-canvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
+        
+        // Helper Canvas for iOS Blur Fix
+        const helperCanvas = document.createElement('canvas');
+        const helperCtx = helperCanvas.getContext('2d');
 
         // --- CORE ---
         function init() {
@@ -468,6 +472,12 @@
 
             // 2. Render Effects
             if (!state.isComparing && (state.mode === 'process')) {
+                // Ensure helper canvas is ready
+                if (helperCanvas.width !== state.image.width || helperCanvas.height !== state.image.height) {
+                    helperCanvas.width = state.image.width;
+                    helperCanvas.height = state.image.height;
+                }
+
                 state.shapes.forEach(s => {
                     ctx.save();
                     drawEffectPath(ctx, s);
@@ -591,6 +601,7 @@
             const pixelSize = shape.pixelSize !== undefined ? shape.pixelSize : state.globalPixelSize;
             const opacity = shape.opacity !== undefined ? shape.opacity : state.globalOpacity;
 
+            // 1. Define the clipping path on main canvas
             ctx.beginPath();
             points.forEach((p,i) => {
                 const x=p.x*w, y=p.y*h;
@@ -598,7 +609,6 @@
             });
             ctx.closePath();
             
-            // --- FIXED FOCUS EFFECT (Inverse Clipping) ---
             if (effect === 'focus') {
                  // Even-Odd Rule: shape + full screen rect = inverted mask
                  ctx.rect(0, 0, w, h);
@@ -607,15 +617,23 @@
             ctx.clip('evenodd');
             ctx.globalAlpha = opacity / 100;
 
+            // 2. Prepare Effect on Helper Canvas (Bypasses iOS Clipping Bug)
+            // Clear previous drawing
+            helperCtx.clearRect(0,0,w,h);
+            helperCtx.save();
+
             if (effect === 'blur' || effect === 'focus') {
-                // GENTLER NORMAL BLUR
-                // Max blur radius is 5% of screen dimension (approx 50px on a 1000px img)
-                // This makes 50% intensity look like ~25px, which is noticeable but not overwhelming
-                const maxRad = Math.max(4, Math.max(w,h)*0.05); 
+                // iOS COMPATIBLE BLUR: Draw to helper, filter there, then draw back
+                // Reduced multiplier for gentler blur (3px default feel)
+                const maxRad = Math.max(2, Math.max(w,h)*0.02); 
                 const blur = Math.max(1, (intensity/100) * maxRad); 
-                ctx.filter = `blur(${blur}px)`;
-                ctx.drawImage(state.image,0,0);
-                ctx.filter = 'none';
+                
+                helperCtx.filter = `blur(${blur}px)`;
+                helperCtx.drawImage(state.image, 0, 0);
+                helperCtx.filter = 'none';
+                
+                // Draw from helper to main (inside the clip)
+                ctx.drawImage(helperCanvas, 0, 0);
             } 
             else if (effect === 'pixelate') {
                  const factor = Math.max(0.005, (pixelSize / 100) * 0.15);
@@ -629,6 +647,7 @@
                  tCtx.imageSmoothingQuality = 'high';
                  tCtx.drawImage(state.image, 0, 0, w, h, 0, 0, sw, sh);
                  
+                 // Contrast
                  const imgData = tCtx.getImageData(0, 0, sw, sh);
                  const d = imgData.data;
                  const contrast = 60; 
@@ -639,37 +658,43 @@
                      d[i+2] = contrastFactor * (d[i+2] - 128) + 128;
                  }
                  tCtx.putImageData(imgData, 0, 0);
+                 
+                 // Draw pixelated version directly to main (no need for helper if we have pixel buffer)
                  ctx.imageSmoothingEnabled = false;
                  ctx.drawImage(tc, 0, 0, sw, sh, 0, 0, w, h);
                  ctx.imageSmoothingEnabled = true;
             } 
             else if (effect === 'frost') {
-                 ctx.filter = `blur(${w*0.005}px)`;
-                 ctx.drawImage(state.image,0,0);
-                 ctx.filter = 'none';
-                 ctx.globalCompositeOperation = 'overlay';
-                 ctx.fillStyle = `rgba(255,255,255,${intensity/200 + 0.15})`;
-                 ctx.fillRect(0,0,w,h);
-                 ctx.globalCompositeOperation = 'source-over';
+                 helperCtx.filter = `blur(${w*0.005}px)`;
+                 helperCtx.drawImage(state.image,0,0);
+                 helperCtx.filter = 'none';
+                 
+                 // Composite on helper
+                 helperCtx.globalCompositeOperation = 'overlay';
+                 helperCtx.fillStyle = `rgba(255,255,255,${intensity/200 + 0.15})`;
+                 helperCtx.fillRect(0,0,w,h);
+                 helperCtx.globalCompositeOperation = 'source-over';
+                 
+                 ctx.drawImage(helperCanvas, 0, 0);
             }
             else if (effect === 'glass') { 
-                // PREMIUM IOS GLASS (Fixed)
                 const blur = Math.max(10, (intensity/100) * 50); 
                 
-                // 1. Background Blur + High Saturation + Brightness Lift
-                ctx.filter = `blur(${blur}px) saturate(200%) brightness(1.15)`;
-                ctx.drawImage(state.image, 0, 0);
-                ctx.filter = 'none';
+                helperCtx.filter = `blur(${blur}px) saturate(200%) brightness(1.15)`;
+                helperCtx.drawImage(state.image, 0, 0);
+                helperCtx.filter = 'none';
 
-                // 2. Milky White Overlay
+                ctx.drawImage(helperCanvas, 0, 0);
+
+                // Add glass overlay directly on main canvas (since clip works for fill/stroke)
                 ctx.fillStyle = `rgba(255, 255, 255, ${0.1 + (intensity / 250)})`;
                 ctx.fill(); 
-
-                // 3. Crisp Border
                 ctx.lineWidth = Math.max(1, w * 0.0015);
                 ctx.strokeStyle = 'rgba(255,255,255,0.4)';
                 ctx.stroke();
             }
+            
+            helperCtx.restore();
             ctx.globalAlpha = 1.0;
         }
 
