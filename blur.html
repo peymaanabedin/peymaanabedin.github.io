@@ -36,28 +36,41 @@
             background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
         }
         
-        /* iOS Slider Styling */
+        /* Modern Polished Slider Styling */
         input[type=range] {
-            -webkit-appearance: none; 
-            background: transparent; 
-        }
-        input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 28px;
-            width: 28px;
-            border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            margin-top: -12px; 
-            transition: transform 0.1s;
+            width: 100%;
+            background: transparent;
+            cursor: pointer;
+            height: 24px; /* Height of touch area */
+            margin: 0;
         }
-        input[type=range]:active::-webkit-slider-thumb { transform: scale(1.1); }
+
+        /* The Track */
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
-            height: 4px;
+            height: 6px;
             cursor: pointer;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
+            background: #333; /* Default Unfilled Color */
+            border-radius: 999px;
+            border: none;
+        }
+
+        /* The Thumb */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            margin-top: -9px; /* Center thumb on track: (24px thumb - 6px track) / 2 * -1 */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            transition: transform 0.1s ease;
+        }
+
+        input[type=range]:active::-webkit-slider-thumb {
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -144,9 +157,11 @@
     </div>
 
     <!-- PROCESS CONTROLS -->
-    <div id="process-controls" class="hidden bg-black/80 backdrop-blur-xl border-t border-white/10 p-5 pb-10 flex flex-col gap-6 slide-up z-30 shadow-2xl rounded-t-3xl">
-        <div class="flex justify-between items-center px-2">
-            <span id="selection-label" class="text-xs font-bold text-white/60 uppercase tracking-widest">
+    <div id="process-controls" class="hidden bg-black/80 backdrop-blur-xl border-t border-white/10 p-6 pb-10 flex flex-col gap-7 slide-up z-30 shadow-2xl rounded-t-3xl">
+        
+        <!-- Header Row -->
+        <div class="flex justify-between items-center px-1">
+            <span id="selection-label" class="text-xs font-bold text-white/50 uppercase tracking-widest">
                 Global Settings
             </span>
             <div class="flex gap-3">
@@ -159,29 +174,34 @@
             </div>
         </div>
 
-        <div class="flex justify-between items-center gap-4 overflow-x-auto scrollbar-hide py-2" id="effect-buttons"></div>
+        <!-- Effect Buttons -->
+        <div class="flex justify-between items-center gap-3 overflow-x-auto scrollbar-hide py-1" id="effect-buttons"></div>
         
-        <div class="space-y-6 px-2">
-            <div class="flex flex-col gap-3">
-                <div class="flex justify-between text-xs font-medium text-white/80">
-                    <span>Intensity</span>
-                    <span id="label-intensity">50%</span>
+        <!-- Sliders -->
+        <div class="space-y-6">
+            <!-- Intensity -->
+            <div class="flex flex-col gap-2.5">
+                <div class="flex justify-between text-xs font-medium text-white/90 px-1">
+                    <span>Blur Strength</span>
+                    <span id="label-intensity" class="font-bold">50%</span>
                 </div>
                 <input type="range" id="slider-intensity" min="0" max="100" value="50">
             </div>
 
-            <div class="flex flex-col gap-3">
-                <div class="flex justify-between text-xs font-medium text-white/80">
-                    <span>Opacity</span>
-                    <span id="label-opacity">100%</span>
+            <!-- Opacity -->
+            <div class="flex flex-col gap-2.5">
+                <div class="flex justify-between text-xs font-medium text-white/90 px-1">
+                    <span>Transparency</span>
+                    <span id="label-opacity" class="font-bold">100%</span>
                 </div>
                 <input type="range" id="slider-opacity" min="0" max="100" value="100">
             </div>
             
-            <div id="container-pixel-size" class="flex flex-col gap-3 hidden">
-                <div class="flex justify-between text-xs font-medium text-white/80">
-                    <span>Block Size</span>
-                    <span id="label-pixel-size">15%</span>
+            <!-- Pixel Size -->
+            <div id="container-pixel-size" class="flex flex-col gap-2.5 hidden">
+                <div class="flex justify-between text-xs font-medium text-white/90 px-1">
+                    <span>Pixel Size</span>
+                    <span id="label-pixel-size" class="font-bold">15%</span>
                 </div>
                 <input type="range" id="slider-pixel-size" min="0" max="100" value="15">
             </div>
@@ -229,6 +249,21 @@
             lucide.createIcons();
             requestAnimationFrame(renderLoop);
             updateUI();
+            // Initialize slider styling
+            updateSliderStyles();
+        }
+
+        function updateSliderStyles() {
+            ['slider-intensity', 'slider-opacity', 'slider-pixel-size'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) updateSliderBackground(el);
+            });
+        }
+
+        function updateSliderBackground(el) {
+            const val = ((el.value - el.min) / (el.max - el.min)) * 100;
+            // Dynamic gradient for the track: "Filled" color left, "Unfilled" color right
+            el.style.background = `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${val}%, #333 ${val}%, #333 100%)`;
         }
 
         // --- HISTORY ---
@@ -489,10 +524,7 @@
             });
             ctx.closePath();
             
-            // --- FOCUS EFFECT FIX ---
-            // We use the even-odd winding rule. 
-            // If we draw the shape AND a full screen rect, the 'evenodd' rule effectively 
-            // subtracts the shape from the rect, creating a hole (mask) where the shape is.
+            // --- FOCUS EFFECT ---
             if (effect === 'focus') {
                  ctx.rect(0, 0, w, h);
             }
@@ -501,9 +533,9 @@
             ctx.globalAlpha = opacity / 100;
 
             if (effect === 'blur' || effect === 'focus') {
-                const blur = Math.max(1, (intensity/100) * (Math.max(w,h)*0.12));
-                // Increased Saturation & Brightness for Premium feel
-                ctx.filter = `blur(${blur}px) saturate(140%) brightness(1.05)`;
+                // STANDARD GAUSSIAN BLUR (Neutral)
+                const blur = Math.max(1, (intensity/100) * (Math.max(w,h)*0.15)); // Max 15% of screen dim
+                ctx.filter = `blur(${blur}px)`;
                 ctx.drawImage(state.image,0,0);
                 ctx.filter = 'none';
             } 
@@ -543,19 +575,12 @@
                  ctx.globalCompositeOperation = 'source-over';
             }
             else if (effect === 'glass') { 
-                // PREMIUM IOS GLASS
                 const blur = Math.max(8, (intensity/100) * 60); 
-                
-                // 1. Background Blur + Vividness
                 ctx.filter = `blur(${blur}px) saturate(180%) brightness(1.1)`;
                 ctx.drawImage(state.image, 0, 0);
                 ctx.filter = 'none';
-
-                // 2. Milky White Overlay
                 ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + (intensity / 200)})`;
                 ctx.fill(); 
-
-                // 3. Subtle White Border
                 ctx.lineWidth = Math.max(1.5, w * 0.0015);
                 ctx.strokeStyle = 'rgba(255,255,255,0.4)';
                 ctx.stroke();
@@ -906,9 +931,21 @@
                 sPix.value = currentPixelSize;
                 document.getElementById('label-pixel-size').innerText = currentPixelSize + '%';
                 
-                sInt.oninput = (e) => updateSettings('intensity', parseInt(e.target.value));
-                sPix.oninput = (e) => updateSettings('pixelSize', parseInt(e.target.value));
-                sOp.oninput = (e) => updateSettings('opacity', parseInt(e.target.value));
+                // Add oninput listener that updates BOTH state AND visuals
+                const handleInput = (key, el) => {
+                    const val = parseInt(el.value);
+                    updateSettings(key, val);
+                    updateSliderBackground(el);
+                };
+
+                sInt.oninput = (e) => handleInput('intensity', e.target);
+                sPix.oninput = (e) => handleInput('pixelSize', e.target);
+                sOp.oninput = (e) => handleInput('opacity', e.target);
+                
+                // Initial draw for backgrounds
+                updateSliderBackground(sInt);
+                updateSliderBackground(sPix);
+                updateSliderBackground(sOp);
             }
 
             if (document.getElementById('btn-delete-shape')) {
@@ -959,7 +996,12 @@
                     if (key === 'opacity') s.opacity = value;
                 });
             }
-            updateUI();
+            if (key === 'effect') updateUI(); // Only full UI update on effect change to keep sliders smooth
+            else {
+                // Just update labels if dragging slider
+                const lbl = document.getElementById(`label-${key === 'pixelSize' ? 'pixel-size' : key}`);
+                if(lbl) lbl.innerText = value + '%';
+            }
         }
 
         window.goToProcess = () => {
@@ -1001,6 +1043,7 @@
         document.getElementById('btn-auto').onclick = () => { 
             updateSettings('intensity', 60); 
             updateSettings('pixelSize', 15);
+            updateUI(); // Refresh to update slider positions
         };
 
         init();
