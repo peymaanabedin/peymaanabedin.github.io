@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>PromptVault Ultra</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <meta name="theme-color" content="#ffffff" id="meta-theme-color">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <script>
+    // Tailwind Config for specific dark mode colors
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            gray: { 850: '#1f2937', 950: '#030712' } // Deeper blacks
+          },
+          animation: {
+            'slide-up': 'slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+            'fade-in': 'fadeIn 0.2s ease-out'
+          },
+          keyframes: {
+            slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } },
+            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Mobile Polish */
+    body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+    .hide-scroll::-webkit-scrollbar { display: none; } 
+    .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Smooth Touch Interactions */
+    .touch-scale:active { transform: scale(0.96); transition: transform 0.1s; }
+    
+    /* Glassmorphism */
+    .glass-nav { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .dark .glass-nav { background: rgba(3,7,18,0.85); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    
+    /* Full Screen Image */
+    .fs-image { object-fit: contain; width: 100%; height: 100%; }
+    
+    /* Prevent iOS Input Zoom */
+    input, textarea { font-size: 16px !important; }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-200 h-[100dvh] flex flex-col overflow-hidden w-full selection:bg-blue-500 selection:text-white">
+
+  <header class="flex-none z-40 w-full glass-nav absolute top-0 left-0 transition-colors duration-300">
+    <div class="px-4 pt-safe-top pb-2 flex justify-between items-center h-16">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <h1 class="text-lg font-bold tracking-tight">PromptVault</h1>
+      </div>
+      <button id="btn-settings" class="w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center touch-scale">
+        <i class="fa-solid fa-gear text-lg text-gray-600 dark:text-gray-300"></i>
+      </button>
+    </div>
+
+    <nav class="flex items-center gap-2 px-4 pb-3 overflow-x-auto hide-scroll w-full" id="nav-cats">
+      </nav>
+  </header>
+
+  <div class="flex-none pt-[7.5rem] px-4 pb-2 z-30 bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
+    <div class="relative">
+      <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      <input type="text" id="search-input" 
+        class="w-full bg-white dark:bg-gray-900 pl-11 pr-12 py-3.5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all placeholder-gray-400 dark:placeholder-gray-600"
+        placeholder="Search prompts..." autocomplete="off">
+      <button id="btn-view" class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-blue-500 touch-scale">
+        <i class="fa-solid fa-grid-2"></i>
+      </button>
+    </div>
+  </div>
+
+  <main id="scroll-area" class="flex-grow overflow-y-auto px-4 pb-32 hide-scroll relative">
+    <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pb-6">
+      </div>
+
+    <div id="loader" class="h-20 w-full flex items-center justify-center opacity-0 transition-opacity">
+      <i class="fa-solid fa-circle-notch fa-spin text-blue-500 text-xl"></i>
+    </div>
+
+    <div id="empty-state" class="hidden flex flex-col items-center justify-center py-24 text-center">
+      <div class="w-20 h-20 bg-gray-200 dark:bg-gray-900 rounded-full flex items-center justify-center mb-4 text-3xl text-gray-400">
+        <i class="fa-solid fa-box-open"></i>
+      </div>
+      <p class="text-gray-500 dark:text-gray-400 font-medium">No prompts found</p>
+    </div>
+  </main>
+
+  <button id="btn-add" class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-xl shadow-blue-600/40 flex items-center justify-center text-2xl touch-scale z-40">
+    <i class="fa-solid fa-plus"></i>
+  </button>
+
+  <div id="modal-form" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity" id="modal-backdrop"></div>
+    <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-[2rem] max-h-[92dvh] flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl border-t border-white/10" id="modal-panel">
+      
+      <div class="w-full flex justify-center pt-3 pb-1 cursor-grab">
+        <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+      </div>
+
+      <div class="flex-grow overflow-y-auto p-5 pb-8 space-y-6 hide-scroll" id="form-scroll">
+        <form id="form-main" class="space-y-6">
+          <input type="hidden" id="entry-id">
+          
+          <h2 class="text-2xl font-bold px-1" id="form-title">New Prompt</h2>
+
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">1. Reference Image</label>
+            <div class="relative w-full h-40 bg-gray-100 dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 overflow-hidden group transition-all" id="img-upload-area">
+              <img id="img-preview" class="absolute inset-0 w-full h-full object-cover hidden z-10" />
+              <i class="fa-solid fa-cloud-arrow-up text-3xl mb-2 group-hover:scale-110 transition-transform"></i>
+              <span class="text-xs font-medium">Tap to upload</span>
+              <input type="file" id="inp-file" accept="image/*" class="absolute inset-0 opacity-0 z-20 cursor-pointer">
+              <button type="button" id="btn-rm-img" class="absolute top-2 right-2 z-30 w-8 h-8 bg-black/50 text-white rounded-full hidden items-center justify-center backdrop-blur">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">2. Name</label>
+            <input type="text" id="inp-name" class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-blue-500 dark:text-white font-medium placeholder-gray-400 transition-shadow" placeholder="e.g., Cyberpunk City">
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">3. Category</label>
+            <div class="flex gap-2 overflow-x-auto hide-scroll pb-1" id="form-cats">
+              </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-end px-1">
+              <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">4. The Prompt</label>
+              <button type="button" id="btn-paste" class="text-blue-600 dark:text-blue-400 text-xs font-bold bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg touch-scale flex items-center gap-1.5">
+                <i class="fa-regular fa-clipboard"></i> PASTE & AUTO-FILL
+              </button>
+            </div>
+            <textarea id="inp-prompt" rows="5" class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 dark:text-white leading-relaxed resize-none transition-shadow" placeholder="Prompt text..."></textarea>
+          </div>
+
+          <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+            <span class="font-semibold text-sm">Add to Favorites</span>
+            <button type="button" id="btn-fav-toggle" class="w-12 h-7 bg-gray-300 dark:bg-gray-600 rounded-full relative transition-colors" data-active="false">
+              <div class="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform shadow-sm"></div>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="p-4 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 gap-3 z-20 pb-8">
+        <button id="btn-cancel" class="py-3.5 rounded-xl font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 touch-scale">Cancel</button>
+        <button id="btn-save" class="py-3.5 rounded-xl font-bold text-white bg-blue-600 shadow-lg shadow-blue-500/20 touch-scale">Save Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-detail" class="fixed inset-0 z-50 hidden bg-white dark:bg-gray-950 flex flex-col transition-opacity duration-200 opacity-0 translate-y-4">
+    
+    <div class="relative h-[45vh] bg-black flex-none group">
+      <img id="detail-img" class="w-full h-full object-cover opacity-90 transition-opacity" onclick="openFullscreen()">
+      
+      <div class="absolute top-0 left-0 right-0 p-4 pt-safe-top flex justify-between items-start bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+        <button onclick="closeDetail()" class="w-10 h-10 bg-black/20 backdrop-blur rounded-full text-white flex items-center justify-center pointer-events-auto touch-scale">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="flex gap-2 pointer-events-auto">
+          <button id="detail-dl" class="w-10 h-10 bg-black/20 backdrop-blur rounded-full text-white flex items-center justify-center touch-scale">
+            <i class="fa-solid fa-download"></i>
+          </button>
+          <button id="detail-edit" class="w-10 h-10 bg-black/20 backdrop-blur rounded-full text-white flex items-center justify-center touch-scale">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="absolute bottom-4 right-4 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs text-white font-medium pointer-events-none">
+        <i class="fa-solid fa-expand mr-1"></i> Tap to expand
+      </div>
+    </div>
+
+    <div class="flex-grow -mt-6 bg-white dark:bg-gray-950 rounded-t-[1.5rem] relative z-10 flex flex-col overflow-hidden">
+      <div class="flex-grow overflow-y-auto p-6 space-y-4 hide-scroll">
+        <div class="flex justify-between items-start">
+          <div>
+            <span id="detail-cat" class="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded mb-2 inline-block">Category</span>
+            <h1 id="detail-title" class="text-2xl font-bold leading-tight">Prompt Title</h1>
+          </div>
+          <button id="detail-fav" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-2xl touch-scale transition-colors">
+            <i class="fa-regular fa-heart"></i>
+          </button>
+        </div>
+
+        <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+          <p id="detail-text" class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap select-text"></p>
+        </div>
+        
+        <button id="detail-copy" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/25 touch-scale flex items-center justify-center gap-2">
+          <i class="fa-regular fa-copy"></i> Copy Prompt
+        </button>
+
+        <button id="detail-delete" class="w-full py-3 text-red-500 font-medium text-sm">Delete Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-fs" class="fixed inset-0 z-[60] bg-black hidden items-center justify-center animate-fade-in">
+    <button onclick="closeFullscreen()" class="absolute top-6 right-6 z-50 w-10 h-10 bg-white/10 text-white rounded-full flex items-center justify-center backdrop-blur">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <img id="fs-img" src="" class="fs-image">
+  </div>
+
+  <div id="modal-settings" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity opacity-0">
+    <div class="bg-white dark:bg-gray-900 w-full max-w-xs rounded-3xl p-5 shadow-2xl transform scale-95 transition-transform">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">Settings</h2>
+        <button onclick="closeSettings()" class="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-500"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3">
+        <button id="btn-theme" class="w-full flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 touch-scale">
+          <span class="font-medium">Dark Mode</span>
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        
+        <div class="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
+
+        <button id="btn-backup" class="w-full flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 touch-scale">
+          <span class="font-medium text-sm">Backup All</span>
+          <i class="fa-solid fa-download text-gray-400"></i>
+        </button>
+        
+        <button id="btn-export-fav" class="w-full flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 touch-scale">
+          <span class="font-medium text-sm">Export Favorites</span>
+          <i class="fa-solid fa-heart text-red-500"></i>
+        </button>
+
+        <label class="w-full flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 touch-scale cursor-pointer">
+          <span class="font-medium text-sm">Restore Data</span>
+          <i class="fa-solid fa-upload text-gray-400"></i>
+          <input type="file" id="inp-restore" accept=".json" class="hidden">
+        </label>
+        
+        <div class="text-center pt-2 text-xs text-gray-400">
+          Prompts: <span id="stat-count">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-900/90 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-2xl text-sm font-bold transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-[70]"></div>
+
+  <script>
+    /* --------------------------------------------------------------------------
+       APP CORE
+       -------------------------------------------------------------------------- */
+    const DB_NAME = 'PV_Ultra_v1';
+    const DB_VER = 1;
+    const STORE = 'prompts';
+    const CATS = [
+      { id: 'all', label: 'All', icon: 'fa-layer-group' },
+      { id: 'fav', label: 'Saved', icon: 'fa-heart text-red-500' },
+      { id: 'personal', label: 'Personal', icon: 'fa-user' },
+      { id: 'art', label: 'Art', icon: 'fa-palette' },
+      { id: 'photo', label: 'Photo', icon: 'fa-camera' },
+      { id: 'dev', label: 'Code', icon: 'fa-code' },
+      { id: 'work', label: 'Work', icon: 'fa-briefcase' },
+      { id: 'fun', label: 'Fun', icon: 'fa-face-smile' }
+    ];
+
+    let db, prompts = [], filtered = [], limit = 0, currentCat = 'all', view = 'grid', editId = null, imgBlob = null, obs;
+    const BATCH = 24;
+
+    const $ = id => document.getElementById(id);
+    const vib = () => navigator.vibrate?.(5); // Haptics
+
+    /* --------------------------------------------------------------------------
+       DATABASE
+       -------------------------------------------------------------------------- */
+    const openDB = () => new Promise(res => {
+      const r = indexedDB.open(DB_NAME, DB_VER);
+      r.onupgradeneeded = e => {
+        const d = e.target.result;
+        if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE, { keyPath: 'id' });
+      };
+      r.onsuccess = () => { db = r.result; res(); };
+    });
+
+    const dbAct = (mode, cb) => new Promise(res => {
+      const tx = db.transaction(STORE, mode);
+      const req = cb(tx.objectStore(STORE));
+      req.onsuccess = () => res(req.result);
+    });
+
+    /* --------------------------------------------------------------------------
+       INIT & RENDER
+       -------------------------------------------------------------------------- */
+    async function init() {
+      // Theme Init
+      const isDark = localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) document.documentElement.classList.add('dark');
+      updateMetaColor();
+
+      await openDB();
+      renderNav();
+      setupObs();
+      await loadData();
+      
+      // Events
+      $('btn-add').onclick = () => openForm();
+      $('btn-cancel').onclick = closeForm;
+      $('btn-save').onclick = saveForm;
+      $('btn-view').onclick = toggleView;
+      $('btn-settings').onclick = openSettings;
+      $('btn-theme').onclick = toggleTheme;
+      $('btn-paste').onclick = handlePaste; // The smart paste logic
+      $('search-input').oninput = (e) => { filterData(e.target.value); };
+      
+      // Detail Events
+      $('detail-copy').onclick = copyPrompt;
+      $('detail-delete').onclick = deletePrompt;
+      $('detail-edit').onclick = editPrompt;
+      $('detail-dl').onclick = downloadImage;
+      $('detail-fav').onclick = toggleFavDetail;
+      
+      // Settings Events
+      $('btn-backup').onclick = () => exportJSON(false);
+      $('btn-export-fav').onclick = () => exportJSON(true);
+      $('inp-restore').onchange = importJSON;
+
+      // Form Events
+      $('inp-file').onchange = handleImage;
+      $('btn-fav-toggle').onclick = toggleFavSwitch;
+      $('btn-rm-img').onclick = clearImage;
+    }
+
+    async function loadData() {
+      prompts = await dbAct('readonly', s => s.getAll());
+      prompts.sort((a,b) => b.id - a.id);
+      $('stat-count').innerText = prompts.length;
+      filterData();
+    }
+
+    function filterData(term = '') {
+      const q = term.toLowerCase();
+      filtered = prompts.filter(p => {
+        const catMatch = currentCat === 'all' ? true : (currentCat === 'fav' ? p.fav : p.cat === currentCat);
+        const textMatch = !q || p.name.toLowerCase().includes(q) || p.prompt.toLowerCase().includes(q);
+        return catMatch && textMatch;
+      });
+      
+      $('grid-container').innerHTML = '';
+      limit = 0;
+      $('empty-state').classList.toggle('hidden', filtered.length > 0);
+      renderBatch();
+    }
+
+    function renderBatch() {
+      if (limit >= filtered.length) return;
+      const frag = document.createDocumentFragment();
+      const next = filtered.slice(limit, limit + BATCH);
+      
+      next.forEach(p => {
+        const url = p.img ? URL.createObjectURL(p.img) : null; // Optimize: cache this if needed
+        const el = document.createElement('div');
+        
+        if (view === 'grid') {
+          el.className = 'relative aspect-square rounded-2xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm touch-scale active:shadow-none transition-all cursor-pointer';
+          el.innerHTML = `
+            ${url ? `<img src="${url}" class="w-full h-full object-cover">` : `<div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">${p.name[0]}</div>`}
+            ${p.fav ? '<div class="absolute top-2 right-2 bg-white/90 dark:bg-black/50 text-red-500 w-6 h-6 rounded-full flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-heart"></i></div>' : ''}
+            <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+              <h3 class="text-white text-sm font-bold truncate">${p.name}</h3>
+            </div>
+          `;
+        } else {
+          el.className = 'flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm touch-scale cursor-pointer';
+          el.innerHTML = `
+             <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+               ${url ? `<img src="${url}" class="w-full h-full object-cover">` : `<div class="w-full h-full bg-blue-500 flex items-center justify-center text-white font-bold">${p.name[0]}</div>`}
+             </div>
+             <div class="flex-grow min-w-0">
+               <div class="flex justify-between">
+                 <h3 class="font-bold dark:text-white truncate">${p.name}</h3>
+                 ${p.fav ? '<i class="fa-solid fa-heart text-red-500 text-xs"></i>' : ''}
+               </div>
+               <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">${p.prompt}</p>
+             </div>
+          `;
+        }
+        el.onclick = () => openDetail(p);
+        frag.appendChild(el);
+      });
+      
+      $('grid-container').appendChild(frag);
+      limit += BATCH;
+    }
+
+    function renderNav() {
+      const nav = $('nav-cats');
+      const formCats = $('form-cats');
+      nav.innerHTML = ''; formCats.innerHTML = '';
+      
+      CATS.forEach(c => {
+        // Top Nav
+        const btn = document.createElement('button');
+        btn.className = `flex-none px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 border ${
+          currentCat === c.id 
+          ? 'bg-blue-600 border-blue-600 text-white shadow-md' 
+          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+        }`;
+        btn.innerHTML = `<i class="fa-solid ${c.icon}"></i> ${c.label}`;
+        btn.onclick = () => { vib(); currentCat = c.id; renderNav(); filterData(); };
+        nav.appendChild(btn);
+
+        // Form Radios
+        if (c.id !== 'all' && c.id !== 'fav') {
+          const label = document.createElement('label');
+          label.className = 'flex-none cursor-pointer';
+          label.innerHTML = `
+            <input type="radio" name="cat" value="${c.id}" class="peer hidden" ${c.id === 'personal' ? 'checked' : ''}>
+            <div class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-transparent text-xs font-bold peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 peer-checked:border-blue-500 transition-all uppercase">
+              ${c.label}
+            </div>
+          `;
+          formCats.appendChild(label);
+        }
+      });
+    }
+
+    /* --------------------------------------------------------------------------
+       WORKFLOW ACTIONS
+       -------------------------------------------------------------------------- */
+    // THE SMART PASTE LOGIC
+    async function handlePaste() {
+      vib();
+      try {
+        const text = await navigator.clipboard.readText();
+        $('inp-prompt').value = text;
+        showToast('Prompt pasted!');
+        
+        // Automation Sequence
+        // 1. Scroll to top of form
+        $('form-scroll').scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // 2. Focus Name input
+        setTimeout(() => {
+          $('inp-name').focus();
+          // 3. Highlight Image area visually
+          $('img-upload-area').classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10');
+          setTimeout(() => {
+            $('img-upload-area').classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10');
+          }, 1500);
+        }, 300);
+
+      } catch (e) { showToast('Clipboard permission required'); }
+    }
+
+    function handleImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          // Compress
+          const cvs = document.createElement('canvas');
+          const max = 1000;
+          let w = img.width, h = img.height;
+          if (w > h && w > max) { h *= max/w; w = max; }
+          else if (h > max) { w *= max/h; h = max; }
+          cvs.width = w; cvs.height = h;
+          cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+          cvs.toBlob(b => {
+             imgBlob = b;
+             $('img-preview').src = URL.createObjectURL(b);
+             $('img-preview').classList.remove('hidden');
+             $('btn-rm-img').classList.remove('hidden');
+             $('btn-rm-img').classList.add('flex');
+          }, 'image/jpeg', 0.85);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearImage() {
+        imgBlob = null;
+        $('img-preview').src = '';
+        $('img-preview').classList.add('hidden');
+        $('btn-rm-img').classList.add('hidden');
+        $('btn-rm-img').classList.remove('flex');
+        $('inp-file').value = '';
+    }
+
+    async function saveForm() {
+      vib();
+      const name = $('inp-name').value.trim() || 'Untitled';
+      const prompt = $('inp-prompt').value.trim();
+      const cat = document.querySelector('input[name="cat"]:checked').value;
+      const fav = $('btn-fav-toggle').dataset.active === 'true';
+
+      if (!prompt) return showToast('Please enter a prompt');
+
+      const data = {
+        id: editId || Date.now(),
+        name, prompt, cat, fav,
+        img: imgBlob || (editId ? prompts.find(p=>p.id===editId).img : null)
+      };
+
+      await dbAct('readwrite', s => s.put(data));
+      
+      closeForm();
+      showToast('Saved!');
+      loadData(); // Reloads list
+      
+      // Update Detail View if open
+      if (editId && !$('modal-detail').classList.contains('hidden')) {
+        openDetail(data);
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       UI TOGGLES
+       -------------------------------------------------------------------------- */
+    function openForm(id = null) {
+      vib();
+      editId = id;
+      imgBlob = null;
+      $('form-main').reset();
+      clearImage();
+      
+      $('form-title').innerText = id ? 'Edit Prompt' : 'New Prompt';
+      $('modal-form').classList.remove('hidden');
+      $('btn-fav-toggle').dataset.active = "false";
+      toggleFavSwitch(true); // reset visuals
+      
+      // Reset scroll
+      $('form-scroll').scrollTop = 0;
+
+      if (id) {
+        const p = prompts.find(x => x.id === id);
+        $('inp-name').value = p.name;
+        $('inp-prompt').value = p.prompt;
+        const rad = document.querySelector(`input[value="${p.cat}"]`);
+        if(rad) rad.checked = true;
+        if(p.fav) { $('btn-fav-toggle').dataset.active = "false"; toggleFavSwitch(); }
+        if(p.img) {
+            imgBlob = p.img;
+            $('img-preview').src = URL.createObjectURL(p.img);
+            $('img-preview').classList.remove('hidden');
+            $('btn-rm-img').classList.remove('hidden');
+            $('btn-rm-img').classList.add('flex');
+        }
+      }
+
+      setTimeout(() => {
+        $('modal-backdrop').classList.remove('opacity-0');
+        $('modal-panel').classList.remove('translate-y-full');
+      }, 10);
+    }
+
+    function closeForm() {
+      $('modal-panel').classList.add('translate-y-full');
+      $('modal-backdrop').classList.add('opacity-0');
+      setTimeout(() => $('modal-form').classList.add('hidden'), 300);
+    }
+
+    function openDetail(p) {
+      vib();
+      $('detail-title').innerText = p.name;
+      $('detail-text').innerText = p.prompt;
+      $('detail-cat').innerText = CATS.find(c=>c.id===p.cat)?.label || 'Other';
+      $('detail-img').src = p.img ? URL.createObjectURL(p.img) : '';
+      $('detail-img').parentElement.style.display = p.img ? 'block' : 'none';
+      
+      // Fav Btn
+      const favIcon = $('detail-fav').firstElementChild;
+      favIcon.className = p.fav ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-400';
+      
+      // Store current P for actions
+      $('modal-detail').dataset.id = p.id;
+      
+      $('modal-detail').classList.remove('hidden');
+      setTimeout(() => {
+        $('modal-detail').classList.remove('opacity-0', 'translate-y-4');
+      }, 10);
+    }
+
+    function closeDetail() {
+      $('modal-detail').classList.add('opacity-0', 'translate-y-4');
+      setTimeout(() => $('modal-detail').classList.add('hidden'), 200);
+    }
+    
+    // Settings
+    function openSettings() { 
+        vib();
+        $('modal-settings').classList.remove('hidden');
+        setTimeout(()=> {
+            $('modal-settings').classList.remove('opacity-0');
+            $('modal-settings').firstElementChild.classList.remove('scale-95');
+        },10);
+    }
+    function closeSettings() {
+        $('modal-settings').classList.add('opacity-0');
+        $('modal-settings').firstElementChild.classList.add('scale-95');
+        setTimeout(()=> $('modal-settings').classList.add('hidden'), 200);
+    }
+
+    // Fullscreen
+    function openFullscreen() { $('fs-img').src = $('detail-img').src; $('modal-fs').classList.remove('hidden'); }
+    function closeFullscreen() { $('modal-fs').classList.add('hidden'); }
+
+    // Helpers
+    function toggleFavSwitch(forceReset = false) {
+      const btn = $('btn-fav-toggle');
+      const knob = btn.firstElementChild;
+      const active = forceReset ? false : (btn.dataset.active === 'false');
+      btn.dataset.active = active;
+      
+      btn.className = `w-12 h-7 rounded-full relative transition-colors ${active ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'}`;
+      knob.style.transform = active ? 'translateX(1.25rem)' : 'translateX(0)';
+    }
+
+    function toggleTheme() {
+      vib();
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      updateMetaColor();
+    }
+    
+    function updateMetaColor() {
+       // Deep black for dark mode OLED, White for light
+       $('meta-theme-color').content = document.documentElement.classList.contains('dark') ? '#030712' : '#ffffff';
+    }
+
+    function toggleView() {
+      vib();
+      view = view === 'grid' ? 'list' : 'grid';
+      filterData();
+    }
+
+    function showToast(msg) {
+      $('toast').innerText = msg;
+      $('toast').classList.remove('opacity-0', 'translate-y-4');
+      setTimeout(() => $('toast').classList.add('opacity-0', 'translate-y-4'), 2000);
+    }
+
+    function setupObs() {
+      obs = new IntersectionObserver(e => { if (e[0].isIntersecting) renderBatch(); }, { root: $('scroll-area'), rootMargin: '300px' });
+      obs.observe($('loader'));
+    }
+
+    /* --------------------------------------------------------------------------
+       DATA ACTIONS
+       -------------------------------------------------------------------------- */
+    function copyPrompt() {
+      navigator.clipboard.writeText($('detail-text').innerText);
+      showToast('Copied to clipboard');
+    }
+    
+    async function deletePrompt() {
+       if(confirm('Delete this prompt?')) {
+           const id = parseInt($('modal-detail').dataset.id);
+           await dbAct('readwrite', s => s.delete(id));
+           closeDetail(); loadData(); showToast('Deleted');
+       }
+    }
+    
+    function editPrompt() {
+        const id = parseInt($('modal-detail').dataset.id);
+        closeDetail();
+        openForm(id);
+    }
+    
+    async function toggleFavDetail() {
+        const id = parseInt($('modal-detail').dataset.id);
+        const p = prompts.find(x=>x.id===id);
+        p.fav = !p.fav;
+        await dbAct('readwrite', s => s.put(p));
+        loadData();
+        // Update Icon
+        const favIcon = $('detail-fav').firstElementChild;
+        favIcon.className = p.fav ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-400';
+    }
+    
+    function downloadImage() {
+        const a = document.createElement('a');
+        a.href = $('detail-img').src;
+        a.download = `PromptVault-${Date.now()}.jpg`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    async function exportJSON(onlyFav) {
+      let data = await dbAct('readonly', s => s.getAll());
+      if(onlyFav) data = data.filter(x=>x.fav);
+      if(!data.length) return showToast('Nothing to export');
+      
+      // Convert Blobs to Base64
+      const exp = await Promise.all(data.map(async p => {
+         let b64 = null;
+         if(p.img) {
+             b64 = await new Promise(r => {
+                 const fr = new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(p.img);
+             });
+         }
+         return { ...p, img: b64 };
+      }));
+      
+      const blob = new Blob([JSON.stringify(exp)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=`PromptVault_${onlyFav?'Favs':'Backup'}.json`;
+      a.click();
+    }
+    
+    function importJSON(e) {
+        const f = e.target.files[0];
+        if(!f) return;
+        const r = new FileReader();
+        r.onload = async ev => {
+            try {
+                const json = JSON.parse(ev.target.result);
+                const imp = json.map(p => {
+                    let b = null;
+                    if(p.img && typeof p.img === 'string') {
+                        const arr = p.img.split(',');
+                        const mime = arr[0].match(/:(.*?);/)[1];
+                        const bin = atob(arr[1]);
+                        let n = bin.length; const u8 = new Uint8Array(n);
+                        while(n--) u8[n] = bin.charCodeAt(n);
+                        b = new Blob([u8], {type:mime});
+                    }
+                    return { ...p, img: b };
+                });
+                const tx = db.transaction(STORE, 'readwrite');
+                const s = tx.objectStore(STORE);
+                s.clear();
+                imp.forEach(i => s.put(i));
+                tx.oncomplete = () => { closeSettings(); loadData(); showToast('Restored!'); };
+            } catch(err) { showToast('Invalid file'); }
+        };
+        r.readAsText(f);
+    }
+
+    // Run
+    init();
+
+  </script>
+</body>
+</html>
