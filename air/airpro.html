@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" type="image/png" sizes="32x32" href="https://8upload.com/image/171db5bf84cf07d4/AppIcon_2x.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://8upload.com/image/171db5bf84cf07d4/AppIcon_2x.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://8upload.com/image/171db5bf84cf07d4/AppIcon_2x.png">
+
+<meta name="apple-mobile-web-app-title" content="هوای پاک پلاس">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="manifest" href="/manifest.webmanifest">
+<title>هوای پاک پلاس | نسخه پیشرفته</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@200..900&display=swap" rel="stylesheet">
+
+<style>
+    /* --- تنظیمات کلی و متغیرها --- */
+    :root {
+        /* تم دارک (پیش‌فرض) - بسیار تیره‌تر */
+        --bg-color: #020617;
+        --bg-gradient: linear-gradient(180deg, #020617 0%, #0f172a 100%);
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --glass-bg: rgba(15, 23, 42, 0.6);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --glass-highlight: rgba(255, 255, 255, 0.03);
+        --glass-blur: 40px;
+        --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+        --inner-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+        
+        --accent-color: #34d399;
+        --liquid-1: #4f46e5;
+        --liquid-2: #db2777;
+    }
+
+    body.light-mode {
+        --bg-color: #f8fafc;
+        --bg-gradient: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --glass-bg: rgba(255, 255, 255, 0.75);
+        --glass-border: rgba(255, 255, 255, 0.9);
+        --glass-highlight: rgba(255, 255, 255, 0.8);
+        --glass-blur: 30px;
+        --card-shadow: 0 15px 35px -5px rgba(148, 163, 184, 0.35);
+        --inner-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.9);
+        
+        --liquid-1: #60a5fa;
+        --liquid-2: #f472b6;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
+
+    body {
+        background-color: var(--bg-color);
+        background-image: var(--bg-gradient);
+        color: var(--text-primary);
+        font-family: 'Vazirmatn', -apple-system, sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+        transition: background 0.5s ease, color 0.5s ease;
+        position: relative;
+    }
+
+    /* --- انیمیشن پس‌زمینه مایع --- */
+    .liquid-blob {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        overflow: hidden; z-index: 0; pointer-events: none;
+    }
+    .blob {
+        position: absolute; border-radius: 50%;
+        filter: blur(90px); opacity: 0.5;
+        animation: floatBlob 15s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        mix-blend-mode: screen;
+    }
+    body.light-mode .blob { mix-blend-mode: multiply; opacity: 0.3; }
+
+    .blob-1 { top: -20%; left: -20%; width: 60vw; height: 60vw; background: var(--liquid-1); }
+    .blob-2 { bottom: -20%; right: -20%; width: 70vw; height: 70vw; background: var(--liquid-2); animation-delay: -7s; }
+    
+    @keyframes floatBlob {
+        0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        100% { transform: translate(40px, 60px) scale(1.1) rotate(10deg); }
+    }
+
+    /* --- ذرات معلق --- */
+    #particles {
+        position: fixed; inset: 0; pointer-events: none; z-index: 5;
+        background-image: none; background-size: 0 0;
+        transition: opacity 0.5s;
+    }
+    body.weather-rain #particles {
+        background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0 L10 10' stroke='rgba(120,120,255,0.6)' stroke-width='1'/%3E%3C/svg%3E");
+        animation: rainFall 0.6s linear infinite;
+    }
+    body.weather-snow #particles {
+        background-image: radial-gradient(white 30%, transparent 30%);
+        background-size: 10px 10px;
+        animation: snowFall 4s linear infinite;
+    }
+    @keyframes rainFall { from { background-position: 0 0; } to { background-position: -10px 400px; } }
+    @keyframes snowFall { from { background-position: 0 0; } to { background-position: 30px 200px; } }
+
+    #app {
+        position: relative; z-index: 10;
+        padding: max(20px, env(safe-area-inset-top)) 24px 40px 24px;
+        max-width: 550px; margin: 0 auto; width: 100%;
+        display: flex; flex-direction: column; gap: 28px;
+        padding-bottom: 100px;
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0; transform: translateY(30px);
+    }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* --- هدر و دکمه‌ها (اصلاح شده) --- */
+    header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        width: 100%;
+    }
+    
+    .location-pill {
+        display: flex; align-items: center; gap: 12px;
+        background: var(--glass-bg); 
+        border: 1px solid var(--glass-border);
+        border-top: 1px solid var(--glass-highlight);
+        padding: 12px 24px; border-radius: 50px;
+        font-size: 16px; font-weight: 800; cursor: pointer;
+        backdrop-filter: blur(var(--glass-blur)); 
+        box-shadow: var(--card-shadow), var(--inner-shadow);
+        transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        color: var(--text-primary);
+        max-width: 60%; /* جلوگیری از بزرگ شدن بیش از حد نام شهر */
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    
+    /* کانتینر دکمه‌ها برای چیدمان ردیفی دقیق */
+    .header-actions { 
+        display: flex; 
+        gap: 12px; 
+        align-items: center; 
+        flex-direction: row; /* تضمین افقی بودن */
+    }
+
+    .btn-circle {
+        width: 50px; height: 50px; border-radius: 50%;
+        background: var(--glass-bg); 
+        border: 1px solid var(--glass-border);
+        border-top: 1px solid var(--glass-highlight);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-primary); cursor: pointer; 
+        backdrop-filter: blur(var(--glass-blur));
+        box-shadow: var(--card-shadow), var(--inner-shadow);
+        transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0; /* جلوگیری از له شدن دکمه */
+    }
+    .btn-circle:hover, .location-pill:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.3), var(--inner-shadow); }
+    .btn-circle:active, .location-pill:active { transform: scale(0.95); }
+
+    /* --- گیج کیفیت هوا --- */
+    .hero-section {
+        display: flex; flex-direction: column; align-items: center;
+        position: relative; margin-top: 20px;
+    }
+    .gauge-wrapper { 
+        width: 300px; height: 300px; position: relative; 
+        filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3)); 
+    }
+    .gauge-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .track { fill: none; stroke: var(--glass-border); stroke-width: 16; stroke-linecap: round; }
+    .progress { 
+        fill: none; stroke: var(--accent-color); stroke-width: 16; stroke-linecap: round;
+        stroke-dasharray: 660; stroke-dashoffset: 660;
+        transition: stroke-dashoffset 2s cubic-bezier(0.2, 0.8, 0.2, 1), stroke 1s;
+        filter: drop-shadow(0 0 10px var(--accent-color));
+    }
+    .hero-center {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        text-align: center; display: flex; flex-direction: column; align-items: center;
+    }
+    .hero-val { 
+        font-size: 90px; font-weight: 900; line-height: 0.9; letter-spacing: -3px; 
+        text-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .hero-label { 
+        font-size: 18px; font-weight: 800; color: #fff; margin-top: 15px; 
+        background: var(--accent-color); padding: 8px 20px; border-radius: 30px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* --- کارت‌های شیشه‌ای --- */
+    .glass-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-top: 1px solid var(--glass-highlight);
+        border-radius: 32px; padding: 32px;
+        backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+        box-shadow: var(--card-shadow), var(--inner-shadow);
+        position: relative; overflow: hidden;
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 25px 50px -5px rgba(0, 0, 0, 0.6), var(--inner-shadow);
+    }
+    .glass-card::after {
+        content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+        transform: skewX(-20deg); pointer-events: none;
+        animation: shine 8s infinite;
+    }
+    @keyframes shine { 0%, 85% { left: -100%; } 100% { left: 200%; } }
+
+    /* --- کارت بصری آب و هوا --- */
+    .weather-visual-card {
+        display: flex; flex-direction: column; align-items: center; text-align: center;
+        background: linear-gradient(160deg, var(--glass-bg) 0%, rgba(255,255,255,0.01) 100%);
+        padding-top: 40px;
+    }
+    .weather-anim-container {
+        width: 180px; height: 180px; margin-bottom: 10px;
+        position: relative; z-index: 2;
+        filter: drop-shadow(0 20px 40px rgba(0,0,0,0.25));
+        transform: perspective(500px) translateZ(20px);
+    }
+    .visual-temp { 
+        font-size: 80px; font-weight: 900; line-height: 1; margin-bottom: 8px; 
+        text-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background: linear-gradient(to bottom, var(--text-primary), var(--text-secondary));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .visual-desc { 
+        font-size: 22px; opacity: 1; margin-bottom: 30px; font-weight: 700; 
+        color: var(--accent-color); letter-spacing: -0.5px;
+    }
+    .visual-grid {
+        display: flex; gap: 20px; width: 100%; justify-content: center;
+        margin-top: 20px; padding-top: 25px; 
+        border-top: 1px solid var(--glass-border);
+    }
+    .v-item { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+    .v-icon { font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+    .v-val { font-size: 20px; font-weight: 800; color: var(--text-primary); }
+    .v-lbl { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+
+    /* --- کارت دوستانه --- */
+    .friendly-card {
+        text-align: right; border-right: 8px solid #fbbf24;
+        background: linear-gradient(90deg, var(--glass-bg) 0%, rgba(0,0,0,0) 100%);
+    }
+    .friendly-title { 
+        font-size: 20px; font-weight: 900; margin-bottom: 16px; 
+        color: #fbbf24; display: flex; align-items: center; gap: 10px; 
+        text-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+    }
+    .friendly-text { 
+        font-size: 16px; line-height: 2.1; font-weight: 500; 
+        text-align: justify; color: var(--text-primary); opacity: 0.95;
+    }
+
+    /* --- کارت‌های متنی --- */
+    .info-card { padding-right: 36px; }
+    .info-title { 
+        font-size: 18px; font-weight: 900; margin-bottom: 16px; 
+        display: flex; align-items: center; gap: 10px; 
+    }
+    .info-body { 
+        font-size: 15px; line-height: 2; font-weight: 400; 
+        color: var(--text-primary); opacity: 0.9; white-space: pre-line; text-align: justify; 
+    }
+
+    /* --- گرید آلاینده‌ها --- */
+    .pollutant-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .p-card {
+        background: var(--glass-bg); border-radius: 30px; padding: 24px;
+        border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight);
+        text-align: center;
+        backdrop-filter: blur(var(--glass-blur));
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        box-shadow: var(--card-shadow), var(--inner-shadow);
+    }
+    .p-val { 
+        font-size: 36px; font-weight: 900; margin: 12px 0; color: var(--accent-color); 
+        text-shadow: 0 0 20px rgba(52, 211, 153, 0.3);
+    }
+
+    /* --- انیمیشن‌های SVG --- */
+    .anim-sun { animation: spin 20s linear infinite; transform-origin: center; }
+    .anim-cloud { animation: float 6s ease-in-out infinite; }
+    .anim-rain { animation: rainDrop 0.8s linear infinite; }
+    .anim-snow { animation: snowDrop 3s linear infinite; }
+    .anim-thunder { animation: flash 5s infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    @keyframes rainDrop { 0% { transform: translateY(0); opacity:1; } 100% { transform: translateY(30px); opacity:0; } }
+    @keyframes flash { 0%, 90%, 100% { opacity: 0; } 92%, 96% { opacity: 1; filter: drop-shadow(0 0 20px #facc15); } }
+
+    /* --- لودر و مودال --- */
+    #loader {
+        position: fixed; inset: 0; background: var(--bg-color); z-index: 200;
+        display: flex; justify-content: center; align-items: center; flex-direction: column;
+        transition: opacity 0.6s;
+    }
+    .modal-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100;
+        backdrop-filter: blur(25px); display: flex; justify-content: center; align-items: flex-end;
+        opacity: 0; pointer-events: none; transition: 0.4s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-sheet {
+        width: 100%; max-width: 550px; background: var(--bg-color);
+        border-top-left-radius: 40px; border-top-right-radius: 40px;
+        padding: 36px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        border-top: 1px solid var(--glass-border);
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+    }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+    .search-input {
+        background: var(--glass-bg); border: 1px solid var(--glass-border);
+        padding: 20px; border-radius: 24px; color: var(--text-primary); font-family: inherit; font-weight: 700;
+        font-size: 18px; width: 100%; margin-top: 24px; text-align: center;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .search-item { 
+        padding: 20px; border-bottom: 1px solid var(--glass-border); cursor: pointer; text-align: center; 
+        color: var(--text-primary); font-weight: 500; transition: 0.2s;
+    }
+    .search-item:hover { background: rgba(255,255,255,0.05); }
+
+</style>
+</head>
+<body>
+
+    <div class="liquid-blob">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div id="particles"></div>
+    
+    <div id="loader">
+        <svg width="80" height="80" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:var(--accent-color);stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:var(--liquid-1);stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <circle cx="12" cy="12" r="10" fill="none" stroke-dasharray="32" stroke-dashoffset="32" stroke="url(#grad1)">
+                <animate attributeName="stroke-dashoffset" from="64" to="0" dur="1.2s" repeatCount="indefinite"/>
+                <animate attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="2s" repeatCount="indefinite"/>
+            </circle>
+        </svg>
+        <div style="margin-top: 25px; font-size: 18px; font-weight: 700; opacity: 0.9; letter-spacing: -0.5px;">در حال برقراری ارتباط با آسمان...</div>
+    </div>
+
+    <div class="modal-overlay" id="search-modal">
+        <div class="modal-sheet">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:22px; font-weight:900;">کجا هستید؟</span>
+                <button onclick="toggleSearch(false)" style="background:none; border:none; color:var(--text-primary); font-size:28px; cursor:pointer;">✕</button>
+            </div>
+            <input type="text" class="search-input" id="city-input" placeholder="نام شهر را بنویسید (مثلاً: تهران)" dir="rtl">
+            <div id="search-list" style="margin-top:20px; max-height:300px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <div id="app">
+        <header class="fade-in-up" style="animation-delay: 0.1s;">
+            <div class="location-pill" onclick="toggleSearch(true)">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="loc-name">تهران</span>
+            </div>
+            
+            <div class="header-actions">
+                <div class="btn-circle" onclick="toggleTheme()" title="تغییر تم">
+                    <svg id="theme-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </div>
+                <div class="btn-circle" onclick="getLocation()" title="موقعیت مکانی من">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="6"/></svg>
+                </div>
+            </div>
+        </header>
+
+        <div class="hero-section fade-in-up" style="animation-delay: 0.2s;">
+            <div class="gauge-wrapper">
+                <svg class="gauge-svg" viewBox="0 0 240 240">
+                    <circle class="track" cx="120" cy="120" r="110"></circle>
+                    <circle id="aqi-ring" class="progress" cx="120" cy="120" r="110"></circle>
+                </svg>
+                <div class="hero-center">
+                    <div class="hero-val" id="aqi-val">--</div>
+                    <div class="hero-label" id="aqi-text">...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card friendly-card fade-in-up" style="animation-delay: 0.3s;">
+            <div class="friendly-title">
+                <span style="font-size: 24px;">👋</span>
+                <span>گزارش اختصاصی برای شما</span>
+            </div>
+            <div class="friendly-text" id="friendly-text">
+                در حال نگارش گزارش اختصاصی...
+            </div>
+        </div>
+
+        <div class="glass-card weather-visual-card fade-in-up" style="animation-delay: 0.4s;">
+            <div class="weather-anim-container" id="weather-icon-container"></div>
+            <div class="visual-temp" id="visual-temp">--°</div>
+            <div class="visual-desc" id="visual-desc">--</div>
+            
+            <div class="visual-grid">
+                <div class="v-item">
+                    <span class="v-icon" style="color:#60a5fa">💧</span>
+                    <span class="v-val" id="hum-val">--%</span>
+                    <span class="v-lbl">رطوبت نسبی</span>
+                </div>
+                <div class="v-item">
+                    <span class="v-icon" style="color:#a78bfa">💨</span>
+                    <span class="v-val" id="wind-val">--</span>
+                    <span class="v-lbl">باد (کیلومتر/ساعت)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card info-card fade-in-up" style="animation-delay: 0.5s; border-right: 8px solid var(--accent-color);">
+            <div class="info-title" style="color:var(--accent-color);">
+                <span style="font-size: 22px;">🍃</span>
+                <span id="aqi-reco-head">توصیه هوشمند سلامتی</span>
+            </div>
+            <div class="info-body" id="aqi-reco-body">در حال تحلیل داده‌های سلامتی...</div>
+        </div>
+
+        <div class="glass-card info-card fade-in-up" style="animation-delay: 0.6s; border-right: 8px solid #60a5fa;">
+            <div class="info-title" style="color:#60a5fa;">
+                <span id="story-icon" style="font-size: 22px;">✨</span>
+                <span id="story-head">داستان آسمان</span>
+            </div>
+            <div class="info-body" id="story-body">در حال شنیدن صدای آسمان...</div>
+        </div>
+        
+        <div class="glass-card info-card fade-in-up" style="animation-delay: 0.7s; border-right: 8px solid #818cf8;">
+            <div class="info-title" style="color:#818cf8;">
+                <span style="font-size: 22px;">🌧️</span>
+                <span>پیش‌بینی بارش (۲۴ ساعت)</span>
+            </div>
+            <div>
+                <div style="font-size:18px; font-weight:900; margin-bottom: 8px;" id="rain-title">--</div>
+                <div style="font-size:15px; opacity:0.8; line-height:1.8; text-align:justify;" id="rain-desc">--</div>
+            </div>
+        </div>
+
+        <div class="pollutant-grid fade-in-up" style="animation-delay: 0.8s;">
+            <div class="p-card">
+                <span style="font-size:32px; margin-bottom: 5px;">😷</span>
+                <div class="p-val" id="pm25-val">--</div>
+                <div style="font-size:14px; font-weight:700; opacity:0.7;">ذرات PM2.5</div>
+            </div>
+            <div class="p-card">
+                <span style="font-size:32px; margin-bottom: 5px;">🌫️</span>
+                <div class="p-val" id="no2-val">--</div>
+                <div style="font-size:14px; font-weight:700; opacity:0.7;">دی‌اکسید نیتروژن</div>
+            </div>
+        </div>
+
+        <footer class="fade-in-up" style="animation-delay: 0.9s; text-align:center; font-size:14px; font-weight:500; opacity:0.4; margin-top:40px;">
+            طراحی و توسعه توسط پیمان عابدین پور 🌍
+        </footer>
+    </div>
+
+<script>
+    const toFarsi = (n) => n?.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]) || '-';
+    let isLight = false;
+
+    // --- تغییر تم (دارک/لایت) ---
+    function toggleTheme() {
+        isLight = !isLight;
+        document.body.classList.toggle('light-mode');
+        const icon = document.getElementById('theme-icon');
+        if(isLight) {
+            icon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+        } else {
+            icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        }
+    }
+
+    // --- آیکون‌های SVG ---
+    function getWeatherSVG(code, isDay) {
+        const sunColor = "#facc15";
+        const cloudColor = isLight ? "#94a3b8" : "#cbd5e1"; 
+        const cloudFilter = "filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));";
+        
+        if (code <= 1) return isDay ? 
+            `<svg viewBox="0 0 100 100" overflow="visible"><defs><filter id="glow"><feGaussianBlur stdDeviation="5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="50" cy="50" r="24" fill="${sunColor}" filter="url(#glow)"><animate attributeName="r" values="24;28;24" dur="4s" repeatCount="indefinite"/></circle><g class="anim-sun" stroke="${sunColor}" stroke-width="4" stroke-linecap="round"><line x1="50" y1="10" x2="50" y2="-5"/><line x1="50" y1="90" x2="50" y2="105"/><line x1="10" y1="50" x2="-5" y2="50"/><line x1="90" y1="50" x2="105" y2="50"/><line x1="22" y1="22" x2="12" y2="12"/><line x1="78" y1="78" x2="88" y2="88"/><line x1="22" y1="78" x2="12" y2="88"/><line x1="78" y1="22" x2="88" y2="12"/></g></svg>` : 
+            `<svg viewBox="0 0 100 100"><path d="M40 20 A30 30 0 1 0 80 70 A20 20 0 1 1 40 20" fill="#f1f5f9" filter="drop-shadow(0 0 20px rgba(255,255,255,0.6))"/><circle cx="65" cy="45" r="3" fill="#94a3b8" opacity="0.6"/><circle cx="50" cy="65" r="4" fill="#94a3b8" opacity="0.4"/></svg>`;
+        
+        if (code <= 3) return `<svg viewBox="0 0 100 100" overflow="visible"><path class="anim-cloud" d="M25,60 a20,20 0 0,1 0,-40 a20,20 0 0,1 40,0 a20,20 0 0,1 0,40 z" fill="${cloudColor}" stroke="white" stroke-width="1.5" style="${cloudFilter}"/></svg>`;
+        
+        if (code <= 67 || code >= 80 && code <= 82) return `<svg viewBox="0 0 100 100" overflow="visible"><path class="anim-cloud" d="M25,60 a20,20 0 0,1 0,-40 a20,20 0 0,1 40,0 a20,20 0 0,1 0,40 z" fill="${cloudColor}" style="${cloudFilter}"/><g class="anim-rain"><line x1="35" y1="65" x2="30" y2="85" stroke="#60a5fa" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="65" x2="45" y2="90" stroke="#60a5fa" stroke-width="4" stroke-linecap="round"/><line x1="65" y1="65" x2="60" y2="85" stroke="#60a5fa" stroke-width="4" stroke-linecap="round"/></g></svg>`;
+        
+        if (code >= 71 && code <= 77 || code >= 85) return `<svg viewBox="0 0 100 100" overflow="visible"><path class="anim-cloud" d="M25,60 a20,20 0 0,1 0,-40 a20,20 0 0,1 40,0 a20,20 0 0,1 0,40 z" fill="${cloudColor}" style="${cloudFilter}"/><g class="anim-snow"><circle cx="35" cy="75" r="5" fill="white"/><circle cx="55" cy="85" r="5" fill="white"/><circle cx="70" cy="70" r="5" fill="white"/></g></svg>`;
+        
+        if (code >= 95) return `<svg viewBox="0 0 100 100" overflow="visible"><path class="anim-cloud" d="M25,60 a20,20 0 0,1 0,-40 a20,20 0 0,1 40,0 a20,20 0 0,1 0,40 z" fill="#475569" style="${cloudFilter}"/><path class="anim-thunder" d="M45,60 L35,80 L50,80 L40,105" fill="none" stroke="#facc15" stroke-width="6" stroke-linejoin="round" filter="drop-shadow(0 0 15px #facc15)"/></svg>`;
+        
+        return `<svg viewBox="0 0 100 100"><g stroke="${cloudColor}" stroke-width="4" stroke-linecap="round"><line x1="20" y1="40" x2="80" y2="40"/><line x1="10" y1="60" x2="90" y2="60" opacity="0.7"/><line x1="30" y1="80" x2="70" y2="80" opacity="0.4"/></g></svg>`;
+    }
+
+    // --- وضعیت دوستانه ---
+    function getFriendlyStatus(t, wCode, wind, hum, isDay) {
+        let text = "";
+        const timeGreeting = isDay ? "سلام، وقت بخیر! امیدوارم روز پرانرژی و خوبی رو شروع کرده باشی. " : "سلام، شب بخیر دوست من. امیدوارم آرامش شب خستگی‌هات رو بشوره. ";
+        text += timeGreeting;
+
+        if(t < 0) text += "راستش رو بخوای، بیرون هوا ناجوانمردانه سرده! 🥶 انگار زمستون با تمام قوا اومده. حتماً چند لایه لباس گرم بپوش و اگه می‌تونی، یه نوشیدنی داغ همراهت داشته باش. ";
+        else if(t < 10) text += "هوا حسابی سرده و نیاز به کاپشن و شال‌گردن داری. 🧣 مواظب باش سرما نخوری چون این هوا موذیانه عمل می‌کنه! ";
+        else if(t < 18) text += "هوا یه خنکی خیلی ملایم و شیک داره. 🧥 یه لباس پاییزی یا یه ژاکت سبک کافیه تا از این هوا لذت ببری. ";
+        else if(t < 27) text += "الان هوا توی بهترین حالت ممکن خودشه! 😍 نه اونقدر گرمه که کلافه بشی، نه اونقدر سرد که بلرزی. جون میده برای پیاده‌روی و لذت بردن از شهر. ";
+        else if(t < 35) text += "هوا گرم شده و آفتاب حسابی داره می‌تابه. ☀️ لباس‌های نخی و روشن بپوش و حواست به نوشیدن آب باشه تا گرمازده نشی. ";
+        else text += "وای! هوا خیلی گرم و سوزانه. 🔥 اگه کار واجبی نداری، توی سایه یا زیر کولر بمون. بیرون رفتن تو این گرما اصلاً شوخی نیست. ";
+
+        if(wCode <= 1) text += isDay ? "آسمون صافه و خورشید داره لبخند می‌زنه. عینک آفتابی یادت نره! 😎 " : "آسمون صاف و پر از ستاره‌ست، اگر فرصت کردی یه نگاهی به بالا بنداز. ✨ ";
+        else if(wCode <= 3) text += "ابرها اومدن تو آسمون ولی فعلاً خبری از بارون نیست، فقط هوا رو شاعرانه کردن. ☁️ ";
+        else if(wCode >= 51 && wCode <= 67 || wCode >= 80) text += "صدای بارون میاد! 🌧️ حتماً چترت رو بردار و از بوی خاک بارون‌خورده لذت ببر، ولی مواظب لیز خوردن باش. ";
+        else if(wCode >= 71) text += "برف داره میاد و همه جا سفیدپوش شده! ☃️ حسابی لباس بپوش و اگه تونستی یه آدم‌برفی هم درست کن. ";
+
+        if(wind > 25) text += "باد نسبتاً شدیدی هم داره می‌وزه، موهاتو محکم ببند چون شوخی نداره! 💨 ";
+        if(hum > 75) text += "رطوبت هوا هم بالاست و ممکنه یکم احساس سنگینی کنی. 💧 ";
+
+        return text;
+    }
+
+    // --- پیام کیفیت هوا ---
+function getAirQualityMessage(aqi) {
+    if (aqi <= 50) return {
+        text: "حالا که خوش‌شانسی آوردی! 🎉 امروز ریه‌هات نمی‌خوان خودشونو بکشن. هوا، نه که خوب باشه، عالیه!\n\nتوصیه: از فرصت استفاده کن. پنجره‌ها رو باز کن، هوا رو قورت بده و فقط بری بیرون تا نفس کشیدن رو احساس کنی. اگه اهل ورزش هستی، برو دویدن یا دوچرخه‌سواری. امروز که هوا اینقدر عالیه، باید لذت برد. از هر نفس باید لذت ببری چون این روزا ندیدی چیزی بهتر از این."
+    };
+    
+    if (aqi <= 100) return {
+        text: "آره، هوا نسبتا خوبه. خیلی زیاد هم خراب نیست. 😊\n\nتوصیه: برو به کارت برس. کار روزمره‌ات رو راحت انجام بده. اگه حساسیت خیلی داری، ممکنه یه کمی اذیت بشی، پس توی ترافیک بمون و نفس‌هات رو کم کن. برای باقی مردم، هوا خوبه و می‌تونی بیرون بری، ولی زیاد هم تلاش نکن!"
+    };
+    
+    if (aqi <= 150) return {
+        text: "هوا برای آدم‌های حساس خطرناکه. 😷 هشدار زرد، یه جورایی دیگه خودت می‌دونی چی می‌گم.\n\nتوصیه: اگه بچه داری، سالمند تو خونه هست یا بارداری، دیگه بیرون نرو! اصلاً ارزشش رو نداره. اگه آسم یا مشکلات قلبی داری، یه روز به خودت مرخصی بده. اگه اینا رو نداری، خیلی سنگین ورزش نکن. امروز یه روز معمولی برای تعطیلی باش."
+    };
+    
+    if (aqi <= 200) return {
+        text: "هشدار قرمز! ⛔ اینجا دیگه هوا برای همه مسموم شده. کاملاً آلوده است.\n\nتوصیه: دیگه همین جا بمون! این هوا پر از گرد و خاکیه که به هیچ‌کس خوب نمیاد. حتی اگه کاری ندارید و باید بری بیرون، ماسک بزن، در غیر این صورت واقعاً داری خودتو بی‌خود می‌کشی. پنجره‌ها رو ببند، دستگاه تصفیه هوا رو روشن کن. از مایعات زیاد بنوش و امیدوار باش که نمیرسی!"
+    };
+    
+    return {
+        text: "خطر جدی و غیرقابل تحمل! ☠️ آلودگی از حد گذشت.\n\nتوصیه: اصلاً بیرون نرو. این هوا یه چیزی شبیه به سمّیه. هر نفس کشیدن مثل یه تقلب به خودته. تمام درزها رو ببند، یه گوشه بشین و از هیچ فعالیت بدنی خبری نباشه. مراقب بچه‌ها و سالمند‌ها باش، چون این هوا اونا رو به راحتی می‌کشه."
+    };
+}
+
+
+    // --- داستان آسمان ---
+function getDetailedQuote(temp, weatherCode, windSpeed, aqi, timeOfDay) {
+    if (aqi > 150) return { title: "شهر توی دود و گند خودش غرقه", icon: "😷", text: "آقا الان این شهر داره غرق میشه توی یه گند و دود که حتی نمی‌دونی از کجا شروع شده! آسمون هم داره پنهان میشه زیر یه لایه خاکی که حتی نمی‌دونه به کی داره زهر می‌زنه. نفس کشیدن اینجا یعنی جونتو توی خطر انداختن. به جای اینکه بیرون بری، بهتره که یه مدت توی خونه حبس بشی. در و پنجره رو ببند، چون اینجا دیگه هوا شبیه به یک سمی شده که تو نمی‌تونی تحمل کنی.\n\nبیخیال این وضع بیرون، اگر نمی‌خوای از هوای آلوده بمیرى، همون‌جا بشین و فقط منتظر باش که این بدبختی تموم بشه." };
+    
+    if ([71, 73, 75, 85, 86].includes(weatherCode)) return { title: "برف زیاد که فقط مردم رو دیوونه می‌کنه", icon: "❄️", text: "آسمون امروز داره برف می‌ریزه، اما نه برف خوشگلی که بخوای بهش نگاه کنی و لذت ببری. این برف مثل یه شوخی بد، بیشتر از اینکه به درد یه زمستون خوب بخوره، به درد آدم‌های سرمازده می‌خوره. می‌ری بیرون؟ برف‌ها هم بهت گیر می‌ده، انگار می‌خوان یادآوری کنن که اصلاً بیرون رفتن چه فایده‌ای داره.\n\nلباس گرم بپوش که سرمای بی‌رحم و خش‌خش زیر پات در انتظارته. این برف دیگه هیچ معنی مثبت و قشنگی نداره، فقط خالی کردن فضا و اعصاب مردم رو هدف گرفته." };
+    
+    if ([95, 96, 99].includes(weatherCode)) return { title: "طوفانی که هیچ‌کس نمی‌تونه کنترلش کنه", icon: "⚡", text: "آسمون امروز به طرز وحشیانه‌ای داره به زمین حمله می‌کنه! برق و رعد دارن از هم سبقت می‌گیرن که ببینن کی بیشتر می‌تونه وحشت به پا کنه. طبیعت امروز داره با این قدرت زمین رو به آشوب می‌کشه و هیچ‌کس ازش خبری نداره.\n\nاگر عقل سلیم داری، بیرون نرو! بیرون یعنی گند زدن به خودت. بهتره همین‌جا بشینی و این نمایش طبیعت رو از توی خونت تماشا کنی، چون ریسک کردن در این شرایط یعنی گرفتن سیلی از طبیعت." };
+    
+    if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(weatherCode)) {
+        if ([63, 65, 81, 82].includes(weatherCode)) return { title: "باران تند و تیز", icon: "🌧️", text: "بارون امروز داره هرچی جلوش می‌بینه رو خیس می‌کنه. توی خیابون‌ها دیگه جای راه رفتن نیست، چون هر چیزی که بهش می‌خوری، همه‌ش غرق در گِل و آب شده. این بارون اصلاً شوخی نداره و هدفش فقط اینه که همه رو خیس کنه و یه خاطره بی‌رحم توی ذهنش بذاره.\n\nچتر و کفش ضدآب رو بیار که امروز با هیچ چیزی نمی‌تونی از این بارون فرار کنی. این بارون همونطور که می‌باره، فقط داره تو رو توی دل گند و لجن می‌فرسته." };
+        
+        return { title: "باران شدیدی که هیچ‌جارو خشک نمی‌ذاره", icon: "☔", text: "بارون داره از آسمون پایین میاد و هیچ وقفه‌ای نمی‌گیره. تمام خیابون‌ها، کوچه‌ها، هرچیزی که بهش برمی‌خوره، می‌ره زیر آب. این بارون به هیچ‌کس رحم نمی‌کنه. فکر کن داری از زیر یه دوش آب به راه می‌ری، ولی هیچ وقت تموم نمی‌شه.\n\nاگر بیرون میری، چتر رو بردار، ولی هیچ‌چیز نمی‌تونه تو رو از خیس شدن نجات بده. این بارون قصد داره برات یه تجربه فراموش‌نشدنی بسازه که با هیچ‌چیز توی دنیا عوض نمی‌کنی!" };
+    }
+
+    if ([45, 48].includes(weatherCode)) return { title: "شهر توی مه گیر کرده و انگار هیچ چیزی نمی‌بینی", icon: "🌫️", text: "مه امروز همه‌چیز رو مخلوط کرده. انگار داری توی یه ظرف بزرگ از گلابی‌ها و خاک سیر می‌کنی که هیچ چیزی ازش نمی‌فهمی. یه دنیای کاملاً توهمی که اصلاً نمی‌دونی چی به چی شده و کجا میری. حتی خودت نمی‌فهمی چرا همه اینطوری گم شدن.\n\nاگه می‌خواهی بیرون بری، باید منتظر بشی که توی این مه کامل گم بشی. چون دیدن هیچ چیزی توی این شرایط غیرممکنه. پس همین‌جا بمون، شاید خدا یه راه نجات پیدا کنه!" };
+
+    if (temp < 0) return { title: "سرمای استخوان‌سوز که هیچ‌وقت تموم نمیشه", icon: "🥶", text: "سرمای امروز دیگه از حد گذشته. این سرمای وحشی داره به همه نشون می‌ده که زمستون هیچ وقت از ذهنش نمی‌ره! هر لحظه که می‌ری بیرون، بیشتر از قبل یخ می‌زنی. حتی اونایی که شمالی‌ن و سرمای این‌جا براشون عادیه، الان دیگه احساس می‌کنن که بدنشون یخ زده.\n\nلباس‌های گرم بپوش و از هر چی به بیرون مربوط میشه دوری کن. چون سرمای اینجا می‌خواد بهت نشون بده که هیچ رحم و مروتی برای کسی نیست." };
+    
+    if (temp > 35) return { title: "آفتاب داغ که تبدیل به جهنم می‌کنه", icon: "🔥", text: "آفتاب امروز دیگه داره زمین رو به جهنم تبدیل می‌کنه! هر قدم که بیرون می‌زاری، انگار داری توی یه کوره بزرگ قدم می‌زاری. هیچ سایه‌ای به دادت نمی‌رسه، همه‌چیز فقط داره می‌سوزه.\n\nلباس نخی بپوش و از هر جایی که سایه پیدا می‌کنی استفاده کن. بیرون رفتن یعنی خودکشی با دستان خودت." };
+    
+    if (temp >= 15 && temp <= 25) return { title: "هوای بی‌روح و بی‌حال که هیچ لذتی نداره", icon: "🌼", text: "این هوای امروز نه گرمه، نه سرده. نه به درد کسی می‌خوره نه به کسی خوش می‌گذره. فقط یه چیزی هست که می‌تونی بگی: «آره، یه هوای معمولی». هیچ چیزی هیجان‌انگیز توش نیست. هیچ لذتی نمی‌بری و فقط می‌خوای هرچه زودتر ازش خلاص بشی.\n\nامروز هیچ حس خاصی نداری. هیچ کار مهمی هم نمی‌خوای بکنی. فقط روز رو سپری می‌کنی و منتظری تموم بشه." };
+    
+    return { title: "آسمون بی‌حرکت و بی‌خیال", icon: "☁️", text: "آسمون امروز اصلاً هیچ کاری نمی‌کنه. انگار توی خواب عمیق افتاده و اصلاً نمی‌دونه که داره چی می‌گذره. نه ابرهایی که بتونن ببارن، نه هیچ چیزی که بتونه تغییر ایجاد کنه. همونطور که همیشه بوده، به همون حالت باقی می‌مونه.\n\nبهترین کار اینه که این روز رو هیچ جدی نگیری. فقط بشین، حتی سعی نکن چیزی رو تغییر بدی، چون هیچ چیزی قرار نیست تغییر کنه." };
+}
+
+    // --- متن پیش‌بینی بارش ---
+    function getRainMessage(probs) {
+        const maxProb = Math.max(...probs);
+        if (maxProb < 10) return { t: "آسمانی خشک و مطمئن", d: "خیالتان راحت! در ۲۴ ساعت آینده احتمال بارش تقریباً صفر است. می‌توانید با خیال راحت برنامه‌های فضای باز بچینید." };
+        if (maxProb < 40) return { t: "شاید چند قطره", d: "احتمال بارش کم است، اما شاید ابرهای گذرا چند قطره‌ای ببارند. نیازی به تغییر جدی برنامه‌ها نیست." };
+        if (maxProb < 75) return { t: "چترها آماده باشند", d: "احتمال بارندگی قابل توجه است. به احتمال زیاد در ساعاتی از روز شاهد بارش خواهیم بود. همراه داشتن چتر عاقلانه است." };
+        return { t: "بارش قطعی و فراگیر", d: "آسمان قطعاً خواهد بارید. برنامه‌ریزی خود را بر اساس یک روز خیس و بارانی انجام دهید و تجهیزات لازم را همراه داشته باشید." };
+    }
+
+    // --- بروزرسانی رابط کاربری ---
+    function updateUI(data, city) {
+        const aqi = data.aqi.current.us_aqi;
+        const current = data.weather.current;
+        const hour = new Date().getHours();
+        const isDay = hour > 6 && hour < 19;
+        const wCode = current.weather_code;
+
+        let accent = '#34d399'; 
+        let status = 'پاک و عالی';
+        document.body.classList.remove('weather-rain', 'weather-snow');
+
+        if(aqi > 50) { accent = '#facc15'; status = 'سالم و قابل قبول'; }
+        if(aqi > 100) { accent = '#fb923c'; status = 'ناسالم برای حساس‌ها'; }
+        if(aqi > 150) { accent = '#f87171'; status = 'ناسالم برای همه'; }
+        if(aqi > 200) { accent = '#c084fc'; status = 'بسیار خطرناک'; }
+        if(aqi > 300) { accent = '#7e22ce'; status = 'مرگبار'; }
+
+        if(wCode >= 95) document.body.classList.add('weather-rain');
+        else if(wCode >= 51 && wCode <= 67 || wCode >= 80) document.body.classList.add('weather-rain');
+        else if(wCode >= 71) document.body.classList.add('weather-snow');
+
+        document.documentElement.style.setProperty('--accent-color', accent);
+        document.documentElement.style.setProperty('--liquid-1', accent);
+
+        document.getElementById('loc-name').innerText = city;
+        
+        animateValue("aqi-val", 0, aqi, 1500);
+        
+        document.getElementById('aqi-text').innerText = status;
+        document.getElementById('aqi-text').style.backgroundColor = accent;
+        
+        const offset = 660 - (Math.min(aqi, 400) / 400) * 660;
+        document.getElementById('aqi-ring').style.strokeDashoffset = offset;
+        document.getElementById('aqi-ring').style.stroke = accent;
+
+        document.getElementById('visual-temp').innerText = toFarsi(Math.round(current.temperature_2m)) + '°';
+        const quote = getDetailedQuote(current.temperature_2m, wCode, current.wind_speed_10m, aqi, hour);
+        document.getElementById('visual-desc').innerText = quote.title;
+        document.getElementById('weather-icon-container').innerHTML = getWeatherSVG(wCode, isDay);
+        document.getElementById('hum-val').innerText = toFarsi(current.relative_humidity_2m) + '%';
+        document.getElementById('wind-val').innerText = toFarsi(current.wind_speed_10m);
+
+        document.getElementById('friendly-text').innerText = getFriendlyStatus(current.temperature_2m, wCode, current.wind_speed_10m, current.relative_humidity_2m, isDay);
+
+        const aqiMsg = getAirQualityMessage(aqi);
+        document.getElementById('aqi-reco-head').innerText = "وضعیت تنفس شما";
+        document.getElementById('aqi-reco-body').innerText = aqiMsg.text;
+
+        document.getElementById('story-head').innerText = quote.title;
+        document.getElementById('story-icon').innerText = quote.icon;
+        document.getElementById('story-body').innerText = quote.text;
+
+        const rainProbs = data.weather.hourly.precipitation_probability.slice(hour, hour+24);
+        const rainInfo = getRainMessage(rainProbs);
+        document.getElementById('rain-title').innerText = rainInfo.t;
+        document.getElementById('rain-desc').innerText = rainInfo.d;
+
+        document.getElementById('pm25-val').innerText = toFarsi(data.aqi.current.pm2_5);
+        document.getElementById('no2-val').innerText = toFarsi(data.aqi.current.nitrogen_dioxide);
+
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => document.getElementById('loader').style.display = 'none', 600);
+    }
+
+    function animateValue(id, start, end, duration) {
+        if (start === end) return;
+        var range = end - start;
+        var current = start;
+        var increment = end > start ? 1 : -1;
+        var stepTime = Math.abs(Math.floor(duration / range));
+        var obj = document.getElementById(id);
+        var timer = setInterval(function() {
+            current += increment;
+            obj.innerHTML = toFarsi(current);
+            if (current == end) { clearInterval(timer); }
+        }, Math.max(stepTime, 20));
+    }
+
+    // --- دریافت داده‌ها و ذخیره‌سازی در LocalStorage ---
+    async function fetchData(lat, lon, name) {
+        document.getElementById('loader').style.display = 'flex';
+        setTimeout(() => document.getElementById('loader').style.opacity = '1', 10);
+        
+        try {
+            const [aqiRes, weatherRes] = await Promise.all([
+                fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,nitrogen_dioxide&timezone=auto`),
+                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&hourly=precipitation_probability&timezone=auto`)
+            ]);
+            
+            if(!aqiRes.ok || !weatherRes.ok) throw new Error("API Error");
+            
+            // ذخیره موقعیت موفق در حافظه مرورگر
+            localStorage.setItem('last_lat', lat);
+            localStorage.setItem('last_lon', lon);
+            localStorage.setItem('last_name', name);
+
+            updateUI({aqi: await aqiRes.json(), weather: await weatherRes.json()}, name);
+        } catch (e) { 
+            alert("متاسفانه در دریافت اطلاعات مشکلی پیش آمده. لطفاً اتصال اینترنت خود را بررسی کنید.");
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 600);
+        }
+    }
+
+    function toggleSearch(show) {
+        const modal = document.getElementById('search-modal');
+        if(show) { modal.classList.add('open'); setTimeout(() => document.getElementById('city-input').focus(), 100); }
+        else modal.classList.remove('open');
+    }
+    
+    let debounce;
+    document.getElementById('city-input').addEventListener('input', (e) => {
+        clearTimeout(debounce);
+        if(e.target.value.length < 2) return;
+        debounce = setTimeout(async () => {
+            try {
+                const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${e.target.value}&count=5&language=en&format=json`);
+                const data = await res.json();
+                const list = document.getElementById('search-list');
+                list.innerHTML = '';
+                if(!data.results) {
+                    list.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6">شهری پیدا نشد</div>';
+                    return;
+                }
+                data.results?.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'search-item';
+                    div.innerText = `${c.name} (${c.country_code})`;
+                    div.onclick = () => { fetchData(c.latitude, c.longitude, c.name); toggleSearch(false); };
+                    list.appendChild(div);
+                });
+            } catch(e) {}
+        }, 600);
+    });
+
+    function getLocation() {
+        if(navigator.geolocation) {
+            document.getElementById('loader').style.display = 'flex';
+            document.getElementById('loader').style.opacity = '1';
+            navigator.geolocation.getCurrentPosition(
+                p => fetchData(p.coords.latitude, p.coords.longitude, "موقعیت من"),
+                () => { 
+                    alert("دسترسی به موقعیت مکانی داده نشد."); 
+                    document.getElementById('loader').style.opacity = '0';
+                    setTimeout(() => document.getElementById('loader').style.display = 'none', 600);
+                }
+            );
+        } else {
+            alert("مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند.");
+        }
+    }
+
+    // --- شروع برنامه با بررسی حافظه ---
+    function initApp() {
+        const savedLat = localStorage.getItem('last_lat');
+        const savedLon = localStorage.getItem('last_lon');
+        const savedName = localStorage.getItem('last_name');
+
+        if (savedLat && savedLon && savedName) {
+            // اگر قبلاً ذخیره شده، همان را بارگذاری کن
+            fetchData(savedLat, savedLon, savedName);
+        } else {
+            // اگر اولین بار است، پیش‌فرض تهران
+            fetchData(35.68, 51.38, "تهران");
+        }
+    }
+
+    initApp();
+
+</script>
+</body>
+</html>
