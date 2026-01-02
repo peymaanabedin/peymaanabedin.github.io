@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Alpha Terminal 2026</title>
+    <style>
+        /* --- CORE VARIABLES --- */
+        :root {
+            --bg-color: #000000;
+            --surface: #0a0a0c;
+            --surface-card: #121214;
+            --surface-hover: #1c1c1f;
+            --border: #27272a;
+            --text-main: #ededed;
+            --text-sub: #888888;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-gold: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --font-mono: "SF Mono", "Menlo", "Consolas", monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Inter", Roboto, sans-serif;
+            --shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f0f2f5;
+            --surface: #ffffff;
+            --surface-card: #ffffff;
+            --surface-hover: #f8fafc;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 20px 16px;
+        }
+
+        /* --- HEADER --- */
+        header { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent-gold); }
+        .theme-btn { 
+            width: 36px; height: 36px; background: var(--surface-card); border: 1px solid var(--border); 
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .theme-btn svg { width: 18px; fill: var(--text-sub); }
+
+        /* --- DASHBOARD LAYOUT --- */
+        .dashboard { width: 100%; max-width: 600px; display: grid; gap: 16px; }
+
+        /* --- CLOCK MODULE --- */
+        .clock-mod {
+            background: var(--surface-card); border: 1px solid var(--border); border-radius: 18px; padding: 20px;
+            text-align: center; position: relative; overflow: hidden; box-shadow: var(--shadow);
+        }
+        .loc-pill {
+            display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px;
+            background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); font-size: 0.75rem; font-weight: 700;
+            cursor: pointer; margin-bottom: 10px; border: 1px solid rgba(59, 130, 246, 0.2); transition: 0.2s;
+        }
+        .loc-pill:hover { background: rgba(59, 130, 246, 0.2); }
+        .main-time { font-family: var(--font-mono); font-size: 3.2rem; font-weight: 700; letter-spacing: -2px; line-height: 1; font-variant-numeric: tabular-nums; }
+        .date-sub { color: var(--text-sub); font-size: 0.9rem; margin-top: 6px; font-weight: 500; }
+
+        /* --- DEEP INSIGHT MODULE --- */
+        .insight-mod {
+            background: var(--surface-card); border: 1px solid var(--border); border-radius: 18px;
+            overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow);
+        }
+        
+        /* Overlap Strip */
+        .ov-strip {
+            background: linear-gradient(90deg, #18181b 0%, #09090b 100%);
+            padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .ov-lbl { font-size: 0.7rem; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
+        .ov-val { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; color: var(--text-main); }
+
+        /* Insight Body */
+        .insight-body { padding: 18px 20px; }
+        
+        .ins-header { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; }
+        
+        .ins-grid { display: grid; gap: 12px; }
+        .ins-row { display: flex; gap: 12px; align-items: flex-start; }
+        .ins-icon { font-size: 1.1rem; line-height: 1; margin-top: 2px; }
+        
+        .ins-content { display: flex; flex-direction: column; }
+        .ins-label { font-size: 0.75rem; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-bottom: 2px; }
+        .ins-value { font-size: 0.9rem; color: var(--text-main); line-height: 1.4; }
+
+        /* --- EVENTS & FED --- */
+        .split-mod { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .mini-card { background: var(--surface-card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; }
+        .mod-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-sub); margin-bottom: 10px; letter-spacing: 0.5px; }
+
+        .fed-big { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+        .fed-sm { font-size: 0.75rem; color: var(--accent-gold); }
+
+        .ev-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.75rem; }
+        .ev-name { color: var(--text-main); font-weight: 500; }
+        .ev-meta { text-align: right; }
+        .ev-date { color: var(--text-sub); display: block; font-size: 0.65rem; }
+        .ev-tag { font-size: 0.65rem; font-weight: 700; color: var(--accent-red); }
+
+        /* --- MARKET GRID --- */
+        .grid-header { margin-top: 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-sub); letter-spacing: 1px; text-transform: uppercase; }
+        
+        .m-card {
+            background: var(--surface-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 16px; position: relative; overflow: hidden; transition: transform 0.2s;
+        }
+        
+        /* Status Strip */
+        .strip { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+        .m-card.open .strip { background: var(--accent-green); box-shadow: 2px 0 15px rgba(16, 185, 129, 0.4); }
+        .m-card.closed .strip { background: var(--border); }
+        .m-card.pre .strip { background: var(--accent-blue); }
+        .m-card.weekend .strip { background: var(--text-sub); opacity: 0.3; }
+
+        .mc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .mc-name { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+        .mc-sub { font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; font-weight: 600; }
+        
+        .st-pill { font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; font-weight: 800; text-transform: uppercase; }
+        .m-card.open .st-pill { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+        .m-card.pre .st-pill { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
+        .m-card.closed .st-pill { background: rgba(255,255,255,0.05); color: var(--text-sub); }
+        .m-card.weekend .st-pill { border: 1px solid var(--border); color: var(--text-sub); }
+
+        .mc-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-sub); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(128,128,128,0.1); }
+        
+        .mc-timer { display: flex; justify-content: space-between; align-items: flex-end; }
+        .t-lbl { font-size: 0.7rem; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-bottom: 2px; }
+        .t-val { font-family: var(--font-mono); font-size: 1.4rem; font-weight: 600; color: var(--text-main); letter-spacing: -1px; }
+
+        .p-track { height: 3px; background: rgba(255,255,255,0.05); width: 100%; margin-top: 12px; border-radius: 2px; overflow: hidden; }
+        .p-fill { height: 100%; width: 0%; transition: width 1s linear; }
+        .m-card.open .p-fill { background: var(--accent-green); }
+        .m-card.pre .p-fill { background: var(--accent-blue); }
+
+        /* --- MODAL --- */
+        .modal-wrap {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal { background: var(--surface-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; width: 90%; max-width: 320px; }
+        .opt { padding: 12px; border-bottom: 1px solid var(--border); cursor: pointer; color: var(--text-sub); transition: 0.2s; }
+        .opt:hover { color: var(--text-main); background: var(--surface-hover); padding-left: 16px; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">ALPHA<span>TERMINAL</span></div>
+        <div class="theme-btn" onclick="toggleTheme()">
+            <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+        </div>
+    </header>
+
+    <div class="dashboard">
+
+        <div class="clock-mod">
+            <div class="loc-pill" id="locBtn" onclick="openModal()">Tehran (IRST) ▼</div>
+            <div class="main-time" id="mainClock">00:00:00</div>
+            <div class="date-sub" id="dateLabel">Loading...</div>
+        </div>
+
+        <div class="insight-mod">
+            <div class="ov-strip">
+                <div class="ov-lbl" id="overlapLabel">Overlap Timer</div>
+                <div class="ov-val" id="overlapTimer">--:--:--</div>
+            </div>
+            <div class="insight-body">
+                <div class="ins-header" id="insContext">Analyzing Market Conditions...</div>
+                <div class="ins-grid">
+                    <div class="ins-row">
+                        <div class="ins-icon">📊</div>
+                        <div class="ins-content">
+                            <div class="ins-label">Sentiment</div>
+                            <div class="ins-value" id="insSentiment">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="ins-row">
+                        <div class="ins-icon">🎯</div>
+                        <div class="ins-content">
+                            <div class="ins-label">Action</div>
+                            <div class="ins-value" id="insAction">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="split-mod">
+            <div class="mini-card">
+                <div class="mod-title">Next FOMC</div>
+                <div class="fed-big" id="fedTimer">--d --h</div>
+                <div class="fed-sm" id="fedDate">Loading</div>
+            </div>
+            <div class="mini-card">
+                <div class="mod-title">Upcoming Events</div>
+                <div id="eventList"></div>
+            </div>
+        </div>
+
+        <div class="grid-header">Live Markets</div>
+        <div id="grid" style="display:grid; gap:12px;"></div>
+
+    </div>
+
+    <div class="modal-wrap" id="modal" onclick="closeModal(event)">
+        <div class="modal">
+            <h3 style="margin-bottom:15px; color:var(--text-main)">Select Base Time</h3>
+            <div class="opt" onclick="setZone('Asia/Tehran', 'Tehran (IRST)')">Tehran (IRST)</div>
+            <div class="opt" onclick="setZone('Europe/London', 'London (GMT)')">London (UK)</div>
+            <div class="opt" onclick="setZone('America/New_York', 'New York (EST)')">New York (USA)</div>
+            <div class="opt" onclick="setZone('local', 'Device Time')">My Local Time</div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        
+        // 1. Market Hours
+        const markets = [
+            { id: 'sydney', name: 'Sydney', sub: 'AUD/NZD', zone: 'Australia/Sydney', open: 22, close: 7, str:'22:00-07:00' },
+            { id: 'tokyo', name: 'Tokyo', sub: 'USD/JPY', zone: 'Asia/Tokyo', open: 9, close: 18, str:'09:00-18:00' },
+            { id: 'london', name: 'London', sub: 'EUR/GBP', zone: 'Europe/London', open: 8, close: 16.5, str:'08:00-16:30' },
+            { id: 'ny', name: 'New York', sub: 'USD/Stocks', zone: 'America/New_York', open: 9.5, close: 16, str:'09:30-16:00' },
+            { id: 'gold', name: 'Gold (XAU)', sub: 'Spot', zone: 'America/New_York', open: 18, close: 17, str:'18:00-17:00' }
+        ];
+
+        // 2. FOMC Decision Dates (2026)
+        const fomcDates = [
+            "2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", 
+            "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09"
+        ];
+
+        let baseZone = localStorage.getItem('zone') || 'Asia/Tehran';
+        let baseName = localStorage.getItem('zoneName') || 'Tehran (IRST)';
+
+        // --- UTILITIES ---
+        const pad = (n) => n.toString().padStart(2, '0');
+        const getBaseTime = () => baseZone === 'local' ? new Date() : new Date(new Date().toLocaleString("en-US", {timeZone: baseZone}));
+        const getMarketTime = (zone) => new Date(new Date().toLocaleString("en-US", {timeZone: zone}));
+
+        function msToTime(ms) {
+            if(ms < 0) return "00:00:00";
+            let s = Math.floor((ms / 1000) % 60);
+            let m = Math.floor((ms / (1000 * 60)) % 60);
+            let h = Math.floor((ms / (1000 * 60 * 60)));
+            return `${pad(h)}:${pad(m)}:${pad(s)}`;
+        }
+
+        // --- ENGINE: ECONOMIC EVENTS ---
+        function getUpcomingEvents() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = now.getMonth();
+            let events = [];
+
+            // 1. NFP (1st Friday)
+            let nfpDate = new Date(y, m, 1);
+            while (nfpDate.getDay() !== 5) nfpDate.setDate(nfpDate.getDate() + 1);
+            if (now > new Date(nfpDate.getTime() + 86400000)) {
+                nfpDate = new Date(y, m + 1, 1);
+                while (nfpDate.getDay() !== 5) nfpDate.setDate(nfpDate.getDate() + 1);
+            }
+            events.push({ name: "NFP (Jobs)", date: nfpDate });
+
+            // 2. CPI (Approx 13th)
+            let cpiDate = new Date(y, m, 13);
+            if (now > cpiDate) cpiDate = new Date(y, m + 1, 13);
+            events.push({ name: "CPI Data", date: cpiDate });
+
+            // 3. FOMC
+            const nextFedStr = fomcDates.find(d => new Date(d + "T23:59:00") > now);
+            if (nextFedStr) events.push({ name: "FOMC Rate", date: new Date(nextFedStr) });
+
+            return events.sort((a,b) => a.date - b.date).slice(0, 3);
+        }
+
+        // --- ENGINE: STRATEGY GENERATOR ---
+        function getStrategy(date) {
+            const day = date.getDay();
+            const uH = date.getUTCHours();
+            const events = getUpcomingEvents();
+            
+            // Check NFP Today
+            const isNFP = events.some(e => e.name.includes("NFP") && e.date.getDate() === date.getDate() && e.date.getMonth() === date.getMonth());
+
+            if (day === 0 || day === 6) {
+                return {
+                    ctx: "Weekend Session",
+                    sent: "Markets closed. Crypto active only.",
+                    act: "Review weekly charts. Mark key levels for Monday."
+                };
+            }
+            if (isNFP) {
+                return {
+                    ctx: "⚠️ NFP WARNING (Today)",
+                    sent: "Extreme Volatility Expected.",
+                    act: "Reduce leverage. Wait for 13:30 UTC print before entering."
+                };
+            }
+            if (uH >= 13 && uH < 16) {
+                return {
+                    ctx: "⚡ London/NY Overlap (Max Liquidity)",
+                    sent: "High Volatility / Trend Continuation.",
+                    act: "Best time for Gold & GBPUSD. Look for H1 breakouts."
+                };
+            }
+            if (uH >= 8 && uH < 13) {
+                return {
+                    ctx: "London Session Active",
+                    sent: "Directional Bias Forming. High Volume.",
+                    act: "Trade the 'European Open' range breakout. Watch EUR/USD."
+                };
+            }
+            if (uH >= 0 && uH < 7) {
+                return {
+                    ctx: "Asian Session (Consolidation)",
+                    sent: "Lower volatility. Range-bound behavior.",
+                    act: "Scalp JPY pairs. Avoid major trend trades."
+                };
+            }
+            return {
+                ctx: "Market Transition / Low Volume",
+                sent: "Choppy / Spreads Widening.",
+                act: "Stand aside. Wait for next session bell."
+            };
+        }
+
+        // --- MAIN APP LOOP ---
+        function update() {
+            const now = getBaseTime();
+            const nowUTC = new Date();
+
+            // 1. HEADER & CLOCK
+            document.getElementById('locBtn').innerText = baseName + ' ▼';
+            document.getElementById('mainClock').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+            document.getElementById('dateLabel').innerText = now.toLocaleDateString('en-GB', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+            // 2. INSIGHT RENDER
+            const stgy = getStrategy(now);
+            document.getElementById('insContext').innerText = stgy.ctx;
+            document.getElementById('insSentiment').innerText = stgy.sent;
+            document.getElementById('insAction').innerText = stgy.act;
+
+            // 3. OVERLAP TIMER (13:00 - 16:00 UTC)
+            const uH = nowUTC.getUTCHours();
+            const olEl = document.getElementById('overlapTimer');
+            const olLbl = document.getElementById('overlapLabel');
+            const isWeekday = nowUTC.getDay() >= 1 && nowUTC.getDay() <= 5;
+
+            if (!isWeekday) {
+                olLbl.innerText = "MARKET CLOSED";
+                olEl.innerText = "--:--:--";
+                olEl.style.color = "var(--text-sub)";
+            } else if (uH >= 13 && uH < 16) {
+                olLbl.innerText = "⚡ OVERLAP ENDS IN";
+                olLbl.style.color = "var(--accent-gold)";
+                olEl.style.color = "var(--accent-gold)";
+                let end = new Date(nowUTC); end.setUTCHours(16,0,0,0);
+                olEl.innerText = msToTime(end - nowUTC);
+            } else {
+                olLbl.innerText = "OVERLAP STARTS IN";
+                olLbl.style.color = "var(--text-sub)";
+                olEl.style.color = "var(--text-main)";
+                let start = new Date(nowUTC); 
+                start.setUTCHours(13,0,0,0);
+                if (uH >= 16) start.setDate(start.getDate() + 1);
+                olEl.innerText = msToTime(start - nowUTC);
+            }
+
+            // 4. FED TIMER
+            const nextFedStr = fomcDates.find(d => new Date(d + "T14:00:00") > now);
+            if(nextFedStr) {
+                const fedDt = new Date(nextFedStr + "T14:00:00");
+                const diff = fedDt - now;
+                const d = Math.floor(diff / (1000*60*60*24));
+                const h = Math.floor((diff % (1000*60*60*24))/(1000*60*60));
+                document.getElementById('fedTimer').innerText = `${d}d ${h}h`;
+                document.getElementById('fedDate').innerText = fedDt.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+            } else {
+                document.getElementById('fedTimer').innerText = "TBD";
+            }
+
+            // 5. EVENTS LIST
+            const evs = getUpcomingEvents();
+            const evEl = document.getElementById('eventList');
+            evEl.innerHTML = evs.map(e => `
+                <div class="ev-item">
+                    <span class="ev-name">${e.name}</span>
+                    <div class="ev-meta">
+                        <span class="ev-date">${e.date.getDate()}/${e.date.getMonth()+1}</span>
+                        <span class="ev-tag">HIGH</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // 6. MARKET GRID
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            markets.forEach(mk => {
+                const mkNow = getMarketTime(mk.zone);
+                let openDt = new Date(mkNow); openDt.setHours(Math.floor(mk.open), (mk.open%1)*60, 0, 0);
+                let closeDt = new Date(mkNow); closeDt.setHours(Math.floor(mk.close), (mk.close%1)*60, 0, 0);
+                if(mk.close < mk.open) closeDt.setDate(closeDt.getDate() + 1);
+
+                let status = 'closed', label = 'OPENS IN', target = null, pct = 0;
+                const isWknd = mkNow.getDay() === 0 || mkNow.getDay() === 6;
+
+                if (isWknd) {
+                    status = 'weekend'; label = 'WEEKEND';
+                    // Find Monday
+                    target = new Date(openDt);
+                    while(target.getDay() !== 1) target.setDate(target.getDate() + 1);
+                    target.setHours(Math.floor(mk.open), (mk.open%1)*60, 0, 0);
+                } 
+                else if (mkNow >= openDt && mkNow < closeDt) {
+                    status = 'open'; label = 'CLOSES IN'; target = closeDt;
+                    pct = ((mkNow - openDt) / (closeDt - openDt)) * 100;
+                } 
+                else {
+                    if (mkNow < openDt) {
+                        status = 'pre'; label = 'OPENS IN'; target = openDt;
+                        let diff = openDt - mkNow;
+                        if(diff < 7200000) pct = ((7200000 - diff) / 7200000) * 100;
+                    } else {
+                        status = 'closed'; label = 'OPENS IN';
+                        target = new Date(openDt); target.setDate(target.getDate() + 1);
+                        while(target.getDay() === 0 || target.getDay() === 6) target.setDate(target.getDate() + 1);
+                    }
+                }
+
+                const diff = target - mkNow;
+                const timerStr = msToTime(diff);
+                const localStr = mkNow.toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit'});
+
+                const el = document.createElement('div');
+                el.className = `m-card ${status}`;
+                el.innerHTML = `
+                    <div class="strip"></div>
+                    <div class="mc-head">
+                        <div>
+                            <div class="mc-name">${mk.name}</div>
+                            <div class="mc-sub">${mk.sub}</div>
+                        </div>
+                        <div class="st-pill">${status}</div>
+                    </div>
+                    <div class="mc-info">
+                        <span>Loc: ${mk.str}</span>
+                        <span>Now: ${localStr}</span>
+                    </div>
+                    <div class="mc-timer">
+                        <span class="t-lbl">${label}</span>
+                        <span class="t-val">${timerStr}</span>
+                    </div>
+                    <div class="p-track"><div class="p-fill" style="width:${pct}%"></div></div>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        // --- UI HANDLERS ---
+        function toggleTheme() {
+            const el = document.documentElement;
+            el.setAttribute('data-theme', el.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        }
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function closeModal(e) { if(e.target.id === 'modal') document.getElementById('modal').style.display = 'none'; }
+        function setZone(z, n) {
+            baseZone = z; baseName = n;
+            localStorage.setItem('zone', z); localStorage.setItem('zoneName', n);
+            document.getElementById('modal').style.display = 'none';
+            update();
+        }
+
+        setInterval(update, 1000);
+        update();
+
+    </script>
+</body>
+</html>
