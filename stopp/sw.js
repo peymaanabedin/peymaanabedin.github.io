@@ -1,25 +1,54 @@
-/* Increment VERSION after changing any cached file. Caches are scoped to this installation. */
-const VERSION='1.0.0';
-const PREFIX='stopp:'+self.registration.scope+':';
+/* Keep this version in sync with app.js, the HTML meta tag and version.json. */
+const VERSION='1.1.0';
+const ROOT=self.registration.scope;
+const INDEX=new URL('./index.html',ROOT).href;
+const VERSION_URL=new URL('./version.json',ROOT).href;
+const PREFIX='stopp:'+ROOT+':';
 const CACHE=PREFIX+VERSION;
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png','./icons/apple-touch-icon.png'];
 self.addEventListener('install',event=>{
-  // A failed install leaves the previous complete version active.
-  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(asset=>new Request(new URL(asset,ROOT),{cache:'reload'})))).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith(PREFIX)&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(key=>key.startsWith(PREFIX)&&key!==CACHE).map(key=>caches.delete(key)));
+    await self.clients.claim();
+    for(const client of await self.clients.matchAll({type:'window',includeUncontrolled:true})){
+      if(client.url.startsWith(ROOT))client.postMessage({type:'STOPP_UPDATE_READY',version:VERSION});
+    }
+  })());
 });
+async function fresh(request){
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),4500);
+  try{return await fetch(new Request(request,{cache:'no-store',signal:controller.signal}));}finally{clearTimeout(timer);}
+}
+async function latestPage(request){
+  const cache=await caches.open(CACHE);
+  try{
+    const response=await fresh(request);
+    if(response.ok&&response.headers.get('Content-Type')?.includes('text/html')){
+      await Promise.all([cache.put(INDEX,response.clone()),cache.put(ROOT,response.clone())]).catch(()=>{});return response;
+    }
+    return await cache.match(INDEX)||response;
+  }catch{return await cache.match(INDEX)||Response.error();}
+}
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
   const url=new URL(event.request.url);
-  if(!url.href.startsWith(self.registration.scope))return;
-  event.respondWith(caches.open(CACHE).then(async cache=>{
-    const cached=await cache.match(event.request,{ignoreSearch:true});
-    if(cached)return cached;
-    try{return await fetch(event.request);}catch(error){
-      if(event.request.mode==='navigate')return await cache.match('./index.html');
-      throw error;
+  if(!url.href.startsWith(ROOT))return;
+  if(url.origin+url.pathname===VERSION_URL){
+    // Never answer version checks with old metadata or an offline HTML page.
+    event.respondWith(fresh(event.request));return;
+  }
+  if(event.request.mode==='navigate'||url.origin+url.pathname===INDEX||url.origin+url.pathname===ROOT){
+    event.respondWith(latestPage(event.request));return;
+  }
+  event.respondWith((async()=>{
+    const cache=await caches.open(CACHE);
+    if(url.pathname.endsWith('/manifest.webmanifest')){
+      try{const response=await fresh(event.request);if(response.ok){await cache.put(event.request,response.clone()).catch(()=>{});return response;}}catch{}
     }
-  }));
+    return await cache.match(event.request,{ignoreSearch:true})||fetch(event.request);
+  })());
 });

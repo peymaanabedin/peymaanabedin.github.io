@@ -1,0 +1,10 @@
+# Used by static hosts that support a _headers file.
+# For other hosts, configure these headers on the corresponding paths.
+/*
+  Cache-Control: no-cache, must-revalidate
+
+/sw.js
+  Cache-Control: no-store
+
+/version.json
+  Cache-Control: no-store
