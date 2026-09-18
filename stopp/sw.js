@@ -1,5 +1,5 @@
 /* Keep this version in sync with app.js, the HTML meta tag and version.json. */
-const VERSION='1.1.0';
+const VERSION='1.2.0';
 const ROOT=self.registration.scope;
 const INDEX=new URL('./index.html',ROOT).href;
 const VERSION_URL=new URL('./version.json',ROOT).href;
