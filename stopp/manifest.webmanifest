@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "stopp — بازی دقت و زمان",
+  "short_name": "stopp",
+  "description": "یک لحظه، تمام تفاوت. بازی دقت با نمایشگر لامپی؛ تک‌نفره یا دونفره روی یک گوشی.",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#151411",
+  "theme_color": "#151411",
+  "categories": ["games", "entertainment"],
+  "prefer_related_applications": false,
+  "icons": [
+    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"./icons/maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ]
+}
