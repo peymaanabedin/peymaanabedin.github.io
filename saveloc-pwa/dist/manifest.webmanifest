@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "Save Loc — مکان‌های من",
+  "short_name": "Save Loc",
+  "description": "هر مکان، یک خاطره. ذخیره و دسته‌بندی مکان‌های شخصی.",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#f7f8f5",
+  "categories": ["navigation", "utilities", "travel"],
+  "icons": [
+    {"src":"./assets/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./assets/icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"./assets/icons/maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ],
+  "shortcuts": [
+    {"name":"مکان‌های من","url":"./#saved","icons":[{"src":"./assets/icons/icon-192.png","sizes":"192x192"}]},
+    {"name":"ثبت مکان","url":"./#map","icons":[{"src":"./assets/icons/icon-192.png","sizes":"192x192"}]}
+  ]
+}
