@@ -27,7 +27,7 @@ test('invalid import rejects the whole payload before any write',()=>{
   assert.throws(()=>normalizeBackup([place(),place({id:'b',lng:181})]),/invalid-coordinates/);assert.equal(store.getItem(STORAGE_KEY),before);
 });
 test('duplicate IDs, unsupported versions and over-limit files are rejected',()=>{
-  assert.throws(()=>normalizeBackup([place(),place()]),/duplicate-id/);assert.throws(()=>normalizeBackup({version:3,places:[]}),/unsupported-version/);assert.throws(()=>normalizeBackup(Array(5001).fill(place())),/too-many-places/);
+  assert.throws(()=>normalizeBackup([place(),place()]),/duplicate-id/);assert.throws(()=>normalizeBackup({version:99,places:[]}),/unsupported-version/);assert.throws(()=>normalizeBackup(Array(5001).fill(place())),/too-many-places/);
 });
 test('deleting a built-in category by ID survives reload and preserves other category names',()=>{
   const state=emptyState();state.categories=state.categories.filter(c=>c.id!=='home');state.categories.find(c=>c.id==='work').name='دفتر';const store=memory();persist(store,state);const loaded=loadState(store).state;

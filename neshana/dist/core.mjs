@@ -8,7 +8,8 @@ export const DEFAULT_CATEGORIES = [
   {id:'customer',name:'مشتری',en:'Customer',icon:'user',color:'orange'},
   {id:'other',name:'سایر',en:'Other',icon:'pin',color:'teal'}
 ];
-export const DEFAULT_PREFS = {theme:'auto',lang:'fa',customTpl:'',shareTitle:'Save Loc',mapProvider:'apple'};
+export const THEMES = ['auto','light','ocean','lavender','sand','dark'];
+export const DEFAULT_PREFS = {theme:'auto',lang:'fa',customTpl:'',shareTitle:'نشانا',mapProvider:'apple'};
 const text=(value,max=300)=>typeof value==='string'?value.trim().slice(0,max):'';
 export const uid=()=>globalThis.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 export function finite(value){
@@ -37,7 +38,8 @@ export function normalizePlace(p){
     acc:accuracy!==null && accuracy>0?Math.min(accuracy,1000000):null,ele:finite(p.ele),
     ts:ts!==null && ts>0 && ts<=8640000000000000?ts:Date.now(),
     address:text(p.address,1000),notes:text(p.notes,3000),category:text(cat,120)||'other',
-    favorite:p.favorite===true,source:p.source==='gps'?'gps':'manual'};
+    favorite:p.favorite===true,source:p.source==='gps'?'gps':'manual',
+    photoId:typeof p.photoId==='string' && /^[a-zA-Z0-9_-]{1,120}$/.test(p.photoId)?p.photoId:''};
 }
 export function safeCustomLink(template,p){
   if(!validPoint(p?.lat,p?.lng) || !template) return '';
@@ -49,17 +51,17 @@ export function safeCustomLink(template,p){
   return value;
 }
 export function normalizePrefs(p={}){
-  return {theme:['auto','light','dark'].includes(p?.theme)?p.theme:'auto',lang:p?.lang==='en'?'en':'fa',
-    customTpl:text(p?.customTpl,500),shareTitle:text(p?.shareTitle,120)||'Save Loc',mapProvider:['apple','google','waze'].includes(p?.mapProvider)?p.mapProvider:'apple'};
+  return {theme:THEMES.includes(p?.theme)?p.theme:'auto',lang:p?.lang==='en'?'en':'fa',
+    customTpl:text(p?.customTpl,500),shareTitle:(!p?.shareTitle||p.shareTitle==='Save Loc')?'نشانا':text(p.shareTitle,120)||'نشانا',mapProvider:['apple','google','waze'].includes(p?.mapProvider)?p.mapProvider:'apple'};
 }
 export function emptyState(){return {version:2,places:[],categories:structuredClone(DEFAULT_CATEGORIES),prefs:{...DEFAULT_PREFS}};}
 export function normalizeBackup(raw,{strict=true}={}){
   const isArray=Array.isArray(raw);
   if(!raw || (!isArray && !Array.isArray(raw.places))) throw new Error('invalid-backup');
-  if(!isArray && raw.version!==undefined && ![1,2].includes(raw.version)) throw new Error('unsupported-version');
+  if(!isArray && raw.version!==undefined && ![1,2,3].includes(raw.version)) throw new Error('unsupported-version');
   const rows=isArray?raw:raw.places;
   if(rows.length>MAX_PLACES) throw new Error('too-many-places');
-  const categories=!isArray && raw.version===2 && Array.isArray(raw.categories)?[]:structuredClone(DEFAULT_CATEGORIES);
+  const categories=!isArray && raw.version>=2 && Array.isArray(raw.categories)?[]:structuredClone(DEFAULT_CATEGORIES);
   const incomingCats=[...(Array.isArray(raw.categories)?raw.categories:[]),...rows.map(p=>p?.category).filter(c=>c && typeof c==='object')];
   for(const c of incomingCats){const n=normalizeCategory(c);if(n){const i=categories.findIndex(x=>x.id===n.id);if(i>=0)categories[i]=n;else if(categories.length<100) categories.push(n);}}
   if(!categories.some(c=>c.id==='other'))categories.push(structuredClone(DEFAULT_CATEGORIES.at(-1)));

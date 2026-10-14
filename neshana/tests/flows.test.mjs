@@ -3,12 +3,15 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {parseHTML} from 'linkedom';
 import {STORAGE_KEY} from '../dist/core.mjs';
+import {IDBFactory} from 'fake-indexeddb';
+import {PhotoStore} from '../dist/photos.mjs';
 // DOM integration only: this deliberately does not claim browser layout, Safari or device GPS coverage.
 const {window,document}=parseHTML(fs.readFileSync(new URL('../dist/index.html',import.meta.url),'utf8'));
 const $=id=>document.getElementById(id),saved=new Map();let clipboard='',gpsSuccess,denied=false;
 const nativeSetTimeout=globalThis.setTimeout;
 globalThis.setTimeout=(callback,delay,...args)=>{const t=nativeSetTimeout(callback,delay,...args);t.unref?.();return t;};
 globalThis.window=window;globalThis.document=document;
+globalThis.indexedDB=new IDBFactory();
 const location={hash:''};globalThis.location=location;window.location=location;
 const media=()=>({matches:false,addEventListener(){}});globalThis.matchMedia=media;window.matchMedia=media;
 globalThis.history={replaceState(_a,_b,url){location.hash=url;}};
@@ -23,6 +26,7 @@ const click=el=>el.click();
 const submit=id=>$(id).dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));
 const input=(id,value)=>{$(id).value=value;$(id).dispatchEvent(new window.Event('input',{bubbles:true}));};
 const getState=()=>JSON.parse(saved.get(STORAGE_KEY));
+const settle=async predicate=>{for(let i=0;i<80;i++){if(predicate())return;await new Promise(r=>nativeSetTimeout(r,5));}throw Error('UI did not settle');};
 await import('../dist/app.mjs');
 
 test('app starts without a loaded map and keeps coordinate entry available',()=>{
@@ -67,4 +71,47 @@ test('delete cancel preserves data; delete then undo restores it',()=>{
   click(document.querySelector('.bottom-nav [data-tab=saved]'));click($('savedList').querySelector('.place-open'));
   click([...$('detailMore').querySelectorAll('button')].find(b=>b.textContent.includes('حذف')));click($('confirmCancel'));assert.equal(getState().places.length,1);
   click($('savedList').querySelector('.place-open'));click([...$('detailMore').querySelectorAll('button')].find(b=>b.textContent.includes('حذف')));click($('confirmAccept'));assert.equal(getState().places.length,0);click($('toastAction'));assert.equal(getState().places.length,1);
+});
+test('direct sharing from both lists invokes native share without opening details',()=>{
+  let shared;navigator.share=async payload=>{shared=payload;};
+  click(document.querySelector('.bottom-nav [data-tab=saved]'));click($('savedList').querySelector('.direct-share'));
+  assert.equal(dialog.open,false);assert.ok(shared.text.includes('کافه کیان'));assert.match(shared.url,/query=35.7153,51.4043/);assert.equal(shared.title,'نشانا');
+  shared=null;click(document.querySelector('.bottom-nav [data-tab=map]'));click($('recentList').querySelector('.direct-share'));assert.ok(shared);assert.equal(dialog.open,false);delete navigator.share;
+});
+test('four explicit light palettes persist and override automatic dark map tone',()=>{
+  click(document.querySelector('.bottom-nav [data-tab=settings]'));
+  for(const theme of ['light','ocean','lavender','sand']){click(document.querySelector(`#themeControl [data-theme=${theme}]`));assert.equal(getState().prefs.theme,theme);assert.equal(document.documentElement.dataset.mapTone,'light');assert.equal(document.querySelectorAll('#themeControl [aria-pressed=true]').length,1);}
+});
+test('about shows requested credit, copyright and the correct external website',()=>{
+  click($('aboutBtn'));assert.ok($('sheetContent').textContent.includes('برنامه نویسی و توسعه: پیمان عابدین پور'));
+  assert.ok($('sheetContent').textContent.includes('تمامی حقوق نشانا محفوظ است'));assert.equal($('sheetContent').querySelector('a').href,'https://peymaanabedinpour.ir');click($('closeSheet'));
+  assert.ok(document.querySelector('.privacy-card').textContent.includes('سرویس‌های بیرونی'));click($('privacyBtn'));assert.ok($('sheetContent').textContent.includes('Photon'));click($('closeSheet'));
+});
+test('photo is optional and the camera control requests the environment camera',()=>{
+  click(document.querySelector('.bottom-nav [data-tab=map]'));click($('saveCurrent'));assert.equal($('photoFile').getAttribute('accept'),'image/*');assert.equal($('cameraFile').getAttribute('capture'),'environment');assert.equal($('photoFile').hasAttribute('required'),false);assert.equal($('photoRemove').hidden,true);click($('saveCancel'));assert.equal(getState().places.length,1);
+});
+test('existing photo previews locally, survives an edit, and can be removed without deleting the place',async()=>{
+  const store=new PhotoStore(),blob=new Blob([fs.readFileSync(new URL('../dist/assets/icons/icon-192.png',import.meta.url))],{type:'image/png'});await store.write([['local-photo',blob]]);
+  const updated=getState();updated.places[0].photoId='local-photo';saved.set(STORAGE_KEY,JSON.stringify(updated));const e=new window.Event('storage');e.key=STORAGE_KEY;window.dispatchEvent(e);
+  click(document.querySelector('.bottom-nav [data-tab=saved]'));await settle(()=>$('savedList').querySelector('.place-thumbnail img'));
+  assert.match($('savedList').querySelector('img').src,/^blob:/);click($('savedList').querySelector('.place-open'));await settle(()=>$('sheetContent').querySelector('.detail-photo img'));
+  click([...$('detailActions').querySelectorAll('button')].find(b=>b.textContent.includes('ویرایش')));await settle(()=>$('photoPreview').querySelector('img'));input('placeNotes','با عکس محلی');submit('saveForm');await settle(()=>!dialog.open);
+  assert.equal(getState().places[0].photoId,'local-photo');assert.ok(await store.get('local-photo'));
+  click($('savedList').querySelector('.place-open'));click([...$('detailActions').querySelectorAll('button')].find(b=>b.textContent.includes('ویرایش')));click($('photoRemove'));submit('saveForm');assert.equal(getState().places[0].photoId,'');assert.equal(getState().places.length,1);
+});
+test('export waits for a second explicit download gesture; legacy import still merges',async()=>{
+  click(document.querySelector('.bottom-nav [data-tab=settings]'));click($('exportBtn'));await settle(()=>$('backupDownload'));assert.ok($('sheetContent').textContent.includes('پشتیبان')||$('sheetContent').textContent.includes('Files'));click($('closeSheet'));
+  const file={name:'legacy.json',size:100,text:async()=>JSON.stringify([{id:'legacy-new',lat:32,lng:54,name:'مکان قدیمی'}])};$('importFile').files=[file];$('importFile').dispatchEvent(new window.Event('change'));await settle(()=>$('importConfirm'));click($('importConfirm'));await settle(()=>!dialog.open);assert.equal(getState().places.length,2);assert.equal(getState().places.find(p=>p.id==='legacy-new').photoId,'');
+});
+test('new photo selection compresses locally, saves with metadata, and ignores a closed form',async()=>{
+  // API contract simulation, not a browser image-decoding or camera test.
+  const fixture=new Blob([fs.readFileSync(new URL('../dist/assets/icons/icon-192.png',import.meta.url))],{type:'image/png'});
+  let hold=false,held,canvas,requestedType;const create=document.createElement.bind(document),oldImage=globalThis.Image;
+  globalThis.Image=class{naturalWidth=4000;naturalHeight=2000;set src(value){if(value){if(hold)held=this;else queueMicrotask(()=>this.onload());}}};
+  document.createElement=(name,...args)=>{const el=create(name,...args);if(name==='canvas'){canvas=el;el.getContext=()=>({fillRect(){},drawImage(){}});el.toBlob=(done,type)=>{requestedType=type;assert.equal(el.width,1280);assert.equal(el.height,640);queueMicrotask(()=>done(fixture));};}return el;};
+  try{
+    click(document.querySelector('.bottom-nav [data-tab=map]'));click($('saveCurrent'));input('placeName','جای عکس‌دار');$('photoFile').files=[fixture];$('photoFile').dispatchEvent(new window.Event('change'));await settle(()=>$('photoPreview').querySelector('img')&&!$('saveSubmit').disabled);submit('saveForm');await settle(()=>!dialog.open);
+    const savedPhoto=getState().places.find(p=>p.name==='جای عکس‌دار');assert.ok(savedPhoto.photoId);assert.ok(await new PhotoStore().get(savedPhoto.photoId));assert.equal(requestedType,'image/jpeg');assert.equal(canvas.width,1);
+    hold=true;click($('saveCurrent'));$('photoFile').files=[fixture];$('photoFile').dispatchEvent(new window.Event('change'));click($('saveCancel'));click($('saveCurrent'));held.onload();await new Promise(r=>nativeSetTimeout(r,10));assert.equal($('photoPreview').hidden,true);assert.equal($('saveSubmit').disabled,false);click($('saveCancel'));
+  }finally{document.createElement=create;globalThis.Image=oldImage;}
 });

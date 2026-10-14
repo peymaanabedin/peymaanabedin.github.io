@@ -1,0 +1,1 @@
+try{const state=JSON.parse(localStorage.getItem('saveloc.state.v2')||'null');const theme=state?.prefs?.theme||localStorage.getItem('saveloc.theme')||'auto';document.documentElement.dataset.theme=['auto','light','ocean','lavender','sand','dark'].includes(theme)?theme:'auto';}catch{}

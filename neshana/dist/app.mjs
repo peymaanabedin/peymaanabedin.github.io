@@ -1,12 +1,29 @@
 import {STORAGE_KEY,DEFAULT_CATEGORIES,uid,validPoint,parseCoordinates,loadState,persist,normalizeBackup,mergeStates,filterPlaces,distance,mapLink,safeCustomLink,LocationSession} from './core.mjs';
 import {esc,icon,categoryIcon,paintIcons,EN} from './ui.mjs';
+import {PhotoStore,preparePhoto,photoBackup,preparePhotoImport,commitPhotoChange,MAX_BACKUP_BYTES} from './photos.mjs';
 const $=id=>document.getElementById(id);
 const all=(s,root=document)=>[...root.querySelectorAll(s)];
 let storage;try{storage=window.localStorage;}catch{storage={getItem(){throw Error('storage');},setItem(){throw Error('storage');}};}
 let initial=loadState(storage),state=initial.state,current=null,tab='map',category='all',limit=60;
 let map,tileLayer,currentMarker,accuracyCircle,markerLayer,geoBusy=false,mapIsReady=false,tileErrors=0;
 let toastTimer,sheetSeq=0,scrollBeforeSheet=0,searchSeq=0,pointSeq=0,deferredPrompt,swRegistration;
-let loadedServices={geocoder:'https://photon.komoot.io',tilesLight:'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',tilesDark:'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'};
+const photoStore=new PhotoStore(),photoViews=new Map();let sheetCleanup=()=>{},sheetLocked=false;
+function releasePhotos(slot){const old=photoViews.get(slot);old?.urls.forEach(url=>URL.revokeObjectURL(url));photoViews.delete(slot);}
+function showPhotos(root,slot){
+  releasePhotos(slot);if(root.closest('[hidden]'))return;const view={urls:[]};photoViews.set(slot,view);
+  all('[data-photo]',root).forEach(async el=>{
+    try{const blob=await photoStore.get(el.dataset.photo);if(!blob||photoViews.get(slot)!==view||!el.isConnected)return;
+      const url=URL.createObjectURL(blob);view.urls.push(url);const img=document.createElement('img');img.src=url;img.alt=el.dataset.photoAlt||'';img.loading='lazy';img.decoding='async';el.replaceChildren(img);el.classList.add('has-photo');
+    }catch{if(el.isConnected)el.setAttribute('aria-label',say('عکس در دسترس نیست','Photo unavailable'));}
+  });
+}
+const photoMarkup=(p,c,detail=false)=>p.photoId?`<span class="${detail?'detail-photo':'place-thumbnail'}" data-photo="${esc(p.photoId)}" data-photo-alt="${esc(say('عکس مکان: ','Place photo: ')+p.name)}">${icon('image')}${detail?`<small>${say('عکس این مکان','Place photo')}</small>`:''}</span>`:categoryIcon(c);
+function discardPhotos(ids,delay=10000){
+  const unique=[...new Set(ids.filter(Boolean))];if(!unique.length)return;
+  setTimeout(()=>{const latest=loadState(storage);if(latest.corrupt)return;const used=new Set(latest.state.places.map(p=>p.photoId));photoStore.write([],unique.filter(id=>!used.has(id))).catch(()=>{});},delay);
+}
+function lockSheet(locked){sheetLocked=locked;$('closeSheet').disabled=locked;}
+let loadedServices={geocoder:'https://photon.komoot.io',tiles:'https://tile.openstreetmap.org/{z}/{x}/{y}.png'};
 const say=(fa,en)=>state.prefs.lang==='en'?en:fa;
 const num=n=>new Intl.NumberFormat(state.prefs.lang==='en'?'en-US':'fa-IR',{maximumFractionDigits:0}).format(n);
 const date=ts=>new Date(ts).toLocaleDateString(state.prefs.lang==='en'?'en-GB':'fa-IR',{month:'short',day:'numeric'});
@@ -43,9 +60,9 @@ function applyLanguage(){
 }
 function applyTheme(){
   document.documentElement.dataset.theme=state.prefs.theme;
-  document.querySelector('meta[name="theme-color"]').content=isDark()?'#111c19':'#f7f8f5';
+  document.querySelector('meta[name="theme-color"]').content=isDark()?'#171e22':({ocean:'#f1f6fc',lavender:'#f6f3fb',sand:'#faf5ec'}[state.prefs.theme]||'#f7f8f5');
   all('[data-theme]',$('themeControl')).forEach(b=>b.setAttribute('aria-pressed',String(state.prefs.theme===b.dataset.theme)));
-  if(tileLayer)tileLayer.setUrl(isDark()?loadedServices.tilesDark:loadedServices.tilesLight);
+  document.documentElement.dataset.mapTone=isDark()?'dark':'light';
 }
 function switchTab(next,{scroll=true}={}){
   if(!['map','saved','settings'].includes(next))next='map';tab=next;$('workspace').dataset.tab=next;
@@ -53,12 +70,15 @@ function switchTab(next,{scroll=true}={}){
   all('.bottom-nav [data-tab]').forEach(b=>{if(b.dataset.tab===next)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
   history.replaceState(null,'',`#${next}`);
   if(scroll){$('panel').scrollTop=0;window.scrollTo({top:0,behavior:'instant'});}
-  if(next==='saved')renderList();if(map)requestAnimationFrame(()=>map.invalidateSize({pan:false}));
+  if(next==='saved'){releasePhotos('recent');renderList();}else if(next==='map'){releasePhotos('list');renderRecent();}else{releasePhotos('recent');releasePhotos('list');}
+  if(map)requestAnimationFrame(()=>map.invalidateSize({pan:false}));
 }
 function button(label,iconName,action,className='button soft'){
   const b=document.createElement('button');b.type='button';b.className=className;b.innerHTML=`${iconName?icon(iconName):''}<span>${esc(label)}</span>`;b.addEventListener('click',action);return b;
 }
 function openSheet(title,html){
+  if(sheetLocked)return sheetSeq;
+  sheetCleanup();sheetCleanup=()=>{};releasePhotos('sheet');
   const wasOpen=$('sheet').open;sheetSeq++;
   text('sheetTitle',title);$('sheetContent').innerHTML=html;paintIcons($('sheet'));
   if(!wasOpen){scrollBeforeSheet=window.scrollY;Object.assign(document.body.style,{overflow:'hidden',position:'fixed',top:`-${scrollBeforeSheet}px`,width:'100%'});$('sheet').showModal();}
@@ -67,13 +87,14 @@ function openSheet(title,html){
   $('closeSheet').focus({preventScroll:true});
   return sheetSeq;
 }
-function closeSheet(){$('sheet').close();}
+function closeSheet(){if(!sheetLocked)$('sheet').close();}
 $('closeSheet').addEventListener('click',closeSheet);
-$('sheet').addEventListener('close',()=>{if($('sheet').open)return;sheetSeq++;Object.assign(document.body.style,{overflow:'',position:'',top:'',width:''});window.scrollTo({top:scrollBeforeSheet,behavior:'instant'});});
+$('sheet').addEventListener('cancel',e=>{if(sheetLocked)e.preventDefault();});
+$('sheet').addEventListener('close',()=>{if($('sheet').open)return;sheetCleanup();sheetCleanup=()=>{};releasePhotos('sheet');sheetSeq++;Object.assign(document.body.style,{overflow:'',position:'',top:'',width:''});window.scrollTo({top:scrollBeforeSheet,behavior:'instant'});});
 $('sheet').addEventListener('click',e=>{if(e.target===$('sheet')){const r=$('sheet').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeSheet();}});
 function confirmAction(title,message,action,{danger=false,label}={}){
   openSheet(title,`<p class="confirm-message">${esc(message)}</p><div class="form-actions"><button class="button soft" id="confirmCancel">${say('انصراف','Cancel')}</button><button class="button ${danger?'danger':'primary'}" id="confirmAccept">${esc(label||say('تأیید','Confirm'))}</button></div>`);
-  $('confirmCancel').onclick=closeSheet;$('confirmAccept').onclick=()=>{if(action()!==false)closeSheet();};
+  $('confirmCancel').onclick=closeSheet;$('confirmAccept').onclick=()=>{const result=action();if(result?.then)result.catch(()=>failure());else if(result!==false)closeSheet();};
 }
 
 // Map code and fonts are served locally; map tiles are fetched only while viewed and never bulk cached.
@@ -82,7 +103,7 @@ function initMap(){
   const L=window.L;
   map=L.map('map',{zoomControl:false,attributionControl:false,scrollWheelZoom:false,minZoom:2,maxZoom:19,worldCopyJump:true});
   map.setView([35.7153,51.4043],13,{animate:false});
-  tileLayer=L.tileLayer(isDark()?loadedServices.tilesDark:loadedServices.tilesLight,{maxZoom:19,keepBuffer:1,updateWhenIdle:true,detectRetina:false,crossOrigin:true}).addTo(map);
+  tileLayer=L.tileLayer(loadedServices.tiles,{maxZoom:19,keepBuffer:1,updateWhenIdle:true,detectRetina:false,crossOrigin:true,referrerPolicy:'strict-origin-when-cross-origin'}).addTo(map);
   tileLayer.on('tileerror',()=>{tileErrors++;if(tileErrors>=3){text('mapNoticeText',say('نقشه در دسترس نیست؛ ذخیرهٔ مختصات همچنان کار می‌کند.','Map is unavailable. Saving coordinates still works.'));$('mapNotice').hidden=false;}});
   tileLayer.on('tileload',()=>{mapIsReady=true;tileErrors=0;if(navigator.onLine)$('mapNotice').hidden=true;});
   markerLayer=L.layerGroup().addTo(map);
@@ -115,7 +136,7 @@ function showCurrentMarker({recenter=true}={}){
 function renderCurrent(){
   $('currentDetails').hidden=!current;$('idleActions').hidden=!!current;$('selectedActions').hidden=!current;
   $('locatingSpinner').hidden=!geoBusy;
-  if(!current){$('liveTitle').innerHTML=state.prefs.lang==='en'?EN.heroTitle:'همین‌جا را<br>به خاطر بسپار.';text('liveSubtitle',say('از یک کافهٔ دنج تا جای پارک ماشینت.','From a quiet café to your parking spot.'));}
+  if(!current){text('liveTitle',say('اینجا را نشانه بگذار.','Keep this place.'));text('liveSubtitle',say('یک لمس، برای پیدا کردن دوباره.','One tap. Find your way back.'));}
   else{
     text('liveTitle',current.name||say(current.source==='gps'?'اینجا هستی.':'یک جای تازه.',current.source==='gps'?'You are here.':'A new place.'));
     text('liveSubtitle',say('یک نشانه برای وقتی که دوباره برمی‌گردی.','A pin for when you come back.'));
@@ -188,9 +209,10 @@ function openManual(){
 }
 
 function renderRecent(){
-  $('recentList').replaceChildren();const recent=filterPlaces(state.places).slice(0,2);
+  releasePhotos('recent');$('recentList').replaceChildren();const recent=filterPlaces(state.places).slice(0,2);
   if(!recent.length){$('recentList').innerHTML=`<div class="empty-recent">${icon('bookmark')}<div><b>${say('اولین نشانه‌ات را بگذار','Drop your first pin')}</b><p>${say('مکان‌های خوب، ارزش به خاطر سپردن دارند.','Good places are worth remembering.')}</p></div></div>`;return;}
-  for(const p of recent){const c=getCat(p.category);const b=button('',null,()=>openDetails(p.id),'recent-item');b.innerHTML=`${categoryIcon(c)}<span class="place-info"><strong>${esc(p.name)}</strong><small>${esc(p.address||catName(c))}</small></span>${icon('chevron')}`;$('recentList').append(b);}
+  for(const p of recent){const c=getCat(p.category),row=document.createElement('div');row.className='recent-row';const b=button('',null,()=>openDetails(p.id),'recent-item');b.innerHTML=`${photoMarkup(p,c)}<span class="place-info"><strong>${esc(p.name)}</strong><small>${esc(p.address||catName(c))}</small></span>`;const direct=button('','share',()=>share(p),'icon-button direct-share');direct.setAttribute('aria-label',say(`اشتراک ${p.name}`,`Share ${p.name}`));row.append(b,direct);$('recentList').append(row);}
+  showPhotos($('recentList'),'recent');
 }
 function renderFilters(){
   if(!['all','favorites',...state.categories.map(c=>c.id)].includes(category))category='all';
@@ -203,6 +225,7 @@ function emptyList(filtered){
   return `<div class="empty-state"><div class="empty-symbol">${icon(filtered?'search':'bookmark')}</div><h3>${filtered?say('این نشانه پیدا نشد','No matching places'):say('ماجرا از یک نشانه شروع می‌شود','It starts with a pin')}</h3><p>${filtered?say('عبارت جستجو یا دسته‌بندی را تغییر بده.','Try another search or category.'):say('خانه، کافه، جای پارک… هر جایی که می‌خواهی دوباره پیدایش کنی.','Home, a café, your parking spot. Keep the places you want to find again.')}</p><button id="emptyAction" class="button primary">${filtered?say('پاک کردن فیلترها','Clear filters'):say('افزودن اولین مکان','Add your first place')}</button></div>`;
 }
 function renderList(){
+  releasePhotos('list');
   text('savedCount',say(`${num(state.places.length)} نشانه، برای پیدا کردن دوباره`,`${num(state.places.length)} places to find again`));
   $('sortSelect').querySelector('[value=distance]').disabled=!current;
   if(!current&&$('sortSelect').value==='distance')$('sortSelect').value='newest';
@@ -214,36 +237,70 @@ function renderList(){
     const c=getCat(p.category),article=document.createElement('article');article.className='place-card';
     const open=button('',null,()=>openDetails(p.id),'place-open');open.setAttribute('aria-label',say(`مشاهدهٔ ${p.name}`,`View ${p.name}`));
     const dist=current?distance(current,p):null,distLabel=dist===null?'':dist<1000?say(`${num(dist)} متر`,`${num(dist)} m`):say(`${num(dist/1000)} کیلومتر`,`${num(dist/1000)} km`);
-    open.innerHTML=`${categoryIcon(c)}<div class="place-info"><h3>${esc(p.name)}</h3><p>${esc(p.address||p.notes||say('مکان ذخیره‌شده','Saved place'))}</p><div class="place-meta"><span>${esc(catName(c))}</span><span>·</span><span>${esc(date(p.ts))}</span></div></div>`;
+    open.innerHTML=`${photoMarkup(p,c)}<div class="place-info"><h3>${esc(p.name)}</h3><p>${esc(p.address||p.notes||say('مکان ذخیره‌شده','Saved place'))}</p><div class="place-meta"><span>${esc(catName(c))}</span><span>·</span><span>${esc(date(p.ts))}</span></div></div>`;
     const fav=button('', 'heart',()=>toggleFavorite(p.id),'favorite-button');fav.setAttribute('aria-label',p.favorite?say('برداشتن ستاره','Remove favorite'):say('ستاره‌دار کردن','Add favorite'));fav.setAttribute('aria-pressed',String(p.favorite));
-    const bottom=document.createElement('div');bottom.className='place-card-bottom';bottom.innerHTML=`<span>${esc(distLabel||`${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`)}</span>`;bottom.append(button(say('مسیریابی','Directions'),'route',()=>openRoutes(p),'text-button'));
+    const bottom=document.createElement('div');bottom.className='place-card-bottom';bottom.innerHTML=`<span class="place-distance">${esc(distLabel||`${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`)}</span>`;const direct=button(say('اشتراک','Share'),'share',()=>share(p),'text-button direct-share');direct.setAttribute('aria-label',say(`اشتراک ${p.name}`,`Share ${p.name}`));bottom.append(direct,button(say('مسیر','Go'),'route',()=>openRoutes(p),'text-button'));
     article.append(open,fav,bottom);fragment.append(article);
   }
-  $('savedList').append(fragment);
+  $('savedList').append(fragment);showPhotos($('savedList'),'list');
 }
 function renderData(){renderRecent();renderFilters();renderList();renderMarkers();$('navCount').hidden=!state.places.length;text('navCount',state.places.length>99?'99+':num(state.places.length));}
 function toggleFavorite(id){transact(s=>{const p=s.places.find(x=>x.id===id);if(p)p.favorite=!p.favorite;return s;});}
+function photoError(error){
+  if(error?.message==='photo-size')return say('عکس باید کمتر از ۲۰ مگابایت باشد. یک عکس کوچک‌تر انتخاب کنید.','Choose a photo smaller than 20 MB.');
+  if(error?.message==='photo-format'||error?.message==='photo-dimensions')return say('این عکس در مرورگر باز نمی‌شود. یک عکس JPG، PNG یا WebP انتخاب کنید.','This image cannot be opened. Choose a JPG, PNG or WebP photo.');
+  if(error?.message==='missing-photo')return say('عکس ذخیره‌شده در دسترس نیست. دوباره انتخابش کنید یا آن را بردارید.','The saved photo is unavailable. Choose it again or remove it.');
+  if(error?.message==='photo-backup-size')return say('حجم عکس‌ها برای یک فایل پشتیبان زیاد است؛ می‌توانید فقط اطلاعات مکان‌ها را دریافت کنید.','Photos are too large for one backup. You can export place information only.');
+  return say('عکس ذخیره نشد. فضای خالی و اجازهٔ ذخیره‌سازی مرورگر را بررسی کنید.','Could not save the photo. Check free space and browser storage permissions.');
+}
 function openSave(p,edit=false){
   stopLocation();const snapshot=structuredClone(p);let selected=p.category||'other';if(!state.categories.some(c=>c.id===selected))selected='other';
-  openSheet(edit?say('ویرایش مکان','Edit place'):say('یک نشانهٔ تازه','A new pin'),`<form id="saveForm"><div class="coordinates-summary">${icon('pin')}<b dir="ltr">${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</b></div><label class="field"><span>${say('نام مکان','Place name')}</span><input id="placeName" value="${esc(p.name||'')}" placeholder="${say('مثلاً کافهٔ همیشگی','e.g. My favorite café')}" maxlength="120" required autocomplete="off" enterkeyhint="next"></label><span class="form-label">${say('دسته‌بندی','Category')}</span><div class="form-chips" id="saveCategories"></div><label class="field"><span>${say('آدرس · اختیاری','Address · optional')}</span><input id="placeAddress" value="${esc(p.address||'')}" maxlength="1000" placeholder="${say('آدرس یا نشانی کوتاه','A short address')}"></label><label class="field"><span>${say('یادداشت · اختیاری','Note · optional')}</span><textarea id="placeNotes" maxlength="3000" rows="3" placeholder="${say('چیزی که بهتر است یادت بماند…','Something worth remembering…')}">${esc(p.notes||'')}</textarea></label><label class="check-row"><input type="checkbox" id="placeFavorite" ${p.favorite?'checked':''}>${say('به ستاره‌دارها اضافه شود','Add to favorites')}</label><p id="saveError" class="form-error" role="alert" hidden></p><div class="form-actions"><button class="button soft" type="button" id="saveCancel">${say('انصراف','Cancel')}</button><button class="button primary" type="submit">${icon('bookmark')}${say('ذخیرهٔ مکان','Save place')}</button></div></form>`);
+  let pendingPhoto=null,photoId=p.photoId||'',photoUrl='',selection=0,imageBusy=false,saving=false;
+  const seq=openSheet(edit?say('ویرایش مکان','Edit place'):say('نشانهٔ تازه','New place'),`<form id="saveForm"><div class="coordinates-summary compact">${icon('pin')}<b dir="ltr">${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</b></div><label class="field"><span>${say('نام مکان','Place name')}</span><input id="placeName" value="${esc(p.name||'')}" placeholder="${say('مثلاً کافهٔ همیشگی','e.g. My favorite café')}" maxlength="120" required autocomplete="off" enterkeyhint="next"></label><span class="form-label">${say('دسته‌بندی','Category')}</span><div class="form-chips" id="saveCategories"></div>
+  <div class="photo-field"><div class="photo-field-heading"><span class="form-label">${say('عکس مکان','Place photo')} <small>${say('اختیاری','optional')}</small></span><button type="button" class="text-button danger-text" id="photoRemove" hidden>${say('برداشتن عکس','Remove photo')}</button></div><div id="photoPreview" class="photo-preview" hidden></div><div class="photo-choices"><button type="button" class="button outline" id="photoGallery">${icon('image')}${say('انتخاب عکس','Choose photo')}</button><button type="button" class="button outline" id="photoCamera">${icon('camera')}${say('دوربین','Camera')}</button></div><p class="photo-hint" id="photoStatus" role="status">${say('فقط روی دستگاهت ذخیره می‌شود.','Stored only on your device.')}</p><input type="file" id="photoFile" accept="image/*" hidden><input type="file" id="cameraFile" accept="image/*" capture="environment" hidden></div>
+  <label class="field"><span>${say('آدرس · اختیاری','Address · optional')}</span><input id="placeAddress" value="${esc(p.address||'')}" maxlength="1000" placeholder="${say('آدرس یا نشانی کوتاه','A short address')}"></label><label class="field"><span>${say('یادداشت · اختیاری','Note · optional')}</span><textarea id="placeNotes" maxlength="3000" rows="2" placeholder="${say('چیزی که بهتر است یادت بماند…','Something worth remembering…')}">${esc(p.notes||'')}</textarea></label><label class="check-row"><input type="checkbox" id="placeFavorite" ${p.favorite?'checked':''}>${say('به ستاره‌دارها اضافه شود','Add to favorites')}</label><p id="saveError" class="form-error" role="alert" hidden></p><div class="form-actions"><button class="button soft" type="button" id="saveCancel">${say('انصراف','Cancel')}</button><button class="button primary" id="saveSubmit" type="submit">${icon('check')}${say('ذخیرهٔ مکان','Save place')}</button></div></form>`);
+  const active=()=>sheetSeq===seq&&$('sheet').open;
+  const revoke=()=>{if(photoUrl)URL.revokeObjectURL(photoUrl);photoUrl='';};
+  sheetCleanup=()=>{selection++;revoke();};
+  const preview=blob=>{revoke();$('photoPreview').replaceChildren();$('photoPreview').hidden=!blob;$('photoRemove').hidden=!blob&&!photoId;if(blob){photoUrl=URL.createObjectURL(blob);const img=document.createElement('img');img.src=photoUrl;img.alt=say('پیش‌نمایش عکس مکان','Place photo preview');$('photoPreview').append(img);}};
+  if(photoId){$('photoRemove').hidden=false;photoStore.get(photoId).then(blob=>{if(active()&&selection===0){if(blob)preview(blob);else text('photoStatus',photoError(Error('missing-photo')));}}).catch(()=>{if(active()&&selection===0)text('photoStatus',photoError());});}
   for(const c of state.categories){const b=button(catName(c),c.icon,()=>{selected=c.id;all('button',$('saveCategories')).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));},'chip');b.setAttribute('aria-pressed',String(c.id===selected));$('saveCategories').append(b);}
+  const busy=value=>{imageBusy=value;$('saveSubmit').disabled=value;$('photoGallery').disabled=value;$('photoCamera').disabled=value;};
+  const choose=async file=>{
+    if(!file||saving)return;const token=++selection;busy(true);text('photoStatus',say('آماده‌سازی عکس روی دستگاه…','Preparing photo on your device…'));
+    try{const blob=await preparePhoto(file);if(!active()||token!==selection)return;pendingPhoto=blob;photoId='';preview(blob);text('photoStatus',say('عکس آماده است؛ با ذخیرهٔ مکان ثبت می‌شود.','Photo ready. Save this place to keep it.'));}
+    catch(error){if(active()&&token===selection)text('photoStatus',photoError(error));}
+    finally{if(active()&&token===selection)busy(false);}
+  };
+  $('photoGallery').onclick=()=>$('photoFile').click();$('photoCamera').onclick=()=>$('cameraFile').click();
+  for(const id of ['photoFile','cameraFile'])$(id).onchange=e=>{const file=e.target.files?.[0];e.target.value='';choose(file);};
+  $('photoRemove').onclick=()=>{selection++;pendingPhoto=null;photoId='';preview(null);busy(false);text('photoStatus',say('بدون عکس ذخیره می‌شود.','This place will be saved without a photo.'));};
   $('saveCancel').onclick=closeSheet;
   $('saveForm').onsubmit=e=>{
-    e.preventDefault();const name=$('placeName').value.trim();if(!name){text('saveError',say('برای مکان یک نام بنویسید.','Give this place a name.'));$('saveError').hidden=false;return;}
-    const record={...snapshot,id:edit?p.id:uid(),name,address:$('placeAddress').value.trim(),notes:$('placeNotes').value.trim(),category:selected,favorite:$('placeFavorite').checked};
-    const ok=transact(s=>{if(edit){const i=s.places.findIndex(x=>x.id===p.id);if(i<0)throw Error('missing-place');s.places[i]=record;}else s.places.unshift(record);return s;});
-    if(ok){closeSheet();toast(edit?say('تغییرات ذخیره شد.','Changes saved.'):say('یک نشانه به مکان‌هایت اضافه شد.','A new pin, safely saved.'));}
+    e.preventDefault();if(imageBusy||saving)return;const name=$('placeName').value.trim();if(!name){text('saveError',say('برای مکان یک نام بنویسید.','Give this place a name.'));$('saveError').hidden=false;return;}
+    const record={...snapshot,id:edit?p.id:uid(),name,address:$('placeAddress').value.trim(),notes:$('placeNotes').value.trim(),category:selected,favorite:$('placeFavorite').checked,photoId:pendingPhoto?uid():photoId};
+    const commit=()=>active()&&transact(s=>{if(edit){const i=s.places.findIndex(x=>x.id===p.id);if(i<0)throw Error('missing-place');s.places[i]=record;}else s.places.unshift(record);return s;});
+    const finished=ok=>{if(ok){if(p.photoId!==record.photoId)discardPhotos([p.photoId]);closeSheet();toast(edit?say('تغییرات ذخیره شد.','Changes saved.'):say('نشانه‌ات ذخیره شد.','Place saved.'));}};
+    if(!pendingPhoto&&!photoId){finished(commit());return;}
+    saving=true;lockSheet(true);all('button,input,textarea',$('saveForm')).forEach(el=>el.disabled=true);
+    (async()=>{
+      try{if(!pendingPhoto&&!await photoStore.get(photoId))throw Error('missing-photo');const ok=await commitPhotoChange(photoStore,pendingPhoto?[[record.photoId,pendingPhoto]]:[],commit);lockSheet(false);finished(ok);}
+      catch(error){lockSheet(false);if(active()){text('saveError',photoError(error));$('saveError').hidden=false;}}
+      finally{saving=false;lockSheet(false);if(active())all('button,input,textarea',$('saveForm')).forEach(el=>el.disabled=false);}
+    })();
   };
 }
 function openDetails(id){
   const p=state.places.find(x=>x.id===id);if(!p)return;const c=getCat(p.category);
-  openSheet(say('جزئیات مکان','Place details'),`<div class="details-top">${categoryIcon(c)}<div><h3>${esc(p.name)}</h3><small>${esc(catName(c))} · ${esc(date(p.ts))}</small></div></div><p class="detail-address">${esc(p.address||say('آدرسی ثبت نشده است.','No address saved.'))}</p>${p.notes?`<p class="detail-notes">${esc(p.notes)}</p>`:''}<button class="coordinates-summary full" id="detailCopy" aria-label="${say('کپی مختصات','Copy coordinates')}">${icon('copy')}<b dir="ltr">${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</b></button><p class="field-hint">${p.acc!==null?say(`دقت ثبت‌شده: ±${num(Math.ceil(p.acc))} متر`,`Recorded accuracy: ±${num(Math.ceil(p.acc))} m`):say('نقطهٔ دستی؛ دقت GPS ثبت نشده','Manual point; no GPS accuracy recorded')}${p.ele!==null?say(` · ارتفاع ${num(p.ele)} متر`,` · altitude ${num(p.ele)} m`):''}</p><button class="button primary full" id="detailDirections">${icon('route')}${say('مسیریابی به اینجا','Directions to this place')}</button><div class="action-row" id="detailActions"></div><div class="action-row" id="detailMore"></div>`);
+  openSheet(say('جزئیات مکان','Place details'),`${p.photoId?photoMarkup(p,c,true):''}<div class="details-top">${categoryIcon(c)}<div><h3>${esc(p.name)}</h3><small>${esc(catName(c))} · ${esc(date(p.ts))}</small></div></div><p class="detail-address">${esc(p.address||say('آدرسی ثبت نشده است.','No address saved.'))}</p>${p.notes?`<p class="detail-notes">${esc(p.notes)}</p>`:''}<button class="coordinates-summary full" id="detailCopy" aria-label="${say('کپی مختصات','Copy coordinates')}">${icon('copy')}<b dir="ltr">${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</b></button><p class="field-hint">${p.acc!==null?say(`دقت ثبت‌شده: ±${num(Math.ceil(p.acc))} متر`,`Recorded accuracy: ±${num(Math.ceil(p.acc))} m`):say('نقطهٔ دستی؛ دقت GPS ثبت نشده','Manual point; no GPS accuracy recorded')}${p.ele!==null?say(` · ارتفاع ${num(p.ele)} متر`,` · altitude ${num(p.ele)} m`):''}</p><button class="button primary full" id="detailDirections">${icon('route')}${say('مسیریابی به اینجا','Directions to this place')}</button><div class="action-row" id="detailActions"></div><div class="action-row" id="detailMore"></div>`);
+  showPhotos($('sheetContent'),'sheet');
   $('detailCopy').onclick=()=>copy(`${p.lat},${p.lng}`);$('detailDirections').onclick=()=>openRoutes(p);
   $('detailActions').append(button(say('روی نقشه','On map'),'map',()=>{closeSheet();stopLocation();selectPoint({...p},{resolve:false});switchTab('map');}),button(say('اشتراک','Share'),'share',()=>share(p)),button(say('ویرایش','Edit'),'edit',()=>openSave(p,true)));
   $('detailMore').append(button(p.favorite?say('برداشتن ستاره','Unfavorite'):say('ستاره‌دار','Favorite'),'heart',()=>{toggleFavorite(p.id);openDetails(p.id);},'button outline'),button(say('حذف مکان','Delete place'),'trash',()=>deletePlace(p),'button outline danger-text'));
 }
 function deletePlace(p){confirmAction(say('این نشانه حذف شود؟','Delete this pin?'),say(`«${p.name}» از مکان‌های شما حذف می‌شود.`,`“${p.name}” will be removed from your places.`),()=>{
   const ok=transact(s=>{s.places=s.places.filter(x=>x.id!==p.id);return s;});
+  if(ok)discardPhotos([p.photoId]);
   if(ok)toast(say('مکان حذف شد.','Place deleted.'),{action:()=>transact(s=>{if(!s.places.some(x=>x.id===p.id))s.places.unshift(p);return s;})});return ok;
 },{danger:true,label:say('حذف مکان','Delete place')});}
 
@@ -285,45 +342,59 @@ function editCategory(c){
 }
 function customSettings(){
   openSheet(say('لینک و اشتراک‌گذاری','Links & sharing'),`<form id="customForm"><label class="field"><span>${say('عنوان اشتراک‌گذاری','Share title')}</span><input id="shareTitle" value="${esc(state.prefs.shareTitle)}" maxlength="120"></label><label class="field"><span>${say('قالب لینک سفارشی','Custom URL template')}</span><input id="customTpl" dir="ltr" value="${esc(state.prefs.customTpl)}" maxlength="500" placeholder="myapp://open?lat={lat}&lng={lng}&name={name}" autocapitalize="off" spellcheck="false"></label><p class="field-hint" dir="auto">${say('جای‌گذارهای قابل استفاده:','Available placeholders:')} <b dir="ltr">{lat}, {lng}, {name}</b></p><p class="form-error" id="customError" hidden role="alert"></p><button class="button primary full" type="submit">${say('ذخیرهٔ تنظیمات','Save settings')}</button></form>`);
-  $('customForm').onsubmit=e=>{e.preventDefault();const tpl=$('customTpl').value.trim(),title=$('shareTitle').value.trim()||'Save Loc';if(tpl&&!safeCustomLink(tpl,{lat:35,lng:51,name:'Test'})){text('customError',say('این قالب لینک معتبر یا مجاز نیست.','This URL template is invalid or unsafe.'));$('customError').hidden=false;return;}if(transact(s=>{s.prefs.customTpl=tpl;s.prefs.shareTitle=title;return s;})){closeSheet();toast(say('تنظیمات ذخیره شد.','Settings saved.'));}};
+  $('customForm').onsubmit=e=>{e.preventDefault();const tpl=$('customTpl').value.trim(),title=$('shareTitle').value.trim()||'نشانا';if(tpl&&!safeCustomLink(tpl,{lat:35,lng:51,name:'Test'})){text('customError',say('این قالب لینک معتبر یا مجاز نیست.','This URL template is invalid or unsafe.'));$('customError').hidden=false;return;}if(transact(s=>{s.prefs.customTpl=tpl;s.prefs.shareTitle=title;return s;})){closeSheet();toast(say('تنظیمات ذخیره شد.','Settings saved.'));}};
 }
 function download(data,name,type='application/json'){
   const blob=new Blob([typeof data==='string'?data:JSON.stringify(data,null,2)],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
-function exportBackup(){
-  if(initial.corrupt){let raw;try{raw=storage.getItem(STORAGE_KEY)||storage.getItem('saveloc.places.v1');}catch{}if(raw){download(raw,'saveloc-recovery-raw.json');toast(say('نسخهٔ خام برای بازیابی دریافت شد.','Raw recovery copy downloaded.'));}else failure();return;}
+async function exportBackup(includePhotos=true){
+  if(initial.corrupt){let raw;try{raw=storage.getItem(STORAGE_KEY)||storage.getItem('saveloc.places.v1');}catch{}if(raw){download(raw,'neshana-recovery-raw.json');toast(say('نسخهٔ خام برای بازیابی دریافت شد.','Raw recovery copy downloaded.'));}else failure();return;}
   const latest=loadState(storage);if(latest.corrupt){initial=latest;exportBackup();return;}
-  download({...latest.state,saved_at:new Date().toISOString()},`saveloc-backup-${new Date().toISOString().slice(0,10)}.json`);toast(say('نسخهٔ پشتیبان آمادهٔ دریافت است.','Your backup is ready to download.'));
+  const seq=openSheet(say('پشتیبان مکان‌ها','Back up your places'),`<p class="field-hint" role="status">${say('در حال آماده‌سازی فایل روی دستگاه…','Preparing the file on your device…')}</p>`);
+  try{
+    const data=await photoBackup(latest.state,photoStore,{includePhotos});if(seq!==sheetSeq||!$('sheet').open)return;
+    const count=Object.keys(data.photos).length;
+    openSheet(say('پشتیبان آماده است','Your backup is ready'),`<div class="coordinates-summary">${icon('shield')}<span>${say(`${num(data.places.length)} مکان · ${num(count)} عکس`,`${num(data.places.length)} places · ${num(count)} photos`)}</span></div><p class="field-hint">${includePhotos?say('مکان‌ها، عکس‌ها و تنظیمات در این فایل هستند. آن را در Files نگه دار تا بتوانی روی دستگاه دیگری بازیابی کنی.','This file contains your places, photos and settings. Keep it in Files to restore on another device.'):say('این فایل فقط اطلاعات مکان‌ها و تنظیمات را دارد؛ عکس‌ها در آن نیستند.','This file contains place information and settings only, without photos.')}</p><button id="backupDownload" class="button primary full">${icon('download')}${say('دریافت فایل پشتیبان','Download backup')}</button>`);
+    $('backupDownload').onclick=()=>download(data,`neshana-${includePhotos?'backup':'places'}-${new Date().toISOString().slice(0,10)}.json`);
+  }catch(error){if(seq!==sheetSeq||!$('sheet').open)return;openSheet(say('پشتیبان عکس‌ها آماده نشد','Photo backup unavailable'),`<p class="confirm-message">${esc(photoError(error))}</p><p class="field-hint">${say('داده‌های فعلی تغییر نکرده‌اند. خروجی بدون عکس، نام، مختصات و یادداشت‌ها را حفظ می‌کند.','Your current data is unchanged. A photo-free export keeps names, coordinates and notes.')}</p><button id="backupWithoutPhotos" class="button primary full">${say('دریافت فقط اطلاعات مکان‌ها','Export place information only')}</button>`);$('backupWithoutPhotos').onclick=()=>exportBackup(false);}
 }
 async function importBackup(file){
-  if(!file)return;if(file.size>5*1024*1024){toast(say('حجم فایل باید کمتر از ۵ مگابایت باشد.','File must be under 5 MB.'));return;}
+  if(!file)return;if(file.size>MAX_BACKUP_BYTES){toast(say('حجم فایل باید کمتر از ۶۰ مگابایت باشد.','File must be under 60 MB.'));return;}
   try{
-    const incoming=normalizeBackup(JSON.parse(await file.text())).state;
+    const raw=JSON.parse(await file.text()),prepared=preparePhotoImport(raw,normalizeBackup(raw).state,uid),incoming=prepared.state;
     const overlap=incoming.places.filter(p=>state.places.some(x=>x.id===p.id)).length;
-    openSheet(say('ورود مکان‌ها','Import places'),`<div class="coordinates-summary">${icon('upload')}<span>${say(`${num(incoming.places.length)} مکان معتبر`,`${num(incoming.places.length)} valid places`)}</span></div><p class="field-hint">${esc(file.name)}<br>${say(`${num(overlap)} شناسهٔ تکراری پیدا شد.`,`${num(overlap)} existing IDs found.`)}</p><div class="import-options"><label class="import-option"><input type="radio" name="importMode" value="merge" checked ${initial.corrupt?'disabled':''}><span>${say('افزودن به مکان‌های فعلی','Add to existing places')}<small>${say('موارد تکراری رد می‌شوند؛ مکان‌ها و تنظیمات فعلی حفظ می‌شوند.','Duplicates are skipped. Current places and settings are kept.')}</small></span></label><label class="import-option"><input type="radio" name="importMode" value="replace" ${initial.corrupt?'checked':''}><span>${say('بازیابی کامل از این فایل','Restore from this file')}<small>${say('تمام مکان‌ها، دسته‌بندی‌ها و تنظیمات فعلی جایگزین می‌شوند.','Replaces all current places, categories and settings.')}</small></span></label></div><div class="form-actions"><button class="button soft" id="importCancel">${say('انصراف','Cancel')}</button><button class="button primary" id="importConfirm">${say('ادامه','Continue')}</button></div>`);
+    openSheet(say('ورود مکان‌ها','Import places'),`<div class="coordinates-summary">${icon('upload')}<span>${say(`${num(incoming.places.length)} مکان · ${num(prepared.entries.length)} عکس`,`${num(incoming.places.length)} places · ${num(prepared.entries.length)} photos`)}</span></div><p class="field-hint">${esc(file.name)}<br>${say(`${num(overlap)} شناسهٔ تکراری پیدا شد.`,`${num(overlap)} existing IDs found.`)}</p><div class="import-options"><label class="import-option"><input type="radio" name="importMode" value="merge" checked ${initial.corrupt?'disabled':''}><span>${say('افزودن به مکان‌های فعلی','Add to existing places')}<small>${say('موارد تکراری رد می‌شوند؛ مکان‌ها و تنظیمات فعلی حفظ می‌شوند.','Duplicates are skipped. Current places and settings are kept.')}</small></span></label><label class="import-option"><input type="radio" name="importMode" value="replace" ${initial.corrupt?'checked':''}><span>${say('بازیابی کامل از این فایل','Restore from this file')}<small>${say('تمام مکان‌ها، عکس‌ها، دسته‌بندی‌ها و تنظیمات فعلی جایگزین می‌شوند.','Replaces all current places, photos, categories and settings.')}</small></span></label></div><div class="form-actions"><button class="button soft" id="importCancel">${say('انصراف','Cancel')}</button><button class="button primary" id="importConfirm">${say('ادامه','Continue')}</button></div>`);
     $('importCancel').onclick=closeSheet;
-    const perform=replace=>{
-      let added=0;
-      const ok=transact(s=>{if(replace){added=incoming.places.length;return incoming;}const result=mergeStates(s,incoming);added=result.added;return result.state;},{replace});
-      if(ok){closeSheet();applyLanguage();applyTheme();renderCurrent();toast(say(`${num(added)} مکان وارد شد.`,`${num(added)} places imported.`));}return ok;
+    const perform=async replace=>{
+      if(sheetLocked)return false;const seq=sheetSeq,oldIds=loadState(storage).state.places.map(p=>p.photoId);let added=0;
+      const existing=new Set(loadState(storage).state.places.map(p=>p.id)),needed=new Set(incoming.places.filter(p=>replace||!existing.has(p.id)).map(p=>p.photoId));
+      const entries=prepared.entries.filter(([id])=>needed.has(id));lockSheet(true);all('button,input',$('sheetContent')).forEach(el=>el.disabled=true);
+      try{
+        const ok=await commitPhotoChange(photoStore,entries,()=>seq===sheetSeq&&transact(s=>{if(replace){added=incoming.places.length;return incoming;}const result=mergeStates(s,incoming);added=result.added;return result.state;},{replace}));
+        lockSheet(false);if(ok){discardPhotos([...oldIds,...entries.map(([id])=>id)]);closeSheet();applyLanguage();applyTheme();renderCurrent();toast(say(`${num(added)} مکان وارد شد.`,`${num(added)} places imported.`));}return ok;
+      }catch(error){toast(photoError(error));return false;}
+      finally{lockSheet(false);if(seq===sheetSeq)all('button,input',$('sheetContent')).forEach(el=>el.disabled=false);}
     };
     $('importConfirm').onclick=()=>{const replace=$('sheetContent').querySelector('input[name=importMode]:checked')?.value==='replace';if(replace)confirmAction(say('داده‌های فعلی جایگزین شوند؟','Replace current data?'),say('این کار همهٔ داده‌های فعلی را با محتوای فایل عوض می‌کند. اگر لازم است ابتدا نسخهٔ پشتیبان بگیرید.','This replaces all current data with the file. Export a backup first if needed.'),()=>perform(true),{danger:true,label:say('جایگزینی و بازیابی','Replace & restore')});else perform(false);};
-  }catch(error){toast(error.message==='unsupported-version'?say('این نسخهٔ فایل پشتیبان هنوز پشتیبانی نمی‌شود.','This backup version is not supported.'):say('فایل نامعتبر است؛ هیچ داده‌ای تغییر نکرد. مختصات و ساختار JSON را بررسی کنید.','Invalid backup. Nothing changed. Check its coordinates and JSON structure.'));}
+  }catch(error){toast(error.message==='unsupported-version'?say('این نسخهٔ فایل پشتیبان هنوز پشتیبانی نمی‌شود.','This backup version is not supported.'):say('فایل یا عکس‌های آن معتبر نیستند؛ هیچ داده‌ای تغییر نکرد.','The file or its photos are invalid. Nothing changed.'));}
 }
 function clearAll(){
-  confirmAction(say('همهٔ نشانه‌ها پاک شوند؟','Delete every pin?'),say(`${num(state.places.length)} مکان حذف می‌شود. دسته‌بندی‌ها و تنظیمات باقی می‌مانند. برای بازیابی بعدی، ابتدا نسخهٔ پشتیبان بگیرید.`,`${num(state.places.length)} places will be removed. Categories and settings stay. Export a backup if you want to restore them later.`),()=>{const ok=transact(s=>{s.places=[];return s;});if(ok)toast(say('همهٔ مکان‌ها حذف شد.','All places deleted.'));return ok;},{danger:true,label:say('حذف همه','Delete all')});
+  confirmAction(say('همهٔ نشانه‌ها پاک شوند؟','Delete every place?'),say(`${num(state.places.length)} مکان و عکس‌های آن‌ها حذف می‌شود. برای بازیابی بعدی، ابتدا پشتیبان بگیرید.`,`${num(state.places.length)} places and their photos will be removed. Export a backup to restore them later.`),()=>{let removed=[];const ok=transact(s=>{removed=s.places.map(p=>p.photoId);s.places=[];return s;});if(ok){discardPhotos(removed,0);toast(say('همهٔ مکان‌ها حذف شد.','All places deleted.'));}return ok;},{danger:true,label:say('حذف همه','Delete all')});
 }
 function isStandalone(){return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
 async function install(){
-  if(isStandalone()){toast(say('Save Loc همین حالا به شکل اپ باز شده است.','Save Loc is already running as an app.'));return;}
+  if(isStandalone()){toast(say('نشانا همین حالا به شکل اپ باز شده است.','Neshana is already running as an app.'));return;}
   if(deferredPrompt){try{const prompt=deferredPrompt;deferredPrompt=null;await prompt.prompt();const result=await prompt.userChoice;if(result.outcome==='accepted')toast(say('نصب آغاز شد.','Installation started.'));return;}catch{}}
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  openSheet(say('Save Loc، همیشه همراهت','Take Save Loc with you'),`<div class="ios-install"><img src="./assets/icons/icon.svg" alt="Save Loc"><h3>${say('یک لمس تا مکان‌های تو','Your places. One tap away.')}</h3><p>${say('اپ را به صفحهٔ اصلی اضافه کن؛ سبک، سریع و بدون نیاز به اپ‌استور.','Add the app to your home screen. Light, fast, no app store needed.')}</p><div class="install-steps">${(ios?[
+  openSheet(say('نشانا، همیشه همراهت','Take Neshana with you'),`<div class="ios-install"><img src="./assets/icons/icon.svg" alt="نشانا"><h3>${say('یک لمس تا مکان‌های تو','Your places. One tap away.')}</h3><p>${say('اپ را به صفحهٔ اصلی اضافه کن؛ سبک، سریع و بدون نیاز به اپ‌استور.','Add the app to your home screen. Light, fast, no app store needed.')}</p><div class="install-steps">${(ios?[
     [say('این صفحه را در Safari باز کن.','Open this page in Safari.'),'globe'],[say('دکمهٔ Share (اشتراک‌گذاری) را بزن.','Tap the Share button.'),'share'],[say('Add to Home Screen را انتخاب کن؛ سپس Add را بزن.','Choose Add to Home Screen, then Add.'),'plus']]:[
     [say('این صفحه را در Safari آیفون یا Chrome / Edge باز کن.','Open this page in iPhone Safari or Chrome / Edge.'),'globe'],[say('در آیفون: Share ← Add to Home Screen.','On iPhone: Share → Add to Home Screen.'),'share'],[say('در Chrome / Edge: از منوی مرورگر Install app یا Add to Home Screen را انتخاب کن.','In Chrome / Edge: choose Install app or Add to Home Screen from the menu.'),'plus']]).map(([label,symbol],i)=>`<div class="install-step"><span class="step-number">${num(i+1)}</span><p>${label}</p>${icon(symbol)}</div>`).join('')}</div><p class="field-hint">${say('اگر گزینهٔ Open as Web App نمایش داده شد، روشنش کن. داده‌های مرورگر و نسخهٔ نصب‌شده ممکن است جدا باشند؛ برای انتقال از پشتیبان استفاده کن.','If you see Open as Web App, turn it on. Browser and installed-app data may be separate; use a backup to transfer.')}</p><button id="installDone" class="button primary full">${say('متوجه شدم','Got it')}</button></div>`);$('installDone').onclick=closeSheet;
 }
 function privacy(){
-  openSheet(say('دربارهٔ داده‌های تو','About your data'),`<div class="coordinates-summary">${icon('shield')}<span>${say('ذخیره روی دستگاه، بدون ردیابی تبلیغاتی','On-device storage. No advertising trackers.')}</span></div><p class="detail-notes">${say('نام، یادداشت و مکان‌های ذخیره‌شده فقط در حافظهٔ همین مرورگر نگهداری می‌شوند. پاک کردن داده‌های سایت یا حذف اپ ممکن است آن‌ها را پاک کند؛ فایل پشتیبان را نگه دارید.\n\nبرای نقشه، محدودهٔ قابل مشاهده از CARTO / OpenStreetMap دریافت می‌شود. جستجو و تبدیل مختصات به آدرس از سرویس Photon استفاده می‌کند؛ عبارت جستجو یا مختصات انتخاب‌شده برای این کار ارسال می‌شود. نام‌ها و یادداشت‌های ذخیره‌شده ارسال نمی‌شوند.\n\nدسترسی GPS فقط با درخواست شما فعال و پس از دریافت نتیجه یا خروج از صفحه متوقف می‌شود. دقت موقعیت را دستگاه و محیط تعیین می‌کنند. در حالت آفلاین فهرست، ویرایش، ثبت مختصات و پشتیبان کار می‌کنند؛ نقشه و جستجوی آدرس به اینترنت نیاز دارند.','Names, notes and saved places stay in this browser’s storage. Clearing website data or removing the app may erase them; keep a backup.\n\nVisible map tiles come from CARTO / OpenStreetMap. Search and reverse geocoding use Photon; the search query or selected coordinates are sent for that purpose. Saved names and notes are not sent.\n\nGPS only starts when requested and stops after a result or when the app is hidden. Accuracy depends on the device and surroundings. Offline, your list, editing, coordinate entry and backups work; maps and address search need internet.')}</p><p class="field-hint" dir="ltr">Map data © OpenStreetMap contributors · Tiles © CARTO · Geocoding: Photon / Komoot</p>`);
+  openSheet(say('حریم خصوصی در نشانا','Privacy in Neshana'),`<div class="coordinates-summary">${icon('shield')}<span>${say('داده‌های تو، روی گوشی تو','Your data. Your device.')}</span></div><div class="privacy-details"><h3>${say('محلی و شخصی','Local and personal')}</h3><p>${say('مکان‌ها، یادداشت‌ها، عکس‌ها و تنظیمات در حافظهٔ همین دستگاه ذخیره می‌شوند. نشانا آن‌ها را در سرور خود بارگذاری نمی‌کند و همگام‌سازی ابری یا ردیاب تبلیغاتی ندارد. عکس‌ها روی دستگاه کوچک می‌شوند و فرادادهٔ عکس اصلی در نسخهٔ ذخیره‌شده نگهداری نمی‌شود.','Places, notes, photos and settings are stored on this device. Neshana does not upload them to its own server and has no cloud sync or advertising trackers. Photos are resized locally and the original image metadata is not kept in the saved copy.')}</p><h3>${say('وقتی از اینترنت استفاده می‌کنی','When you use the internet')}</h3><p>${say('نمایش نقشه به OpenStreetMap متصل می‌شود؛ محدودهٔ نقشه و IP برای این سرویس قابل مشاهده است. در جستجوی آنلاین و دریافت آدرس، عبارت جستجو یا مختصات انتخاب‌شده به Photon فرستاده می‌شود. نام، یادداشت و عکس ذخیره‌شده برای این سرویس‌ها ارسال نمی‌شوند. در مسیریابی و اشتراک‌گذاری، فقط با انتخاب خودت اطلاعات به برنامهٔ انتخابی داده می‌شود.','The map connects to OpenStreetMap, which can see the viewed area and your IP. Online search and address lookup send your query or selected coordinates to Photon. Saved names, notes and photos are not sent to these services. Directions and sharing pass information to another app only when you choose them.')}</p><h3>${say('کنترل در دست توست','You stay in control')}</h3><p>${say('GPS فقط با درخواست خودت فعال می‌شود. دوربین فقط پس از لمس دکمهٔ دوربین در دسترس است. برای نگه‌داشتن مکان‌ها و عکس‌ها نسخهٔ پشتیبان بگیر؛ پاک کردن داده‌های سایت یا حذف اپ ممکن است آن‌ها را پاک کند. فایل پشتیبان شامل داده‌های شخصی توست و محل نگهداری‌اش را خودت انتخاب می‌کنی.','GPS starts only when you request it. The camera is accessed only after you tap Camera. Keep a backup of places and photos: clearing site data or removing the app may erase them. Your backup contains personal information; you choose where to keep it.')}</p></div>`);
+}
+function about(){
+  openSheet(say('دربارهٔ نشانا','About Neshana'),`<div class="about-app"><img src="./assets/icons/icon.svg" alt="${say('نشان نشانا','Neshana logo')}" width="80" height="80"><h3>${say('نشانا','Neshana')}</h3><p>${say('نشانه‌ای برای جاهایی که می‌خواهی دوباره پیدا کنی.','A little reminder of places worth finding again.')}</p><span class="version-label">${say('نسخهٔ ۳٫۰','Version 3.0')}</span></div><div class="about-credit"><strong>${say('برنامه نویسی و توسعه: پیمان عابدین پور','Programming & development: Peymaan Abedinpour')}</strong><a href="https://peymaanabedinpour.ir" target="_blank" rel="noopener noreferrer" class="developer-link"><span dir="ltr">peymaanabedinpour.ir</span>${icon('external')}</a></div><p class="copyright">${say('© ۱۴۰۵ پیمان عابدین پور. تمامی حقوق نشانا محفوظ است.','© 2026 Peymaan Abedinpour. All rights reserved.')}</p>`);
 }
 function updateNetwork(){
   $('offlineBanner').hidden=navigator.onLine;if(!navigator.onLine){text('mapNoticeText',say('آفلاین · نقشهٔ تازه بارگیری نمی‌شود.','Offline · new map tiles cannot load.'));$('mapNotice').hidden=false;}else if(mapIsReady)$('mapNotice').hidden=true;
@@ -358,11 +429,11 @@ all('[data-theme]',$('themeControl')).forEach(b=>b.onclick=()=>setPref('theme',b
 all('[data-lang]',$('languageControl')).forEach(b=>b.onclick=()=>setPref('lang',b.dataset.lang));
 $('mapProvider').onchange=e=>setPref('mapProvider',e.target.value);
 $('manageCategories').onclick=manageCategories;$('customSettings').onclick=customSettings;
-$('exportBtn').onclick=exportBackup;$('importBtn').onclick=()=>{$('importFile').value='';$('importFile').click();};
+$('exportBtn').onclick=()=>exportBackup();$('importBtn').onclick=()=>{$('importFile').value='';$('importFile').click();};
 $('importFile').onchange=e=>{const file=e.target.files?.[0];e.target.value='';importBackup(file);};$('clearAll').onclick=clearAll;
-$('privacyBtn').onclick=privacy;
+$('privacyBtn').onclick=privacy;$('aboutBtn').onclick=about;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
-window.addEventListener('appinstalled',()=>{deferredPrompt=null;toast(say('Save Loc نصب شد.','Save Loc installed.'));});
+window.addEventListener('appinstalled',()=>{deferredPrompt=null;toast(say('نشانا نصب شد.','Neshana installed.'));});
 window.addEventListener('online',updateNetwork);window.addEventListener('offline',updateNetwork);
 window.addEventListener('hashchange',()=>switchTab(location.hash.slice(1),{scroll:false}));
 window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY){const updated=loadState(storage);if(!updated.corrupt){state=updated.state;applyLanguage();applyTheme();renderCurrent();}}});

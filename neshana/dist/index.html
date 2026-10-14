@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f7f8f5">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Save Loc">
+  <meta name="apple-mobile-web-app-title" content="نشانا">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="مکان‌های دوست‌داشتنی‌ات را ذخیره کن. Save Loc، دفترچه شخصی مکان‌های تو؛ سریع، ساده و همیشه همراه.">
+  <meta name="description" content="مکان‌های دوست‌داشتنی‌ات را ذخیره کن. نشانا، دفترچه شخصی مکان‌های تو؛ سریع، ساده و همیشه همراه.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>Save Loc — مکان‌های من</title>
+  <title>نشانا — مکان‌های من</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png" sizes="180x180">
@@ -25,7 +25,7 @@
 <body>
 <a class="skip-link" href="#workspace" data-t="skip">رفتن به محتوا</a>
 <header class="app-header">
-  <a class="brand" href="#map" aria-label="Save Loc"><img src="./assets/icons/icon.svg" width="42" height="42" alt=""><span><b dir="ltr">Save Loc<span class="brand-dot">.</span></b><small data-t="tagline">هر مکان، یک خاطره</small></span></a>
+  <a class="brand" href="#map" aria-label="نشانا"><img src="./assets/icons/icon.svg" width="42" height="42" alt=""><span><b>نشانا</b><small data-t="tagline">جای خوب، یادمان می‌ماند</small></span></a>
   <div class="header-note"><span class="tiny-dot"></span><span data-t="personalAtlas">دفترچهٔ شخصی مکان‌های تو</span></div>
   <button class="icon-button install-trigger" data-action="install" aria-label="نصب اپلیکیشن" data-label="install"><i data-icon="download"></i><span class="desktop-text" data-t="install">نصب اپلیکیشن</span></button>
 </header>
@@ -34,7 +34,7 @@
     <div id="map" role="region" aria-label="نقشه تعاملی؛ برای انتخاب یک نقطه کلیک کنید" tabindex="0"></div>
     <div class="map-search-wrap">
       <form id="mapSearchForm" class="map-search" role="search">
-        <i data-icon="search"></i><input id="mapSearchInput" type="search" enterkeyhint="search" autocomplete="off" placeholder="کجا را به خاطر بسپاریم؟" data-ph="mapSearch" aria-label="جستجوی مکان یا مختصات" data-label="mapSearchLabel" maxlength="160">
+        <i data-icon="search"></i><input id="mapSearchInput" type="search" enterkeyhint="search" autocomplete="off" placeholder="جستجوی مکان یا آدرس" data-ph="mapSearch" aria-label="جستجوی مکان یا مختصات" data-label="mapSearchLabel" maxlength="160">
         <button type="submit" class="icon-button small" aria-label="جستجو" data-label="search"><i data-icon="arrow"></i></button>
       </form>
       <div id="searchResults" class="search-results" aria-live="polite" hidden></div>
@@ -43,7 +43,7 @@
     <div class="map-side-tools"><button class="map-button" id="zoomIn" aria-label="بزرگ‌نمایی" data-label="zoomIn"><i data-icon="plus"></i></button><button class="map-button" id="zoomOut" aria-label="کوچک‌نمایی" data-label="zoomOut"><i data-icon="minus"></i></button><button class="map-button locate-map" id="mapLocate" aria-label="یافتن موقعیت من" data-label="locate"><i data-icon="locate"></i></button></div>
     <div class="map-caption" id="mapCaption"><span class="tiny-dot"></span><span data-t="initialView">نمای اولیه · تهران</span></div>
     <div class="map-notice" id="mapNotice" hidden><i data-icon="wifi-off"></i><span id="mapNoticeText"></span><button id="retryMap" data-t="retry">تلاش دوباره</button></div>
-    <div class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a><span> · </span><a href="https://carto.com/attributions" target="_blank" rel="noopener">© CARTO</a></div>
+    <div class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></div>
   </section>
   <aside class="panel" id="panel">
     <div class="panel-handle" aria-hidden="true"></div>
@@ -51,7 +51,7 @@
     <div id="storageBanner" class="status-banner warning" hidden><i data-icon="alert"></i><span id="storageMessage"></span></div>
     <section id="viewMap" class="view" aria-labelledby="liveTitle">
       <div class="eyebrow"><span class="tiny-dot"></span><span id="locationStatus" data-t="yourPlaces">جای تو، در دنیای تو</span><span id="locatingSpinner" class="spinner" hidden></span></div>
-      <div class="live-heading"><div><h1 id="liveTitle" data-t="heroTitle">همین‌جا را<br>به خاطر بسپار.</h1><p id="liveSubtitle" data-t="heroSubtitle">از یک کافهٔ دنج تا جای پارک ماشینت.</p></div><div class="hero-mark" aria-hidden="true"><i data-icon="pin"></i><span></span></div></div>
+      <div class="live-heading"><div><h1 id="liveTitle" data-t="heroTitle">اینجا را نشانه بگذار.</h1><p id="liveSubtitle" data-t="heroSubtitle">یک لمس، برای پیدا کردن دوباره.</p></div></div>
       <div id="geoError" class="inline-error" role="alert" hidden></div>
       <div id="currentDetails" class="current-details" hidden>
         <div class="address-line"><i data-icon="pin"></i><p id="currentAddress"></p></div>
@@ -81,15 +81,23 @@
     <section id="viewSettings" class="view" aria-labelledby="settingsTitle" hidden>
       <div class="eyebrow" data-t="makeYours">به سبک خودت</div><h1 id="settingsTitle" data-t="settings">تنظیمات</h1><p class="page-subtitle" data-t="settingsSubtitle">یک همراه کوچک، با سلیقهٔ تو.</p>
       <h2 class="group-title" data-t="appearance">ظاهر و زبان</h2>
-      <div class="settings-group"><div class="setting-row"><span data-t="theme">نمایش</span><div class="segmented" id="themeControl"><button data-theme="auto" data-t="auto">خودکار</button><button data-theme="light" data-t="light">روشن</button><button data-theme="dark" data-t="dark">تیره</button></div></div><div class="setting-row"><span data-t="language">زبان</span><div class="segmented" id="languageControl"><button data-lang="fa">فارسی</button><button data-lang="en">English</button></div></div></div>
+      <div class="settings-group appearance-group"><div class="theme-heading"><span data-t="theme">رنگ و حال‌وهوا</span><small data-t="themeHint">به سلیقهٔ تو</small></div><div class="theme-grid" id="themeControl" aria-label="انتخاب تم">
+        <button data-theme="light"><span class="theme-preview paper"><i></i><i></i><i></i></span><span data-t="paper">کاغذی</span></button>
+        <button data-theme="ocean"><span class="theme-preview ocean"><i></i><i></i><i></i></span><span data-t="ocean">آبی آرام</span></button>
+        <button data-theme="lavender"><span class="theme-preview lavender"><i></i><i></i><i></i></span><span data-t="lavender">یاسی</span></button>
+        <button data-theme="sand"><span class="theme-preview sand"><i></i><i></i><i></i></span><span data-t="sand">شنی</span></button>
+        <button data-theme="auto" class="theme-mode"><i data-icon="auto"></i><span data-t="auto">خودکار</span></button>
+        <button data-theme="dark" class="theme-mode"><i data-icon="moon"></i><span data-t="dark">تیره</span></button>
+      </div><div class="setting-row"><span data-t="language">زبان</span><div class="segmented" id="languageControl"><button data-lang="fa">فارسی</button><button data-lang="en">English</button></div></div></div>
       <h2 class="group-title" data-t="organize">مرتب و منظم</h2>
       <div class="settings-group"><button class="setting-link" id="manageCategories"><i data-icon="grid"></i><span data-t="manageCategories">مدیریت دسته‌بندی‌ها</span><i data-icon="chevron"></i></button><div class="setting-row"><label for="mapProvider" data-t="defaultMap">مسیریاب پیش‌فرض</label><select id="mapProvider"><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option></select></div><button class="setting-link" id="customSettings"><i data-icon="external"></i><span data-t="linkSettings">لینک سفارشی و اشتراک‌گذاری</span><i data-icon="chevron"></i></button></div>
       <h2 class="group-title" data-t="yourData">داده‌های تو</h2>
       <div class="settings-group"><button class="setting-link" id="exportBtn"><i data-icon="download"></i><span data-t="export">دریافت نسخهٔ پشتیبان</span><i data-icon="chevron"></i></button><button class="setting-link" id="importBtn"><i data-icon="upload"></i><span data-t="import">ورود فایل یا بازیابی</span><i data-icon="chevron"></i></button><button class="setting-link danger-text" id="clearAll"><i data-icon="trash"></i><span data-t="clearAll">حذف همهٔ مکان‌ها</span><i data-icon="chevron"></i></button></div>
       <p class="settings-hint" data-t="backupNote">برای انتقال به گوشی دیگر یا نسخهٔ نصب‌شده، فایل پشتیبان بگیر و آنجا وارد کن.</p>
-      <button class="install-card" data-action="install"><img src="./assets/icons/icon.svg" alt="" width="48" height="48"><span><strong data-t="alwaysWithYou">همیشه همراهت</strong><small data-t="installHint">Save Loc را به صفحهٔ اصلی اضافه کن</small></span><i data-icon="plus"></i></button>
-      <button class="text-button privacy-button" id="privacyBtn"><i data-icon="shield"></i><span data-t="privacy">دربارهٔ داده‌ها و حریم خصوصی</span></button>
-      <footer class="credits"><b dir="ltr">Save Loc · 2.0</b><span>Peymaan Abedinpour</span></footer>
+      <button class="install-card" data-action="install"><img src="./assets/icons/icon.svg" alt="" width="48" height="48"><span><strong data-t="alwaysWithYou">همیشه همراهت</strong><small data-t="installHint">نشانا را به صفحهٔ اصلی اضافه کن</small></span><i data-icon="plus"></i></button>
+      <div class="privacy-card"><i data-icon="shield"></i><div><strong data-t="privacyHeading">داده‌های تو، روی گوشی تو</strong><p data-t="privacySummary">مکان‌ها، یادداشت‌ها و عکس‌ها در حافظهٔ همین دستگاه ذخیره می‌شوند و برای ما ارسال نمی‌شوند. نقشه و جستجوی آنلاین از سرویس‌های بیرونی استفاده می‌کنند؛ اشتراک‌گذاری فقط با انتخاب خودت انجام می‌شود.</p><button class="text-button" id="privacyBtn" data-t="privacy">جزئیات حریم خصوصی</button></div></div>
+      <div class="settings-group"><button class="setting-link" id="aboutBtn"><i data-icon="info"></i><span data-t="about">دربارهٔ نشانا</span><i data-icon="chevron"></i></button></div>
+      <footer class="credits"><b data-t="appVersion">نشانا · نسخهٔ ۳٫۰</b><span data-t="developerShort">ساختهٔ پیمان عابدین پور</span></footer>
     </section>
   </aside>
 </main>
@@ -98,6 +106,6 @@
 <div id="toast" class="toast" role="status" aria-live="polite" hidden><i data-icon="check"></i><span id="toastMessage"></span><button id="toastAction" hidden></button></div>
 <button id="updateReady" class="update-ready" hidden><i data-icon="refresh"></i><span data-t="updateReady">نسخهٔ جدید آماده است؛ به‌روزرسانی</span></button>
 <input type="file" id="importFile" accept=".json,application/json" hidden>
-<noscript><div class="noscript">برای استفاده از Save Loc، جاوااسکریپت مرورگر را فعال کنید.</div></noscript>
+<noscript><div class="noscript">برای استفاده از نشانا، جاوااسکریپت مرورگر را فعال کنید.</div></noscript>
 </body>
 </html>

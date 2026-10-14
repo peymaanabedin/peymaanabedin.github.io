@@ -1,1 +1,0 @@
-{"name":"saveloc-pwa","version":"2.0.0","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.mjs","check":"node --check dist/app.mjs && node --check dist/core.mjs && node --check dist/sw.js"},"devDependencies":{"linkedom":"0.18.12"}}
