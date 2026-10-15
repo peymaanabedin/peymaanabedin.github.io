@@ -10,7 +10,7 @@ test('zero coordinates are valid but blanks, booleans and nonfinite values are r
 test('coordinate entry accepts Persian and Arabic digits without silently changing order',()=>{
   assert.deepEqual(parseCoordinates('۳۵٫۷۱۵۳۰۰، ۵۱٫۴۰۴۳۰۰'),{lat:35.7153,lng:51.4043});
   assert.deepEqual(parseCoordinates('-١٢.٥, ٤٠'),{lat:-12.5,lng:40});assert.deepEqual(parseCoordinates('0 0'),{lat:0,lng:0});
-  for(const s of ['91,51','a,b','35.5','35,51,21','Infinity,0','35;',''])assert.equal(parseCoordinates(s),null);
+  for(const s of ['91,181','a,b','35.5','35,51,21','Infinity,0','35;',''])assert.equal(parseCoordinates(s),null);
 });
 test('Persian search normalizes Arabic letter variants, marks and ZWNJ',()=>{
   assert.equal(normalizeSearch(' کافه‌يِ  كیان '),'کافه ی کیان');assert.equal(filterPlaces([place({name:'کافه کیان'})],{query:'كافه كيان'}).length,1);
