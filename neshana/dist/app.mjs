@@ -107,6 +107,15 @@ function confirmAction(title,message,action,{danger=false,label}={}){
 }
 
 // Online raster tiles are view-only. Explicit offline downloads use the permitted vector archive separately.
+function startMap(){
+  try{initMap();}catch(error){
+    console.warn('Neshana map initialization failed',error);
+    try{map?.remove();}catch{}
+    map=null;tileLayer=null;markerLayer=null;
+    text('mapNoticeText',say('نقشه باز نشد. دوباره تلاش کن؛ ورود مختصات و مکان‌های ذخیره‌شده در دسترس‌اند.','Map could not start. Retry; coordinates and saved places remain available.'));
+    $('mapNotice').hidden=false;
+  }
+}
 function initMap(){
   if(!window.L){text('mapNoticeText',say('نقشه بارگیری نشد. می‌توانید مختصات را دستی وارد کنید.','Map could not load. You can still enter coordinates.'));$('mapNotice').hidden=false;return;}
   const L=window.L;
@@ -451,7 +460,7 @@ function privacy(){
   openSheet(say('حریم خصوصی در نشانا','Privacy in Neshana'),`<div class="coordinates-summary">${icon('shield')}<span>${say('داده‌های تو، روی گوشی تو','Your data. Your device.')}</span></div><div class="privacy-details"><h3>${say('محلی و شخصی','Local and personal')}</h3><p>${say('مکان‌ها، یادداشت‌ها، عکس‌ها و تنظیمات در حافظهٔ همین دستگاه ذخیره می‌شوند. نشانا آن‌ها را در سرور خود بارگذاری نمی‌کند و همگام‌سازی ابری یا ردیاب تبلیغاتی ندارد. عکس‌ها روی دستگاه کوچک می‌شوند و فرادادهٔ عکس اصلی در نسخهٔ ذخیره‌شده نگهداری نمی‌شود.','Places, notes, photos and settings are stored on this device. Neshana does not upload them to its own server and has no cloud sync or advertising trackers. Photos are resized locally and the original image metadata is not kept in the saved copy.')}</p><h3>${say('وقتی از اینترنت استفاده می‌کنی','When you use the internet')}</h3><p>${say('دریافت محدودهٔ آفلاین به Protomaps یا آرشیو عمومی Source Cooperative متصل می‌شود و محدودهٔ انتخابی برای منبع قابل مشاهده است. نقشهٔ دریافت‌شده روی دستگاه می‌ماند. نمایش نقشهٔ آنلاین به OpenFreeMap یا OpenStreetMap متصل می‌شود؛ محدودهٔ نقشه و IP برای این سرویس قابل مشاهده است. در جستجوی آنلاین و دریافت آدرس، عبارت جستجو یا مختصات انتخاب‌شده به Photon فرستاده می‌شود. نام، یادداشت و عکس ذخیره‌شده برای این سرویس‌ها ارسال نمی‌شوند. در مسیریابی و اشتراک‌گذاری، فقط با انتخاب خودت اطلاعات به برنامهٔ انتخابی داده می‌شود.','Offline area downloads connect to Protomaps or its public Source Cooperative archive. Downloaded map files stay on this device. The online map connects to OpenFreeMap or OpenStreetMap, which can see the viewed area and your IP. Online search and address lookup send your query or selected coordinates to Photon. Saved names, notes and photos are not sent to these services. Directions and sharing pass information to another app only when you choose them.')}</p><h3>${say('کنترل در دست توست','You stay in control')}</h3><p>${say('GPS فقط با درخواست خودت فعال می‌شود. دوربین فقط پس از لمس دکمهٔ دوربین در دسترس است. برای نگه‌داشتن مکان‌ها و عکس‌ها نسخهٔ پشتیبان بگیر؛ پاک کردن داده‌های سایت یا حذف اپ ممکن است آن‌ها را پاک کند. فایل پشتیبان شامل داده‌های شخصی توست و محل نگهداری‌اش را خودت انتخاب می‌کنی.','GPS starts only when you request it. The camera is accessed only after you tap Camera. Keep a backup of places and photos: clearing site data or removing the app may erase them. Your backup contains personal information; you choose where to keep it.')}</p></div>`);
 }
 function about(){
-  openSheet(say('دربارهٔ نشانا','About Neshana'),`<div class="about-app"><img src="./assets/icons/icon-192.png" alt="${say('نشان نشانا','Neshana logo')}" width="80" height="80"><h3>${say('نشانا','Neshana')}</h3><p>${say('نشانه‌ای برای جاهایی که می‌خواهی دوباره پیدا کنی.','A little reminder of places worth finding again.')}</p><span class="version-label">${say('نسخهٔ ۳٫۲٫۱','Version 3.2.1')}</span></div><div class="about-credit"><strong>${say('برنامه نویسی و توسعه: پیمان عابدین پور','Programming & development: Peymaan Abedinpour')}</strong><a href="https://peymaanabedinpour.ir" target="_blank" rel="noopener noreferrer" class="developer-link"><span dir="ltr">peymaanabedinpour.ir</span>${icon('external')}</a></div><p class="copyright">${say('© ۱۴۰۵ پیمان عابدین پور. تمامی حقوق نشانا محفوظ است.','© 2026 Peymaan Abedinpour. All rights reserved.')}</p>`);
+  openSheet(say('دربارهٔ نشانا','About Neshana'),`<div class="about-app"><img src="./assets/icons/icon-192.png" alt="${say('نشان نشانا','Neshana logo')}" width="80" height="80"><h3>${say('نشانا','Neshana')}</h3><p>${say('نشانه‌ای برای جاهایی که می‌خواهی دوباره پیدا کنی.','A little reminder of places worth finding again.')}</p><span class="version-label">${say('نسخهٔ ۳٫۲٫۲','Version 3.2.2')}</span></div><div class="about-credit"><strong>${say('برنامه نویسی و توسعه: پیمان عابدین پور','Programming & development: Peymaan Abedinpour')}</strong><a href="https://peymaanabedinpour.ir" target="_blank" rel="noopener noreferrer" class="developer-link"><span dir="ltr">peymaanabedinpour.ir</span>${icon('external')}</a></div><p class="copyright">${say('© ۱۴۰۵ پیمان عابدین پور. تمامی حقوق نشانا محفوظ است.','© 2026 Peymaan Abedinpour. All rights reserved.')}</p>`);
 }
 function mapError(error){
   if(error?.name==='AbortError')return say('دریافت متوقف شد؛ نقشهٔ قبلی حفظ شده است.','Download stopped. Your previous map is safe.');
@@ -572,7 +581,7 @@ $('saveCurrent').onclick=()=>current&&openSave(current);$('shareCurrent').onclic
 $('routeCurrent').onclick=()=>current&&openRoutes(current);
 $('copyLat').onclick=()=>current&&copy(String(current.lat));$('copyLng').onclick=()=>current&&copy(String(current.lng));
 $('mapHome').onclick=fitPlaces;$('zoomIn').onclick=()=>map?.zoomIn();$('zoomOut').onclick=()=>map?.zoomOut();
-$('retryMap').onclick=()=>{onlineFailed=false;if(!navigator.onLine){openOfflineSettings();return;}if(map){syncMapLayer(true);return;}tileErrors=0;mapIsReady=false;if(tileLayer){tileLayer.redraw();toast(say('در حال بارگیری نقشه…','Loading map…'));}else initMap();};
+$('retryMap').onclick=()=>{onlineFailed=false;if(!navigator.onLine){openOfflineSettings();return;}if(map){syncMapLayer(true);return;}tileErrors=0;mapIsReady=false;if(tileLayer){tileLayer.redraw();toast(say('در حال بارگیری نقشه…','Loading map…'));}else startMap();};
 $('openMapSearch').onclick=openSearch;
 $('savedSearch').addEventListener('input',()=>{limit=60;renderList();renderMarkers();});$('sortSelect').onchange=renderList;
 $('filterButton').onclick=openFilters;$('clearFilters').onclick=()=>{category='all';renderFilters();renderList();renderMarkers();};
@@ -597,6 +606,6 @@ if(window.visualViewport){const update=()=>{document.documentElement.style.setPr
 paintIcons();applyLanguage();applyFont();applyTheme();renderCurrent();switchTab(location.hash.slice(1)||'map',{scroll:false});updateNetwork();
 if(initial.corrupt){text('storageMessage',say('دادهٔ ذخیره‌شده قابل خواندن نیست. برای حفظ آن، از تنظیمات «نسخهٔ پشتیبان» را دریافت کنید؛ سپس فایل سالم را بازیابی کنید.','Stored data is damaged. Export a recovery copy from Settings, then restore a valid backup.'));$('storageBanner').hidden=false;}
 fetch('./services.json').then(r=>r.ok?r.json():null).then(config=>{if(config?.geocoder?.startsWith('https://'))loadedServices.geocoder=config.geocoder;}).catch(()=>{});
-loadGeoid().then(()=>renderCurrent()).catch(()=>{});initMap();initOffline();window.addEventListener('load',setupServiceWorker,{once:true});if(document.readyState==='complete')setupServiceWorker();
+loadGeoid().then(()=>renderCurrent()).catch(()=>{});startMap();initOffline();window.addEventListener('load',setupServiceWorker,{once:true});if(document.readyState==='complete')setupServiceWorker();
 
 window.neshanaReady=true;window.dispatchEvent(new window.Event('neshana:ready'));

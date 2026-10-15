@@ -1,0 +1,12 @@
+{
+  "release": "3.2.2-4fa116eb64eaab1a",
+  "environment": "Node native Canvas; IndexedDB simulated; network disabled for the second render",
+  "provider": "OpenFreeMap / OpenMapTiles / OpenStreetMap",
+  "tiles": 6,
+  "bytes": 1562778,
+  "colors": 1221,
+  "offlineReads": 4,
+  "identicalOnlineOfflinePNG": true,
+  "width": 1080,
+  "height": 1350
+}

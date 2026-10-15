@@ -1,15 +1,17 @@
-/sw.js
-  Cache-Control: no-cache, no-store, must-revalidate
-  Service-Worker-Allowed: /
-/manifest.webmanifest
-  Content-Type: application/manifest+json
-  Cache-Control: no-cache
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  Cache-Control: no-cache, must-revalidate
+/*.mjs
+  Content-Type: text/javascript; charset=utf-8
+/sw.js
+  Content-Type: text/javascript; charset=utf-8
+  Cache-Control: no-cache, no-store, must-revalidate
+/manifest.webmanifest
+  Content-Type: application/manifest+json
 /repair.html
   Cache-Control: no-cache, no-store, must-revalidate
 /repair.js
   Cache-Control: no-cache, no-store, must-revalidate
-/bootstrap.js
-  Cache-Control: no-cache, must-revalidate
+/release.json
+  Cache-Control: no-cache, no-store, must-revalidate

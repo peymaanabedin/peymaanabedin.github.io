@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 const read=p=>fs.readFileSync(new URL(`../dist/${p}`,import.meta.url),'utf8');
-const VERSION=read('sw.js').match(/const CACHE='([^']+)'/)[1];
+const VERSION=read('sw.js').match(/const RELEASE='([^']+)'/)[1];
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 test('the independent bootstrap registers updates even when the app module cannot start',async()=>{
   const events={},domEvents={},panel={hidden:true};let registered=0,updated=0;
   const window={isSecureContext:true,addEventListener(name,fn){events[name]=fn;}};
   const document={hidden:false,getElementById(){return panel;},addEventListener(name,fn){domEvents[name]=fn;}};
   const navigator={onLine:true,serviceWorker:{register(url,options){registered++;assert.equal(url,'./sw.js');assert.equal(options.updateViaCache,'none');return Promise.resolve({async update(){updated++;}});}}};
-  vm.runInNewContext(read('bootstrap.js'),{window,document,navigator});
+  vm.runInNewContext(read('bootstrap.js'),{window,document,navigator,setTimeout,clearTimeout});
   assert.equal(registered,1);await window.neshanaWorker;
   events.error({target:{id:'app-entry'}});assert.equal(panel.hidden,false);
   events.online();await flush();assert.equal(updated,1);
@@ -47,6 +47,6 @@ test('offline recovery explains the retry without deleting the existing install'
   const r=recovery({online:false});await r.finish();assert.equal(r.calls.registered,0);assert.equal(r.calls.activated,0);assert.ok(r.elements.get('repairStatus').textContent.includes('اتصال اینترنت'));
 });
 test('the recovery route and classic bootstrap are independent of the broken app graph',()=>{
-  const index=read('index.html'),repair=read('repair.html');assert.ok(index.indexOf('./bootstrap.js')<index.indexOf('./app.mjs'));assert.match(repair,/src="\.\/repair.js"/);assert.doesNotMatch(repair,/app\.mjs|type="module"/);
+  const index=read('index.html'),repair=read('repair.html');assert.ok(index.indexOf('./bootstrap.js')<index.indexOf('id="app-entry"'));assert.match(repair,/src="\.\/repair.js"/);assert.doesNotMatch(repair,/app\.mjs|type="module"/);
   assert.ok(read('repair.js').includes(VERSION));assert.doesNotMatch(read('repair.js'),/unregister|caches\.delete|deleteDatabase|localStorage\.(clear|removeItem)/);
 });

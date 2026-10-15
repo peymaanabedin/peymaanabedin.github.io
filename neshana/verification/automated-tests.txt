@@ -1,0 +1,134 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> neshana-pwa@3.2.2 verify
+> npm run build && npm run check && npm test
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> neshana-pwa@3.2.2 build
+> npm run build:vendor && node scripts/build-release.mjs
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> neshana-pwa@3.2.2 build:vendor
+> node scripts/build-vendor.mjs
+
+protomaps: 128630 bytes; no external imports
+pmtiles: 19376 bytes; no external imports
+Neshana 3.2.2-4fa116eb64eaab1a: 7 bundled modules, 40 verified offline assets
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> neshana-pwa@3.2.2 check
+> node --check dist/app.mjs && node --check dist/core.mjs && node --check dist/coordinates.mjs && node --check dist/offline.mjs && node --check dist/elevation.mjs && node --check dist/map-source.mjs && node --check dist/map-render.mjs && node --check dist/share-card.mjs && node --check dist/photos.mjs && node --check dist/sw.js && node --check dist/bootstrap.js && node --check dist/repair.js
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> neshana-pwa@3.2.2 test
+> node --test tests/*.test.mjs
+
+✔ every shipped JS import resolves like a browser, without npm or a CDN (22.966774ms)
+✔ both map libraries load as standalone ESM with no node_modules resolution (31.401551ms)
+✔ the core startup graph does not depend on optional map/PNG rendering modules (2.835129ms)
+✔ common coordinate forms parse accurately without network requests (6.29314ms)
+✔ an unambiguous longitude-first pair is flagged for review; ordinary order stays unchanged (1.195955ms)
+✔ short links, multiple points, invalid angles and unrelated text are never guessed (0.684934ms)
+✔ zero coordinates are valid but blanks, booleans and nonfinite values are rejected (1.68254ms)
+✔ coordinate entry accepts Persian and Arabic digits without silently changing order (3.987109ms)
+✔ Persian search normalizes Arabic letter variants, marks and ZWNJ (0.420905ms)
+✔ manual coordinates never invent zero-metre GPS accuracy or altitude (0.396098ms)
+✔ legacy import migrates category objects while retaining IDs, notes, position and timestamp (0.786948ms)
+✔ invalid import rejects the whole payload before any write (1.176136ms)
+✔ duplicate IDs, unsupported versions and over-limit files are rejected (0.592574ms)
+✔ deleting a built-in category by ID survives reload and preserves other category names (0.469919ms)
+✔ missing category references move safely to Other (0.374896ms)
+✔ legacy data is read without overwriting old keys (0.561177ms)
+✔ corrupt storage is detected and does not masquerade as a clean empty state (0.393754ms)
+✔ storage errors are surfaced instead of claiming a successful save (0.39747ms)
+✔ merge preserves existing records/settings and skips duplicates (1.959147ms)
+✔ filters distinguish empty results, favorites and categories; nearest sorting uses coordinates (0.629931ms)
+✔ custom links reject executable/local URLs and encode user-supplied names (0.467095ms)
+✔ map links use coordinates as destination and encode place names (0.384941ms)
+✔ first GPS fix is delivered immediately; worse accuracy is ignored (0.60328ms)
+✔ accurate GPS fix stops hardware watch and deadline (0.239582ms)
+✔ late geolocation callbacks cannot overwrite a new manual selection (0.221805ms)
+✔ restarting a location watch ignores the previous run (0.176647ms)
+✔ deadline without fix produces actionable timeout and clears watch (0.245381ms)
+✔ deadline with coarse fix retains the best reported position (0.213372ms)
+✔ permission denial ends tracking and reports original error code (0.212501ms)
+✔ local EGM96 interpolation matches original grid samples, wraps longitude and converts h − N (9.074619ms)
+✔ font, GPS accuracy, sea-level height and Iranian routing preferences survive storage normalization (1.610431ms)
+✔ a later altitude fix is retained without replacing the better horizontal location (0.744674ms)
+✔ app starts without a loaded map and keeps coordinate entry available (1.320844ms)
+✔ manual selection → save → detail → edit → list → copy works end to end (59.159228ms)
+✔ paste previews, swaps, explains clipboard denial and ignores a closed form (32.686711ms)
+✔ categories live inside one filter and addition dates show a Persian calendar plus time (19.288938ms)
+✔ offline search and map settings remain usable offline; deleting only the map preserves places (31.306288ms)
+✔ newest user action survives whitespace name and storage-write failure (8.236874ms)
+✔ favorite filter and no-results state are distinct from an empty collection (7.849389ms)
+✔ category edits target category ID and deletion keeps saved places (13.077071ms)
+✔ RTL/English/theme settings persist and rerender the visible app (17.01875ms)
+✔ iPhone install opens actionable steps; no fake automatic installation (1.975773ms)
+✔ GPS first fix updates immediately and is stopped before manual entry (6.451589ms)
+✔ delete cancel preserves data; delete then undo restores it (10.317624ms)
+✔ sharing from the list offers PNG and sends a link without opening place details (4.638993ms)
+✔ four explicit light palettes persist and override automatic dark map tone (21.490641ms)
+✔ about shows requested credit, copyright and the correct external website (4.627706ms)
+✔ photo is optional and the camera control requests the environment camera (5.055491ms)
+✔ existing photo previews locally, survives an edit, and can be removed without deleting the place (52.404227ms)
+✔ export waits for a second explicit download gesture; legacy import still merges (21.857284ms)
+✔ new photo selection compresses locally, saves with metadata, and ignores a closed form (37.169263ms)
+✔ selected GPS point can be dismissed and late GPS callbacks cannot reopen it (3.733916ms)
+✔ Yekan Bakh and Peyda can be switched persistently without losing records (14.565677ms)
+✔ filter management creates, edits and deletes a category and returns to the filter (32.782937ms)
+✔ search opens a dedicated box and returns live results without submitting (756.925513ms)
+✔ a manual sea-level height is saved, restored in edit and shown in details (21.087452ms)
+✔ region planning is bounded, wraps the antimeridian and includes zoom hierarchy (2.964966ms)
+✔ complete download activates atomically and stored map tiles read with no provider (31.109856ms)
+✔ failed and cancelled updates preserve the complete previous map and clean staging (17.820316ms)
+✔ quota failure and oversize archive cannot replace the previous map (3.302034ms)
+✔ concurrent map replacement is detected and cleanup never deletes the active generation (2.535097ms)
+✔ daily build discovery selects only valid compatible URLs and pinned archive fallback is transparent (11.748805ms)
+✔ range reader rejects full-file responses, truncation, foreign hosts and changing archive editions (1.327604ms)
+✔ an accessible daily index with a blocked archive falls back after validating header, metadata and real tile access (1.894409ms)
+✔ photo blobs persist through database reconnects and explicit removal (7.66501ms)
+✔ photo and metadata commits roll back new blobs after quota failure or rejected save (4.202574ms)
+✔ unavailable photo storage never reports a successful metadata save (0.347344ms)
+✔ backup includes images and imports them with new IDs without mutating source (12.782811ms)
+✔ missing or untrusted backup photo data is rejected before local storage changes (5.781527ms)
+✔ photo-free backup is explicit, portable and leaves original photo references intact (4.313791ms)
+✔ photo IDs and new themes survive metadata reload; legacy default share title migrates (0.840619ms)
+✔ oversized and non-bitmap input files fail before image decoding (0.515888ms)
+✔ HTML is accessible and install metadata uses real local resources (2.493985ms)
+✔ every literal JS DOM reference has a static or template-defined element (1.545143ms)
+✔ manifest scopes PWA to this app and actual icons match declared sizes (0.713607ms)
+✔ Peyda is bundled as valid compact WOFF2 fonts (1.014231ms)
+✔ service worker precaches all required app assets with no CDN dependency (31.202521ms)
+✔ healthy shells retain user-controlled updates and scoped cache cleanup (18.006431ms)
+✔ known broken shell recovers automatically only after the entire fixed shell is cached (17.319004ms)
+✔ failed precache never replaces the old shell, and a pending bad update never interrupts a healthy active shell (16.066173ms)
+✔ offline navigation uses cached app shell even with an install query (30.398839ms)
+✔ offline readiness reads every cached asset without network and reports a missing file (17.588921ms)
+✔ worker never intercepts maps, geocoding, POST or other app/auth routes (1.384941ms)
+✔ map uses the keyless standard endpoint; dark mode never switches to a gated provider (1.341354ms)
+✔ explicit light palettes never inherit the system dark palette (0.287464ms)
+✔ stale or incomplete deployed bytes fail integrity and preserve the active shell (2.263097ms)
+✔ a legacy bare-import bundle is repaired even under an unrecognized old cache name (21.331596ms)
+✔ installations in another path and unrelated caches survive activation (25.222114ms)
+✔ the independent bootstrap registers updates even when the app module cannot start (4.035572ms)
+✔ recovery activates a verified complete fixed shell and opens the same app scope (5.69059ms)
+✔ recovery never activates an incomplete or mismatched shell (13.778053ms)
+✔ offline recovery explains the retry without deleting the existing install (1.861279ms)
+✔ the recovery route and classic bootstrap are independent of the broken app graph (0.890765ms)
+✔ the deployable HTML uses the bundled, versioned entry and every output is offline-ready (2.189515ms)
+✔ all release integrity values match the exact shipped bytes (9.421682ms)
+✔ the production entry can initialize without evaluating optional map libraries (11.567116ms)
+✔ bundling preserves relative URLs for the height grid and share-card logo (0.72858ms)
+✔ production bundle stays usable when map initialization throws (103.868563ms)
+ℹ tests 98
+ℹ suites 0
+ℹ pass 98
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1544.522485

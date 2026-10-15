@@ -1,6 +1,6 @@
 /* Recovery deliberately has no module imports and never changes user storage. */
 (function(){
-  const VERSION='saveloc-shell-v3-20261015-3';
+  const VERSION='3.2.2-4fa116eb64eaab1a';
   const status=document.getElementById('repairStatus'),retry=document.getElementById('repairRetry'),open=document.getElementById('repairOpen');
   let busy=false;
   function inspect(worker){return new Promise(resolve=>{
