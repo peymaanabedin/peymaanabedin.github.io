@@ -12,7 +12,7 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>نشانا — مکان‌های من</title>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./assets/icons/icon-192.png" type="image/png">
+  <link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png" sizes="180x180">
   <link rel="preload" href="./assets/fonts/Peyda-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="./assets/fonts/Peyda-Bold.woff2" as="font" type="font/woff2" crossorigin>
@@ -25,7 +25,7 @@
 <body>
 <a class="skip-link" href="#workspace" data-t="skip">رفتن به محتوا</a>
 <header class="app-header">
-  <a class="brand" href="#map" aria-label="نشانا"><img src="./assets/icons/icon-192.png" width="42" height="42" alt=""><span><b>نشانا</b><small data-t="tagline">جای خوب، یادمان می‌ماند</small></span></a>
+  <a class="brand" href="#map" aria-label="نشانا"><img src="./assets/icons/icon.svg" width="42" height="42" alt=""><span><b>نشانا</b><small data-t="tagline">جای خوب، یادمان می‌ماند</small></span></a>
   <div class="header-note"><span class="tiny-dot"></span><span data-t="personalAtlas">دفترچهٔ شخصی مکان‌های تو</span></div>
   <button class="icon-button install-trigger" data-action="install" aria-label="نصب اپلیکیشن" data-label="install"><i data-icon="download"></i><span class="desktop-text" data-t="install">نصب اپلیکیشن</span></button>
 </header>
@@ -33,11 +33,14 @@
   <section id="mapStage" class="map-stage" aria-label="نقشه" data-label="map">
     <div id="map" role="region" aria-label="نقشه تعاملی؛ برای انتخاب یک نقطه کلیک کنید" tabindex="0"></div>
     <div class="map-search-wrap">
-      <button id="openMapSearch" class="map-search search-launch" aria-haspopup="dialog"><i data-icon="search"></i><span data-t="mapSearch">جستجوی مکان یا آدرس</span><span class="search-key" aria-hidden="true">⌕</span></button>
+      <form id="mapSearchForm" class="map-search" role="search">
+        <i data-icon="search"></i><input id="mapSearchInput" type="search" enterkeyhint="search" autocomplete="off" placeholder="جستجوی مکان یا آدرس" data-ph="mapSearch" aria-label="جستجوی مکان یا مختصات" data-label="mapSearchLabel" maxlength="160">
+        <button type="submit" class="icon-button small" aria-label="جستجو" data-label="search"><i data-icon="arrow"></i></button>
+      </form>
+      <div id="searchResults" class="search-results" aria-live="polite" hidden></div>
     </div>
     <div class="map-top-tools"><button class="map-button" id="mapHome" aria-label="نمایش همه مکان‌ها" data-label="showAll"><i data-icon="layers"></i></button><div class="compass" aria-hidden="true"><span>N</span><i></i></div></div>
     <div class="map-side-tools"><button class="map-button" id="zoomIn" aria-label="بزرگ‌نمایی" data-label="zoomIn"><i data-icon="plus"></i></button><button class="map-button" id="zoomOut" aria-label="کوچک‌نمایی" data-label="zoomOut"><i data-icon="minus"></i></button><button class="map-button locate-map" id="mapLocate" aria-label="یافتن موقعیت من" data-label="locate"><i data-icon="locate"></i></button></div>
-    <button class="map-offline-badge" id="offlineMapBadge" hidden></button>
     <div class="map-caption" id="mapCaption"><span class="tiny-dot"></span><span data-t="initialView">نمای اولیه · تهران</span></div>
     <div class="map-notice" id="mapNotice" hidden><i data-icon="wifi-off"></i><span id="mapNoticeText"></span><button id="retryMap" data-t="retry">تلاش دوباره</button></div>
     <div class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></div>
@@ -46,11 +49,12 @@
     <div class="panel-handle" aria-hidden="true"></div>
     <div id="offlineBanner" class="status-banner" hidden><i data-icon="wifi-off"></i><span data-t="offline">آفلاین هستید؛ مکان‌های ذخیره‌شده در دسترس‌اند.</span></div>
     <div id="storageBanner" class="status-banner warning" hidden><i data-icon="alert"></i><span id="storageMessage"></span></div>
-    <section id="viewMap" class="view map-dock" aria-label="ابزار ثبت مکان">
-      <div id="locationProgress" class="location-progress" role="status" hidden><span id="locatingSpinner" class="spinner"></span><span id="locationStatus"></span></div>
+    <section id="viewMap" class="view" aria-labelledby="liveTitle">
+      <div class="eyebrow"><span class="tiny-dot"></span><span id="locationStatus" data-t="yourPlaces">جای تو، در دنیای تو</span><span id="locatingSpinner" class="spinner" hidden></span></div>
+      <div class="live-heading"><div><h1 id="liveTitle" data-t="heroTitle">اینجا را نشانه بگذار.</h1><p id="liveSubtitle" data-t="heroSubtitle">یک لمس، برای پیدا کردن دوباره.</p></div></div>
       <div id="geoError" class="inline-error" role="alert" hidden></div>
       <div id="currentDetails" class="current-details" hidden>
-        <div class="selection-heading"><span data-t="selectedPoint">نقطهٔ انتخاب‌شده</span><button id="closeCurrent" class="text-button"><span data-t="backToMap">بازگشت به نقشه</span><i data-icon="close"></i></button></div><div class="address-line"><i data-icon="pin"></i><p id="currentAddress"></p></div>
+        <div class="address-line"><i data-icon="pin"></i><p id="currentAddress"></p></div>
         <div class="coordinate-grid">
           <button id="copyLat" class="coordinate" aria-label="کپی عرض جغرافیایی" data-label="copyLat"><span data-t="latitude">عرض جغرافیایی</span><b id="currentLat" dir="ltr">—</b><i data-icon="copy"></i></button>
           <button id="copyLng" class="coordinate" aria-label="کپی طول جغرافیایی" data-label="copyLng"><span data-t="longitude">طول جغرافیایی</span><b id="currentLng" dir="ltr">—</b><i data-icon="copy"></i></button>
@@ -58,12 +62,18 @@
         <div class="accuracy-line"><span id="accuracyText"></span><span id="altitudeText"></span><time id="currentTime"></time></div>
       </div>
       <div class="primary-actions" id="idleActions"><button class="button primary" id="locateBtn"><i data-icon="locate"></i><span data-t="locate">یافتن موقعیت من</span></button><button class="button soft" id="manualBtn"><i data-icon="plus"></i><span data-t="manual">ورود مختصات</span></button></div>
-      <div class="primary-actions" id="selectedActions" hidden><button class="button primary" id="saveCurrent"><i data-icon="bookmark"></i><span data-t="savePlace">ذخیرهٔ این مکان</span></button><button class="button soft square" id="manualSelected" aria-label="ورود مختصات" data-label="manual"><i data-icon="paste"></i></button><button class="button soft square" id="shareCurrent" aria-label="اشتراک مکان" data-label="share"><i data-icon="share"></i></button><button class="button soft square" id="routeCurrent" aria-label="مسیریابی" data-label="directions"><i data-icon="route"></i></button></div>
+      <div class="primary-actions" id="selectedActions" hidden><button class="button primary" id="saveCurrent"><i data-icon="bookmark"></i><span data-t="savePlace">ذخیرهٔ این مکان</span></button><button class="button soft square" id="shareCurrent" aria-label="اشتراک مکان" data-label="share"><i data-icon="share"></i></button><button class="button soft square" id="routeCurrent" aria-label="مسیریابی" data-label="directions"><i data-icon="route"></i></button></div>
+      <button class="text-button map-help" id="pickHelp"><i data-icon="tap"></i><span data-t="tapMap">یا یک نقطه روی نقشه انتخاب کن</span></button>
+      <div class="panel-divider"></div>
+      <div class="section-heading"><h2 data-t="recent">آخرین نشانه‌ها</h2><button class="text-button" data-action="saved"><span data-t="seeAll">دیدن همه</span><i data-icon="chevron"></i></button></div>
+      <div id="recentList" class="recent-list"></div>
+      <div class="quiet-note"><i data-icon="shield"></i><span data-t="localNote">مکان‌ها فقط روی همین دستگاه ذخیره می‌شوند.</span></div>
     </section>
     <section id="viewSaved" class="view" aria-labelledby="savedTitle" hidden>
-      <div class="page-heading"><div class="saved-title-row"><h1 id="savedTitle" data-t="savedPlaces">مکان‌های من</h1><span id="savedCount" class="count-pill"></span></div><button class="button soft square" id="addSaved" aria-label="افزودن مکان" data-label="addPlace"><i data-icon="plus"></i></button></div>
+      <div class="eyebrow" data-t="yourCollection">مجموعهٔ شخصی تو</div>
+      <div class="page-heading"><div><h1 id="savedTitle" data-t="savedPlaces">مکان‌های من</h1><p id="savedCount"></p></div><button class="button soft square" id="addSaved" aria-label="افزودن مکان" data-label="addPlace"><i data-icon="plus"></i></button></div>
       <label class="search-field"><i data-icon="search"></i><input id="savedSearch" type="search" placeholder="جستجو بین مکان‌ها…" data-ph="savedSearch" aria-label="جستجوی مکان‌های ذخیره‌شده" data-label="savedSearch"></label>
-      <div class="filter-toolbar"><button class="filter-button" id="filterButton"><i data-icon="filter"></i><span id="filterLabel">همهٔ دسته‌ها</span><i data-icon="chevron"></i></button><button class="text-button" id="clearFilters" hidden data-t="clearFilters">پاک کردن فیلتر</button></div>
+      <div id="categoryFilters" class="chip-row" aria-label="دسته‌بندی‌ها" data-label="categories"></div>
       <div class="list-toolbar"><span id="resultCount"></span><label class="sort-control"><i data-icon="sort"></i><select id="sortSelect" aria-label="مرتب‌سازی" data-label="sort"><option value="newest" data-t="newest">جدیدترین</option><option value="oldest" data-t="oldest">قدیمی‌ترین</option><option value="name" data-t="byName">نام مکان</option><option value="distance" data-t="nearest">نزدیک‌ترین</option></select></label></div>
       <div id="savedList" class="saved-list" aria-live="polite"></div>
       <button id="loadMore" class="button soft full" data-t="loadMore" hidden>نمایش بیشتر</button>
@@ -78,19 +88,16 @@
         <button data-theme="sand"><span class="theme-preview sand"><i></i><i></i><i></i></span><span data-t="sand">شنی</span></button>
         <button data-theme="auto" class="theme-mode"><i data-icon="auto"></i><span data-t="auto">خودکار</span></button>
         <button data-theme="dark" class="theme-mode"><i data-icon="moon"></i><span data-t="dark">تیره</span></button>
-      </div><div class="setting-row"><span data-t="font">فونت</span><div class="segmented" id="fontControl"><button data-font="peyda">پیدا</button><button data-font="yekanbakh">یکان‌بخ</button></div></div><div class="setting-row"><span data-t="language">زبان</span><div class="segmented" id="languageControl"><button data-lang="fa">فارسی</button><button data-lang="en">English</button></div></div></div>
+      </div><div class="setting-row"><span data-t="language">زبان</span><div class="segmented" id="languageControl"><button data-lang="fa">فارسی</button><button data-lang="en">English</button></div></div></div>
       <h2 class="group-title" data-t="organize">مرتب و منظم</h2>
-      <div class="settings-group"><button class="setting-link" id="manageCategories"><i data-icon="grid"></i><span data-t="manageCategories">مدیریت دسته‌بندی‌ها</span><i data-icon="chevron"></i></button><div class="setting-row"><label for="mapProvider" data-t="defaultMap">مسیریاب پیش‌فرض</label><select id="mapProvider"><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option><option value="neshan">نشان</option><option value="balad">بلد</option></select></div><button class="setting-link" id="customSettings"><i data-icon="external"></i><span data-t="linkSettings">لینک سفارشی و اشتراک‌گذاری</span><i data-icon="chevron"></i></button></div>
-      <h2 class="group-title" data-t="offlineMap">نقشهٔ آفلاین</h2>
-      <div class="settings-group"><button class="setting-link" id="offlineSettings"><i data-icon="map-download"></i><span><b data-t="offlineManage">دانلود و مدیریت محدوده</b><small id="offlineSummary">محدوده‌ای دانلود نشده</small></span><i data-icon="chevron"></i></button></div>
-      <div class="offline-readiness" id="offlineReadiness" role="status"></div><button id="offlineCheck" class="text-button" data-t="offlineCheck">بررسی آمادگی آفلاین</button>
+      <div class="settings-group"><button class="setting-link" id="manageCategories"><i data-icon="grid"></i><span data-t="manageCategories">مدیریت دسته‌بندی‌ها</span><i data-icon="chevron"></i></button><div class="setting-row"><label for="mapProvider" data-t="defaultMap">مسیریاب پیش‌فرض</label><select id="mapProvider"><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option></select></div><button class="setting-link" id="customSettings"><i data-icon="external"></i><span data-t="linkSettings">لینک سفارشی و اشتراک‌گذاری</span><i data-icon="chevron"></i></button></div>
       <h2 class="group-title" data-t="yourData">داده‌های تو</h2>
       <div class="settings-group"><button class="setting-link" id="exportBtn"><i data-icon="download"></i><span data-t="export">دریافت نسخهٔ پشتیبان</span><i data-icon="chevron"></i></button><button class="setting-link" id="importBtn"><i data-icon="upload"></i><span data-t="import">ورود فایل یا بازیابی</span><i data-icon="chevron"></i></button><button class="setting-link danger-text" id="clearAll"><i data-icon="trash"></i><span data-t="clearAll">حذف همهٔ مکان‌ها</span><i data-icon="chevron"></i></button></div>
       <p class="settings-hint" data-t="backupNote">برای انتقال به گوشی دیگر یا نسخهٔ نصب‌شده، فایل پشتیبان بگیر و آنجا وارد کن.</p>
-      <button class="install-card" data-action="install"><img src="./assets/icons/icon-192.png" alt="" width="48" height="48"><span><strong data-t="alwaysWithYou">همیشه همراهت</strong><small data-t="installHint">نشانا را به صفحهٔ اصلی اضافه کن</small></span><i data-icon="plus"></i></button>
-      <div class="privacy-card"><i data-icon="shield"></i><div><strong data-t="privacyHeading">داده‌های تو، روی گوشی تو</strong><p data-t="privacySummary">مکان‌ها، یادداشت‌ها و عکس‌ها در حافظهٔ همین دستگاه ذخیره می‌شوند و برای ما ارسال نمی‌شوند. نقشهٔ آنلاین، دریافت محدوده و جستجوی آنلاین از سرویس‌های بیرونی استفاده می‌کنند؛ اشتراک‌گذاری فقط با انتخاب خودت انجام می‌شود.</p><button class="text-button" id="privacyBtn" data-t="privacy">جزئیات حریم خصوصی</button></div></div>
+      <button class="install-card" data-action="install"><img src="./assets/icons/icon.svg" alt="" width="48" height="48"><span><strong data-t="alwaysWithYou">همیشه همراهت</strong><small data-t="installHint">نشانا را به صفحهٔ اصلی اضافه کن</small></span><i data-icon="plus"></i></button>
+      <div class="privacy-card"><i data-icon="shield"></i><div><strong data-t="privacyHeading">داده‌های تو، روی گوشی تو</strong><p data-t="privacySummary">مکان‌ها، یادداشت‌ها و عکس‌ها در حافظهٔ همین دستگاه ذخیره می‌شوند و برای ما ارسال نمی‌شوند. نقشه و جستجوی آنلاین از سرویس‌های بیرونی استفاده می‌کنند؛ اشتراک‌گذاری فقط با انتخاب خودت انجام می‌شود.</p><button class="text-button" id="privacyBtn" data-t="privacy">جزئیات حریم خصوصی</button></div></div>
       <div class="settings-group"><button class="setting-link" id="aboutBtn"><i data-icon="info"></i><span data-t="about">دربارهٔ نشانا</span><i data-icon="chevron"></i></button></div>
-      <footer class="credits"><b data-t="appVersion">نشانا · نسخهٔ ۳٫۲</b><span data-t="developerShort">ساختهٔ پیمان عابدین پور</span></footer>
+      <footer class="credits"><b data-t="appVersion">نشانا · نسخهٔ ۳٫۰</b><span data-t="developerShort">ساختهٔ پیمان عابدین پور</span></footer>
     </section>
   </aside>
 </main>

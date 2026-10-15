@@ -1,1 +1,0 @@
-Yekan Bakh fonts supplied by the application owner in yekanbakh.zip. The Regular, SemiBold and Bold TTF files were converted losslessly to WOFF for local web use. No license text was included in that attachment. The existing Peyda license remains in FontLicense.txt.

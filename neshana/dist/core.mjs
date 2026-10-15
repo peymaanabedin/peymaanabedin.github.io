@@ -9,7 +9,7 @@ export const DEFAULT_CATEGORIES = [
   {id:'other',name:'سایر',en:'Other',icon:'pin',color:'teal'}
 ];
 export const THEMES = ['auto','light','ocean','lavender','sand','dark'];
-export const DEFAULT_PREFS = {theme:'auto',font:'peyda',lang:'fa',customTpl:'',shareTitle:'نشانا',mapProvider:'apple'};
+export const DEFAULT_PREFS = {theme:'auto',lang:'fa',customTpl:'',shareTitle:'نشانا',mapProvider:'apple'};
 const text=(value,max=300)=>typeof value==='string'?value.trim().slice(0,max):'';
 export const uid=()=>globalThis.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 export function finite(value){
@@ -20,7 +20,11 @@ export function validPoint(lat,lng){ return finite(lat)!==null && finite(lng)!==
 export function normalizeSearch(value){
   return String(value||'').toLowerCase().replace(/ي|ى/g,'ی').replace(/ك/g,'ک').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[\u200c\u200d]/g,' ').replace(/\s+/g,' ').trim();
 }
-export {parseCoordinates} from './coordinates.mjs';
+export function parseCoordinates(value){
+  const normalized=String(value).replace(/[۰-۹]/g,c=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(c))).replace(/[٠-٩]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(c))).replace(/٫/g,'.').replace(/،/g,',').trim();
+  const match=normalized.match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
+  return match && validPoint(match[1],match[2])?{lat:+match[1],lng:+match[2]}:null;
+}
 export function normalizeCategory(c){
   if(!c || typeof c!=='object' || !text(c.name,40) || c.id==='all') return null;
   return {id:text(c.id,120)||uid(),name:text(c.name,40),en:text(c.en,40),icon:text(c.icon,24)||'pin',color:['teal','blue','purple','rose','orange'].includes(c.color)?c.color:'teal'};
@@ -31,9 +35,8 @@ export function normalizePlace(p){
   const accuracy=finite(p.acc);
   const ts=finite(p.ts);
   return {id:text(p.id,120)||uid(),name:text(p.name,120)||'مکان بدون نام',lat:Number(p.lat),lng:Number(p.lng),
-    acc:accuracy!==null && accuracy>0?Math.min(accuracy,1000000):null,ele:finite(p.ele),eleAcc:finite(p.eleAcc),heightMsl:finite(p.heightMsl),heightSource:['egm96','manual'].includes(p.heightSource)?p.heightSource:'',
+    acc:accuracy!==null && accuracy>0?Math.min(accuracy,1000000):null,ele:finite(p.ele),
     ts:ts!==null && ts>0 && ts<=8640000000000000?ts:Date.now(),
-    createdAt:finite(p.createdAt)>0 && finite(p.createdAt)<=8640000000000000?Number(p.createdAt):(ts>0 && ts<=8640000000000000?ts:Date.now()),
     address:text(p.address,1000),notes:text(p.notes,3000),category:text(cat,120)||'other',
     favorite:p.favorite===true,source:p.source==='gps'?'gps':'manual',
     photoId:typeof p.photoId==='string' && /^[a-zA-Z0-9_-]{1,120}$/.test(p.photoId)?p.photoId:''};
@@ -48,8 +51,8 @@ export function safeCustomLink(template,p){
   return value;
 }
 export function normalizePrefs(p={}){
-  return {theme:THEMES.includes(p?.theme)?p.theme:'auto',font:p?.font==='yekanbakh'?'yekanbakh':'peyda',lang:p?.lang==='en'?'en':'fa',
-    customTpl:text(p?.customTpl,500),shareTitle:(!p?.shareTitle||p.shareTitle==='Save Loc')?'نشانا':text(p.shareTitle,120)||'نشانا',mapProvider:['apple','google','waze','neshan','balad'].includes(p?.mapProvider)?p.mapProvider:'apple'};
+  return {theme:THEMES.includes(p?.theme)?p.theme:'auto',lang:p?.lang==='en'?'en':'fa',
+    customTpl:text(p?.customTpl,500),shareTitle:(!p?.shareTitle||p.shareTitle==='Save Loc')?'نشانا':text(p.shareTitle,120)||'نشانا',mapProvider:['apple','google','waze'].includes(p?.mapProvider)?p.mapProvider:'apple'};
 }
 export function emptyState(){return {version:2,places:[],categories:structuredClone(DEFAULT_CATEGORIES),prefs:{...DEFAULT_PREFS}};}
 export function normalizeBackup(raw,{strict=true}={}){
@@ -100,14 +103,12 @@ export function distance(a,b){
 export function filterPlaces(places,{query='',category='all',sort='newest',origin=null}={}){
   const q=normalizeSearch(query);
   return places.filter(p=>(category==='all'||(category==='favorites'?p.favorite:p.category===category)) && (!q||normalizeSearch(`${p.name} ${p.address} ${p.notes}`).includes(q)))
-    .sort((a,b)=>sort==='name'?a.name.localeCompare(b.name,'fa'):sort==='distance'&&origin?distance(origin,a)-distance(origin,b):sort==='oldest'?(a.createdAt||a.ts)-(b.createdAt||b.ts):(b.createdAt||b.ts)-(a.createdAt||a.ts));
+    .sort((a,b)=>sort==='name'?a.name.localeCompare(b.name,'fa'):sort==='distance'&&origin?distance(origin,a)-distance(origin,b):sort==='oldest'?a.ts-b.ts:b.ts-a.ts);
 }
 export function mapLink(provider,p,directions=false){
   if(!validPoint(p?.lat,p?.lng))return '';
   const pair=`${Number(p.lat)},${Number(p.lng)}`;
   if(provider==='google')return directions?`https://www.google.com/maps/dir/?api=1&destination=${pair}`:`https://www.google.com/maps/search/?api=1&query=${pair}`;
-  if(provider==='neshan')return `https://neshan.org/maps/@${pair},15z,0p/routing/car/destination/${pair}`;
-  if(provider==='balad')return `https://balad.ir/directions/driving?destination=${Number(p.lng)},${Number(p.lat)}`;
   if(provider==='waze')return `https://waze.com/ul?ll=${pair}&navigate=yes`;
   return directions?`https://maps.apple.com/?daddr=${pair}&dirflg=d`:`https://maps.apple.com/?ll=${pair}&q=${encodeURIComponent(p.name||pair)}`;
 }
@@ -123,9 +124,8 @@ export class LocationSession {
       const watch=this.geo.watchPosition(pos=>{
         if(!active()||!validPoint(pos.coords.latitude,pos.coords.longitude))return;
         const acc=finite(pos.coords.accuracy);if(acc===null||acc<0)return;
-        const fix={lat:pos.coords.latitude,lng:pos.coords.longitude,acc,ele:finite(pos.coords.altitude),eleAcc:finite(pos.coords.altitudeAccuracy),ts:pos.timestamp||Date.now(),source:'gps'};
-        if(!this.best||acc<this.best.acc){if(fix.ele===null&&this.best&&distance(fix,this.best)<5){fix.ele=this.best.ele;fix.eleAcc=this.best.eleAcc;}this.best=fix;this.onFix(fix);}
-        else if(fix.ele!==null&&(this.best.ele===null||fix.eleAcc!==null&&(this.best.eleAcc===null||fix.eleAcc<this.best.eleAcc))&&distance(fix,this.best)<5){this.best={...this.best,ele:fix.ele,eleAcc:fix.eleAcc};this.onFix(this.best);}
+        const fix={lat:pos.coords.latitude,lng:pos.coords.longitude,acc,ele:finite(pos.coords.altitude),ts:pos.timestamp||Date.now(),source:'gps'};
+        if(!this.best||acc<this.best.acc){this.best=fix;this.onFix(fix);}
         if(acc<=this.target){this.stop();this.onEnd('precise');}
       },error=>{if(!active())return;const has=!!this.best;this.stop();if(has)this.onEnd('best');else this.onError(error);},{enableHighAccuracy:true,maximumAge:0,timeout:this.timeout});
       if(active())this.watch=watch;else this.geo.clearWatch(watch);

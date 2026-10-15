@@ -1,16 +1,14 @@
 {
   "name": "neshana-pwa",
-  "version": "3.2.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check dist/app.mjs && node --check dist/core.mjs && node --check dist/coordinates.mjs && node --check dist/offline.mjs && node --check dist/elevation.mjs && node --check dist/map-render.mjs && node --check dist/share-card.mjs && node --check dist/photos.mjs && node --check dist/sw.js"
+    "check": "node --check dist/app.mjs && node --check dist/core.mjs && node --check dist/photos.mjs && node --check dist/sw.js"
   },
   "devDependencies": {
-    "fake-indexeddb": "6.2.4",
     "linkedom": "0.18.12",
-    "pmtiles": "^4.5.0",
-    "protomaps-leaflet": "^5.0.0"
+    "fake-indexeddb": "6.2.4"
   }
 }
