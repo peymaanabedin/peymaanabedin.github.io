@@ -33,11 +33,7 @@
   <section id="mapStage" class="map-stage" aria-label="نقشه" data-label="map">
     <div id="map" role="region" aria-label="نقشه تعاملی؛ برای انتخاب یک نقطه کلیک کنید" tabindex="0"></div>
     <div class="map-search-wrap">
-      <form id="mapSearchForm" class="map-search" role="search">
-        <i data-icon="search"></i><input id="mapSearchInput" type="search" enterkeyhint="search" autocomplete="off" placeholder="جستجوی مکان یا آدرس" data-ph="mapSearch" aria-label="جستجوی مکان یا مختصات" data-label="mapSearchLabel" maxlength="8192">
-        <button type="submit" class="icon-button small" aria-label="جستجو" data-label="search"><i data-icon="arrow"></i></button>
-      </form>
-      <div id="searchResults" class="search-results" aria-live="polite" hidden></div>
+      <button id="openMapSearch" class="map-search search-launch" aria-haspopup="dialog"><i data-icon="search"></i><span data-t="mapSearch">جستجوی مکان یا آدرس</span><span class="search-key" aria-hidden="true">⌕</span></button>
     </div>
     <div class="map-top-tools"><button class="map-button" id="mapHome" aria-label="نمایش همه مکان‌ها" data-label="showAll"><i data-icon="layers"></i></button><div class="compass" aria-hidden="true"><span>N</span><i></i></div></div>
     <div class="map-side-tools"><button class="map-button" id="zoomIn" aria-label="بزرگ‌نمایی" data-label="zoomIn"><i data-icon="plus"></i></button><button class="map-button" id="zoomOut" aria-label="کوچک‌نمایی" data-label="zoomOut"><i data-icon="minus"></i></button><button class="map-button locate-map" id="mapLocate" aria-label="یافتن موقعیت من" data-label="locate"><i data-icon="locate"></i></button></div>
@@ -54,7 +50,7 @@
       <div id="locationProgress" class="location-progress" role="status" hidden><span id="locatingSpinner" class="spinner"></span><span id="locationStatus"></span></div>
       <div id="geoError" class="inline-error" role="alert" hidden></div>
       <div id="currentDetails" class="current-details" hidden>
-        <div class="address-line"><i data-icon="pin"></i><p id="currentAddress"></p></div>
+        <div class="selection-heading"><span data-t="selectedPoint">نقطهٔ انتخاب‌شده</span><button id="closeCurrent" class="text-button"><span data-t="backToMap">بازگشت به نقشه</span><i data-icon="close"></i></button></div><div class="address-line"><i data-icon="pin"></i><p id="currentAddress"></p></div>
         <div class="coordinate-grid">
           <button id="copyLat" class="coordinate" aria-label="کپی عرض جغرافیایی" data-label="copyLat"><span data-t="latitude">عرض جغرافیایی</span><b id="currentLat" dir="ltr">—</b><i data-icon="copy"></i></button>
           <button id="copyLng" class="coordinate" aria-label="کپی طول جغرافیایی" data-label="copyLng"><span data-t="longitude">طول جغرافیایی</span><b id="currentLng" dir="ltr">—</b><i data-icon="copy"></i></button>
@@ -82,18 +78,19 @@
         <button data-theme="sand"><span class="theme-preview sand"><i></i><i></i><i></i></span><span data-t="sand">شنی</span></button>
         <button data-theme="auto" class="theme-mode"><i data-icon="auto"></i><span data-t="auto">خودکار</span></button>
         <button data-theme="dark" class="theme-mode"><i data-icon="moon"></i><span data-t="dark">تیره</span></button>
-      </div><div class="setting-row"><span data-t="language">زبان</span><div class="segmented" id="languageControl"><button data-lang="fa">فارسی</button><button data-lang="en">English</button></div></div></div>
+      </div><div class="setting-row"><span data-t="font">فونت</span><div class="segmented" id="fontControl"><button data-font="peyda">پیدا</button><button data-font="yekanbakh">یکان‌بخ</button></div></div><div class="setting-row"><span data-t="language">زبان</span><div class="segmented" id="languageControl"><button data-lang="fa">فارسی</button><button data-lang="en">English</button></div></div></div>
       <h2 class="group-title" data-t="organize">مرتب و منظم</h2>
-      <div class="settings-group"><button class="setting-link" id="manageCategories"><i data-icon="grid"></i><span data-t="manageCategories">مدیریت دسته‌بندی‌ها</span><i data-icon="chevron"></i></button><div class="setting-row"><label for="mapProvider" data-t="defaultMap">مسیریاب پیش‌فرض</label><select id="mapProvider"><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option></select></div><button class="setting-link" id="customSettings"><i data-icon="external"></i><span data-t="linkSettings">لینک سفارشی و اشتراک‌گذاری</span><i data-icon="chevron"></i></button></div>
+      <div class="settings-group"><button class="setting-link" id="manageCategories"><i data-icon="grid"></i><span data-t="manageCategories">مدیریت دسته‌بندی‌ها</span><i data-icon="chevron"></i></button><div class="setting-row"><label for="mapProvider" data-t="defaultMap">مسیریاب پیش‌فرض</label><select id="mapProvider"><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option><option value="neshan">نشان</option><option value="balad">بلد</option></select></div><button class="setting-link" id="customSettings"><i data-icon="external"></i><span data-t="linkSettings">لینک سفارشی و اشتراک‌گذاری</span><i data-icon="chevron"></i></button></div>
       <h2 class="group-title" data-t="offlineMap">نقشهٔ آفلاین</h2>
       <div class="settings-group"><button class="setting-link" id="offlineSettings"><i data-icon="map-download"></i><span><b data-t="offlineManage">دانلود و مدیریت محدوده</b><small id="offlineSummary">محدوده‌ای دانلود نشده</small></span><i data-icon="chevron"></i></button></div>
+      <div class="offline-readiness" id="offlineReadiness" role="status"></div><button id="offlineCheck" class="text-button" data-t="offlineCheck">بررسی آمادگی آفلاین</button>
       <h2 class="group-title" data-t="yourData">داده‌های تو</h2>
       <div class="settings-group"><button class="setting-link" id="exportBtn"><i data-icon="download"></i><span data-t="export">دریافت نسخهٔ پشتیبان</span><i data-icon="chevron"></i></button><button class="setting-link" id="importBtn"><i data-icon="upload"></i><span data-t="import">ورود فایل یا بازیابی</span><i data-icon="chevron"></i></button><button class="setting-link danger-text" id="clearAll"><i data-icon="trash"></i><span data-t="clearAll">حذف همهٔ مکان‌ها</span><i data-icon="chevron"></i></button></div>
       <p class="settings-hint" data-t="backupNote">برای انتقال به گوشی دیگر یا نسخهٔ نصب‌شده، فایل پشتیبان بگیر و آنجا وارد کن.</p>
       <button class="install-card" data-action="install"><img src="./assets/icons/icon-192.png" alt="" width="48" height="48"><span><strong data-t="alwaysWithYou">همیشه همراهت</strong><small data-t="installHint">نشانا را به صفحهٔ اصلی اضافه کن</small></span><i data-icon="plus"></i></button>
       <div class="privacy-card"><i data-icon="shield"></i><div><strong data-t="privacyHeading">داده‌های تو، روی گوشی تو</strong><p data-t="privacySummary">مکان‌ها، یادداشت‌ها و عکس‌ها در حافظهٔ همین دستگاه ذخیره می‌شوند و برای ما ارسال نمی‌شوند. نقشهٔ آنلاین، دریافت محدوده و جستجوی آنلاین از سرویس‌های بیرونی استفاده می‌کنند؛ اشتراک‌گذاری فقط با انتخاب خودت انجام می‌شود.</p><button class="text-button" id="privacyBtn" data-t="privacy">جزئیات حریم خصوصی</button></div></div>
       <div class="settings-group"><button class="setting-link" id="aboutBtn"><i data-icon="info"></i><span data-t="about">دربارهٔ نشانا</span><i data-icon="chevron"></i></button></div>
-      <footer class="credits"><b data-t="appVersion">نشانا · نسخهٔ ۳٫۱</b><span data-t="developerShort">ساختهٔ پیمان عابدین پور</span></footer>
+      <footer class="credits"><b data-t="appVersion">نشانا · نسخهٔ ۳٫۲</b><span data-t="developerShort">ساختهٔ پیمان عابدین پور</span></footer>
     </section>
   </aside>
 </main>

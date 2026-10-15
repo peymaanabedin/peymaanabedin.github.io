@@ -1,5 +1,5 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {IDBFactory} from 'fake-indexeddb';
-import {OfflineStore,regionBounds,regionTiles,regionContains,downloadRegion,latestBuild,RegionRangeSource,ARCHIVE_URL,OFFLINE_MAX_BYTES} from '../dist/offline.mjs';
+import {OfflineStore,regionBounds,regionTiles,regionContains,downloadRegion,latestBuild,openMapSource,RegionRangeSource,ARCHIVE_URL,OFFLINE_MAX_BYTES} from '../dist/offline.mjs';
 const store=()=>{const factory=new IDBFactory();return new OfflineStore(()=>factory);};
 const config={center:{lat:35.7153,lng:51.4043},radiusKm:3,maxZoom:14,build:{key:'20261014.pmtiles',version:'4.15',source:'daily',sourceDate:'2026-10-14'}};
 const tile=new Uint8Array([1,2,3]).buffer;
@@ -38,4 +38,11 @@ test('range reader rejects full-file responses, truncation, foreign hosts and ch
  await assert.rejects(new RegionRangeSource(ARCHIVE_URL,null,async()=>new Response(tile,{status:200})).getBytes(0,3),/map-range/);
  await assert.rejects(new RegionRangeSource(ARCHIVE_URL,null,async()=>new Response(tile,{status:206})).getBytes(0,4),/map-range/);
  await assert.rejects(new RegionRangeSource(ARCHIVE_URL,null,async()=>new Response(tile,{status:206,headers:{ETag:'b'}}),'a').getBytes(0,3),/map-source-changed/);
+});
+test('an accessible daily index with a blocked archive falls back after validating header, metadata and real tile access',async()=>{
+ const header=new Uint8Array(127);header.set(new TextEncoder().encode('PMTiles'));let checks=[];
+ class Archive{constructor(source){this.source=source;}async getHeader(){checks.push(this.source.url);if(this.source.url.includes('build.protomaps'))throw Error('blocked');return {tileType:1,maxZoom:15};}async getMetadata(){return {'planetiler:osm:osmosisreplicationtime':'2026-03-31T04:00:00Z'};}async getZxy(z,x,y){checks.push([z,x,y]);return {data:tile};}}
+ const r=await openMapSource(Archive,{build:{key:'20261015.pmtiles',source:'daily',url:'https://build.protomaps.com/20261015.pmtiles'},center:config.center,fetcher:async()=>new Response(header,{status:206,headers:{ETag:'edition'}})});
+ assert.equal(r.build.source,'archive');assert.equal(r.build.sourceDate,'2026-03-31','metadata supplies the date when CORS does not expose Last-Modified');assert.equal(checks.length,3);assert.equal(checks.at(-1)[0],14);
+ const c=new AbortController();c.abort();await assert.rejects(openMapSource(Archive,{signal:c.signal}),{name:'AbortError'});
 });

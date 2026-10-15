@@ -58,6 +58,9 @@ export async function latestBuild(fetcher=fetch,signal){
     if(!build)throw Error('map-source');return {key:build.key,version:build.version,url:`https://build.protomaps.com/${build.key}`,source:'daily',sourceDate:`${build.key.slice(0,4)}-${build.key.slice(4,6)}-${build.key.slice(6,8)}`};
   }catch(error){if(signal?.aborted)throw error;}
   finally{clearTimeout(timeout);signal?.removeEventListener('abort',abort);}
+  return archiveBuild(fetcher,signal);
+}
+export async function archiveBuild(fetcher=fetch,signal){
   const fallback=new RegionRangeSource(ARCHIVE_URL,signal,fetcher),header=await fallback.getBytes(0,127);
   if(new TextDecoder().decode(header.data.slice(0,7))!=='PMTiles'||!header.etag)throw Error('map-source');
   return {key:`archive:${header.etag}`,etag:header.etag,version:'4',url:ARCHIVE_URL,source:'archive',sourceDate:header.lastModified?new Date(header.lastModified).toISOString().slice(0,10):null};
@@ -66,8 +69,11 @@ export class RegionRangeSource {
   constructor(url,signal,fetcher=fetch,expectedEtag){if(!/^https:\/\/build\.protomaps\.com\/\d{8}\.pmtiles$/.test(url)&&url!==ARCHIVE_URL)throw Error('map-source');this.url=url;this.signal=signal;this.fetcher=fetcher;this.expectedEtag=expectedEtag;}
   getKey(){return this.url;}
   async getBytes(offset,length,requestSignal){
+    for(let attempt=0;;attempt++){try{return await this.readRange(offset,length,requestSignal);}catch(error){if(attempt>=1||this.signal?.aborted||requestSignal?.aborted||['map-source-changed','map-range'].includes(error.message))throw error;}}
+  }
+  async readRange(offset,length,requestSignal){
     const controller=new AbortController(),signals=[this.signal,requestSignal].filter(Boolean),abort=()=>controller.abort();signals.forEach(s=>{if(s.aborted)abort();else s.addEventListener('abort',abort,{once:true});});const timeout=setTimeout(abort,25000);
-    try{const r=await this.fetcher(this.url,{headers:{Range:`bytes=${offset}-${offset+length-1}`},signal:controller.signal,credentials:'omit'});if(r.status!==206)throw Error('map-range');if(this.expectedEtag&&r.headers.get('etag')!==this.expectedEtag)throw Error('map-source-changed');const data=await r.arrayBuffer();if(data.byteLength!==length)throw Error('map-range');return {data,etag:r.headers.get('etag')||undefined,lastModified:r.headers.get('last-modified')||undefined,cacheControl:r.headers.get('cache-control')||undefined,expires:r.headers.get('expires')||undefined};}
+    try{const r=await this.fetcher(this.url,{headers:{Range:`bytes=${offset}-${offset+length-1}`},signal:controller.signal,credentials:'omit',cache:'no-store'});if(r.status!==206)throw Error('map-range');if(this.expectedEtag&&r.headers.get('etag')!==this.expectedEtag)throw Error('map-source-changed');const data=await r.arrayBuffer();if(data.byteLength!==length)throw Error('map-range');return {data,etag:r.headers.get('etag')||undefined,lastModified:r.headers.get('last-modified')||undefined,cacheControl:r.headers.get('cache-control')||undefined,expires:r.headers.get('expires')||undefined};}
     finally{clearTimeout(timeout);signals.forEach(s=>s.removeEventListener('abort',abort));}
   }
 }
@@ -85,4 +91,22 @@ export async function downloadRegion({store,center,radiusKm,maxZoom=15,build,pro
     const meta={generation,center,radiusKm,bounds,maxZoom,build:build.key,buildVersion:build.version,source:build.source,sourceDate:build.sourceDate,dataDate:build.dataDate||null,updatedAt:Date.now(),bytes,count:done,autoUpdate};
     await store.activate(meta,previous?.generation);if(previous)await store.removeGeneration(previous.generation).catch(()=>{});return meta;
   }catch(e){await store.removeGeneration(generation).catch(()=>{});throw e;}
+}
+
+// A readable build index is not proof that its archive is reachable from this browser.
+export async function openMapSource(PMTiles,{build=null,fetcher=fetch,signal,center,maxZoom=15,archiveOnly=false}={}){
+  let first=build;if(!first&&!archiveOnly){try{first=await latestBuild(fetcher,signal);}catch(error){if(signal?.aborted)throw error;}}
+  const candidates=archiveOnly?[null]:first?.source==='archive'?[first]:[first,null];let error;
+  for(let candidate of candidates){
+    if(signal?.aborted)throw new DOMException('Cancelled','AbortError');
+    try{
+      candidate=candidate||await archiveBuild(fetcher,signal);
+      const source=new RegionRangeSource(candidate.url,signal,fetcher,candidate.etag),provider=new PMTiles(source),header=await provider.getHeader();
+      if(header.tileType!==1||header.maxZoom<maxZoom)throw Error('map-source');
+      const metadata=await provider.getMetadata(),stamp=metadata['planetiler:osm:osmosisreplicationtime']||metadata['osm:replication_timestamp'];
+      if(center){const z=Math.min(14,maxZoom),n=2**z,x=Math.floor((center.lng+180)/360*n)%n,y=Math.max(0,Math.min(n-1,Math.floor(tileY(center.lat,z))));await provider.getZxy(z,x,y,signal);}
+      return {provider,build:{...candidate,dataDate:typeof stamp==='string'?stamp:null,sourceDate:candidate.sourceDate||(typeof stamp==='string'?stamp.slice(0,10):null)}};
+    }catch(e){error=e;if(signal?.aborted)throw e;}
+  }
+  throw error||Error('map-source');
 }

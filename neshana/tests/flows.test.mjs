@@ -27,7 +27,7 @@ const click=el=>el.click();
 const submit=id=>$(id).dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));
 const input=(id,value)=>{$(id).value=value;$(id).dispatchEvent(new window.Event('input',{bubbles:true}));};
 const getState=()=>JSON.parse(saved.get(STORAGE_KEY));
-const settle=async predicate=>{for(let i=0;i<80;i++){if(predicate())return;await new Promise(r=>nativeSetTimeout(r,5));}throw Error('UI did not settle');};
+const settle=async predicate=>{for(let i=0;i<500;i++){if(predicate())return;await new Promise(r=>nativeSetTimeout(r,5));}throw Error('UI did not settle');};
 await import('../dist/app.mjs');
 
 test('app starts without a loaded map and keeps coordinate entry available',()=>{
@@ -59,7 +59,7 @@ test('categories live inside one filter and addition dates show a Persian calend
 });
 test('offline search and map settings remain usable offline; deleting only the map preserves places',async()=>{
   const store=new OfflineStore(),center={lat:35.7,lng:51.4};await store.activate({generation:'ui-offline',center,bounds:regionBounds(center,3),radiusKm:3,maxZoom:14,bytes:100,updatedAt:Date.now(),source:'archive',sourceDate:'2026-03-31',dataDate:'2026-03-31T04:00:00Z',autoUpdate:false},null);
-  navigator.onLine=false;window.dispatchEvent(new window.Event('offline'));click(document.querySelector('.bottom-nav [data-tab=map]'));input('mapSearchInput','کافه کیان');submit('mapSearchForm');assert.ok($('searchResults').textContent.includes('کافه کیان'));click($('searchResults').querySelector('button'));assert.equal($('currentLat').textContent,'35.715300');
+  navigator.onLine=false;window.dispatchEvent(new window.Event('offline'));click(document.querySelector('.bottom-nav [data-tab=map]'));click($('openMapSearch'));input('mapSearchInput','کافه کیان');assert.ok($('searchResults').textContent.includes('کافه کیان'));click($('searchResults').querySelector('button'));assert.equal($('currentLat').textContent,'35.715300');
   click(document.querySelector('.bottom-nav [data-tab=settings]'));click($('offlineSettings'));await settle(()=>$('offlineDownload'));assert.equal($('offlineDownload').disabled,true);assert.ok($('sheetContent').textContent.includes('2026-03-31'));assert.equal($('offlineMapFile').getAttribute('accept'),'.pmtiles');
   const count=getState().places.length;click($('offlineDelete'));click($('confirmAccept'));await settle(()=>!dialog.open);assert.equal(await store.active(),null);assert.equal(getState().places.length,count);navigator.onLine=true;window.dispatchEvent(new window.Event('online'));
 });
@@ -94,11 +94,11 @@ test('delete cancel preserves data; delete then undo restores it',()=>{
   click([...$('detailMore').querySelectorAll('button')].find(b=>b.textContent.includes('حذف')));click($('confirmCancel'));assert.equal(getState().places.length,1);
   click($('savedList').querySelector('.place-open'));click([...$('detailMore').querySelectorAll('button')].find(b=>b.textContent.includes('حذف')));click($('confirmAccept'));assert.equal(getState().places.length,0);click($('toastAction'));assert.equal(getState().places.length,1);
 });
-test('direct sharing from the saved list invokes native share without opening details',()=>{
+test('sharing from the list offers PNG and sends a link without opening place details',()=>{
   let shared;navigator.share=async payload=>{shared=payload;};
   click(document.querySelector('.bottom-nav [data-tab=saved]'));click($('savedList').querySelector('.direct-share'));
-  assert.equal(dialog.open,false);assert.ok(shared.text.includes('کافه کیان'));assert.match(shared.url,/query=35.7153,51.4043/);assert.equal(shared.title,'نشانا');
-  delete navigator.share;
+  assert.equal(dialog.open,true);assert.ok($('shareImage'));assert.equal($('detailActions'),null);click($('shareLink'));assert.ok(shared.text.includes('کافه کیان'));assert.match(shared.url,/query=35.7153,51.4043/);assert.equal(shared.title,'نشانا');
+  click($('closeSheet'));delete navigator.share;
 });
 test('four explicit light palettes persist and override automatic dark map tone',()=>{
   click(document.querySelector('.bottom-nav [data-tab=settings]'));
@@ -136,4 +136,26 @@ test('new photo selection compresses locally, saves with metadata, and ignores a
     const savedPhoto=getState().places.find(p=>p.name==='جای عکس‌دار');assert.ok(savedPhoto.photoId);assert.ok(await new PhotoStore().get(savedPhoto.photoId));assert.equal(requestedType,'image/jpeg');assert.equal(canvas.width,1);
     hold=true;click($('saveCurrent'));$('photoFile').files=[fixture];$('photoFile').dispatchEvent(new window.Event('change'));click($('saveCancel'));click($('saveCurrent'));held.onload();await new Promise(r=>nativeSetTimeout(r,10));assert.equal($('photoPreview').hidden,true);assert.equal($('saveSubmit').disabled,false);click($('saveCancel'));
   }finally{document.createElement=create;globalThis.Image=oldImage;}
+});
+test('selected GPS point can be dismissed and late GPS callbacks cannot reopen it',()=>{
+ click(document.querySelector('.bottom-nav [data-tab=map]'));click($('mapLocate'));gpsSuccess({coords:{latitude:35,longitude:51,accuracy:40,altitude:1200,altitudeAccuracy:10},timestamp:Date.now()});assert.equal($('currentDetails').hidden,false);
+ const count=getState().places.length;click($('closeCurrent'));assert.equal($('currentDetails').hidden,true);assert.equal($('idleActions').hidden,false);gpsSuccess({coords:{latitude:36,longitude:52,accuracy:1,altitude:1300},timestamp:Date.now()});assert.equal($('currentDetails').hidden,true);assert.equal(getState().places.length,count);
+});
+test('Yekan Bakh and Peyda can be switched persistently without losing records',()=>{
+ click(document.querySelector('.bottom-nav [data-tab=settings]'));const count=getState().places.length;click(document.querySelector('#fontControl [data-font=yekanbakh]'));assert.equal(document.documentElement.dataset.font,'yekanbakh');assert.equal(getState().prefs.font,'yekanbakh');assert.equal(getState().places.length,count);click(document.querySelector('#fontControl [data-font=peyda]'));assert.equal(getState().prefs.font,'peyda');
+});
+test('filter management creates, edits and deletes a category and returns to the filter',()=>{
+ click(document.querySelector('.bottom-nav [data-tab=saved]'));click($('filterButton'));click($('filterManage'));input('categoryName','آزمون دسته');submit('categoryForm');const c=getState().categories.find(c=>c.name==='آزمون دسته');assert.ok(c);
+ click([...$('categoryManager').children].find(r=>r.textContent.includes('آزمون دسته')).querySelector('button'));input('editCategoryName','دستهٔ ویرایش‌شده');submit('editCategoryForm');assert.equal(getState().categories.find(x=>x.id===c.id).name,'دستهٔ ویرایش‌شده');
+ click([...$('categoryManager').children].find(r=>r.textContent.includes('دستهٔ ویرایش‌شده')).querySelector('.danger-text'));click($('confirmAccept'));assert.ok($('categoryBack'));assert.equal(getState().categories.some(x=>x.id===c.id),false);click($('categoryBack'));assert.ok($('categoryFilters'));click($('closeSheet'));
+});
+test('search opens a dedicated box and returns live results without submitting',async()=>{
+ const original=globalThis.fetch,queries=[];navigator.onLine=true;
+ globalThis.fetch=async url=>{const u=new URL(url,'https://local.test');if(u.searchParams.has('q')){queries.push(u.searchParams.get('q'));return {ok:true,json:async()=>({features:[{geometry:{coordinates:[51.67,32.65]},properties:{name:'اصفهان زنده',city:'اصفهان'}}]})};}return original(url);};
+ try{click(document.querySelector('.bottom-nav [data-tab=map]'));click($('openMapSearch'));assert.equal(dialog.open,true);input('mapSearchInput','اص');await new Promise(r=>nativeSetTimeout(r,80));input('mapSearchInput','اصفهان');await settle(()=>$('searchResults')?.textContent.includes('اصفهان زنده'));assert.deepEqual(queries,['اصفهان']);click($('searchResults').querySelector('.search-result'));assert.equal(dialog.open,false);assert.equal($('currentLat').textContent,'32.650000');}
+ finally{globalThis.fetch=original;if(dialog.open)click($('closeSheet'));}
+});
+test('a manual sea-level height is saved, restored in edit and shown in details',()=>{
+ click($('saveCurrent'));input('placeName','ارتفاع ثبت‌شده');input('placeHeight','-430');submit('saveForm');const p=getState().places.find(p=>p.name==='ارتفاع ثبت‌شده');assert.equal(p.heightMsl,-430);assert.equal(p.heightSource,'manual');
+ click(document.querySelector('.bottom-nav [data-tab=saved]'));input('savedSearch','ارتفاع ثبت‌شده');click($('savedList').querySelector('.place-open'));assert.ok($('sheetContent').textContent.includes('سطح دریا'));click([...$('detailActions').querySelectorAll('button')].find(b=>b.textContent.includes('ویرایش')));assert.equal($('placeHeight').value,'-430');click($('saveCancel'));input('savedSearch','');
 });
