@@ -5,6 +5,7 @@ import {parseHTML} from 'linkedom';
 import {STORAGE_KEY} from '../dist/core.mjs';
 import {IDBFactory} from 'fake-indexeddb';
 import {PhotoStore} from '../dist/photos.mjs';
+import {OfflineStore,regionBounds} from '../dist/offline.mjs';
 // DOM integration only: this deliberately does not claim browser layout, Safari or device GPS coverage.
 const {window,document}=parseHTML(fs.readFileSync(new URL('../dist/index.html',import.meta.url),'utf8'));
 const $=id=>document.getElementById(id),saved=new Map();let clipboard='',gpsSuccess,denied=false;
@@ -30,16 +31,37 @@ const settle=async predicate=>{for(let i=0;i<80;i++){if(predicate())return;await
 await import('../dist/app.mjs');
 
 test('app starts without a loaded map and keeps coordinate entry available',()=>{
-  assert.equal($('mapNotice').hidden,false);assert.equal($('currentDetails').hidden,true);assert.ok($('recentList').textContent.includes('اولین'));assert.equal($('viewSaved').hidden,true);
+  assert.equal($('mapNotice').hidden,false);assert.equal($('currentDetails').hidden,true);assert.equal($('recentList'),null);assert.equal($('liveTitle'),null);assert.equal($('viewSaved').hidden,true);
 });
 test('manual selection → save → detail → edit → list → copy works end to end',async()=>{
   click($('manualBtn'));assert.equal(dialog.open,true);input('manualCoords','۳۵٫۷۱۵۳، ۵۱٫۴۰۴۳');submit('manualForm');assert.equal(dialog.open,false);assert.equal($('currentLat').textContent,'35.715300');
   click($('saveCurrent'));input('placeName','کافه <img src=x onerror=alert(1)>');input('placeNotes','ورودی شمالی');submit('saveForm');
-  assert.equal(getState().places.length,1);assert.equal($('recentList').querySelector('img'),null,'user text must not become HTML');
-  click($('recentList').querySelector('button'));assert.equal(dialog.open,true);click([...$('detailActions').querySelectorAll('button')].find(b=>b.textContent.includes('ویرایش')));
-  input('placeName','کافه کیان');submit('saveForm');assert.equal(getState().places[0].name,'کافه کیان');
+  assert.equal(getState().places.length,1);click(document.querySelector('.bottom-nav [data-tab=saved]'));assert.equal($('savedList').querySelector('img'),null,'user text must not become HTML');
+  click($('savedList').querySelector('.place-open'));assert.equal(dialog.open,true);click([...$('detailActions').querySelectorAll('button')].find(b=>b.textContent.includes('ویرایش')));
+  const createdAt=getState().places[0].createdAt;
+  input('placeName','کافه کیان');submit('saveForm');assert.equal(getState().places[0].name,'کافه کیان');assert.equal(getState().places[0].createdAt,createdAt,'editing must preserve the addition time');
   click(document.querySelector('.bottom-nav [data-tab=saved]'));input('savedSearch','كافه كيان');assert.equal($('savedList').querySelectorAll('.place-card').length,1);
   click($('savedList').querySelector('.place-open'));click($('detailCopy'));await Promise.resolve();assert.equal(clipboard,'35.7153,51.4043');click($('closeSheet'));
+});
+test('paste previews, swaps, explains clipboard denial and ignores a closed form',async()=>{
+  click(document.querySelector('.bottom-nav [data-tab=map]'));click($('manualSelected'));
+  navigator.clipboard.readText=async()=> '۳۵°۴۲′ شمال، ۵۱°۲۴′ شرق';click($('pasteCoords'));await settle(()=>$('previewLat').textContent==='35.700000');assert.equal($('previewLng').textContent,'51.400000');
+  click($('swapCoords'));assert.equal($('previewLat').textContent,'51.400000');click($('swapCoords'));submit('manualForm');assert.equal($('currentLat').textContent,'35.700000');
+  click($('manualSelected'));navigator.clipboard.readText=async()=>{throw Error('permission');};click($('pasteCoords'));await settle(()=>!$('manualError').hidden);assert.match($('manualError').textContent,/Paste/);
+  let release;navigator.clipboard.readText=()=>new Promise(r=>{release=r;});click($('pasteCoords'));click($('closeSheet'));click($('manualSelected'));input('manualCoords','10,20');release('30,40');await Promise.resolve();assert.equal($('manualCoords').value,'10,20');
+  input('manualCoords','https://maps.app.goo.gl/abc');submit('manualForm');assert.equal(dialog.open,true);assert.ok($('manualError').textContent.includes('کوتاه'));click($('closeSheet'));delete navigator.clipboard.readText;
+});
+test('categories live inside one filter and addition dates show a Persian calendar plus time',()=>{
+  click(document.querySelector('.bottom-nav [data-tab=saved]'));input('savedSearch','');assert.equal($('categoryFilters'),null);click($('savedList').querySelector('.favorite-button'));click($('filterButton'));assert.equal(dialog.open,true);
+  click([...$('categoryFilters').querySelectorAll('button')].find(b=>b.textContent.includes('ستاره‌دار')));assert.equal(dialog.open,false);assert.equal($('clearFilters').hidden,false);assert.equal($('filterLabel').textContent,'ستاره‌دار');assert.equal($('savedList').querySelectorAll('.place-card').length,1);
+  const time=$('savedList').querySelector('time');assert.ok(time);assert.match(time.textContent,/۱۴\d*[۰-۹].*[۰-۹]{2}:[۰-۹]{2}/);assert.ok(Number.isFinite(Date.parse(time.getAttribute('datetime'))));
+  click($('clearFilters'));assert.equal($('clearFilters').hidden,true);assert.equal($('filterLabel').textContent,'همهٔ دسته‌ها');click($('savedList').querySelector('.favorite-button'));
+});
+test('offline search and map settings remain usable offline; deleting only the map preserves places',async()=>{
+  const store=new OfflineStore(),center={lat:35.7,lng:51.4};await store.activate({generation:'ui-offline',center,bounds:regionBounds(center,3),radiusKm:3,maxZoom:14,bytes:100,updatedAt:Date.now(),source:'archive',sourceDate:'2026-03-31',dataDate:'2026-03-31T04:00:00Z',autoUpdate:false},null);
+  navigator.onLine=false;window.dispatchEvent(new window.Event('offline'));click(document.querySelector('.bottom-nav [data-tab=map]'));input('mapSearchInput','کافه کیان');submit('mapSearchForm');assert.ok($('searchResults').textContent.includes('کافه کیان'));click($('searchResults').querySelector('button'));assert.equal($('currentLat').textContent,'35.715300');
+  click(document.querySelector('.bottom-nav [data-tab=settings]'));click($('offlineSettings'));await settle(()=>$('offlineDownload'));assert.equal($('offlineDownload').disabled,true);assert.ok($('sheetContent').textContent.includes('2026-03-31'));assert.equal($('offlineMapFile').getAttribute('accept'),'.pmtiles');
+  const count=getState().places.length;click($('offlineDelete'));click($('confirmAccept'));await settle(()=>!dialog.open);assert.equal(await store.active(),null);assert.equal(getState().places.length,count);navigator.onLine=true;window.dispatchEvent(new window.Event('online'));
 });
 test('newest user action survives whitespace name and storage-write failure',()=>{
   click(document.querySelector('.bottom-nav [data-tab=map]'));click($('saveCurrent'));input('placeName','   ');submit('saveForm');assert.equal(getState().places.length,1);assert.equal($('saveError').hidden,false);
@@ -72,11 +94,11 @@ test('delete cancel preserves data; delete then undo restores it',()=>{
   click([...$('detailMore').querySelectorAll('button')].find(b=>b.textContent.includes('حذف')));click($('confirmCancel'));assert.equal(getState().places.length,1);
   click($('savedList').querySelector('.place-open'));click([...$('detailMore').querySelectorAll('button')].find(b=>b.textContent.includes('حذف')));click($('confirmAccept'));assert.equal(getState().places.length,0);click($('toastAction'));assert.equal(getState().places.length,1);
 });
-test('direct sharing from both lists invokes native share without opening details',()=>{
+test('direct sharing from the saved list invokes native share without opening details',()=>{
   let shared;navigator.share=async payload=>{shared=payload;};
   click(document.querySelector('.bottom-nav [data-tab=saved]'));click($('savedList').querySelector('.direct-share'));
   assert.equal(dialog.open,false);assert.ok(shared.text.includes('کافه کیان'));assert.match(shared.url,/query=35.7153,51.4043/);assert.equal(shared.title,'نشانا');
-  shared=null;click(document.querySelector('.bottom-nav [data-tab=map]'));click($('recentList').querySelector('.direct-share'));assert.ok(shared);assert.equal(dialog.open,false);delete navigator.share;
+  delete navigator.share;
 });
 test('four explicit light palettes persist and override automatic dark map tone',()=>{
   click(document.querySelector('.bottom-nav [data-tab=settings]'));

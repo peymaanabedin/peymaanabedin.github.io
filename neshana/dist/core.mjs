@@ -20,11 +20,7 @@ export function validPoint(lat,lng){ return finite(lat)!==null && finite(lng)!==
 export function normalizeSearch(value){
   return String(value||'').toLowerCase().replace(/ي|ى/g,'ی').replace(/ك/g,'ک').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[\u200c\u200d]/g,' ').replace(/\s+/g,' ').trim();
 }
-export function parseCoordinates(value){
-  const normalized=String(value).replace(/[۰-۹]/g,c=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(c))).replace(/[٠-٩]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(c))).replace(/٫/g,'.').replace(/،/g,',').trim();
-  const match=normalized.match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
-  return match && validPoint(match[1],match[2])?{lat:+match[1],lng:+match[2]}:null;
-}
+export {parseCoordinates} from './coordinates.mjs';
 export function normalizeCategory(c){
   if(!c || typeof c!=='object' || !text(c.name,40) || c.id==='all') return null;
   return {id:text(c.id,120)||uid(),name:text(c.name,40),en:text(c.en,40),icon:text(c.icon,24)||'pin',color:['teal','blue','purple','rose','orange'].includes(c.color)?c.color:'teal'};
@@ -37,6 +33,7 @@ export function normalizePlace(p){
   return {id:text(p.id,120)||uid(),name:text(p.name,120)||'مکان بدون نام',lat:Number(p.lat),lng:Number(p.lng),
     acc:accuracy!==null && accuracy>0?Math.min(accuracy,1000000):null,ele:finite(p.ele),
     ts:ts!==null && ts>0 && ts<=8640000000000000?ts:Date.now(),
+    createdAt:finite(p.createdAt)>0 && finite(p.createdAt)<=8640000000000000?Number(p.createdAt):(ts>0 && ts<=8640000000000000?ts:Date.now()),
     address:text(p.address,1000),notes:text(p.notes,3000),category:text(cat,120)||'other',
     favorite:p.favorite===true,source:p.source==='gps'?'gps':'manual',
     photoId:typeof p.photoId==='string' && /^[a-zA-Z0-9_-]{1,120}$/.test(p.photoId)?p.photoId:''};
@@ -103,7 +100,7 @@ export function distance(a,b){
 export function filterPlaces(places,{query='',category='all',sort='newest',origin=null}={}){
   const q=normalizeSearch(query);
   return places.filter(p=>(category==='all'||(category==='favorites'?p.favorite:p.category===category)) && (!q||normalizeSearch(`${p.name} ${p.address} ${p.notes}`).includes(q)))
-    .sort((a,b)=>sort==='name'?a.name.localeCompare(b.name,'fa'):sort==='distance'&&origin?distance(origin,a)-distance(origin,b):sort==='oldest'?a.ts-b.ts:b.ts-a.ts);
+    .sort((a,b)=>sort==='name'?a.name.localeCompare(b.name,'fa'):sort==='distance'&&origin?distance(origin,a)-distance(origin,b):sort==='oldest'?(a.createdAt||a.ts)-(b.createdAt||b.ts):(b.createdAt||b.ts)-(a.createdAt||a.ts));
 }
 export function mapLink(provider,p,directions=false){
   if(!validPoint(p?.lat,p?.lng))return '';

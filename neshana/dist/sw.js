@@ -1,6 +1,6 @@
-const CACHE='saveloc-shell-v3-20261014-1';
+const CACHE='saveloc-shell-v3-20261015-1';
 const BASE=new URL('./',self.location.href);
-const ASSETS=['./','index.html','styles.css','theme.js','app.mjs','core.mjs','ui.mjs','photos.mjs','manifest.webmanifest','services.json','vendor/leaflet.js','vendor/leaflet.css','assets/fonts/Peyda-Regular.woff2','assets/fonts/Peyda-Medium.woff2','assets/fonts/Peyda-SemiBold.woff2','assets/fonts/Peyda-Bold.woff2','assets/icons/icon.svg','assets/icons/icon-192.png','assets/icons/icon-512.png','assets/icons/maskable-512.png','assets/icons/apple-touch-icon.png'];
+const ASSETS=['./','index.html','styles.css','theme.js','app.mjs','core.mjs','ui.mjs','photos.mjs','coordinates.mjs','offline.mjs','vendor/protomaps.mjs','vendor/pmtiles.mjs','manifest.webmanifest','services.json','vendor/leaflet.js','vendor/leaflet.css','assets/fonts/Peyda-Regular.woff2','assets/fonts/Peyda-Medium.woff2','assets/fonts/Peyda-SemiBold.woff2','assets/fonts/Peyda-Bold.woff2','assets/icons/icon-192.png','assets/icons/icon-512.png','assets/icons/maskable-512.png','assets/icons/apple-touch-icon.png'];
 const SHELL=new Set(ASSETS.map(p=>new URL(p,BASE).href));
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(p=>new Request(new URL(p,BASE),{cache:'reload'})))));});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(key=>key.startsWith('saveloc-shell-')&&key!==CACHE).map(key=>caches.delete(key)));await self.clients.claim();})());});
